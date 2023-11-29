@@ -1,0 +1,59 @@
+{
+    "name": "zksync-ethers",
+    "version": "5.0.0",
+    "main": "build/src/index.js",
+    "types": "build/src/index.d.ts",
+    "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
+    "files": [
+        "build/",
+        "abi/",
+        "src/",
+        "typechain/"
+    ],
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zksync-sdk/zksync-ethers.git"
+    },
+    "bugs": {
+        "url": "https://github.com/zksync-sdk/zksync-ethers.git/issues"
+    },
+    "homepage": "https://github.com/zksync-sdk/zksync-ethers.git/tree/ethers-v5#readme",
+    "keywords": [
+        "zksync",
+        "web3",
+        "ethereum",
+        "layer2"
+    ],
+    "dependencies": {
+        "ethers": "~5.7.0"
+    },
+    "devDependencies": {
+        "@typechain/ethers-v5": "^2.0.0",
+        "@types/chai": "^4.2.19",
+        "@types/mocha": "^8.2.2",
+        "@types/node": "^16.0.0",
+        "chai": "^4.3.4",
+        "ethers": "~5.7.0",
+        "mocha": "10.1.0",
+        "ncp": "^2.0.0",
+        "prettier": "3.0.3",
+        "ts-node": "^10.0.0",
+        "typechain": "^3.0.0",
+        "typescript": "^4.3.5"
+    },
+    "peerDependencies": {
+        "ethers": "~5.7.0"
+    },
+    "scripts": {
+        "test": "mocha -r ts-node/register --bail tests/setup.test.ts tests/unit/*.test.ts tests/integration/*.test.ts",
+        "build": "tsc && cp -f typechain/*.d.ts build/typechain && ncp ./abi ./build/abi",
+        "lint": "prettier . --write",
+        "lint:check": "prettier . --check",
+        "watch": "tsc --watch",
+        "types": "find ./abi -name \"*.json\" -print0 | xargs -0 -I {} npx typechain --target ethers-v5 --outDir typechain {}"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

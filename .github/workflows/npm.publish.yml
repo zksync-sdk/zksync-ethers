@@ -1,0 +1,36 @@
+name: Publish NPM package
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "ref or tag to publish NPM package from"
+        default: ""
+        required: false
+      tag:
+        required: true
+        type: choice
+        description: package tag
+        default: latest
+        options:
+          - latest
+          - next
+          - beta
+jobs:
+  zksync:
+    name: Publish package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+      - name: Build package and publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm install
+          npm run build
+          npm publish --tag ${{ inputs.tag }} 
