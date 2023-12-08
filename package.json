@@ -44,7 +44,9 @@
         "ethers": "^6.7.1"
     },
     "scripts": {
-        "test": "mocha -r ts-node/register --bail tests/setup.test.ts tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test": "yarn test:unit && yarn test:integration",
+            "test:unit": "mocha -r ts-node/register --bail tests/unit/*.test.ts",
+            "test:integration": "mocha -r ts-node/register --bail tests/setup.test.ts tests/integration/*.test.ts",
         "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
         "lint": "prettier . --write",
         "lint:check": "prettier . --check",
