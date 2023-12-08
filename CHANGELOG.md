@@ -4,4 +4,4 @@
 
 ### Features
 
-* setup `zksync-ethers` project ([a6e4685](https://github.com/zksync-sdk/zksync-ethers.git/commit/a6e4685186c0fc3505343d13101570ec70938b69))
+* setup `zksync-ethers` project ([05bdb16](https://github.com/zksync-sdk/zksync-ethers.git/commit/05bdb16af15bc6edd862cbbb51b9903849dbe905))
