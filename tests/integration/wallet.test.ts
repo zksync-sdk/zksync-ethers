@@ -458,3 +458,7 @@ describe("Wallet", () => {
         }).timeout(25_000);
     });
 });
+
+describe("AbstractWallet", () => {
+    // TODO: add tests
+});

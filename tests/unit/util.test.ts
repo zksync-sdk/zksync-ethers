@@ -47,4 +47,8 @@ describe("utils", () => {
             );
         });
     });
+
+    describe("#signingFunction()", () => {
+        // TODO: add tests
+    });
 });
