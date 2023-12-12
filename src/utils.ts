@@ -392,6 +392,12 @@ export function undoL1ToL2Alias(address: string): string {
     return ethers.hexlify(ethers.toBeHex(result));
 }
 
+/// Function that can be passed to the AbstractWallet class that overrides 
+export async function signingFunction(privateKeys: string[]): Promise<string> {
+    // TODO
+    return "";
+}
+
 /// Getters data used to correctly initialize the L1 token counterpart on L2
 export async function getERC20DefaultBridgeData(
     l1TokenAddress: string,

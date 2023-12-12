@@ -4,6 +4,7 @@ import { Provider, types, utils, Wallet } from "../../src";
 import { ethers } from "ethers";
 import * as fs from "fs";
 import { TOKENS } from "../const";
+import { Paymaster } from "../../src/paymaster";
 
 const { expect } = chai;
 
@@ -460,5 +461,28 @@ describe("Wallet", () => {
 });
 
 describe("AbstractWallet", () => {
-    // TODO: add tests
+    const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+    const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
+    const RECEIVER = "0xa61464658AfeAf65CccaaFD3a512b69A83B77618";
+
+    const provider = Provider.getDefaultProvider(types.Network.Localhost);
+    const ethProvider = ethers.getDefaultProvider("http://localhost:8545");
+    const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+    let paymaster: Paymaster;
+
+    before("setup", async function () {
+        // TODO: deploy account abstraction, deploy paymaster, initialize paymaster
+        
+    });
+
+    describe("#constructor()", () => {
+        it("`AbstractWallet(aaAddress, signingFunction, wallet.provider, paymaster)` should return a `AbstractWallet` with L2 provider", async () => {
+            // TODO 
+        });
+
+        it("`AbstractWallet(aaAddress, signingFunction, wallet.provider, paymaster)` should return a `AbstractWallet` with L2 provider", async () => {
+            // TODO 
+        });
+    });
+
 });

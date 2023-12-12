@@ -1,9 +1,10 @@
 import { EIP712Signer } from "./signer";
 import { Provider } from "./provider";
-import { EIP712_TX_TYPE, serializeEip712 } from "./utils";
+import { EIP712_TX_TYPE, serializeEip712, signingFunction } from "./utils";
 import { ethers, ProgressCallback } from "ethers";
 import { TransactionLike, TransactionRequest, TransactionResponse } from "./types";
 import { AdapterL1, AdapterL2 } from "./adapters";
+import { Paymaster } from "./paymaster";
 
 export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     // @ts-ignore
@@ -122,5 +123,32 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     override async sendTransaction(tx: TransactionRequest): Promise<TransactionResponse> {
         const populatedTx = await this.populateTransaction(tx);
         return await this.provider.broadcastTransaction(await this.signTransaction(populatedTx));
+    }
+}
+
+export class AbstractWallet extends Wallet {
+    readonly accountAddress: string;
+    paymaster: Paymaster;
+    signingFunction: any;
+
+    constructor(
+        accountAddress: string,
+        privateKey: string,
+        provider: Provider,
+        paymaster: Paymaster,
+        customSigningFunction: any = signingFunction,
+    ) {
+        super(privateKey, provider);
+        this.accountAddress = accountAddress;
+        this.paymaster = paymaster;
+        this.signingFunction = customSigningFunction;
+    }
+
+    override getAddress(): Promise<string> {
+        return Promise.resolve(this.accountAddress);
+    }
+
+    override async signTransaction(transaction: TransactionRequest): Promise<string> {
+        return this.signingFunction(transaction);
     }
 }
