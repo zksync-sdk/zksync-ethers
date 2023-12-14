@@ -1,10 +1,9 @@
 import * as chai from "chai";
 import "../custom-matchers";
-import { Provider, types, utils, Wallet } from "../../src";
-import { ethers } from "ethers";
+import { AbstractWallet, ContractFactory, Paymaster, Provider, types, utils, Wallet, Contract } from "../../src";
+import { ethers, Typed } from "ethers";
 import * as fs from "fs";
 import { TOKENS } from "../const";
-import { Paymaster } from "../../src/paymaster";
 
 const { expect } = chai;
 
@@ -461,27 +460,89 @@ describe("Wallet", () => {
 });
 
 describe("AbstractWallet", () => {
-    const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
     const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
-    const RECEIVER = "0xa61464658AfeAf65CccaaFD3a512b69A83B77618";
+    const PRIVATE_KEY2 = "0xac1e735be8536c6534bb4f17f06f6afc73b2b5ba84ac2cfb12f7461b20c0bbe3";
 
-    const provider = Provider.getDefaultProvider(types.Network.Localhost);
+    const tokenPath = "../files/Token.json";
+    const paymasterPath = "../files/Paymaster.json";
+    const accountAbstractionPath = "../files/SimpleAccount.json";
+
+    let paymaster: Paymaster;
+    let abstractWallet: AbstractWallet;
+    let accountAbstractionAddress: string;
+
+    const provider = new Provider("http://localhost:8011");
     const ethProvider = ethers.getDefaultProvider("http://localhost:8545");
     const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-    let paymaster: Paymaster;
+    const otherWallet = new Wallet(PRIVATE_KEY2, provider, ethProvider);
 
     before("setup", async function () {
-        // TODO: deploy account abstraction, deploy paymaster, initialize paymaster
-        
+        // deploy account abstraction
+        console.log("Deploying account abstraction...");
+        const abstractionAbi = require(accountAbstractionPath).abi;
+        const abstractionBytecode: string = require(accountAbstractionPath).bytecode;
+        const aaFactory = new ContractFactory(abstractionAbi, abstractionBytecode, wallet);
+        const aaContract = await aaFactory.deploy(wallet.address);
+        accountAbstractionAddress = await aaContract.getAddress();
+
+        // deploy token
+        console.log("Deploying token...");
+        const INIT_MINT_AMOUNT = 10;
+
+        const tokenAbi = require(tokenPath).abi;
+        const tokenBytecode = require(tokenPath).bytecode;
+        const tokenFactory = new ContractFactory(tokenAbi, tokenBytecode, wallet);
+        const tokenContract = await tokenFactory.deploy("Ducat", "Ducat", 18) as Contract;
+        const tokenAddress = await tokenContract.getAddress();
+
+        // mint tokens to wallet, so it could pay fee with tokens
+        console.log("Minting tokens...");
+        await tokenContract.mint(
+            Typed.address(await wallet.getAddress()),
+            Typed.uint256(INIT_MINT_AMOUNT),
+        );
+
+        // deploy paymaster
+        console.log("Deploying paymaster...");
+        const paymasterAbi = require(paymasterPath).abi;
+        const paymasterBytecode = require(paymasterPath).bytecode;
+        const paymasterFactory = new ContractFactory(
+            paymasterAbi,
+            paymasterBytecode,
+            otherWallet,
+            "createAccount"
+        );
+        const paymasterContract = await paymasterFactory.deploy(tokenAddress);
+        const paymasterAddress = await paymasterContract.getAddress();
+
+        // transfer ETH to paymaster so it could pay fee
+        console.log("Transferring ETH to paymaster...");
+        const faucetTx = await wallet.transfer({
+            token: utils.ETH_ADDRESS,
+            to: paymasterAddress,
+            amount: ethers.parseEther("0.1"),
+        });
+        await faucetTx.wait();
+
+        // initialize paymaster
+        console.log("Initializing paymaster...");
+        paymaster = new Paymaster("ApprovalBased", paymasterAddress, tokenAddress);
     });
 
     describe("#constructor()", () => {
-        it("`AbstractWallet(aaAddress, signingFunction, wallet.provider, paymaster)` should return a `AbstractWallet` with L2 provider", async () => {
-            // TODO 
-        });
-
-        it("`AbstractWallet(aaAddress, signingFunction, wallet.provider, paymaster)` should return a `AbstractWallet` with L2 provider", async () => {
-            // TODO 
+        it("`new AbstractWallet()` should return a `AbstractWallet` with L1 and L2 provider", async () => {
+            abstractWallet = new AbstractWallet(
+                accountAbstractionAddress,
+                wallet.privateKey,
+                paymaster,
+                provider,
+                ethProvider,
+            );
+            expect(abstractWallet.accountAddress).to.be.equal(accountAbstractionAddress);
+            expect(abstractWallet.signingKey.privateKey).to.be.equal(PRIVATE_KEY);
+            expect(abstractWallet.provider).to.be.equal(provider);
+            expect(abstractWallet.paymaster).to.be.equal(paymaster);
+            expect(abstractWallet.providerL1).to.be.equal(ethProvider);
         });
     });
 

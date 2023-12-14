@@ -1,6 +1,6 @@
 import { EIP712Signer } from "./signer";
 import { Provider } from "./provider";
-import { EIP712_TX_TYPE, serializeEip712, signingFunction } from "./utils";
+import { EIP712_TX_TYPE, isNullTypeNullDataTransaction, isRegularEIP712Transaction, serializeEip712 } from "./utils";
 import { ethers, ProgressCallback } from "ethers";
 import { TransactionLike, TransactionRequest, TransactionResponse } from "./types";
 import { AdapterL1, AdapterL2 } from "./adapters";
@@ -126,29 +126,71 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     }
 }
 
+interface SigningFunction {
+    (this: AbstractWallet, transaction: TransactionRequest): Promise<string>;
+}
+
 export class AbstractWallet extends Wallet {
     readonly accountAddress: string;
     paymaster: Paymaster;
-    signingFunction: any;
+    customSigningFunction: SigningFunction;
 
     constructor(
         accountAddress: string,
         privateKey: string,
-        provider: Provider,
         paymaster: Paymaster,
-        customSigningFunction: any = signingFunction,
+        providerL2?: Provider,
+        providerL1?: ethers.Provider,
+        customSigningFunction: SigningFunction = signingFunction,
     ) {
-        super(privateKey, provider);
+        super(privateKey, providerL2);
         this.accountAddress = accountAddress;
         this.paymaster = paymaster;
-        this.signingFunction = customSigningFunction;
+        this.providerL1 = providerL1;
+        this.customSigningFunction = customSigningFunction.bind(this);
     }
 
     override getAddress(): Promise<string> {
         return Promise.resolve(this.accountAddress);
     }
 
-    override async signTransaction(transaction: TransactionRequest): Promise<string> {
-        return this.signingFunction(transaction);
+    override async populateTransaction(transaction: TransactionRequest): Promise<TransactionLike> {
+        if (isNullTypeNullDataTransaction(transaction)) { transaction.type = 0; } // use legacy txs by default
+        if (isRegularEIP712Transaction(transaction)) {
+            return await super.populateTransaction(transaction);
+        }
+        transaction.type = EIP712_TX_TYPE;
+        const populated = (await super.populateTransaction(transaction)) as TransactionLike;
+
+        populated.type = EIP712_TX_TYPE;
+        populated.value ??= 0;
+        populated.data ??= "0x";
+        const customData = this.paymaster.getCustomData();
+        populated.customData = this._fillCustomData(customData);
+        populated.gasPrice = await this.provider.getGasPrice();
+        return populated;
     }
+
+    override async signTransaction(transaction: TransactionRequest): Promise<string> {
+        if (isRegularEIP712Transaction(transaction)) {
+            return await super.signTransaction(transaction);
+        }
+        const populated = await this.populateTransaction(transaction);
+        return this.customSigningFunction(populated);
+    }
+}
+
+/// Function that can be passed to the AbstractWallet class that overrides 
+/// the default signing function. This function is called when the transaction
+/// is a custom transaction. i.e. has a customData field or has a type not of value 113 (EIP712_TX_TYPE)
+export async function signingFunction(this: AbstractWallet, transaction: TransactionRequest): Promise<string> {
+    transaction.from ??= this.getAddress();
+    let from = await ethers.resolveAddress(transaction.from);
+    if (from.toLowerCase() != (await this.getAddress()).toLowerCase()) {
+        throw new Error("Transaction `from` address mismatch");
+    }
+    transaction.customData ??= {};
+    transaction.customData.customSignature = await this.eip712.sign(transaction);
+    const populated = await this.populateTransaction(transaction);
+    return serializeEip712(populated);
 }
