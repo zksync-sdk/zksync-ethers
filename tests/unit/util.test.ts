@@ -50,10 +50,6 @@ describe("utils", () => {
         });
     });
 
-    describe("#signingFunction()", () => {
-        // TODO: add tests for signingFunction
-    });
-
     describe("#encodeData()", () => {
         it("should encode an array of numbers", () => {
             const data = [1, 2, 3];
