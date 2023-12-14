@@ -1,4 +1,4 @@
-import { AbiCoder, BigNumberish, BytesLike, ethers, SignatureLike } from "ethers";
+import { AbiCoder, BigNumberish, BytesLike, encodeBytes32String, ethers, getBytes, hexlify, SignatureLike, toBeArray, toBeHex, toUtf8Bytes, zeroPadValue } from "ethers";
 import {
     Address,
     DeploymentInfo,
@@ -8,6 +8,7 @@ import {
     PriorityOpTree,
     PriorityQueueType,
     TransactionLike,
+    TransactionRequest,
 } from "./types";
 import { Provider } from "./provider";
 import { EIP712Signer } from "./signer";
@@ -593,4 +594,33 @@ export async function estimateCustomBridgeDepositL2Gas(
         calldata: calldata,
         l2Value: l2Value,
     });
+}
+
+export function isRegularEIP712Transaction(transaction: TransactionRequest): boolean {
+    return transaction.customData == null && transaction.type != EIP712_TX_TYPE;
+}
+
+export function isNullTypeNullDataTransaction(transaction: TransactionRequest): boolean {
+    return transaction.type == null && transaction.customData == null;
+}
+
+export function encodeData(data: any[]): string {
+    const types = data.map(item => {
+        if (typeof item === 'number') {
+            return 'uint256';
+        } else if (typeof item === 'string') {
+            return 'string';
+        } else if (typeof item === 'boolean') {
+            return 'bool';
+        } else if (Array.isArray(item)) {
+            throw new Error('Nested arrays are not supported');
+        } else if (typeof item === 'object' && item !== null) {
+            throw new Error('Nested objects are not supported');
+        }
+        throw new Error(`Unsupported data type: ${typeof item}`);
+    });
+
+    const coder = new AbiCoder();
+    const encodedData = coder.encode(types, data);
+    return encodedData;
 }

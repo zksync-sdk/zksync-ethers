@@ -1,5 +1,7 @@
 import { expect } from "chai";
 import { utils } from "../../src";
+import { EIP712_TX_TYPE, encodeData, isNullTypeNullDataTransaction, isRegularEIP712Transaction } from "../../src/utils";
+import { TransactionRequest } from "../../src/types";
 
 describe("utils", () => {
     describe("#applyL1ToL2Alias()", () => {
@@ -49,6 +51,125 @@ describe("utils", () => {
     });
 
     describe("#signingFunction()", () => {
-        // TODO: add tests
+        // TODO: add tests for signingFunction
+    });
+
+    describe("#encodeData()", () => {
+        it("should encode an array of numbers", () => {
+            const data = [1, 2, 3];
+            const encodedData = encodeData(data);
+            expect(encodedData).to.equal("0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003");
+        });
+
+        it("should encode an array of strings", () => {
+            const data = ["hello", "world"];
+            const encodedData = encodeData(data);
+            expect(encodedData).to.equal("0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000568656c6c6f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005776f726c64000000000000000000000000000000000000000000000000000000");
+        });
+
+        it("should encode an array of booleans", () => {
+            const data = [true, false];
+            const encodedData = encodeData(data);
+            expect(encodedData).to.equal("0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000");
+        });
+
+        it("should throw an error for nested arrays", () => {
+            const data = [[1, 2], [3, 4]];
+            expect(() => encodeData(data)).to.throw("Nested arrays are not supported");
+        });
+
+        it("should encode an array of objects", () => {
+            const data = [{ name: "John" }, { name: "Jane" }];
+            expect(() => encodeData(data)).to.throw("Nested objects are not supported");
+        });
+
+        it("should throw an error for unsupported data type", () => {
+            const data = [null];
+            expect(() => encodeData(data)).to.throw("Unsupported data type: object");
+        });
+    });
+
+    describe("#isRegularEIP712Transaction()", () => {
+        it("should return true if transaction customData is null and type is not EIP712_TX_TYPE", () => {
+            const transaction: TransactionRequest = {
+                type: 1,
+                customData: null,
+            };
+            const result = isRegularEIP712Transaction(transaction);
+            expect(result).to.be.true;
+        });
+
+        it("should return false if transaction customData is not null", () => {
+            const transaction: TransactionRequest = {
+                type: 1,
+                customData: {
+                    customSignature: "some signature",
+                },
+            };
+            const result = isRegularEIP712Transaction(transaction);
+            expect(result).to.be.false;
+        });
+
+        it("should return false if transaction type is EIP712_TX_TYPE", () => {
+            const transaction: TransactionRequest = {
+                type: EIP712_TX_TYPE,
+                customData: null,
+            };
+            const result = isRegularEIP712Transaction(transaction);
+            expect(result).to.be.false;
+        });
+
+        it("should return false if transaction customData is not null and type is EIP712_TX_TYPE", () => {
+            const transaction: TransactionRequest = {
+                type: EIP712_TX_TYPE,
+                customData: {
+                    customSignature: "some signature",
+                },
+            };
+            const result = isRegularEIP712Transaction(transaction);
+            expect(result).to.be.false;
+        });
+    });
+
+    describe("isNullTypeNullDataTransaction", () => {
+        it("should return true if transaction type and customData are null", () => {
+            const transaction: TransactionRequest = {
+                type: null,
+                customData: null,
+            };
+            const result = isNullTypeNullDataTransaction(transaction);
+            expect(result).to.be.true;
+        });
+
+        it("should return false if transaction type is not null", () => {
+            const transaction: TransactionRequest = {
+                type: 1,
+                customData: null,
+            };
+            const result = isNullTypeNullDataTransaction(transaction);
+            expect(result).to.be.false;
+        });
+
+        it("should return false if transaction customData is not null", () => {
+            const transaction: TransactionRequest = {
+                type: null,
+                customData: {
+                    customSignature: "some signature",
+                },
+            };
+            const result = isNullTypeNullDataTransaction(transaction);
+            expect(result).to.be.false;
+        });
+
+        it("should return false if transaction type and customData are not null", () => {
+            const transaction: TransactionRequest = {
+                type: 1,
+                customData: {
+                    customSignature: "some signature",
+                },
+            };
+            const result = isNullTypeNullDataTransaction(transaction);
+            expect(result).to.be.false;
+        });
     });
 });
