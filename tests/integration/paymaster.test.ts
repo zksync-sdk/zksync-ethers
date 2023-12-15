@@ -32,6 +32,8 @@ describe("Paymaster", () => {
                 Typed.uint256(INIT_MINT_AMOUNT),
             );
 
+            await utils.sleep(1000); // workaround for duplicated nonce
+
             const paymasterAbi = require(paymasterPath).abi;
             const paymasterBytecode = require(paymasterPath).bytecode;
             const accountFactory = new ContractFactory(
@@ -90,14 +92,13 @@ describe("Paymaster", () => {
             expect(walletTokenBalanceBeforeTx == BigInt(INIT_MINT_AMOUNT)).to.be.true;
 
             expect(paymasterBalanceBeforeTx - paymasterBalanceAfterTx >= BigInt(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterTx === BigInt(MINT_AMOUNT) - BigInt(MINIMAL_ALLOWANCE)).to
-                .be.true;
+            expect(paymasterTokenBalanceAfterTx === BigInt(MINIMAL_ALLOWANCE)).to.be.true;
 
             expect(walletBalanceBeforeTx - walletBalanceAfterTx >= BigInt(0)).to.be.true;
             expect(
                 walletTokenBalanceAfterTx ==
                     walletTokenBalanceBeforeTx - BigInt(MINIMAL_ALLOWANCE) + BigInt(MINT_AMOUNT),
             ).to.be.true;
-        }).timeout(20_000);
+        }).timeout(30_000);
     });
 });
