@@ -13,8 +13,9 @@ on:
         default: latest
         options:
           - latest
-          - next
           - beta
+          - legacy-ethers-v5
+          - legacy-ethers-v5-beta
 jobs:
   zksync:
     name: Publish package
