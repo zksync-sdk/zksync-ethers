@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { utils } from "../../src";
-import { EIP712_TX_TYPE, encodeData, isNullTypeNullDataTransaction, isRegularEIP712Transaction } from "../../src/utils";
+import { EIP712_TX_TYPE, encodeData } from "../../src/utils";
 import { TransactionRequest } from "../../src/types";
 
 describe("utils", () => {
@@ -82,90 +82,6 @@ describe("utils", () => {
         it("should throw an error for unsupported data type", () => {
             const data = [null];
             expect(() => encodeData(data)).to.throw("Unsupported data type: object");
-        });
-    });
-
-    describe("#isRegularEIP712Transaction()", () => {
-        it("should return true if transaction customData is null and type is not EIP712_TX_TYPE", () => {
-            const transaction: TransactionRequest = {
-                type: 1,
-                customData: null,
-            };
-            const result = isRegularEIP712Transaction(transaction);
-            expect(result).to.be.true;
-        });
-
-        it("should return false if transaction customData is not null", () => {
-            const transaction: TransactionRequest = {
-                type: 1,
-                customData: {
-                    customSignature: "some signature",
-                },
-            };
-            const result = isRegularEIP712Transaction(transaction);
-            expect(result).to.be.false;
-        });
-
-        it("should return false if transaction type is EIP712_TX_TYPE", () => {
-            const transaction: TransactionRequest = {
-                type: EIP712_TX_TYPE,
-                customData: null,
-            };
-            const result = isRegularEIP712Transaction(transaction);
-            expect(result).to.be.false;
-        });
-
-        it("should return false if transaction customData is not null and type is EIP712_TX_TYPE", () => {
-            const transaction: TransactionRequest = {
-                type: EIP712_TX_TYPE,
-                customData: {
-                    customSignature: "some signature",
-                },
-            };
-            const result = isRegularEIP712Transaction(transaction);
-            expect(result).to.be.false;
-        });
-    });
-
-    describe("isNullTypeNullDataTransaction", () => {
-        it("should return true if transaction type and customData are null", () => {
-            const transaction: TransactionRequest = {
-                type: null,
-                customData: null,
-            };
-            const result = isNullTypeNullDataTransaction(transaction);
-            expect(result).to.be.true;
-        });
-
-        it("should return false if transaction type is not null", () => {
-            const transaction: TransactionRequest = {
-                type: 1,
-                customData: null,
-            };
-            const result = isNullTypeNullDataTransaction(transaction);
-            expect(result).to.be.false;
-        });
-
-        it("should return false if transaction customData is not null", () => {
-            const transaction: TransactionRequest = {
-                type: null,
-                customData: {
-                    customSignature: "some signature",
-                },
-            };
-            const result = isNullTypeNullDataTransaction(transaction);
-            expect(result).to.be.false;
-        });
-
-        it("should return false if transaction type and customData are not null", () => {
-            const transaction: TransactionRequest = {
-                type: 1,
-                customData: {
-                    customSignature: "some signature",
-                },
-            };
-            const result = isNullTypeNullDataTransaction(transaction);
-            expect(result).to.be.false;
         });
     });
 });

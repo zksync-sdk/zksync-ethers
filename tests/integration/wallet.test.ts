@@ -1,6 +1,7 @@
 import * as chai from "chai";
 import "../custom-matchers";
 import { AbstractWallet, ContractFactory, Paymaster, Provider, types, utils, Wallet, Contract } from "../../src";
+import { serializeEip712 } from "../../src/utils";
 import { ethers, Typed } from "ethers";
 import * as fs from "fs";
 import { TOKENS } from "../const";
@@ -462,28 +463,42 @@ describe("Wallet", () => {
 describe("AbstractWallet", () => {
     const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
     const PRIVATE_KEY2 = "0xac1e735be8536c6534bb4f17f06f6afc73b2b5ba84ac2cfb12f7461b20c0bbe3";
+    const PRIVATE_KEY3 = "0xd293c684d884d56f8d6abd64fc76757d3664904e309a0645baf8522ab6366d9e";
 
     const tokenPath = "../files/Token.json";
     const paymasterPath = "../files/Paymaster.json";
     const accountAbstractionPath = "../files/SimpleAccount.json";
 
     let paymaster: Paymaster;
-    let abstractWallet: AbstractWallet;
     let accountAbstractionAddress: string;
 
-    const provider = new Provider("http://localhost:8011");
+    const provider = Provider.getDefaultProvider(types.Network.Localhost);
+    if (provider == undefined) {
+        throw new Error("undefined Provider in tests")
+    }
     const ethProvider = ethers.getDefaultProvider("http://localhost:8545");
     const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
     const otherWallet = new Wallet(PRIVATE_KEY2, provider, ethProvider);
+    const anotherWallet = new Wallet(PRIVATE_KEY3, provider, ethProvider);
 
     before("setup", async function () {
+        this.timeout(30_000);
         // deploy account abstraction
         console.log("Deploying account abstraction...");
         const abstractionAbi = require(accountAbstractionPath).abi;
         const abstractionBytecode: string = require(accountAbstractionPath).bytecode;
-        const aaFactory = new ContractFactory(abstractionAbi, abstractionBytecode, wallet);
+        const aaFactory = new ContractFactory(abstractionAbi, abstractionBytecode, wallet, "createAccount");
         const aaContract = await aaFactory.deploy(wallet.address);
         accountAbstractionAddress = await aaContract.getAddress();
+
+        // send 100 ETH to account abstraction
+        console.log("Sending ETH to account abstraction...");
+        const aaFaucetTx = await wallet.transfer({
+            token: utils.ETH_ADDRESS,
+            to: accountAbstractionAddress,
+            amount: ethers.parseEther("100"),
+        });
+        await aaFaucetTx.wait();
 
         // deploy token
         console.log("Deploying token...");
@@ -491,14 +506,14 @@ describe("AbstractWallet", () => {
 
         const tokenAbi = require(tokenPath).abi;
         const tokenBytecode = require(tokenPath).bytecode;
-        const tokenFactory = new ContractFactory(tokenAbi, tokenBytecode, wallet);
+        const tokenFactory = new ContractFactory(tokenAbi, tokenBytecode, otherWallet);
         const tokenContract = await tokenFactory.deploy("Ducat", "Ducat", 18) as Contract;
         const tokenAddress = await tokenContract.getAddress();
 
-        // mint tokens to wallet, so it could pay fee with tokens
+        // mint tokens to account abstraction address, so it could pay fee with tokens
         console.log("Minting tokens...");
         await tokenContract.mint(
-            Typed.address(await wallet.getAddress()),
+            Typed.address(accountAbstractionAddress),
             Typed.uint256(INIT_MINT_AMOUNT),
         );
 
@@ -509,7 +524,7 @@ describe("AbstractWallet", () => {
         const paymasterFactory = new ContractFactory(
             paymasterAbi,
             paymasterBytecode,
-            otherWallet,
+            anotherWallet,
             "createAccount"
         );
         const paymasterContract = await paymasterFactory.deploy(tokenAddress);
@@ -517,26 +532,75 @@ describe("AbstractWallet", () => {
 
         // transfer ETH to paymaster so it could pay fee
         console.log("Transferring ETH to paymaster...");
-        const faucetTx = await wallet.transfer({
+        const paymasterFaucetTx = await wallet.transfer({
             token: utils.ETH_ADDRESS,
             to: paymasterAddress,
             amount: ethers.parseEther("0.1"),
         });
-        await faucetTx.wait();
+        await paymasterFaucetTx.wait();
 
         // initialize paymaster
         console.log("Initializing paymaster...");
         paymaster = new Paymaster("ApprovalBased", paymasterAddress, tokenAddress);
     });
 
+    describe("legacy syntax", () => {
+        it("should transfer ETH with custom class", async () => {
+            class SingleSignerAAWallet extends Wallet {
+                readonly accountAddress: string;
+                constructor(
+                  accountAddress: string,
+                  privateKey: string,
+                  providerL2: Provider,
+                ) {
+                  super(privateKey, providerL2);
+                  this.accountAddress = accountAddress; // this.address is read-only in ethers.Wallet
+                }
+              
+                override getAddress(): Promise<string> { // override, used in ethers.BaseWallet.signTransaction() and AdapterL2.transfer()
+                  return Promise.resolve(this.accountAddress);
+                }
+              
+                override async signTransaction(transaction: types.TransactionRequest) { // overrides zks.Wallet.signTransaction()
+                  const sig = await this.eip712.sign(transaction);
+                  if (transaction.customData === undefined) {
+                    throw new Error("Transaction customData is undefined");
+                  }
+                  // @ts-ignore
+                  transaction.customData.customSignature = sig;
+                  // @ts-ignore
+                  return (0, serializeEip712)(transaction);
+                }
+            }
+            const customWallet = new SingleSignerAAWallet(
+                accountAbstractionAddress, 
+                wallet.privateKey, 
+                provider
+              );
+            const balanceBefore = (await provider.getBalance(wallet.address));
+            const tx = await customWallet.transfer({
+                to: wallet.address,
+                amount: ethers.parseEther("10"),
+                overrides: { type: 113 },
+            });
+            await tx.wait();
+            const balanceAfter = (await provider.getBalance(wallet.address));
+            const difference = balanceAfter - balanceBefore;
+            // Assert that the balance has increased by approximately 10 ETH
+            console.log("Difference: ", difference / BigInt(10 ** 18));
+            expect(difference / BigInt(10 ** 18) > 9.9).to.be.true;
+            expect(difference / BigInt(10 ** 18) < 10.1).to.be.true;
+        });
+    }).timeout(30_000);
+
     describe("#constructor()", () => {
         it("`new AbstractWallet()` should return a `AbstractWallet` with L1 and L2 provider", async () => {
-            abstractWallet = new AbstractWallet(
+            const abstractWallet = new AbstractWallet(
                 accountAbstractionAddress,
                 wallet.privateKey,
-                paymaster,
                 provider,
                 ethProvider,
+                paymaster,
             );
             expect(abstractWallet.accountAddress).to.be.equal(accountAbstractionAddress);
             expect(abstractWallet.signingKey.privateKey).to.be.equal(PRIVATE_KEY);
@@ -546,4 +610,44 @@ describe("AbstractWallet", () => {
         });
     });
 
+    describe("#transfer()", () => {
+        const abstractWallet = new AbstractWallet(
+            accountAbstractionAddress,
+            wallet.privateKey,
+            provider,
+            ethProvider,
+            paymaster,
+        );
+        it("should transfer ETH", async () => {
+            const balanceBeforeTransfer = await provider.getBalance(wallet.address);
+            const tx = await abstractWallet.transfer({
+                to: wallet.address, 
+                amount: ethers.parseEther("10")
+            });
+            const result = await tx.wait();
+            console.log("XNonce:", await abstractWallet.getNonce());
+            const balanceAfterTransfer = await provider.getBalance(wallet.address);
+            const difference = balanceAfterTransfer - balanceBeforeTransfer;
+            expect(result).not.to.be.null;
+            console.log("Difference: ", difference / BigInt(10 ** 18));
+            // Assert that the balance has increased by approximately 10 ETH
+            expect(difference / BigInt(10 ** 18) > 9.9).to.be.true;
+            expect(difference / BigInt(10 ** 18) < 10.1).to.be.true;
+        }).timeout(25_000);
+
+        it.skip("should transfer DAI", async () => {
+            const amount = 5;
+            const l2DAI = await provider.l2TokenAddress(TOKENS.DAI.address);
+            const balanceBeforeTransfer = await provider.getBalance(wallet.address, "latest", l2DAI);
+            const tx = await abstractWallet.transfer({
+                token: l2DAI,
+                to: wallet.address,
+                amount: amount,
+            });
+            const result = await tx.wait();
+            const balanceAfterTransfer = await provider.getBalance(wallet.address, "latest", l2DAI);
+            expect(result).not.to.be.null;
+            expect(balanceAfterTransfer - balanceBeforeTransfer).to.be.equal(BigInt(amount));
+        }).timeout(25_000);
+    });
 });

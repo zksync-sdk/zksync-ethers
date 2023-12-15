@@ -47,6 +47,8 @@
         "test": "yarn test:unit && yarn test:integration",
             "test:unit": "mocha -r ts-node/register --bail tests/unit/*.test.ts",
             "test:integration": "mocha -r ts-node/register --bail tests/setup.test.ts tests/integration/*.test.ts",
+                "test:aa": "yarn test:unit && yarn test:aa:wallet",
+                "test:aa:wallet": "mocha -r ts-node/register --bail tests/integration/wallet.test.ts --grep 'AbstractWallet'",
         "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
         "lint": "prettier . --write",
         "lint:check": "prettier . --check",

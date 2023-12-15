@@ -596,14 +596,6 @@ export async function estimateCustomBridgeDepositL2Gas(
     });
 }
 
-export function isRegularEIP712Transaction(transaction: TransactionRequest): boolean {
-    return transaction.customData == null && transaction.type != EIP712_TX_TYPE;
-}
-
-export function isNullTypeNullDataTransaction(transaction: TransactionRequest): boolean {
-    return transaction.type == null && transaction.customData == null;
-}
-
 export function encodeData(data: any[]): string {
     const types = data.map(item => {
         if (typeof item === 'number') {

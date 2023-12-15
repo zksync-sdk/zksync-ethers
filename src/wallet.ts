@@ -1,10 +1,10 @@
-import { EIP712Signer } from "./signer";
-import { Provider } from "./provider";
-import { EIP712_TX_TYPE, isNullTypeNullDataTransaction, isRegularEIP712Transaction, serializeEip712 } from "./utils";
-import { ethers, ProgressCallback } from "ethers";
-import { TransactionLike, TransactionRequest, TransactionResponse } from "./types";
+import { ProgressCallback, ethers } from "ethers";
 import { AdapterL1, AdapterL2 } from "./adapters";
 import { Paymaster } from "./paymaster";
+import { Provider } from "./provider";
+import { EIP712Signer } from "./signer";
+import { TransactionLike, TransactionRequest, TransactionResponse } from "./types";
+import { EIP712_TX_TYPE, serializeEip712 } from "./utils";
 
 export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     // @ts-ignore
@@ -138,9 +138,9 @@ export class AbstractWallet extends Wallet {
     constructor(
         accountAddress: string,
         privateKey: string,
-        paymaster: Paymaster,
         providerL2?: Provider,
         providerL1?: ethers.Provider,
+        paymaster: Paymaster | null = null,
         customSigningFunction: SigningFunction = signingFunction,
     ) {
         super(privateKey, providerL2);
@@ -150,47 +150,27 @@ export class AbstractWallet extends Wallet {
         this.customSigningFunction = customSigningFunction.bind(this);
     }
 
+    override transfer(transaction: { to: string; amount: ethers.BigNumberish; token?: string; overrides?: ethers.Overrides; }): Promise<TransactionResponse> {
+        transaction.overrides = { type: EIP712_TX_TYPE };
+        return super.transfer(transaction);
+    }
+
     override getAddress(): Promise<string> {
         return Promise.resolve(this.accountAddress);
     }
 
-    override async populateTransaction(transaction: TransactionRequest): Promise<TransactionLike> {
-        if (isNullTypeNullDataTransaction(transaction)) { transaction.type = 0; } // use legacy txs by default
-        if (isRegularEIP712Transaction(transaction)) {
-            return await super.populateTransaction(transaction);
-        }
-        transaction.type = EIP712_TX_TYPE;
-        const populated = (await super.populateTransaction(transaction)) as TransactionLike;
-
-        populated.type = EIP712_TX_TYPE;
-        populated.value ??= 0;
-        populated.data ??= "0x";
-        const customData = this.paymaster.getCustomData();
-        populated.customData = this._fillCustomData(customData);
-        populated.gasPrice = await this.provider.getGasPrice();
-        return populated;
-    }
-
     override async signTransaction(transaction: TransactionRequest): Promise<string> {
-        if (isRegularEIP712Transaction(transaction)) {
-            return await super.signTransaction(transaction);
-        }
-        const populated = await this.populateTransaction(transaction);
-        return this.customSigningFunction(populated);
+        return this.customSigningFunction(transaction);
     }
 }
 
-/// Function that can be passed to the AbstractWallet class that overrides 
-/// the default signing function. This function is called when the transaction
-/// is a custom transaction. i.e. has a customData field or has a type not of value 113 (EIP712_TX_TYPE)
 export async function signingFunction(this: AbstractWallet, transaction: TransactionRequest): Promise<string> {
-    transaction.from ??= this.getAddress();
-    let from = await ethers.resolveAddress(transaction.from);
-    if (from.toLowerCase() != (await this.getAddress()).toLowerCase()) {
-        throw new Error("Transaction `from` address mismatch");
-    }
-    transaction.customData ??= {};
+    const paymasterCustomData = this.paymaster == null ? {} : this.paymaster.getCustomData();
+    if (transaction.customData === undefined) {
+        throw new Error("Transaction customData is undefined");
+      }
+    transaction.customData = this._fillCustomData(paymasterCustomData);
     transaction.customData.customSignature = await this.eip712.sign(transaction);
-    const populated = await this.populateTransaction(transaction);
-    return serializeEip712(populated);
+    // @ts-ignore
+    return (0, serializeEip712)(transaction);
 }
