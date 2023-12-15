@@ -4,7 +4,7 @@ import { Paymaster } from "./paymaster";
 import { Provider } from "./provider";
 import { EIP712Signer } from "./signer";
 import { TransactionLike, TransactionRequest, TransactionResponse } from "./types";
-import { EIP712_TX_TYPE, serializeEip712 } from "./utils";
+import { DEFAULT_GAS_PER_PUBDATA_LIMIT, EIP712_TX_TYPE, serializeEip712 } from "./utils";
 
 export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     // @ts-ignore
@@ -165,11 +165,10 @@ export class AbstractWallet extends Wallet {
 }
 
 export async function signingFunction(this: AbstractWallet, transaction: TransactionRequest): Promise<string> {
-    const paymasterParams = this.paymaster == null ? null : this.paymaster.getPaymasterParams();
-    if (transaction.customData === undefined) {
-        throw new Error("Transaction customData is undefined");
-      }
-    transaction.customData.paymasterParams = paymasterParams;
+    transaction.customData = this.paymaster ? {
+        gasPerPubdata: DEFAULT_GAS_PER_PUBDATA_LIMIT,
+        paymasterParams: this.paymaster.getPaymasterParams(),
+    } : {};
     transaction.customData = this._fillCustomData(transaction.customData);
     transaction.customData.customSignature = await this.eip712.sign(transaction);
     // @ts-ignore
