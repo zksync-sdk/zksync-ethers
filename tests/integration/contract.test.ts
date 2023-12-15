@@ -2,7 +2,6 @@ import * as chai from "chai";
 import "../custom-matchers";
 import { Provider, types, Wallet, ContractFactory } from "../../src";
 import { ethers } from "ethers";
-import { TOKENS } from "../const";
 
 const { expect } = chai;
 
@@ -15,6 +14,8 @@ describe("ContractFactory", () => {
     const tokenPath = "../files/Token.json";
     const paymasterPath = "../files/Paymaster.json";
     const storagePath = "../files/Storage.json";
+
+    const DAI = require("../token.json");
 
     describe("#constructor()", () => {
         it("`ContractFactory(abi, bytecode, runner)` should return a `ContractFactory` with `create` deployment", async () => {
@@ -81,7 +82,7 @@ describe("ContractFactory", () => {
                 "createAccount",
             );
             const paymasterContract = await accountFactory.deploy(
-                await provider.l2TokenAddress(TOKENS.DAI.address),
+                await provider.l2TokenAddress(DAI.l1Address),
             );
 
             const code = await provider.getCode(await paymasterContract.getAddress());
@@ -122,7 +123,7 @@ describe("ContractFactory", () => {
                 "create2Account",
             );
             const paymasterContract = await accountFactory.deploy(
-                await provider.l2TokenAddress(TOKENS.DAI.address),
+                await provider.l2TokenAddress(DAI.l1Address),
                 { customData: { salt: ethers.hexlify(ethers.randomBytes(32)) } },
             );
 

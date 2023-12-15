@@ -100,11 +100,11 @@ export function getDeployedContracts(receipt: ethers.TransactionReceipt): Deploy
             // Take the last topic (deployed contract address as U256) and extract address from it (U160).
             .map((log) => {
                 const sender = `0x${log.topics[1].slice(log.topics[1].length - addressBytesLen)}`;
-                const bytesCodehash = log.topics[2];
+                const bytecodeHash = log.topics[2];
                 const address = `0x${log.topics[3].slice(log.topics[3].length - addressBytesLen)}`;
                 return {
                     sender: ethers.getAddress(sender),
-                    bytecodeHash: bytesCodehash,
+                    bytecodeHash: bytecodeHash,
                     deployedAddress: ethers.getAddress(address),
                 };
             })
