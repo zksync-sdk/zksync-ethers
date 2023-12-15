@@ -1,4 +1,7 @@
-import { AbiCoder, BigNumberish, BytesLike, encodeBytes32String, ethers, getBytes, hexlify, SignatureLike, toBeArray, toBeHex, toUtf8Bytes, zeroPadValue } from "ethers";
+import { AbiCoder, BigNumberish, BytesLike, ethers, SignatureLike } from "ethers";
+import { IERC20__factory, IL1Bridge__factory } from "../typechain";
+import { Provider } from "./provider";
+import { EIP712Signer } from "./signer";
 import {
     Address,
     DeploymentInfo,
@@ -7,12 +10,8 @@ import {
     PaymasterParams,
     PriorityOpTree,
     PriorityQueueType,
-    TransactionLike,
-    TransactionRequest,
+    TransactionLike
 } from "./types";
-import { Provider } from "./provider";
-import { EIP712Signer } from "./signer";
-import { IERC20__factory, IL1Bridge__factory } from "../typechain";
 
 export * from "./paymaster-utils";
 
