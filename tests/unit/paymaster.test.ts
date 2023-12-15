@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Paymaster } from "../../src";
+import { getApprovalBasedPaymasterInput } from "../../src/utils";
 
 describe("Paymaster", () => {
   describe("constructor", () => {
@@ -36,8 +37,8 @@ describe("Paymaster", () => {
     });
   });
 
-  describe("getCustomData", () => {
-    it("should return the custom data", () => {
+  describe("getPaymasterParams", () => {
+    it("should return the paymaster params", () => {
       const address = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
       const paymasterInput = {
         type: "ApprovalBased",
@@ -45,23 +46,20 @@ describe("Paymaster", () => {
         minimalAllowance: 100,
         innerInput: [1, 2, 3]
       };
-      const expectedCustomData = {
-        gasPerPubdata: 50000,
-        paymasterParams: {
+      const paymasterParams = {
           paymaster: address,
           paymasterInput
-        }
-      };
+        };
 
       // @ts-ignore
-      expectedCustomData.paymasterParams.paymasterInput = [1, 2, 3];
-      // @ts-ignore
       const paymaster = new Paymaster(paymasterInput.type, address, paymasterInput.token, paymasterInput.minimalAllowance, paymasterInput.innerInput);
-      const customData = paymaster.getCustomData();
-      // @ts-ignore
-      expectedCustomData.paymasterParams.paymasterInput = "0x949431dc000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b77618000000000000000000000000000000000000000000000000000000000000006400000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003";
-      
-      expect(customData).to.deep.equal(expectedCustomData);
+      const resPaymasterParams = paymaster.getPaymasterParams();      
+      const expectedPaymasterParams = {
+        paymaster: address,
+        // @ts-ignore
+        paymasterInput: getApprovalBasedPaymasterInput(paymaster.paymasterInput),
+      };
+      expect(resPaymasterParams).to.deep.equal(expectedPaymasterParams);
     });
   });
 });

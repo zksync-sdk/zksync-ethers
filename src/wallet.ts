@@ -165,11 +165,12 @@ export class AbstractWallet extends Wallet {
 }
 
 export async function signingFunction(this: AbstractWallet, transaction: TransactionRequest): Promise<string> {
-    const paymasterCustomData = this.paymaster == null ? {} : this.paymaster.getCustomData();
+    const paymasterParams = this.paymaster == null ? null : this.paymaster.getPaymasterParams();
     if (transaction.customData === undefined) {
         throw new Error("Transaction customData is undefined");
       }
-    transaction.customData = this._fillCustomData(paymasterCustomData);
+    transaction.customData.paymasterParams = paymasterParams;
+    transaction.customData = this._fillCustomData(transaction.customData);
     transaction.customData.customSignature = await this.eip712.sign(transaction);
     // @ts-ignore
     return (0, serializeEip712)(transaction);

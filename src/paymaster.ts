@@ -1,6 +1,6 @@
 import { getAddress } from "ethers";
-import { ApprovalBasedPaymasterInput, Eip712Meta, GeneralPaymasterInput } from "./types";
-import { DEFAULT_GAS_PER_PUBDATA_LIMIT, getPaymasterParams, encodeData } from "./utils";
+import { ApprovalBasedPaymasterInput, GeneralPaymasterInput } from "./types";
+import { encodeData, getPaymasterParams } from "./utils";
 
 export class Paymaster {
     type: string;
@@ -17,21 +17,21 @@ export class Paymaster {
         this.type = type;
         this.address = getAddress(address);
         const encodedInnerInput = encodeData(innerInput);
-        this.paymasterInput = type == "ApprovalBased" ? {
-            type,
-            token: getAddress(tokenAddress),
-            minimalAllowance,
-            innerInput: encodedInnerInput
-        } : {
-            type,
-            innerInput: encodedInnerInput
-        };
+        this.paymasterInput =
+            type == "ApprovalBased"
+                ? {
+                      type,
+                      token: getAddress(tokenAddress),
+                      minimalAllowance,
+                      innerInput: encodedInnerInput,
+                  }
+                : {
+                      type,
+                      innerInput: encodedInnerInput,
+                  };
     }
 
-    getCustomData() {
-        return {
-            gasPerPubdata: DEFAULT_GAS_PER_PUBDATA_LIMIT,
-            paymasterParams: getPaymasterParams(this.address, this.paymasterInput),
-        } as Eip712Meta;
+    getPaymasterParams() {
+        return getPaymasterParams(this.address, this.paymasterInput);
     }
 }
