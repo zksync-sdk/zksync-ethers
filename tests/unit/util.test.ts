@@ -74,4 +74,20 @@ describe("utils", () => {
             );
         });
     });
+
+    describe("#isETH", () => {
+        it("should return true for ETH_ADDRESS", () => {
+            const result = utils.isETH("0x0000000000000000000000000000000000000000");
+            expect(result).to.be.true;
+        });
+        it("should return true for L2_ETH_TOKEN_ADDRESS", () => {
+            const result = utils.isETH("0x000000000000000000000000000000000000800a");
+            expect(result).to.be.true;
+        });
+
+        it("should return false for other addresses", () => {
+            const result = utils.isETH("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049");
+            expect(result).to.be.false;
+        });
+    });
 });
