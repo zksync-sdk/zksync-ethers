@@ -231,11 +231,6 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
             };
         }
 
-        async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
-            const tokens: Token[] = await this.send("zks_getConfirmedTokens", [start, limit]);
-            return tokens.map((token) => ({ address: token.l2Address, ...token }));
-        }
-
         async getAllAccountBalances(address: Address): Promise<BalancesMap> {
             let balances = await this.send("zks_getAllAccountBalances", [address]);
             for (let token in balances) {

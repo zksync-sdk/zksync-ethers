@@ -145,13 +145,6 @@ describe("Provider", () => {
         });
     });
 
-    describe("#getConfirmedTokens()", () => {
-        it("should return confirmed tokens", async () => {
-            const result = await provider.getConfirmedTokens();
-            expect(result).to.have.lengthOf(1);
-        });
-    });
-
     describe("#getDefaultBridgeAddresses()", () => {
         it("should return default bridges", async () => {
             const result = await provider.getDefaultBridgeAddresses();
