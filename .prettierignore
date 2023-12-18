@@ -1,6 +1,7 @@
 node_modules
 .github
 .idea
+.nycrc
 CHANGELOG.md
 typechain
 abi
