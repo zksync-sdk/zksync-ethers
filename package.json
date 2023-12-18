@@ -35,6 +35,7 @@
         "ethers": "^6.7.1",
         "mocha": "^10.2.0",
         "ncp": "^2.0.0",
+        "nyc": "^15.1.0",
         "prettier": "3.0.3",
         "ts-node": "^10.9.1",
         "typechain": "^8.3.1",
@@ -45,6 +46,7 @@
     },
     "scripts": {
         "test": "mocha -r ts-node/register --bail tests/setup.test.ts tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test:coverage": "nyc  mocha -r ts-node/register --bail tests/unit/*.test.ts ",
         "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
         "lint": "prettier . --write",
         "lint:check": "prettier . --check",
