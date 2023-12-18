@@ -27,10 +27,10 @@ describe("Paymaster", () => {
             const tokenAddress = await tokenContract.getAddress();
 
             // mint tokens to wallet, so it could pay fee with tokens
-            const mintTx = await tokenContract.mint(
+            const mintTx = (await tokenContract.mint(
                 Typed.address(await wallet.getAddress()),
                 Typed.uint256(INIT_MINT_AMOUNT),
-            ) as ethers.ContractTransactionResponse;
+            )) as ethers.ContractTransactionResponse;
             await mintTx.wait();
 
             const paymasterAbi = require(paymasterPath).abi;

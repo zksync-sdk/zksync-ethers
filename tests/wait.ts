@@ -9,12 +9,12 @@ async function main() {
     for (let i = 0; i < maxAttempts; i++) {
         try {
             await provider.getNetwork();
-            return
+            return;
         } catch (error) {
-          await utils.sleep(20_000);
+            await utils.sleep(20_000);
         }
     }
-    throw new Error("Maximum retries exceeded.")
+    throw new Error("Maximum retries exceeded.");
 }
 
 main()

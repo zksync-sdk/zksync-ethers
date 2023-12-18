@@ -115,8 +115,8 @@ const withdrawal = await wallet.withdraw({
 
 ## 🤖 Running tests
 
-In order to run test you need run [local-setup](https://github.com/matter-labs/local-setup) on your machine. 
-For running  tests, use:
+In order to run test you need run [local-setup](https://github.com/matter-labs/local-setup) on your machine.
+For running tests, use:
 
 ```shell
 yarn test:wait # waits for local-setup to be ready
