@@ -47,6 +47,7 @@
     "scripts": {
         "test:prepare": "cd  tests/setup/ && ./setup.sh && cd ../..",
         "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test:wait": "ts-node tests/wait.ts",
         "test": "mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
         "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
         "lint": "prettier . --write",
