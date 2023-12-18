@@ -27,12 +27,11 @@ describe("Paymaster", () => {
             const tokenAddress = await tokenContract.getAddress();
 
             // mint tokens to wallet, so it could pay fee with tokens
-            await tokenContract.mint(
+            const mintTx = await tokenContract.mint(
                 Typed.address(await wallet.getAddress()),
                 Typed.uint256(INIT_MINT_AMOUNT),
-            );
-
-            await utils.sleep(1000); // workaround for duplicated nonce
+            ) as ethers.ContractTransactionResponse;
+            await mintTx.wait();
 
             const paymasterAbi = require(paymasterPath).abi;
             const paymasterBytecode = require(paymasterPath).bytecode;
