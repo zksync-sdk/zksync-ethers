@@ -23,7 +23,7 @@ import {
     TransactionStatus,
     Fee,
     Network as ZkSyncNetwork,
-    RawBlockTransaction
+    RawBlockTransaction,
 } from "./types";
 import {
     CONTRACT_DEPLOYER,
@@ -400,7 +400,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             if (l2WethToken != ethers.constants.AddressZero) {
                 return l2WethToken;
             }
-        } catch (e) { }
+        } catch (e) {}
         const l2Erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
         return await l2Erc20Bridge.l2TokenAddress(token);
     }
@@ -418,7 +418,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             if (l1WethToken != ethers.constants.AddressZero) {
                 return l1WethToken;
             }
-        } catch (e) { }
+        } catch (e) {}
         const erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
         return await erc20Bridge.l1TokenAddress(token);
     }
@@ -663,7 +663,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             let l1WethToken = ethers.constants.AddressZero;
             try {
                 l1WethToken = await l2WethBridge.l1TokenAddress(tx.token);
-            } catch (e) { }
+            } catch (e) {}
             tx.bridgeAddress =
                 l1WethToken != ethers.constants.AddressZero
                     ? bridgeAddresses.wethL2

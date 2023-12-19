@@ -33,6 +33,7 @@
         "@types/chai": "^4.2.19",
         "@types/mocha": "^8.2.2",
         "@types/node": "^16.0.0",
+        "c8": "^8.0.1",
         "chai": "^4.3.4",
         "ethers": "~5.7.0",
         "mocha": "10.1.0",
@@ -46,7 +47,10 @@
         "ethers": "~5.7.0"
     },
     "scripts": {
-        "test": "mocha -r ts-node/register --bail tests/setup.test.ts tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test:prepare": "cd  tests/setup/ && ./setup.sh && cd ../..",
+        "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test:wait": "ts-node tests/wait.ts",
+        "test": "mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
         "build": "tsc && cp -f typechain/*.d.ts build/typechain && ncp ./abi ./build/abi",
         "lint": "prettier . --write",
         "lint:check": "prettier . --check",

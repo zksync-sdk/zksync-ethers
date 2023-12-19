@@ -254,7 +254,7 @@ export interface RawBlockTransaction {
                 max_fee_per_gas: BigInt;
                 max_priority_fee_per_gas: BigInt;
                 gas_per_pubdata_limit: BigInt;
-            },
+            };
             initiatorAddress: Address;
             signature: Uint8Array;
             transactionType: string;
@@ -266,7 +266,7 @@ export interface RawBlockTransaction {
                 paymaster: Address;
                 paymasterInput: Uint8Array;
             };
-        }
+        };
     };
     execute: {
         calldata: string;
