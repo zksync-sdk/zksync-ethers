@@ -1,0 +1,37 @@
+name: Run tests
+on:
+  workflow_dispatch:
+  pull_request:
+    branch: ethers-v5
+    types: [ opened, reopened, synchronize ]
+
+permissions:
+  contents: read # for checkout
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+      - name: Install dependencies
+        run: yarn install
+      - name: Run local-setup
+        run: |
+          git clone https://github.com/matter-labs/local-setup.git
+          pushd local-setup
+          docker-compose up -d
+          popd
+      - name: Wait for local-setup to be ready
+        run: yarn test:wait
+      - name: Prepare environment
+        run: yarn test:prepare
+      - name: Run tests
+        run: yarn test
