@@ -1,9 +1,7 @@
 name: Validate
 on:
   pull_request:
-    branches:
-      - main
-      - ethers-v5
+    branch: main
     types: [ opened, reopened, synchronize ]
 
 permissions:
