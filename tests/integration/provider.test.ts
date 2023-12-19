@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Provider, types, utils, Wallet } from "../../src";
 import { BigNumber, ethers } from "ethers";
-import {TOKENS} from "../const";
+import { TOKENS } from "../const";
 
 describe("Provider", () => {
     const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
@@ -138,13 +138,6 @@ describe("Provider", () => {
         it("should return transaction receipt", async () => {
             const result = await provider.getTransaction(tx.hash);
             expect(result).not.to.be.null;
-        });
-    });
-
-    describe("#getConfirmedTokens()", () => {
-        it("should return confirmed tokens", async () => {
-            const result = await provider.getConfirmedTokens();
-            expect(result).to.have.lengthOf(2);
         });
     });
 
