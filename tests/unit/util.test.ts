@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { utils } from "../../src";
 
 describe("utils", () => {
-    describe("#isETH", () => {
+    describe("#isETH()", () => {
         it("should return true for L1 ETH address", async () => {
             const result = utils.isETH(utils.ETH_ADDRESS);
             expect(result).to.be.true;
@@ -14,14 +14,14 @@ describe("utils", () => {
         });
     });
 
-    describe("#createAddress", () => {
+    describe("#createAddress()", () => {
         it("should return the correct address", async () => {
             const address = utils.createAddress("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", 1);
             expect(address).to.be.equal("0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021");
         });
     });
 
-    describe("#create2Address", () => {
+    describe("#create2Address()", () => {
         it("should return the correct address", async () => {
             const address = utils.create2Address(
                 "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
