@@ -104,7 +104,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
 
         override async getTransactionReceipt(txHash: string): Promise<TransactionReceipt> {
             while (true) {
-                const receipt = await super.getTransactionReceipt(txHash) as TransactionReceipt;
+                const receipt = (await super.getTransactionReceipt(txHash)) as TransactionReceipt;
                 if (receipt && receipt.blockNumber) {
                     return receipt;
                 }

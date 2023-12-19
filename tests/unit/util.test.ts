@@ -4,6 +4,37 @@ import { EIP712_TX_TYPE, encodeData } from "../../src/utils";
 import { TransactionRequest } from "../../src/types";
 
 describe("utils", () => {
+    describe("#isETH", () => {
+        it("should return true for L1 ETH address", async () => {
+            const result = utils.isETH(utils.ETH_ADDRESS);
+            expect(result).to.be.true;
+        });
+
+        it("should return true for L2 ETH address", async () => {
+            const result = utils.isETH(utils.L2_ETH_TOKEN_ADDRESS);
+            expect(result).to.be.true;
+        });
+    });
+
+    describe("#createAddress", () => {
+        it("should return the correct address", async () => {
+            const address = utils.createAddress("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", 1);
+            expect(address).to.be.equal("0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021");
+        });
+    });
+
+    describe("#create2Address", () => {
+        it("should return the correct address", async () => {
+            const address = utils.create2Address(
+                "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                "0x010001cb6a6e8d5f6829522f19fa9568660e0a9cd53b2e8be4deb0a679452e41",
+                "0x01",
+                "0x01",
+            );
+            expect(address).to.be.equal("0x29bac3E5E8FFE7415F97C956BFA106D70316ad50");
+        });
+    });
+
     describe("#applyL1ToL2Alias()", () => {
         it("should return the L2 contract address based on provided L1 contract address", async () => {
             const l1ContractAddress = "0x702942B8205E5dEdCD3374E5f4419843adA76Eeb";
@@ -20,6 +51,15 @@ describe("utils", () => {
             const l1ContractAddress = utils.undoL1ToL2Alias(l2ContractAddress);
             expect(l1ContractAddress.toLowerCase()).to.be.equal(
                 "0x702942B8205E5dEdCD3374E5f4419843adA76Eeb".toLowerCase(),
+            );
+        });
+
+        it("should handle a case where L1_TO_L2_ALIAS_OFFSET is greater than the address", () => {
+            const l2ContractAddress = "0x100";
+            const l1ContractAddress = utils.undoL1ToL2Alias(l2ContractAddress);
+
+            expect(l1ContractAddress.toLowerCase()).to.be.equal(
+                "0xeeeeffffffffffffffffffffffffffffffffefef".toLowerCase(),
             );
         });
     });

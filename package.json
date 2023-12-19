@@ -31,8 +31,9 @@
         "@types/chai": "^4.3.9",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.5.2",
+        "c8": "^8.0.1",
         "chai": "^4.3.10",
-        "ethers": "^6.7.1",
+        "ethers": "6.9.0",
         "mocha": "^10.2.0",
         "ncp": "^2.0.0",
         "prettier": "3.0.3",
@@ -41,9 +42,12 @@
         "typescript": "^5.1.6"
     },
     "peerDependencies": {
-        "ethers": "^6.7.1"
+        "ethers": "^6.9.0"
     },
     "scripts": {
+        "test:prepare": "cd  tests/setup/ && ./setup.sh && cd ../..",
+        "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test:wait": "ts-node tests/wait.ts",
         "test": "yarn test:unit && yarn test:integration",
             "test:unit": "mocha -r ts-node/register --bail tests/unit/*.test.ts",
             "test:integration": "mocha -r ts-node/register --bail tests/setup.test.ts tests/integration/*.test.ts",

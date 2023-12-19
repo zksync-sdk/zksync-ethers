@@ -113,6 +113,23 @@ const withdrawal = await wallet.withdraw({
 });
 ```
 
+## 🤖 Running tests
+
+In order to run test you need run [local-setup](https://github.com/matter-labs/local-setup) on your machine.
+For running tests, use:
+
+```shell
+yarn test:wait # waits for local-setup to be ready
+yarn test:prepare # prepares the environment (deploys token on both layers, etc.)
+yarn test
+```
+
+For running test coverage, use:
+
+```shell
+yarn test:coverage
+```
+
 ## 🤝 Contributing
 
 We welcome contributions from the community! If you're interested in contributing to the `zksync-ethers` JavaScript SDK,

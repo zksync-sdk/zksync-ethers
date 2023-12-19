@@ -27,10 +27,11 @@ describe("Paymaster", () => {
             const tokenAddress = await tokenContract.getAddress();
 
             // mint tokens to wallet, so it could pay fee with tokens
-            await tokenContract.mint(
+            const mintTx = (await tokenContract.mint(
                 Typed.address(await wallet.getAddress()),
                 Typed.uint256(INIT_MINT_AMOUNT),
-            );
+            )) as ethers.ContractTransactionResponse;
+            await mintTx.wait();
 
             const paymasterAbi = require(paymasterPath).abi;
             const paymasterBytecode = require(paymasterPath).bytecode;
@@ -90,14 +91,13 @@ describe("Paymaster", () => {
             expect(walletTokenBalanceBeforeTx == BigInt(INIT_MINT_AMOUNT)).to.be.true;
 
             expect(paymasterBalanceBeforeTx - paymasterBalanceAfterTx >= BigInt(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterTx === BigInt(MINT_AMOUNT) - BigInt(MINIMAL_ALLOWANCE)).to
-                .be.true;
+            expect(paymasterTokenBalanceAfterTx === BigInt(MINIMAL_ALLOWANCE)).to.be.true;
 
             expect(walletBalanceBeforeTx - walletBalanceAfterTx >= BigInt(0)).to.be.true;
             expect(
                 walletTokenBalanceAfterTx ==
                     walletTokenBalanceBeforeTx - BigInt(MINIMAL_ALLOWANCE) + BigInt(MINT_AMOUNT),
             ).to.be.true;
-        }).timeout(20_000);
+        }).timeout(30_000);
     });
 });

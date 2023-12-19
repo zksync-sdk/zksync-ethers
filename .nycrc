@@ -1,0 +1,16 @@
+{
+    "report-dir": "./coverage",
+    "reporter": [
+        "lcov",
+        "text"
+    ],
+    "clean": true,
+    "all": true,
+    "include": [
+        "src/*"
+    ],
+    "exclude": [
+        "tests/*",
+        "typechain/*"
+    ]
+}

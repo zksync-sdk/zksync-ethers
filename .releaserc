@@ -1,0 +1,34 @@
+{
+  "repositoryUrl": "https://github.com/zksync-sdk/zksync-ethers.git",
+  "branches": "main",
+  "debug": true,
+  "addReleases": "top",
+  "preset": "angular",
+  "releaseRules": [
+    {"breaking": true, "release": "minor"}
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md", "package.json"],
+        "message": "${nextRelease.version} version bump [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    "@semantic-release/github"
+  ]
+}
