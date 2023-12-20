@@ -4,6 +4,8 @@ on:
   pull_request:
     branch: main
     types: [ opened, reopened, synchronize ]
+  pull_request_target:
+    types: [ opened, reopened, synchronize ]
 
 permissions:
   contents: read # for checkout
