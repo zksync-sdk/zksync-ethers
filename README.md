@@ -1,5 +1,7 @@
 # 🚀 zksync-ethers JavaScript SDK 🚀
 
+![Era Logo](https://github.com/matter-labs/era-contracts/raw/main/eraLogo.svg)
+
 In order to provide easy access to all the features of zkSync Era, the `zksync-ethers` JavaScript SDK was created,
 which is made in a way that has an interface very similar to those of [ethers](https://docs.ethers.io/v6/). In
 fact, `ethers` is a peer dependency of our library and most of the objects exported by `zksync-ethers` (
@@ -111,6 +113,23 @@ const withdrawal = await wallet.withdraw({
     token: utils.ETH_ADDRESS,
     amount: ethers.parseEther("1.0"),
 });
+```
+
+## 🤖 Running tests
+
+In order to run test you need to run [local-setup](https://github.com/matter-labs/local-setup) on your machine.
+For running tests, use:
+
+```shell
+yarn test:wait # waits for local-setup to be ready
+yarn test:prepare # prepares the environment (deploys token on both layers, etc.)
+yarn test
+```
+
+For running test coverage, use:
+
+```shell
+yarn test:coverage
 ```
 
 ## 🤝 Contributing
