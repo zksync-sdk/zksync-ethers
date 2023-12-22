@@ -48,8 +48,8 @@ The complete examples with various use cases are available [here](https://github
 import { Provider, utils, types } from "zksync-ethers";
 import { ethers } from "ethers";
 
-const provider = Provider.getDefaultProvider(types.Network.Goerli); // zkSync Era testnet (L2)
-const ethProvider = ethers.getDefaultProvider("goerli"); // goerli testnet (L1)
+const provider = Provider.getDefaultProvider(types.Network.Sepolia); // zkSync Era testnet (L2)
+const ethProvider = ethers.getDefaultProvider("sepolia"); // sepolia testnet (L1)
 ```
 
 ### Get the latest block number
@@ -89,7 +89,7 @@ const receiver = Wallet.createRandom();
 const transfer = await wallet.transfer({
     to: receiver,
     token: utils.ETH_ADDRESS,
-    amount: ethers.parseEther("1.0"),
+    amount: ethers.utils.parseEther("1.0"),
 });
 ```
 
@@ -100,7 +100,7 @@ Transfer funds from L1 to L2 network.
 ```ts
 const deposit = await wallet.deposit({
     token: utils.ETH_ADDRESS,
-    amount: ethers.parseEther("1.0"),
+    amount: ethers.utils.parseEther("1.0"),
 });
 ```
 
@@ -111,7 +111,7 @@ Transfer funds from L2 to L1 network.
 ```ts
 const withdrawal = await wallet.withdraw({
     token: utils.ETH_ADDRESS,
-    amount: ethers.parseEther("1.0"),
+    amount: ethers.utils.parseEther("1.0"),
 });
 ```
 
