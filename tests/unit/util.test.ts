@@ -62,6 +62,20 @@ describe("utils", () => {
         });
     });
 
+    describe("#checkBaseCost()", () => {
+        it("throws an error if the base cost bigger than value", async () => {
+            const baseCost = 100;
+            const value = 99;
+            try {
+                await utils.checkBaseCost(baseCost, value);
+            } catch (e) {
+                expect(e.message).to.be.equal(
+                    `The base cost of performing the priority operation is higher than the provided value parameter for the transaction: baseCost: ${baseCost}, provided value: ${value}`,
+                );
+            }
+        });
+    });
+
     describe("#hashBytecode()", () => {
         it("should return the hash of bytecode which length is not 2 bytes so padding needs to be performed", async () => {
             const bytecode =
