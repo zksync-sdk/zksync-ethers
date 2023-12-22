@@ -53,6 +53,7 @@
         "lint": "prettier . --write",
         "lint:check": "prettier . --check",
         "watch": "tsc --watch",
+        "types:fetch": "cd scripts && ./update-abi.sh && cd ../",
         "types": "typechain --target ethers-v6 --out-dir typechain abi/*.json"
     },
     "publishConfig": {

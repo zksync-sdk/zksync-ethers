@@ -23,30 +23,6 @@ import type {
   TypedContractMethod,
 } from "./common";
 
-export declare namespace ContractDeployer {
-  export type ForceDeploymentStruct = {
-    bytecodeHash: BytesLike;
-    newAddress: AddressLike;
-    callConstructor: boolean;
-    value: BigNumberish;
-    input: BytesLike;
-  };
-
-  export type ForceDeploymentStructOutput = [
-    bytecodeHash: string,
-    newAddress: string,
-    callConstructor: boolean,
-    value: bigint,
-    input: string
-  ] & {
-    bytecodeHash: string;
-    newAddress: string;
-    callConstructor: boolean;
-    value: bigint;
-    input: string;
-  };
-}
-
 export declare namespace IContractDeployer {
   export type AccountInfoStruct = {
     supportedAAVersion: BigNumberish;
@@ -59,17 +35,13 @@ export declare namespace IContractDeployer {
   ] & { supportedAAVersion: bigint; nonceOrdering: bigint };
 }
 
-export interface ContractDeployerInterface extends Interface {
+export interface IContractDeployerInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "create"
       | "create2"
       | "create2Account"
       | "createAccount"
-      | "extendedAccountVersion"
-      | "forceDeployKeccak256"
-      | "forceDeployOnAddress"
-      | "forceDeployOnAddresses"
       | "getAccountInfo"
       | "getNewAddressCreate"
       | "getNewAddressCreate2"
@@ -101,22 +73,6 @@ export interface ContractDeployerInterface extends Interface {
     values: [BytesLike, BytesLike, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "extendedAccountVersion",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "forceDeployKeccak256",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "forceDeployOnAddress",
-    values: [ContractDeployer.ForceDeploymentStruct, AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "forceDeployOnAddresses",
-    values: [ContractDeployer.ForceDeploymentStruct[]]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getAccountInfo",
     values: [AddressLike]
   ): string;
@@ -145,22 +101,6 @@ export interface ContractDeployerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createAccount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "extendedAccountVersion",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "forceDeployKeccak256",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "forceDeployOnAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "forceDeployOnAddresses",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -239,11 +179,11 @@ export namespace ContractDeployedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface ContractDeployer extends BaseContract {
-  connect(runner?: ContractRunner | null): ContractDeployer;
+export interface IContractDeployer extends BaseContract {
+  connect(runner?: ContractRunner | null): IContractDeployer;
   waitForDeployment(): Promise<this>;
 
-  interface: ContractDeployerInterface;
+  interface: IContractDeployerInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -307,36 +247,12 @@ export interface ContractDeployer extends BaseContract {
 
   createAccount: TypedContractMethod<
     [
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish
     ],
     [string],
-    "payable"
-  >;
-
-  extendedAccountVersion: TypedContractMethod<
-    [_address: AddressLike],
-    [bigint],
-    "view"
-  >;
-
-  forceDeployKeccak256: TypedContractMethod<
-    [_keccak256BytecodeHash: BytesLike],
-    [void],
-    "payable"
-  >;
-
-  forceDeployOnAddress: TypedContractMethod<
-    [_deployment: ContractDeployer.ForceDeploymentStruct, _sender: AddressLike],
-    [void],
-    "payable"
-  >;
-
-  forceDeployOnAddresses: TypedContractMethod<
-    [_deployments: ContractDeployer.ForceDeploymentStruct[]],
-    [void],
     "payable"
   >;
 
@@ -409,36 +325,12 @@ export interface ContractDeployer extends BaseContract {
     nameOrSignature: "createAccount"
   ): TypedContractMethod<
     [
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish
     ],
     [string],
-    "payable"
-  >;
-  getFunction(
-    nameOrSignature: "extendedAccountVersion"
-  ): TypedContractMethod<[_address: AddressLike], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "forceDeployKeccak256"
-  ): TypedContractMethod<
-    [_keccak256BytecodeHash: BytesLike],
-    [void],
-    "payable"
-  >;
-  getFunction(
-    nameOrSignature: "forceDeployOnAddress"
-  ): TypedContractMethod<
-    [_deployment: ContractDeployer.ForceDeploymentStruct, _sender: AddressLike],
-    [void],
-    "payable"
-  >;
-  getFunction(
-    nameOrSignature: "forceDeployOnAddresses"
-  ): TypedContractMethod<
-    [_deployments: ContractDeployer.ForceDeploymentStruct[]],
-    [void],
     "payable"
   >;
   getFunction(
