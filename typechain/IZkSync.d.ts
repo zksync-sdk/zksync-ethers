@@ -34,7 +34,6 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     "facets()": FunctionFragment;
     "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "freezeDiamond()": FunctionFragment;
-    "getAllowList()": FunctionFragment;
     "getFirstUnprocessedPriorityTx()": FunctionFragment;
     "getGovernor()": FunctionFragment;
     "getL2BootloaderBytecodeHash()": FunctionFragment;
@@ -159,10 +158,6 @@ interface IZkSyncInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "freezeDiamond",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAllowList",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -408,10 +403,6 @@ interface IZkSyncInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "freezeDiamond",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getAllowList",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -802,14 +793,6 @@ export class IZkSync extends Contract {
     freezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
 
     "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
-
-    getAllowList(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "getAllowList()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
 
     getFirstUnprocessedPriorityTx(overrides?: CallOverrides): Promise<{
       0: BigNumber;
@@ -1502,10 +1485,6 @@ export class IZkSync extends Contract {
 
   "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
 
-  getAllowList(overrides?: CallOverrides): Promise<string>;
-
-  "getAllowList()"(overrides?: CallOverrides): Promise<string>;
-
   getFirstUnprocessedPriorityTx(overrides?: CallOverrides): Promise<BigNumber>;
 
   "getFirstUnprocessedPriorityTx()"(
@@ -2086,10 +2065,6 @@ export class IZkSync extends Contract {
     freezeDiamond(overrides?: CallOverrides): Promise<void>;
 
     "freezeDiamond()"(overrides?: CallOverrides): Promise<void>;
-
-    getAllowList(overrides?: CallOverrides): Promise<string>;
-
-    "getAllowList()"(overrides?: CallOverrides): Promise<string>;
 
     getFirstUnprocessedPriorityTx(
       overrides?: CallOverrides
@@ -2746,10 +2721,6 @@ export class IZkSync extends Contract {
 
     "freezeDiamond()"(overrides?: Overrides): Promise<BigNumber>;
 
-    getAllowList(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "getAllowList()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     getFirstUnprocessedPriorityTx(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -3309,10 +3280,6 @@ export class IZkSync extends Contract {
     freezeDiamond(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     "freezeDiamond()"(overrides?: Overrides): Promise<PopulatedTransaction>;
-
-    getAllowList(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "getAllowList()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getFirstUnprocessedPriorityTx(
       overrides?: CallOverrides

@@ -91,7 +91,7 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "WithdrawalFinalized"): EventFragment;
 }
 
-export class IL1Bridge extends Contract {
+export class Il1Bridge extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

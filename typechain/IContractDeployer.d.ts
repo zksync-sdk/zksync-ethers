@@ -21,16 +21,12 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface ContractDeployerInterface extends ethers.utils.Interface {
+interface IContractDeployerInterface extends ethers.utils.Interface {
   functions: {
     "create(bytes32,bytes32,bytes)": FunctionFragment;
     "create2(bytes32,bytes32,bytes)": FunctionFragment;
     "create2Account(bytes32,bytes32,bytes,uint8)": FunctionFragment;
     "createAccount(bytes32,bytes32,bytes,uint8)": FunctionFragment;
-    "extendedAccountVersion(address)": FunctionFragment;
-    "forceDeployKeccak256(bytes32)": FunctionFragment;
-    "forceDeployOnAddress(tuple,address)": FunctionFragment;
-    "forceDeployOnAddresses(tuple[])": FunctionFragment;
     "getAccountInfo(address)": FunctionFragment;
     "getNewAddressCreate(address,uint256)": FunctionFragment;
     "getNewAddressCreate2(address,bytes32,bytes32,bytes)": FunctionFragment;
@@ -53,39 +49,6 @@ interface ContractDeployerInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "createAccount",
     values: [BytesLike, BytesLike, BytesLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "extendedAccountVersion",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "forceDeployKeccak256",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "forceDeployOnAddress",
-    values: [
-      {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      string
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "forceDeployOnAddresses",
-    values: [
-      {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[]
-    ]
   ): string;
   encodeFunctionData(
     functionFragment: "getAccountInfo",
@@ -116,22 +79,6 @@ interface ContractDeployerInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createAccount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "extendedAccountVersion",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "forceDeployKeccak256",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "forceDeployOnAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "forceDeployOnAddresses",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -168,7 +115,7 @@ interface ContractDeployerInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ContractDeployed"): EventFragment;
 }
 
-export class ContractDeployer extends Contract {
+export class IContractDeployer extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -179,7 +126,7 @@ export class ContractDeployer extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: ContractDeployerInterface;
+  interface: IContractDeployerInterface;
 
   functions: {
     create(
@@ -227,7 +174,7 @@ export class ContractDeployer extends Contract {
     ): Promise<ContractTransaction>;
 
     createAccount(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -235,80 +182,10 @@ export class ContractDeployer extends Contract {
     ): Promise<ContractTransaction>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
-      overrides?: PayableOverrides
-    ): Promise<ContractTransaction>;
-
-    extendedAccountVersion(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: number;
-    }>;
-
-    "extendedAccountVersion(address)"(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: number;
-    }>;
-
-    forceDeployKeccak256(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: PayableOverrides
-    ): Promise<ContractTransaction>;
-
-    "forceDeployKeccak256(bytes32)"(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: PayableOverrides
-    ): Promise<ContractTransaction>;
-
-    forceDeployOnAddress(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: PayableOverrides
-    ): Promise<ContractTransaction>;
-
-    "forceDeployOnAddress(tuple,address)"(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: PayableOverrides
-    ): Promise<ContractTransaction>;
-
-    forceDeployOnAddresses(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
-      overrides?: PayableOverrides
-    ): Promise<ContractTransaction>;
-
-    "forceDeployOnAddresses(tuple[])"(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
@@ -454,7 +331,7 @@ export class ContractDeployer extends Contract {
   ): Promise<ContractTransaction>;
 
   createAccount(
-    arg0: BytesLike,
+    _salt: BytesLike,
     _bytecodeHash: BytesLike,
     _input: BytesLike,
     _aaVersion: BigNumberish,
@@ -462,76 +339,10 @@ export class ContractDeployer extends Contract {
   ): Promise<ContractTransaction>;
 
   "createAccount(bytes32,bytes32,bytes,uint8)"(
-    arg0: BytesLike,
+    _salt: BytesLike,
     _bytecodeHash: BytesLike,
     _input: BytesLike,
     _aaVersion: BigNumberish,
-    overrides?: PayableOverrides
-  ): Promise<ContractTransaction>;
-
-  extendedAccountVersion(
-    _address: string,
-    overrides?: CallOverrides
-  ): Promise<number>;
-
-  "extendedAccountVersion(address)"(
-    _address: string,
-    overrides?: CallOverrides
-  ): Promise<number>;
-
-  forceDeployKeccak256(
-    _keccak256BytecodeHash: BytesLike,
-    overrides?: PayableOverrides
-  ): Promise<ContractTransaction>;
-
-  "forceDeployKeccak256(bytes32)"(
-    _keccak256BytecodeHash: BytesLike,
-    overrides?: PayableOverrides
-  ): Promise<ContractTransaction>;
-
-  forceDeployOnAddress(
-    _deployment: {
-      bytecodeHash: BytesLike;
-      newAddress: string;
-      callConstructor: boolean;
-      value: BigNumberish;
-      input: BytesLike;
-    },
-    _sender: string,
-    overrides?: PayableOverrides
-  ): Promise<ContractTransaction>;
-
-  "forceDeployOnAddress(tuple,address)"(
-    _deployment: {
-      bytecodeHash: BytesLike;
-      newAddress: string;
-      callConstructor: boolean;
-      value: BigNumberish;
-      input: BytesLike;
-    },
-    _sender: string,
-    overrides?: PayableOverrides
-  ): Promise<ContractTransaction>;
-
-  forceDeployOnAddresses(
-    _deployments: {
-      bytecodeHash: BytesLike;
-      newAddress: string;
-      callConstructor: boolean;
-      value: BigNumberish;
-      input: BytesLike;
-    }[],
-    overrides?: PayableOverrides
-  ): Promise<ContractTransaction>;
-
-  "forceDeployOnAddresses(tuple[])"(
-    _deployments: {
-      bytecodeHash: BytesLike;
-      newAddress: string;
-      callConstructor: boolean;
-      value: BigNumberish;
-      input: BytesLike;
-    }[],
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
@@ -649,7 +460,7 @@ export class ContractDeployer extends Contract {
     ): Promise<string>;
 
     createAccount(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -657,78 +468,12 @@ export class ContractDeployer extends Contract {
     ): Promise<string>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
-
-    extendedAccountVersion(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<number>;
-
-    "extendedAccountVersion(address)"(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<number>;
-
-    forceDeployKeccak256(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "forceDeployKeccak256(bytes32)"(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    forceDeployOnAddress(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "forceDeployOnAddress(tuple,address)"(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    forceDeployOnAddresses(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "forceDeployOnAddresses(tuple[])"(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     getAccountInfo(
       _address: string,
@@ -863,7 +608,7 @@ export class ContractDeployer extends Contract {
     ): Promise<BigNumber>;
 
     createAccount(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -871,76 +616,10 @@ export class ContractDeployer extends Contract {
     ): Promise<BigNumber>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
-      overrides?: PayableOverrides
-    ): Promise<BigNumber>;
-
-    extendedAccountVersion(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "extendedAccountVersion(address)"(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    forceDeployKeccak256(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: PayableOverrides
-    ): Promise<BigNumber>;
-
-    "forceDeployKeccak256(bytes32)"(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: PayableOverrides
-    ): Promise<BigNumber>;
-
-    forceDeployOnAddress(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: PayableOverrides
-    ): Promise<BigNumber>;
-
-    "forceDeployOnAddress(tuple,address)"(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: PayableOverrides
-    ): Promise<BigNumber>;
-
-    forceDeployOnAddresses(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
-      overrides?: PayableOverrides
-    ): Promise<BigNumber>;
-
-    "forceDeployOnAddresses(tuple[])"(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
@@ -1049,7 +728,7 @@ export class ContractDeployer extends Contract {
     ): Promise<PopulatedTransaction>;
 
     createAccount(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -1057,76 +736,10 @@ export class ContractDeployer extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      arg0: BytesLike,
+      _salt: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
-      overrides?: PayableOverrides
-    ): Promise<PopulatedTransaction>;
-
-    extendedAccountVersion(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "extendedAccountVersion(address)"(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    forceDeployKeccak256(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: PayableOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "forceDeployKeccak256(bytes32)"(
-      _keccak256BytecodeHash: BytesLike,
-      overrides?: PayableOverrides
-    ): Promise<PopulatedTransaction>;
-
-    forceDeployOnAddress(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: PayableOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "forceDeployOnAddress(tuple,address)"(
-      _deployment: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      },
-      _sender: string,
-      overrides?: PayableOverrides
-    ): Promise<PopulatedTransaction>;
-
-    forceDeployOnAddresses(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
-      overrides?: PayableOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "forceDeployOnAddresses(tuple[])"(
-      _deployments: {
-        bytecodeHash: BytesLike;
-        newAddress: string;
-        callConstructor: boolean;
-        value: BigNumberish;
-        input: BytesLike;
-      }[],
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 

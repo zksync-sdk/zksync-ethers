@@ -83,7 +83,7 @@ interface Ierc20Interface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
-export class IERC20 extends Contract {
+export class Ierc20 extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

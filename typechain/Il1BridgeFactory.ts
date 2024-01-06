@@ -5,14 +5,14 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IL1Bridge } from "./IL1Bridge";
+import type { Il1Bridge } from "./Il1Bridge";
 
-export class IL1BridgeFactory {
+export class Il1BridgeFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): IL1Bridge {
-    return new Contract(address, _abi, signerOrProvider) as IL1Bridge;
+  ): Il1Bridge {
+    return new Contract(address, _abi, signerOrProvider) as Il1Bridge;
   }
 }
 

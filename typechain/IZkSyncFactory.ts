@@ -791,19 +791,6 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "getAllowList",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "getFirstUnprocessedPriorityTx",
     outputs: [
       {
