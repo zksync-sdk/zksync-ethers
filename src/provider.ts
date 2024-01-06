@@ -15,7 +15,6 @@ import {
     JsonRpcPayload,
     resolveProperties,
     FetchRequest,
-    AddressLike,
 } from "ethers";
 import { IERC20__factory, IEthToken__factory, IL2Bridge__factory } from "../typechain";
 import {
@@ -23,7 +22,6 @@ import {
     TransactionResponse,
     TransactionRequest,
     TransactionStatus,
-    Token,
     PriorityOpResponse,
     BalancesMap,
     MessageProof,

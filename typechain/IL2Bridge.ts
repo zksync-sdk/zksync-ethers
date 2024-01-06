@@ -8,7 +8,6 @@ import type {
   FunctionFragment,
   Result,
   Interface,
-  EventFragment,
   AddressLike,
   ContractRunner,
   ContractMethod,
@@ -18,7 +17,6 @@ import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
-  TypedLogDescription,
   TypedListener,
   TypedContractMethod,
 } from "./common";
@@ -32,10 +30,6 @@ export interface IL2BridgeInterface extends Interface {
       | "l2TokenAddress"
       | "withdraw"
   ): FunctionFragment;
-
-  getEvent(
-    nameOrSignatureOrTopic: "FinalizeDeposit" | "WithdrawalInitiated"
-  ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "finalizeDeposit",
@@ -69,56 +63,6 @@ export interface IL2BridgeInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-}
-
-export namespace FinalizeDepositEvent {
-  export type InputTuple = [
-    l1Sender: AddressLike,
-    l2Receiver: AddressLike,
-    l2Token: AddressLike,
-    amount: BigNumberish
-  ];
-  export type OutputTuple = [
-    l1Sender: string,
-    l2Receiver: string,
-    l2Token: string,
-    amount: bigint
-  ];
-  export interface OutputObject {
-    l1Sender: string;
-    l2Receiver: string;
-    l2Token: string;
-    amount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace WithdrawalInitiatedEvent {
-  export type InputTuple = [
-    l2Sender: AddressLike,
-    l1Receiver: AddressLike,
-    l2Token: AddressLike,
-    amount: BigNumberish
-  ];
-  export type OutputTuple = [
-    l2Sender: string,
-    l1Receiver: string,
-    l2Token: string,
-    amount: bigint
-  ];
-  export interface OutputObject {
-    l2Sender: string;
-    l1Receiver: string;
-    l2Token: string;
-    amount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export interface IL2Bridge extends BaseContract {
@@ -230,42 +174,5 @@ export interface IL2Bridge extends BaseContract {
     "nonpayable"
   >;
 
-  getEvent(
-    key: "FinalizeDeposit"
-  ): TypedContractEvent<
-    FinalizeDepositEvent.InputTuple,
-    FinalizeDepositEvent.OutputTuple,
-    FinalizeDepositEvent.OutputObject
-  >;
-  getEvent(
-    key: "WithdrawalInitiated"
-  ): TypedContractEvent<
-    WithdrawalInitiatedEvent.InputTuple,
-    WithdrawalInitiatedEvent.OutputTuple,
-    WithdrawalInitiatedEvent.OutputObject
-  >;
-
-  filters: {
-    "FinalizeDeposit(address,address,address,uint256)": TypedContractEvent<
-      FinalizeDepositEvent.InputTuple,
-      FinalizeDepositEvent.OutputTuple,
-      FinalizeDepositEvent.OutputObject
-    >;
-    FinalizeDeposit: TypedContractEvent<
-      FinalizeDepositEvent.InputTuple,
-      FinalizeDepositEvent.OutputTuple,
-      FinalizeDepositEvent.OutputObject
-    >;
-
-    "WithdrawalInitiated(address,address,address,uint256)": TypedContractEvent<
-      WithdrawalInitiatedEvent.InputTuple,
-      WithdrawalInitiatedEvent.OutputTuple,
-      WithdrawalInitiatedEvent.OutputObject
-    >;
-    WithdrawalInitiated: TypedContractEvent<
-      WithdrawalInitiatedEvent.InputTuple,
-      WithdrawalInitiatedEvent.OutputTuple,
-      WithdrawalInitiatedEvent.OutputObject
-    >;
-  };
+  filters: {};
 }

@@ -15,15 +15,15 @@ import { IERC20__factory, IL1Bridge__factory } from "../typechain";
 
 export * from "./paymaster-utils";
 
-export const ZKSYNC_MAIN_ABI = new ethers.Interface(require("../abi/IZkSync.json").abi);
-export const CONTRACT_DEPLOYER = new ethers.Interface(require("../abi/ContractDeployer.json").abi);
-export const L1_MESSENGER = new ethers.Interface(require("../abi/IL1Messenger.json").abi);
-export const IERC20 = new ethers.Interface(require("../abi/IERC20.json").abi);
-export const IERC1271 = new ethers.Interface(require("../abi/IERC1271.json").abi);
-export const L1_BRIDGE_ABI = new ethers.Interface(require("../abi/IL1Bridge.json").abi);
-export const L2_BRIDGE_ABI = new ethers.Interface(require("../abi/IL2Bridge.json").abi);
-export const NONCE_HOLDER_ABI = new ethers.Interface(require("../abi/INonceHolder.json").abi);
-export const PAYMASTER_FLOW_ABI = new ethers.Interface(require("../abi/IPaymasterFlow.json").abi);
+export const ZKSYNC_MAIN_ABI = new ethers.Interface(require("../abi/IZkSync.json"));
+export const CONTRACT_DEPLOYER = new ethers.Interface(require("../abi/IContractDeployer.json"));
+export const L1_MESSENGER = new ethers.Interface(require("../abi/IL1Messenger.json"));
+export const IERC20 = new ethers.Interface(require("../abi/IERC20.json"));
+export const IERC1271 = new ethers.Interface(require("../abi/IERC1271.json"));
+export const L1_BRIDGE_ABI = new ethers.Interface(require("../abi/IL1Bridge.json"));
+export const L2_BRIDGE_ABI = new ethers.Interface(require("../abi/IL2Bridge.json"));
+export const NONCE_HOLDER_ABI = new ethers.Interface(require("../abi/INonceHolder.json"));
+export const PAYMASTER_FLOW_ABI = new ethers.Interface(require("../abi/IPaymasterFlow.json"));
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
