@@ -1,11 +1,9 @@
 import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
-import {
-    IERC20Factory,
-    IL1BridgeFactory,
-    IL2BridgeFactory,
-    IZkSyncFactory,
-    INonceHolderFactory,
-} from "../typechain";
+import { Ierc20Factory as IERC20Factory } from "../typechain/Ierc20Factory";
+import { Il1BridgeFactory as IL1BridgeFactory } from "../typechain/Il1BridgeFactory";
+import { Il2BridgeFactory as IL2BridgeFactory } from "../typechain/Il2BridgeFactory";
+import { IZkSyncFactory } from "../typechain/IZkSyncFactory";
+import { INonceHolderFactory } from "../typechain/INonceHolderFactory";
 import { Provider } from "./provider";
 import {
     Address,

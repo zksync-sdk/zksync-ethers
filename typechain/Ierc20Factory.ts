@@ -5,11 +5,11 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IERC20 } from "./IERC20";
+import type { Ierc20 } from "./Ierc20";
 
-export class IERC20Factory {
-  static connect(address: string, signerOrProvider: Signer | Provider): IERC20 {
-    return new Contract(address, _abi, signerOrProvider) as IERC20;
+export class Ierc20Factory {
+  static connect(address: string, signerOrProvider: Signer | Provider): Ierc20 {
+    return new Contract(address, _abi, signerOrProvider) as Ierc20;
   }
 }
 

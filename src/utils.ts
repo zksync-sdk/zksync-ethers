@@ -1,31 +1,32 @@
-import { utils, ethers, BigNumber, BigNumberish, BytesLike } from "ethers";
+import { BigNumber, BigNumberish, BytesLike, ethers, utils } from "ethers";
 import { SignatureLike } from "@ethersproject/bytes";
 import {
     Address,
-    Eip712Meta,
-    PriorityQueueType,
-    PriorityOpTree,
     DeploymentInfo,
-    PaymasterParams,
+    Eip712Meta,
     EthereumSignature,
+    PaymasterParams,
+    PriorityOpTree,
+    PriorityQueueType,
 } from "./types";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Provider } from "./provider";
 import { EIP712Signer } from "./signer";
-import { IERC20Factory, IL1BridgeFactory } from "../typechain";
+import { Ierc20Factory as IERC20Factory } from "../typechain/Ierc20Factory";
+import { Il1BridgeFactory as IL1BridgeFactory } from "../typechain/Il1BridgeFactory";
 import { AbiCoder } from "ethers/lib/utils";
 
 export * from "./paymaster-utils";
 
-export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IZkSync.json").abi);
-export const CONTRACT_DEPLOYER = new utils.Interface(require("../abi/ContractDeployer.json").abi);
-export const L1_MESSENGER = new utils.Interface(require("../abi/IL1Messenger.json").abi);
-export const IERC20 = new utils.Interface(require("../abi/IERC20.json").abi);
-export const IERC1271 = new utils.Interface(require("../abi/IERC1271.json").abi);
-export const L1_BRIDGE_ABI = new utils.Interface(require("../abi/IL1Bridge.json").abi);
-export const L2_BRIDGE_ABI = new utils.Interface(require("../abi/IL2Bridge.json").abi);
-export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder.json").abi);
-export const PAYMASTER_FLOW_ABI = new utils.Interface(require("../abi/IPaymasterFlow.json").abi);
+export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IZkSync.json"));
+export const CONTRACT_DEPLOYER = new utils.Interface(require("../abi/IContractDeployer.json"));
+export const L1_MESSENGER = new utils.Interface(require("../abi/IL1Messenger.json"));
+export const IERC20 = new utils.Interface(require("../abi/IERC20.json"));
+export const IERC1271 = new utils.Interface(require("../abi/IERC1271.json"));
+export const L1_BRIDGE_ABI = new utils.Interface(require("../abi/IL1Bridge.json"));
+export const L2_BRIDGE_ABI = new utils.Interface(require("../abi/IL2Bridge.json"));
+export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder.json"));
+export const PAYMASTER_FLOW_ABI = new utils.Interface(require("../abi/IPaymasterFlow.json"));
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
@@ -94,25 +95,25 @@ export function getHashedL2ToL1Msg(sender: Address, msg: BytesLike, txNumberInBl
 
 export function getDeployedContracts(receipt: ethers.providers.TransactionReceipt): DeploymentInfo[] {
     const addressBytesLen = 40;
-    const deployedContracts = receipt.logs
-        .filter(
-            (log) =>
-                log.topics[0] == utils.id("ContractDeployed(address,bytes32,address)") &&
-                log.address == CONTRACT_DEPLOYER_ADDRESS,
-        )
-        // Take the last topic (deployed contract address as U256) and extract address from it (U160).
-        .map((log) => {
-            const sender = `0x${log.topics[1].slice(log.topics[1].length - addressBytesLen)}`;
-            const bytesCodehash = log.topics[2];
-            const address = `0x${log.topics[3].slice(log.topics[3].length - addressBytesLen)}`;
-            return {
-                sender: utils.getAddress(sender),
-                bytecodeHash: bytesCodehash,
-                deployedAddress: utils.getAddress(address),
-            };
-        });
-
-    return deployedContracts;
+    return (
+        receipt.logs
+            .filter(
+                (log) =>
+                    log.topics[0] == utils.id("ContractDeployed(address,bytes32,address)") &&
+                    log.address == CONTRACT_DEPLOYER_ADDRESS,
+            )
+            // Take the last topic (deployed contract address as U256) and extract address from it (U160).
+            .map((log) => {
+                const sender = `0x${log.topics[1].slice(log.topics[1].length - addressBytesLen)}`;
+                const bytecodeHash = log.topics[2];
+                const address = `0x${log.topics[3].slice(log.topics[3].length - addressBytesLen)}`;
+                return {
+                    sender: utils.getAddress(sender),
+                    bytecodeHash: bytecodeHash,
+                    deployedAddress: utils.getAddress(address),
+                };
+            })
+    );
 }
 
 export function create2Address(
@@ -181,7 +182,7 @@ export function serialize(transaction: ethers.providers.TransactionRequest, sign
     }
 
     if (!transaction.from) {
-        throw new Error("Explicitly providing `from` field is reqiured for EIP712 transactions");
+        throw new Error("Explicitly providing `from` field is required for EIP712 transactions");
     }
     const from = transaction.from;
 
@@ -505,7 +506,7 @@ async function isSignatureCorrect(
     }
 }
 
-// Returns `true` or `false` depending on whether or not the account abstraction's
+// Returns `true` or `false` depending on whether the account abstraction's
 // signature is correct. Note, that while currently it does not do any `async` actions.
 // in the future it will. That's why the `Promise<boolean>` is returned.
 export async function isMessageSignatureCorrect(
@@ -518,7 +519,7 @@ export async function isMessageSignatureCorrect(
     return await isSignatureCorrect(provider, address, msgHash, signature);
 }
 
-// Returns `true` or `false` depending on whether or not the account abstraction's
+// Returns `true` or `false` depending on whether the account abstraction's
 // EIP712 signature is correct. Note, that while currently it does not do any `async` actions.
 // in the future it will. That's why the `Promise<boolean>` is returned.
 export async function isTypedDataSignatureCorrect(

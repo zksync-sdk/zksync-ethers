@@ -60,7 +60,7 @@ interface Il1MessengerInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "L2ToL1LogSent"): EventFragment;
 }
 
-export class IL1Messenger extends Contract {
+export class Il1Messenger extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

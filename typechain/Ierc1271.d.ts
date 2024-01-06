@@ -37,7 +37,7 @@ interface Ierc1271Interface extends ethers.utils.Interface {
   events: {};
 }
 
-export class IERC1271 extends Contract {
+export class Ierc1271 extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

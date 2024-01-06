@@ -5,80 +5,18 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IL2Bridge } from "./IL2Bridge";
+import type { Il2Bridge } from "./Il2Bridge";
 
-export class IL2BridgeFactory {
+export class Il2BridgeFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): IL2Bridge {
-    return new Contract(address, _abi, signerOrProvider) as IL2Bridge;
+  ): Il2Bridge {
+    return new Contract(address, _abi, signerOrProvider) as Il2Bridge;
   }
 }
 
 const _abi = [
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "l1Sender",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "l2Receiver",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "l2Token",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "FinalizeDeposit",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "l2Sender",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "l1Receiver",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "l2Token",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "WithdrawalInitiated",
-    type: "event",
-  },
   {
     inputs: [
       {
