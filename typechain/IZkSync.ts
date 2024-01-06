@@ -285,7 +285,6 @@ export interface IZkSyncInterface extends Interface {
       | "facets"
       | "finalizeEthWithdrawal"
       | "freezeDiamond"
-      | "getAllowList"
       | "getFirstUnprocessedPriorityTx"
       | "getGovernor"
       | "getL2BootloaderBytecodeHash"
@@ -385,10 +384,6 @@ export interface IZkSyncInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "freezeDiamond",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAllowList",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -599,10 +594,6 @@ export interface IZkSyncInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "freezeDiamond",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getAllowList",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -1113,8 +1104,6 @@ export interface IZkSync extends BaseContract {
 
   freezeDiamond: TypedContractMethod<[], [void], "nonpayable">;
 
-  getAllowList: TypedContractMethod<[], [string], "view">;
-
   getFirstUnprocessedPriorityTx: TypedContractMethod<[], [bigint], "view">;
 
   getGovernor: TypedContractMethod<[], [string], "view">;
@@ -1366,9 +1355,6 @@ export interface IZkSync extends BaseContract {
   getFunction(
     nameOrSignature: "freezeDiamond"
   ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "getAllowList"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getFirstUnprocessedPriorityTx"
   ): TypedContractMethod<[], [bigint], "view">;

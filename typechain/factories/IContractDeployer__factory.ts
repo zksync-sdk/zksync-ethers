@@ -4,9 +4,9 @@
 
 import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
-  ContractDeployer,
-  ContractDeployerInterface,
-} from "../ContractDeployer";
+  IContractDeployer,
+  IContractDeployerInterface,
+} from "../IContractDeployer";
 
 const _abi = [
   {
@@ -94,7 +94,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "newAddress",
         type: "address",
       },
     ],
@@ -123,7 +123,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "newAddress",
         type: "address",
       },
     ],
@@ -157,7 +157,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "newAddress",
         type: "address",
       },
     ],
@@ -168,7 +168,7 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "",
+        name: "_salt",
         type: "bytes32",
       },
       {
@@ -191,127 +191,10 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "newAddress",
         type: "address",
       },
     ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_address",
-        type: "address",
-      },
-    ],
-    name: "extendedAccountVersion",
-    outputs: [
-      {
-        internalType: "enum IContractDeployer.AccountAbstractionVersion",
-        name: "",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "_keccak256BytecodeHash",
-        type: "bytes32",
-      },
-    ],
-    name: "forceDeployKeccak256",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "bytecodeHash",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "newAddress",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "callConstructor",
-            type: "bool",
-          },
-          {
-            internalType: "uint256",
-            name: "value",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes",
-            name: "input",
-            type: "bytes",
-          },
-        ],
-        internalType: "struct ContractDeployer.ForceDeployment",
-        name: "_deployment",
-        type: "tuple",
-      },
-      {
-        internalType: "address",
-        name: "_sender",
-        type: "address",
-      },
-    ],
-    name: "forceDeployOnAddress",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "bytecodeHash",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "newAddress",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "callConstructor",
-            type: "bool",
-          },
-          {
-            internalType: "uint256",
-            name: "value",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes",
-            name: "input",
-            type: "bytes",
-          },
-        ],
-        internalType: "struct ContractDeployer.ForceDeployment[]",
-        name: "_deployments",
-        type: "tuple[]",
-      },
-    ],
-    name: "forceDeployOnAddresses",
-    outputs: [],
     stateMutability: "payable",
     type: "function",
   },
@@ -432,15 +315,15 @@ const _abi = [
   },
 ] as const;
 
-export class ContractDeployer__factory {
+export class IContractDeployer__factory {
   static readonly abi = _abi;
-  static createInterface(): ContractDeployerInterface {
-    return new Interface(_abi) as ContractDeployerInterface;
+  static createInterface(): IContractDeployerInterface {
+    return new Interface(_abi) as IContractDeployerInterface;
   }
   static connect(
     address: string,
     runner?: ContractRunner | null
-  ): ContractDeployer {
-    return new Contract(address, _abi, runner) as unknown as ContractDeployer;
+  ): IContractDeployer {
+    return new Contract(address, _abi, runner) as unknown as IContractDeployer;
   }
 }
