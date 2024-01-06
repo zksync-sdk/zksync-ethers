@@ -35,7 +35,7 @@ solc --base-path system-contracts \
 mkdir abi /abi
 mv l1-abi/* system-contracts-abi/* abi
 
-contracts="IZkSync.abi IL1Bridge.abi IL2Bridge.abi IL2ERC20Bridge.abi IContractDeployer.abi IEthToken.abi IL1Messenger.abi INonceHolder.abi IPaymasterFlow.abi"
+contracts="IZkSync.abi IL1Bridge.abi IL2Bridge.abi IContractDeployer.abi IEthToken.abi IL1Messenger.abi INonceHolder.abi IPaymasterFlow.abi"
 
 for filename in $contracts; do
     jq '.' "abi/$filename" > "/abi/${filename%.abi}.json"
