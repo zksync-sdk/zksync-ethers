@@ -36,9 +36,9 @@ describe("Wallet", () => {
         });
     });
 
-    describe("#getMainContract()", () => {
+    describe("#getBridgehubContract()", () => {
         it("should return the main contract", async () => {
-            const result = await wallet.getMainContract();
+            const result = await wallet.getBridgehubContract();
             expect(result).not.to.be.null;
         });
     });
@@ -521,7 +521,7 @@ describe("Wallet", () => {
     describe("#getRequestExecuteTx()", () => {
         it("should return request execute transaction", async () => {
             const result = await wallet.getRequestExecuteTx({
-                contractAddress: await provider.getMainContractAddress(),
+                contractAddress: await provider.getBridgehubContractAddress(),
                 calldata: "0x",
                 l2Value: 7_000_000_000,
             });
@@ -532,7 +532,7 @@ describe("Wallet", () => {
     describe("#estimateGasRequestExecute()", () => {
         it("should return gas estimation for request execute transaction", async () => {
             const result = await wallet.estimateGasRequestExecute({
-                contractAddress: await provider.getMainContractAddress(),
+                contractAddress: await provider.getBridgehubContractAddress(),
                 calldata: "0x",
                 l2Value: 7_000_000_000,
             });
@@ -546,7 +546,7 @@ describe("Wallet", () => {
             const l2BalanceBeforeExecution = await wallet.getBalance();
             const l1BalanceBeforeExecution = await wallet.getBalanceL1();
             const tx = await wallet.requestExecute({
-                contractAddress: await provider.getMainContractAddress(),
+                contractAddress: await provider.getBridgehubContractAddress(),
                 calldata: "0x",
                 l2Value: amount,
                 l2GasLimit: 900_000,

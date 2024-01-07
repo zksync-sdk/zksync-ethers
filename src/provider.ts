@@ -27,6 +27,7 @@ import {
     RawBlockTransaction,
 } from "./types";
 import {
+    BOOTLOADER_FORMAL_ADDRESS,
     CONTRACT_DEPLOYER,
     CONTRACT_DEPLOYER_ADDRESS,
     EIP712_TX_TYPE,
@@ -552,9 +553,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return [parseInt(range[0], 16), parseInt(range[1], 16)];
     }
 
-    async getMainContractAddress(): Promise<Address> {
+    async getBridgehubContractAddress(): Promise<Address> {
         if (!this.contractAddresses.mainContract) {
-            this.contractAddresses.mainContract = await this.send("zks_getMainContract", []);
+            this.contractAddresses.mainContract = await this.send("zks_getBridgehubContract", []);
         }
         return this.contractAddresses.mainContract;
     }
@@ -824,7 +825,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         l1TxResponse: ethers.providers.TransactionResponse,
     ): Promise<TransactionResponse> {
         const receipt = await l1TxResponse.wait();
-        const l2Hash = getL2HashFromPriorityOp(receipt, await this.getMainContractAddress());
+        const l2Hash = getL2HashFromPriorityOp(receipt, await this.getBridgehubContractAddress());
 
         let status = null;
         do {
@@ -851,6 +852,33 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         };
 
         return l2Response;
+    }
+
+    async _getPriorityOpConfirmationL2ToL1Log(txHash: string, index: number = 0) {
+        const hash = ethers.utils.hexlify(txHash);
+        const receipt = await this.getTransactionReceipt(hash);
+        const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
+            ([_, log]) => log.sender == BOOTLOADER_FORMAL_ADDRESS,
+        );
+        const [l2ToL1LogIndex, l2ToL1Log] = messages[index];
+
+        return {
+            l2ToL1LogIndex,
+            l2ToL1Log,
+            l1BatchTxId: receipt.l1BatchTxIndex,
+        };
+    }
+
+
+    async getPriorityOpConfirmation(txHash: string, index: number = 0){
+        const { l2ToL1LogIndex, l2ToL1Log, l1BatchTxId } = await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
+        const proof = await this.getLogProof(txHash, l2ToL1LogIndex);
+        return {
+            l1BatchNumber: l2ToL1Log.l1BatchNumber,
+            l2MessageIndex: proof.id,
+            l2TxNumberInBlock: l1BatchTxId,
+            proof: proof.proof,
+        };
     }
 
     async getContractAccountInfo(address: Address): Promise<ContractAccountInfo> {
