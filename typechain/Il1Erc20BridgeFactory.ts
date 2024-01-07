@@ -5,14 +5,14 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { Il1Bridge } from "./Il1Bridge";
+import type { Il1Erc20Bridge } from "./Il1Erc20Bridge";
 
-export class Il1BridgeFactory {
+export class Il1Erc20BridgeFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): Il1Bridge {
-    return new Contract(address, _abi, signerOrProvider) as Il1Bridge;
+  ): Il1Erc20Bridge {
+    return new Contract(address, _abi, signerOrProvider) as Il1Erc20Bridge;
   }
 }
 
@@ -174,6 +174,45 @@ const _abi = [
         name: "_l2TxGasPerPubdataByte",
         type: "uint256",
       },
+    ],
+    name: "deposit",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "txHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasLimit",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasPerPubdataByte",
+        type: "uint256",
+      },
       {
         internalType: "address",
         name: "_refundRecipient",
@@ -189,6 +228,35 @@ const _abi = [
       },
     ],
     stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_account",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "_depositL2TxHash",
+        type: "bytes32",
+      },
+    ],
+    name: "depositAmount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -278,6 +346,50 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "l2TokenBeacon",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "sharedBridge",
+    outputs: [
+      {
+        internalType: "contract IL1SharedBridge",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "transferTokenToSharedBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ];

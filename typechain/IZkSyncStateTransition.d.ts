@@ -21,12 +21,17 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface IZkSyncInterface extends ethers.utils.Interface {
+interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   functions: {
     "acceptAdmin()": FunctionFragment;
-    "acceptGovernor()": FunctionFragment;
+    "baseTokenGasPriceMultiplierDenominator()": FunctionFragment;
+    "baseTokenGasPriceMultiplierNominator()": FunctionFragment;
+    "bridgehubRequestL2Transaction(tuple)": FunctionFragment;
+    "changeFeeParams(tuple)": FunctionFragment;
     "commitBatches(tuple,tuple[])": FunctionFragment;
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])": FunctionFragment;
     "executeBatches(tuple[])": FunctionFragment;
+    "executeBatchesSharedBridge(uint256,tuple[])": FunctionFragment;
     "executeUpgrade(tuple)": FunctionFragment;
     "facetAddress(bytes4)": FunctionFragment;
     "facetAddresses()": FunctionFragment;
@@ -34,17 +39,22 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     "facets()": FunctionFragment;
     "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "freezeDiamond()": FunctionFragment;
+    "getAdmin()": FunctionFragment;
+    "getBaseToken()": FunctionFragment;
+    "getBaseTokenBridge()": FunctionFragment;
+    "getBridgehub()": FunctionFragment;
     "getFirstUnprocessedPriorityTx()": FunctionFragment;
-    "getGovernor()": FunctionFragment;
     "getL2BootloaderBytecodeHash()": FunctionFragment;
     "getL2DefaultAccountBytecodeHash()": FunctionFragment;
     "getL2SystemContractsUpgradeBatchNumber()": FunctionFragment;
     "getL2SystemContractsUpgradeTxHash()": FunctionFragment;
     "getName()": FunctionFragment;
-    "getPendingGovernor()": FunctionFragment;
+    "getPendingAdmin()": FunctionFragment;
     "getPriorityQueueSize()": FunctionFragment;
     "getPriorityTxMaxGasLimit()": FunctionFragment;
     "getProtocolVersion()": FunctionFragment;
+    "getPubdataPricingMode()": FunctionFragment;
+    "getStateTransitionManager()": FunctionFragment;
     "getTotalBatchesCommitted()": FunctionFragment;
     "getTotalBatchesExecuted()": FunctionFragment;
     "getTotalBatchesVerified()": FunctionFragment;
@@ -60,18 +70,24 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     "l2TransactionBaseCost(uint256,uint256,uint256)": FunctionFragment;
     "priorityQueueFrontOperation()": FunctionFragment;
     "proveBatches(tuple,tuple[],tuple)": FunctionFragment;
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)": FunctionFragment;
     "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)": FunctionFragment;
     "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])": FunctionFragment;
     "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])": FunctionFragment;
     "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)": FunctionFragment;
     "revertBatches(uint256)": FunctionFragment;
+    "revertBatchesSharedBridge(uint256,uint256)": FunctionFragment;
     "setPendingAdmin(address)": FunctionFragment;
-    "setPendingGovernor(address)": FunctionFragment;
     "setPorterAvailability(bool)": FunctionFragment;
     "setPriorityTxMaxGasLimit(uint256)": FunctionFragment;
+    "setTokenMultiplier(uint128,uint128)": FunctionFragment;
+    "setTransactionFilterer(address)": FunctionFragment;
     "setValidator(address,bool)": FunctionFragment;
+    "setValidiumMode(uint8)": FunctionFragment;
     "storedBatchHash(uint256)": FunctionFragment;
+    "transferEthToSharedBridge()": FunctionFragment;
     "unfreezeDiamond()": FunctionFragment;
+    "upgradeChainFromVersion(uint256,tuple)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -79,8 +95,41 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "acceptGovernor",
+    functionFragment: "baseTokenGasPriceMultiplierDenominator",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "baseTokenGasPriceMultiplierNominator",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgehubRequestL2Transaction",
+    values: [
+      {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      }
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeFeeParams",
+    values: [
+      {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      }
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "commitBatches",
@@ -105,13 +154,57 @@ interface IZkSyncInterface extends ethers.utils.Interface {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "commitBatchesSharedBridge",
+    values: [
+      BigNumberish,
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
       }[]
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "executeBatches",
     values: [
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "executeBatchesSharedBridge",
+    values: [
+      BigNumberish,
       {
         batchNumber: BigNumberish;
         batchHash: BytesLike;
@@ -160,12 +253,21 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     functionFragment: "freezeDiamond",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "getAdmin", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getFirstUnprocessedPriorityTx",
+    functionFragment: "getBaseToken",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getGovernor",
+    functionFragment: "getBaseTokenBridge",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBridgehub",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getFirstUnprocessedPriorityTx",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -186,7 +288,7 @@ interface IZkSyncInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "getName", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getPendingGovernor",
+    functionFragment: "getPendingAdmin",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -199,6 +301,14 @@ interface IZkSyncInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getProtocolVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPubdataPricingMode",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getStateTransitionManager",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -284,6 +394,36 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "proveBatchesSharedBridge",
+    values: [
+      BigNumberish,
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      }
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "proveL1ToL2TransactionStatus",
     values: [
       BytesLike,
@@ -336,11 +476,11 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setPendingAdmin",
-    values: [string]
+    functionFragment: "revertBatchesSharedBridge",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setPendingGovernor",
+    functionFragment: "setPendingAdmin",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -352,16 +492,48 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setTokenMultiplier",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setTransactionFilterer",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setValidator",
     values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setValidiumMode",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "storedBatchHash",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "transferEthToSharedBridge",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "unfreezeDiamond",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "upgradeChainFromVersion",
+    values: [
+      BigNumberish,
+      {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      }
+    ]
   ): string;
 
   decodeFunctionResult(
@@ -369,7 +541,19 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "acceptGovernor",
+    functionFragment: "baseTokenGasPriceMultiplierDenominator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "baseTokenGasPriceMultiplierNominator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "bridgehubRequestL2Transaction",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeFeeParams",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -377,7 +561,15 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "commitBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "executeBatches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "executeBatchesSharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -405,12 +597,21 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     functionFragment: "freezeDiamond",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getAdmin", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getFirstUnprocessedPriorityTx",
+    functionFragment: "getBaseToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getGovernor",
+    functionFragment: "getBaseTokenBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getBridgehub",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getFirstUnprocessedPriorityTx",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -431,7 +632,7 @@ interface IZkSyncInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "getName", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getPendingGovernor",
+    functionFragment: "getPendingAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -444,6 +645,14 @@ interface IZkSyncInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getProtocolVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getPubdataPricingMode",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getStateTransitionManager",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -507,6 +716,10 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "proveBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "proveL1ToL2TransactionStatus",
     data: BytesLike
   ): Result;
@@ -527,11 +740,11 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setPendingAdmin",
+    functionFragment: "revertBatchesSharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setPendingGovernor",
+    functionFragment: "setPendingAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -543,7 +756,19 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setTokenMultiplier",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setTransactionFilterer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setValidator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setValidiumMode",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -551,7 +776,15 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "transferEthToSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "unfreezeDiamond",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "upgradeChainFromVersion",
     data: BytesLike
   ): Result;
 
@@ -565,13 +798,16 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     "Freeze()": EventFragment;
     "IsPorterAvailableStatusUpdate(bool)": EventFragment;
     "NewAdmin(address,address)": EventFragment;
-    "NewGovernor(address,address)": EventFragment;
+    "NewBaseTokenMultiplier(uint128,uint128,uint128,uint128)": EventFragment;
+    "NewFeeParams(tuple,tuple)": EventFragment;
     "NewPendingAdmin(address,address)": EventFragment;
-    "NewPendingGovernor(address,address)": EventFragment;
     "NewPriorityRequest(uint256,bytes32,uint64,tuple,bytes[])": EventFragment;
     "NewPriorityTxMaxGasLimit(uint256,uint256)": EventFragment;
+    "NewTransactionFilterer(address,address)": EventFragment;
+    "ProposeTransparentUpgrade(tuple,uint256,bytes32)": EventFragment;
     "Unfreeze()": EventFragment;
     "ValidatorStatusUpdate(address,bool)": EventFragment;
+    "ValidiumModeStatusUpdate(uint8)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "BlockCommit"): EventFragment;
@@ -585,16 +821,19 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     nameOrSignatureOrTopic: "IsPorterAvailableStatusUpdate"
   ): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewAdmin"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewGovernor"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewBaseTokenMultiplier"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewFeeParams"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewPendingAdmin"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewPendingGovernor"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewPriorityRequest"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewPriorityTxMaxGasLimit"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewTransactionFilterer"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ProposeTransparentUpgrade"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unfreeze"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ValidatorStatusUpdate"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ValidiumModeStatusUpdate"): EventFragment;
 }
 
-export class IZkSync extends Contract {
+export class IZkSyncStateTransition extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -605,16 +844,86 @@ export class IZkSync extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: IZkSyncInterface;
+  interface: IZkSyncStateTransitionInterface;
 
   functions: {
     acceptAdmin(overrides?: Overrides): Promise<ContractTransaction>;
 
     "acceptAdmin()"(overrides?: Overrides): Promise<ContractTransaction>;
 
-    acceptGovernor(overrides?: Overrides): Promise<ContractTransaction>;
+    baseTokenGasPriceMultiplierDenominator(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
 
-    "acceptGovernor()"(overrides?: Overrides): Promise<ContractTransaction>;
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber;
+    }>;
+
+    baseTokenGasPriceMultiplierNominator(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber;
+    }>;
+
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
 
     commitBatches(
       _lastCommittedBatchData: {
@@ -637,7 +946,7 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -663,7 +972,61 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -683,6 +1046,36 @@ export class IZkSync extends Contract {
     ): Promise<ContractTransaction>;
 
     "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
       _batchesData: {
         batchNumber: BigNumberish;
         batchHash: BytesLike;
@@ -794,20 +1187,44 @@ export class IZkSync extends Contract {
 
     "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
 
+    getAdmin(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getBaseToken()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getBaseTokenBridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
     getFirstUnprocessedPriorityTx(overrides?: CallOverrides): Promise<{
       0: BigNumber;
     }>;
 
     "getFirstUnprocessedPriorityTx()"(overrides?: CallOverrides): Promise<{
       0: BigNumber;
-    }>;
-
-    getGovernor(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<{
-      0: string;
     }>;
 
     getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<{
@@ -852,11 +1269,11 @@ export class IZkSync extends Contract {
       0: string;
     }>;
 
-    getPendingGovernor(overrides?: CallOverrides): Promise<{
+    getPendingAdmin(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
-    "getPendingGovernor()"(overrides?: CallOverrides): Promise<{
+    "getPendingAdmin()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
@@ -882,6 +1299,22 @@ export class IZkSync extends Contract {
 
     "getProtocolVersion()"(overrides?: CallOverrides): Promise<{
       0: BigNumber;
+    }>;
+
+    getPubdataPricingMode(overrides?: CallOverrides): Promise<{
+      0: number;
+    }>;
+
+    "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<{
+      0: number;
+    }>;
+
+    getStateTransitionManager(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getStateTransitionManager()"(overrides?: CallOverrides): Promise<{
+      0: string;
     }>;
 
     getTotalBatchesCommitted(overrides?: CallOverrides): Promise<{
@@ -1018,7 +1451,7 @@ export class IZkSync extends Contract {
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      hash: string;
+      merkleRoot: string;
       0: string;
     }>;
 
@@ -1026,7 +1459,7 @@ export class IZkSync extends Contract {
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      hash: string;
+      merkleRoot: string;
       0: string;
     }>;
 
@@ -1126,6 +1559,64 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    proveBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     proveL1ToL2TransactionStatus(
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
@@ -1151,7 +1642,7 @@ export class IZkSync extends Contract {
     }>;
 
     proveL2LogInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -1168,7 +1659,7 @@ export class IZkSync extends Contract {
     }>;
 
     "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -1185,7 +1676,7 @@ export class IZkSync extends Contract {
     }>;
 
     proveL2MessageInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -1199,7 +1690,7 @@ export class IZkSync extends Contract {
     }>;
 
     "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -1244,6 +1735,18 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    revertBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "revertBatchesSharedBridge(uint256,uint256)"(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     setPendingAdmin(
       _newPendingAdmin: string,
       overrides?: Overrides
@@ -1251,16 +1754,6 @@ export class IZkSync extends Contract {
 
     "setPendingAdmin(address)"(
       _newPendingAdmin: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    setPendingGovernor(
-      _newPendingGovernor: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -1284,6 +1777,28 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -1293,6 +1808,16 @@ export class IZkSync extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -1310,18 +1835,122 @@ export class IZkSync extends Contract {
       0: string;
     }>;
 
+    transferEthToSharedBridge(
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "transferEthToSharedBridge()"(
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     unfreezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
 
     "unfreezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+    upgradeChainFromVersion(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "upgradeChainFromVersion(uint256,tuple)"(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
   };
 
   acceptAdmin(overrides?: Overrides): Promise<ContractTransaction>;
 
   "acceptAdmin()"(overrides?: Overrides): Promise<ContractTransaction>;
 
-  acceptGovernor(overrides?: Overrides): Promise<ContractTransaction>;
+  baseTokenGasPriceMultiplierDenominator(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
-  "acceptGovernor()"(overrides?: Overrides): Promise<ContractTransaction>;
+  "baseTokenGasPriceMultiplierDenominator()"(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  baseTokenGasPriceMultiplierNominator(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  "baseTokenGasPriceMultiplierNominator()"(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  bridgehubRequestL2Transaction(
+    _request: {
+      sender: string;
+      contractL2: string;
+      mintValue: BigNumberish;
+      l2Value: BigNumberish;
+      l2Calldata: BytesLike;
+      l2GasLimit: BigNumberish;
+      l2GasPerPubdataByteLimit: BigNumberish;
+      factoryDeps: BytesLike[];
+      refundRecipient: string;
+    },
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  "bridgehubRequestL2Transaction(tuple)"(
+    _request: {
+      sender: string;
+      contractL2: string;
+      mintValue: BigNumberish;
+      l2Value: BigNumberish;
+      l2Calldata: BytesLike;
+      l2GasLimit: BigNumberish;
+      l2GasPerPubdataByteLimit: BigNumberish;
+      factoryDeps: BytesLike[];
+      refundRecipient: string;
+    },
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  changeFeeParams(
+    _newFeeParams: {
+      pubdataPricingMode: BigNumberish;
+      batchOverheadL1Gas: BigNumberish;
+      maxPubdataPerBatch: BigNumberish;
+      maxL2GasPerBatch: BigNumberish;
+      priorityTxMaxPubdata: BigNumberish;
+      minimalL2GasPrice: BigNumberish;
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "changeFeeParams(tuple)"(
+    _newFeeParams: {
+      pubdataPricingMode: BigNumberish;
+      batchOverheadL1Gas: BigNumberish;
+      maxPubdataPerBatch: BigNumberish;
+      maxL2GasPerBatch: BigNumberish;
+      priorityTxMaxPubdata: BigNumberish;
+      minimalL2GasPrice: BigNumberish;
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   commitBatches(
     _lastCommittedBatchData: {
@@ -1344,7 +1973,7 @@ export class IZkSync extends Contract {
       bootloaderHeapInitialContentsHash: BytesLike;
       eventsQueueStateHash: BytesLike;
       systemLogs: BytesLike;
-      totalL2ToL1Pubdata: BytesLike;
+      pubdataCommitments: BytesLike;
     }[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -1370,7 +1999,61 @@ export class IZkSync extends Contract {
       bootloaderHeapInitialContentsHash: BytesLike;
       eventsQueueStateHash: BytesLike;
       systemLogs: BytesLike;
-      totalL2ToL1Pubdata: BytesLike;
+      pubdataCommitments: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  commitBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _lastCommittedBatchData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _newBatchesData: {
+      batchNumber: BigNumberish;
+      timestamp: BigNumberish;
+      indexRepeatedStorageChanges: BigNumberish;
+      newStateRoot: BytesLike;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      bootloaderHeapInitialContentsHash: BytesLike;
+      eventsQueueStateHash: BytesLike;
+      systemLogs: BytesLike;
+      pubdataCommitments: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+    _chainId: BigNumberish,
+    _lastCommittedBatchData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _newBatchesData: {
+      batchNumber: BigNumberish;
+      timestamp: BigNumberish;
+      indexRepeatedStorageChanges: BigNumberish;
+      newStateRoot: BytesLike;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      bootloaderHeapInitialContentsHash: BytesLike;
+      eventsQueueStateHash: BytesLike;
+      systemLogs: BytesLike;
+      pubdataCommitments: BytesLike;
     }[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -1390,6 +2073,36 @@ export class IZkSync extends Contract {
   ): Promise<ContractTransaction>;
 
   "executeBatches(tuple[])"(
+    _batchesData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  executeBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _batchesData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "executeBatchesSharedBridge(uint256,tuple[])"(
+    _chainId: BigNumberish,
     _batchesData: {
       batchNumber: BigNumberish;
       batchHash: BytesLike;
@@ -1485,15 +2198,27 @@ export class IZkSync extends Contract {
 
   "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
 
+  getAdmin(overrides?: CallOverrides): Promise<string>;
+
+  "getAdmin()"(overrides?: CallOverrides): Promise<string>;
+
+  getBaseToken(overrides?: CallOverrides): Promise<string>;
+
+  "getBaseToken()"(overrides?: CallOverrides): Promise<string>;
+
+  getBaseTokenBridge(overrides?: CallOverrides): Promise<string>;
+
+  "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<string>;
+
+  getBridgehub(overrides?: CallOverrides): Promise<string>;
+
+  "getBridgehub()"(overrides?: CallOverrides): Promise<string>;
+
   getFirstUnprocessedPriorityTx(overrides?: CallOverrides): Promise<BigNumber>;
 
   "getFirstUnprocessedPriorityTx()"(
     overrides?: CallOverrides
   ): Promise<BigNumber>;
-
-  getGovernor(overrides?: CallOverrides): Promise<string>;
-
-  "getGovernor()"(overrides?: CallOverrides): Promise<string>;
 
   getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<string>;
 
@@ -1523,9 +2248,9 @@ export class IZkSync extends Contract {
 
   "getName()"(overrides?: CallOverrides): Promise<string>;
 
-  getPendingGovernor(overrides?: CallOverrides): Promise<string>;
+  getPendingAdmin(overrides?: CallOverrides): Promise<string>;
 
-  "getPendingGovernor()"(overrides?: CallOverrides): Promise<string>;
+  "getPendingAdmin()"(overrides?: CallOverrides): Promise<string>;
 
   getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1538,6 +2263,14 @@ export class IZkSync extends Contract {
   getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
   "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getPubdataPricingMode(overrides?: CallOverrides): Promise<number>;
+
+  "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<number>;
+
+  getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
+
+  "getStateTransitionManager()"(overrides?: CallOverrides): Promise<string>;
 
   getTotalBatchesCommitted(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1723,6 +2456,64 @@ export class IZkSync extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  proveBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _prevBatch: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _committedBatches: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    _proof: {
+      recursiveAggregationInput: BigNumberish[];
+      serializedProof: BigNumberish[];
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+    _chainId: BigNumberish,
+    _prevBatch: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _committedBatches: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    _proof: {
+      recursiveAggregationInput: BigNumberish[];
+      serializedProof: BigNumberish[];
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   proveL1ToL2TransactionStatus(
     _l2TxHash: BytesLike,
     _l2BatchNumber: BigNumberish,
@@ -1744,7 +2535,7 @@ export class IZkSync extends Contract {
   ): Promise<boolean>;
 
   proveL2LogInclusion(
-    _l2BatchNumber: BigNumberish,
+    _batchNumber: BigNumberish,
     _index: BigNumberish,
     _log: {
       l2ShardId: BigNumberish;
@@ -1759,7 +2550,7 @@ export class IZkSync extends Contract {
   ): Promise<boolean>;
 
   "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
-    _l2BatchNumber: BigNumberish,
+    _batchNumber: BigNumberish,
     _index: BigNumberish,
     _log: {
       l2ShardId: BigNumberish;
@@ -1774,7 +2565,7 @@ export class IZkSync extends Contract {
   ): Promise<boolean>;
 
   proveL2MessageInclusion(
-    _l2BatchNumber: BigNumberish,
+    _batchNumber: BigNumberish,
     _index: BigNumberish,
     _message: {
       txNumberInBatch: BigNumberish;
@@ -1786,7 +2577,7 @@ export class IZkSync extends Contract {
   ): Promise<boolean>;
 
   "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
-    _l2BatchNumber: BigNumberish,
+    _batchNumber: BigNumberish,
     _index: BigNumberish,
     _message: {
       txNumberInBatch: BigNumberish;
@@ -1829,6 +2620,18 @@ export class IZkSync extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  revertBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _newLastBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "revertBatchesSharedBridge(uint256,uint256)"(
+    _chainId: BigNumberish,
+    _newLastBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   setPendingAdmin(
     _newPendingAdmin: string,
     overrides?: Overrides
@@ -1836,16 +2639,6 @@ export class IZkSync extends Contract {
 
   "setPendingAdmin(address)"(
     _newPendingAdmin: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  setPendingGovernor(
-    _newPendingGovernor: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "setPendingGovernor(address)"(
-    _newPendingGovernor: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -1869,6 +2662,28 @@ export class IZkSync extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  setTokenMultiplier(
+    _nominator: BigNumberish,
+    _denominator: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setTokenMultiplier(uint128,uint128)"(
+    _nominator: BigNumberish,
+    _denominator: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setTransactionFilterer(
+    _transactionFilterer: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setTransactionFilterer(address)"(
+    _transactionFilterer: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   setValidator(
     _validator: string,
     _active: boolean,
@@ -1878,6 +2693,16 @@ export class IZkSync extends Contract {
   "setValidator(address,bool)"(
     _validator: string,
     _active: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setValidiumMode(
+    _validiumMode: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setValidiumMode(uint8)"(
+    _validiumMode: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -1891,18 +2716,122 @@ export class IZkSync extends Contract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  transferEthToSharedBridge(
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "transferEthToSharedBridge()"(
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   unfreezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
 
   "unfreezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+  upgradeChainFromVersion(
+    _protocolVersion: BigNumberish,
+    _cutData: {
+      facetCuts: {
+        facet: string;
+        action: BigNumberish;
+        isFreezable: boolean;
+        selectors: BytesLike[];
+      }[];
+      initAddress: string;
+      initCalldata: BytesLike;
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "upgradeChainFromVersion(uint256,tuple)"(
+    _protocolVersion: BigNumberish,
+    _cutData: {
+      facetCuts: {
+        facet: string;
+        action: BigNumberish;
+        isFreezable: boolean;
+        selectors: BytesLike[];
+      }[];
+      initAddress: string;
+      initCalldata: BytesLike;
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     acceptAdmin(overrides?: CallOverrides): Promise<void>;
 
     "acceptAdmin()"(overrides?: CallOverrides): Promise<void>;
 
-    acceptGovernor(overrides?: CallOverrides): Promise<void>;
+    baseTokenGasPriceMultiplierDenominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "acceptGovernor()"(overrides?: CallOverrides): Promise<void>;
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    baseTokenGasPriceMultiplierNominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     commitBatches(
       _lastCommittedBatchData: {
@@ -1925,7 +2854,7 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1951,7 +2880,61 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1971,6 +2954,36 @@ export class IZkSync extends Contract {
     ): Promise<void>;
 
     "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
       _batchesData: {
         batchNumber: BigNumberish;
         batchHash: BytesLike;
@@ -2066,6 +3079,22 @@ export class IZkSync extends Contract {
 
     "freezeDiamond()"(overrides?: CallOverrides): Promise<void>;
 
+    getAdmin(overrides?: CallOverrides): Promise<string>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<string>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<string>;
+
+    "getBaseToken()"(overrides?: CallOverrides): Promise<string>;
+
+    getBaseTokenBridge(overrides?: CallOverrides): Promise<string>;
+
+    "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<string>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<string>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<string>;
+
     getFirstUnprocessedPriorityTx(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -2073,10 +3102,6 @@ export class IZkSync extends Contract {
     "getFirstUnprocessedPriorityTx()"(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    getGovernor(overrides?: CallOverrides): Promise<string>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<string>;
 
     getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<string>;
 
@@ -2108,9 +3133,9 @@ export class IZkSync extends Contract {
 
     "getName()"(overrides?: CallOverrides): Promise<string>;
 
-    getPendingGovernor(overrides?: CallOverrides): Promise<string>;
+    getPendingAdmin(overrides?: CallOverrides): Promise<string>;
 
-    "getPendingGovernor()"(overrides?: CallOverrides): Promise<string>;
+    "getPendingAdmin()"(overrides?: CallOverrides): Promise<string>;
 
     getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2123,6 +3148,14 @@ export class IZkSync extends Contract {
     getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPubdataPricingMode(overrides?: CallOverrides): Promise<number>;
+
+    "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<number>;
+
+    getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
+
+    "getStateTransitionManager()"(overrides?: CallOverrides): Promise<string>;
 
     getTotalBatchesCommitted(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2311,6 +3344,64 @@ export class IZkSync extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    proveBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     proveL1ToL2TransactionStatus(
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
@@ -2332,7 +3423,7 @@ export class IZkSync extends Contract {
     ): Promise<boolean>;
 
     proveL2LogInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -2347,7 +3438,7 @@ export class IZkSync extends Contract {
     ): Promise<boolean>;
 
     "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -2362,7 +3453,7 @@ export class IZkSync extends Contract {
     ): Promise<boolean>;
 
     proveL2MessageInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -2374,7 +3465,7 @@ export class IZkSync extends Contract {
     ): Promise<boolean>;
 
     "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -2417,6 +3508,18 @@ export class IZkSync extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    revertBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "revertBatchesSharedBridge(uint256,uint256)"(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setPendingAdmin(
       _newPendingAdmin: string,
       overrides?: CallOverrides
@@ -2424,16 +3527,6 @@ export class IZkSync extends Contract {
 
     "setPendingAdmin(address)"(
       _newPendingAdmin: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setPendingGovernor(
-      _newPendingGovernor: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2457,6 +3550,28 @@ export class IZkSync extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -2466,6 +3581,16 @@ export class IZkSync extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2479,9 +3604,43 @@ export class IZkSync extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
+    transferEthToSharedBridge(overrides?: CallOverrides): Promise<void>;
+
+    "transferEthToSharedBridge()"(overrides?: CallOverrides): Promise<void>;
+
     unfreezeDiamond(overrides?: CallOverrides): Promise<void>;
 
     "unfreezeDiamond()"(overrides?: CallOverrides): Promise<void>;
+
+    upgradeChainFromVersion(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "upgradeChainFromVersion(uint256,tuple)"(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
@@ -2518,19 +3677,18 @@ export class IZkSync extends Contract {
 
     NewAdmin(oldAdmin: string | null, newAdmin: string | null): EventFilter;
 
-    NewGovernor(
-      oldGovernor: string | null,
-      newGovernor: string | null
+    NewBaseTokenMultiplier(
+      oldNominator: null,
+      oldDenominator: null,
+      newNominator: null,
+      newDenominator: null
     ): EventFilter;
+
+    NewFeeParams(oldFeeParams: null, newFeeParams: null): EventFilter;
 
     NewPendingAdmin(
       oldPendingAdmin: string | null,
       newPendingAdmin: string | null
-    ): EventFilter;
-
-    NewPendingGovernor(
-      oldPendingGovernor: string | null,
-      newPendingGovernor: string | null
     ): EventFilter;
 
     NewPriorityRequest(
@@ -2546,12 +3704,25 @@ export class IZkSync extends Contract {
       newPriorityTxMaxGasLimit: null
     ): EventFilter;
 
+    NewTransactionFilterer(
+      oldTransactionFilterer: null,
+      newTransactionFilterer: null
+    ): EventFilter;
+
+    ProposeTransparentUpgrade(
+      diamondCut: null,
+      proposalId: BigNumberish | null,
+      proposalSalt: null
+    ): EventFilter;
+
     Unfreeze(): EventFilter;
 
     ValidatorStatusUpdate(
       validatorAddress: string | null,
       isActive: null
     ): EventFilter;
+
+    ValidiumModeStatusUpdate(validiumMode: null): EventFilter;
   };
 
   estimateGas: {
@@ -2559,9 +3730,75 @@ export class IZkSync extends Contract {
 
     "acceptAdmin()"(overrides?: Overrides): Promise<BigNumber>;
 
-    acceptGovernor(overrides?: Overrides): Promise<BigNumber>;
+    baseTokenGasPriceMultiplierDenominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "acceptGovernor()"(overrides?: Overrides): Promise<BigNumber>;
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    baseTokenGasPriceMultiplierNominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
 
     commitBatches(
       _lastCommittedBatchData: {
@@ -2584,7 +3821,7 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -2610,7 +3847,61 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -2630,6 +3921,36 @@ export class IZkSync extends Contract {
     ): Promise<BigNumber>;
 
     "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
       _batchesData: {
         batchNumber: BigNumberish;
         batchHash: BytesLike;
@@ -2721,6 +4042,22 @@ export class IZkSync extends Contract {
 
     "freezeDiamond()"(overrides?: Overrides): Promise<BigNumber>;
 
+    getAdmin(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getBaseToken()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getBaseTokenBridge(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     getFirstUnprocessedPriorityTx(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -2728,10 +4065,6 @@ export class IZkSync extends Contract {
     "getFirstUnprocessedPriorityTx()"(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    getGovernor(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2767,9 +4100,9 @@ export class IZkSync extends Contract {
 
     "getName()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getPendingGovernor(overrides?: CallOverrides): Promise<BigNumber>;
+    getPendingAdmin(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getPendingGovernor()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "getPendingAdmin()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2782,6 +4115,16 @@ export class IZkSync extends Contract {
     getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPubdataPricingMode(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getStateTransitionManager(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getStateTransitionManager()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getTotalBatchesCommitted(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2939,6 +4282,64 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    proveBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     proveL1ToL2TransactionStatus(
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
@@ -2960,7 +4361,7 @@ export class IZkSync extends Contract {
     ): Promise<BigNumber>;
 
     proveL2LogInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -2975,7 +4376,7 @@ export class IZkSync extends Contract {
     ): Promise<BigNumber>;
 
     "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -2990,7 +4391,7 @@ export class IZkSync extends Contract {
     ): Promise<BigNumber>;
 
     proveL2MessageInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -3002,7 +4403,7 @@ export class IZkSync extends Contract {
     ): Promise<BigNumber>;
 
     "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -3045,6 +4446,18 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    revertBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "revertBatchesSharedBridge(uint256,uint256)"(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     setPendingAdmin(
       _newPendingAdmin: string,
       overrides?: Overrides
@@ -3052,16 +4465,6 @@ export class IZkSync extends Contract {
 
     "setPendingAdmin(address)"(
       _newPendingAdmin: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    setPendingGovernor(
-      _newPendingGovernor: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -3085,6 +4488,28 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -3094,6 +4519,16 @@ export class IZkSync extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -3107,9 +4542,43 @@ export class IZkSync extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    transferEthToSharedBridge(overrides?: Overrides): Promise<BigNumber>;
+
+    "transferEthToSharedBridge()"(overrides?: Overrides): Promise<BigNumber>;
+
     unfreezeDiamond(overrides?: Overrides): Promise<BigNumber>;
 
     "unfreezeDiamond()"(overrides?: Overrides): Promise<BigNumber>;
+
+    upgradeChainFromVersion(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "upgradeChainFromVersion(uint256,tuple)"(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -3117,9 +4586,75 @@ export class IZkSync extends Contract {
 
     "acceptAdmin()"(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    acceptGovernor(overrides?: Overrides): Promise<PopulatedTransaction>;
+    baseTokenGasPriceMultiplierDenominator(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    "acceptGovernor()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    baseTokenGasPriceMultiplierNominator(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
 
     commitBatches(
       _lastCommittedBatchData: {
@@ -3142,7 +4677,7 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -3168,7 +4703,61 @@ export class IZkSync extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -3188,6 +4777,36 @@ export class IZkSync extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
       _batchesData: {
         batchNumber: BigNumberish;
         batchHash: BytesLike;
@@ -3281,6 +4900,26 @@ export class IZkSync extends Contract {
 
     "freezeDiamond()"(overrides?: Overrides): Promise<PopulatedTransaction>;
 
+    getAdmin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getBaseToken()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getBaseTokenBridge(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getBaseTokenBridge()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getFirstUnprocessedPriorityTx(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -3288,10 +4927,6 @@ export class IZkSync extends Contract {
     "getFirstUnprocessedPriorityTx()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    getGovernor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getL2BootloaderBytecodeHash(
       overrides?: CallOverrides
@@ -3329,11 +4964,9 @@ export class IZkSync extends Contract {
 
     "getName()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getPendingGovernor(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getPendingAdmin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "getPendingGovernor()"(
+    "getPendingAdmin()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -3358,6 +4991,22 @@ export class IZkSync extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "getProtocolVersion()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPubdataPricingMode(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getPubdataPricingMode()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getStateTransitionManager(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getStateTransitionManager()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -3541,6 +5190,64 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    proveBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     proveL1ToL2TransactionStatus(
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
@@ -3562,7 +5269,7 @@ export class IZkSync extends Contract {
     ): Promise<PopulatedTransaction>;
 
     proveL2LogInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -3577,7 +5284,7 @@ export class IZkSync extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: {
         l2ShardId: BigNumberish;
@@ -3592,7 +5299,7 @@ export class IZkSync extends Contract {
     ): Promise<PopulatedTransaction>;
 
     proveL2MessageInclusion(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -3604,7 +5311,7 @@ export class IZkSync extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: {
         txNumberInBatch: BigNumberish;
@@ -3647,6 +5354,18 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    revertBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "revertBatchesSharedBridge(uint256,uint256)"(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     setPendingAdmin(
       _newPendingAdmin: string,
       overrides?: Overrides
@@ -3654,16 +5373,6 @@ export class IZkSync extends Contract {
 
     "setPendingAdmin(address)"(
       _newPendingAdmin: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    setPendingGovernor(
-      _newPendingGovernor: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
@@ -3687,6 +5396,28 @@ export class IZkSync extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -3696,6 +5427,16 @@ export class IZkSync extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
@@ -3709,8 +5450,46 @@ export class IZkSync extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    transferEthToSharedBridge(
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "transferEthToSharedBridge()"(
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     unfreezeDiamond(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     "unfreezeDiamond()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    upgradeChainFromVersion(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "upgradeChainFromVersion(uint256,tuple)"(
+      _protocolVersion: BigNumberish,
+      _cutData: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
   };
 }

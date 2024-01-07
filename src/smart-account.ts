@@ -18,7 +18,7 @@ import {
   signPayloadWithECDSA,
   signPayloadWithMultipleECDSA,
 } from './smart-account-utils';
-import {INonceHolderFactory} from './typechain/INonceHolderFactory';
+import {INonceHolderFactory} from '../typechain/INonceHolderFactory';
 import {NONCE_HOLDER_ADDRESS, serialize} from './utils';
 import {EIP712Signer} from './signer';
 import {
