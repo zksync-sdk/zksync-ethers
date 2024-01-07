@@ -2,23 +2,18 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {ContractFactory, Provider, types, Wallet, Contract} from '../../src';
 import {ethers} from 'ethers';
+import {PRIVATE_KEY1, DAI_L1} from '../utils';
 
 const {expect} = chai;
 
-import TokensL1 from '../files/tokens.json';
 import Token from '../files/Token.json';
 import Paymaster from '../files/Paymaster.json';
 import Storage from '../files/Storage.json';
 import Demo from '../files/Demo.json';
 
 describe('ContractFactory', () => {
-  const PRIVATE_KEY =
-    '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
-
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
-  const wallet = new Wallet(PRIVATE_KEY, provider);
-
-  const DAI_L1 = TokensL1[0].address;
+  const wallet = new Wallet(PRIVATE_KEY1, provider);
 
   describe('#constructor()', () => {
     it('`ContractFactory(abi, bytecode, runner)` should return a `ContractFactory` with `create` deployment', async () => {

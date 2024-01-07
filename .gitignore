@@ -3,6 +3,8 @@ node_modules
 tests/build
 coverage
 docs
+typechain
+!src/typechain
 
 .idea
 .vscode

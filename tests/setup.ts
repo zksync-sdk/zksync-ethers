@@ -1,23 +1,16 @@
 import {
   Provider,
-  types,
   Wallet,
   ContractFactory,
   Contract,
+  types,
   utils,
 } from '../src';
 import {ethers} from 'ethers';
-import fs from 'fs';
-import {Il1Bridge} from '../src/typechain/Il1Bridge';
+import {ITestnetErc20TokenFactory} from '../typechain/ITestnetErc20TokenFactory';
 
-import TokensL1 from './files/tokens.json';
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
-import TokenL2Bridged from './files/TokenL2Bridged.json';
-import TokenL1 from './files/TokenL1.json';
-import CustomBridgeL1 from './files/CustomBridgeL1.json';
-import CustomBridgeL2 from './files/CustomBridgeL2.json';
-import DiamondProxy from './files/diamondProxy.json';
 
 const PRIVATE_KEY =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
@@ -27,6 +20,7 @@ const ethProvider = ethers.getDefaultProvider('http://127.0.0.1:8545');
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
+const DAI_L1 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
 const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4'; // deployed by using create2 and SALT
@@ -89,84 +83,107 @@ async function deployPaymasterAndToken(): Promise<{
   return {token: tokenAddress, paymaster: paymasterAddress};
 }
 
-// Creates token on L2 by depositing
-async function createTokenL2(l1TokenAddress: string): Promise<string> {
-  const priorityOpResponse = await wallet.deposit({
-    token: l1TokenAddress,
-    to: await wallet.getAddress(),
-    amount: 100,
-    approveERC20: true,
-    refundRecipient: await wallet.getAddress(),
-  });
-  await priorityOpResponse.waitFinalize();
-  return await wallet.l2TokenAddress(l1TokenAddress);
-}
+/*
+Mints tokens on L1 in case L2 is non-ETH based chain.
+It mints based token, provided alternative tokens (different from base token) and wETH.
+*/
+async function mintTokensOnL1(alternativeToken: string) {
+  const bridgehub = await wallet.getBridgehubContract();
+  const chainId = (await provider.getNetwork()).chainId;
+  const baseTokenAddress = await bridgehub.baseToken(chainId);
 
-async function deployCustomBridges() {
-  // deploy L2 token
-  const l2TokenFactory = new ContractFactory(
-    TokenL2Bridged.abi,
-    TokenL2Bridged.bytecode,
-    wallet
-  );
-  const l2Token = (await l2TokenFactory.deploy('USDC', 'USDC', 18)) as Contract;
+  if (baseTokenAddress !== utils.ETH_ADDRESS_IN_CONTRACTS) {
+    const baseToken = ITestnetErc20TokenFactory.connect(
+      baseTokenAddress,
+      wallet._signerL1()
+    );
+    const baseTokenMintTx = await baseToken.mint(
+      await wallet.getAddress(),
+      ethers.utils.parseEther('20000')
+    );
+    await baseTokenMintTx.wait();
+  }
 
-  // deploy L1 token
-  const l1TokenFactory = new ethers.ContractFactory(
-    TokenL1.abi,
-    TokenL1.bytecode,
+  const altToken = ITestnetErc20TokenFactory.connect(
+    alternativeToken,
     wallet._signerL1()
   );
-  const l1Token = (await l1TokenFactory.deploy('USDC', 'USDC', 18)) as Contract;
-
-  // mint token to L1
-  const tx = await l1Token.mint(wallet.address, ethers.utils.parseEther('100'));
-  await tx.wait();
-
-  // deploy custom bridges
-  const gasPrice = (await ethProvider.getFeeData()).gasPrice!;
-  const zkSync = await wallet.getMainContract();
-  const requiredValueToInitializeBridge = await zkSync.l2TransactionBaseCost(
-    gasPrice,
-    10_000_000,
-    utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT
+  const altTokenMintTx = await altToken.mint(
+    await wallet.getAddress(),
+    ethers.utils.parseEther('20000')
   );
-  const l1BridgeFactory = new ethers.ContractFactory(
-    CustomBridgeL1.abi,
-    CustomBridgeL1.bytecode,
-    wallet._signerL1()
-  );
-  const l1Bridge = (await l1BridgeFactory.deploy(
-    [CustomBridgeL2.bytecode],
-    [l1Token.address, l2Token.address, DiamondProxy.address],
-    requiredValueToInitializeBridge,
-    {
-      gasPrice,
-      value: requiredValueToInitializeBridge,
-      gasLimit: 10_000_000,
-    }
-  )) as Il1Bridge;
-
-  // connect L2 token to L2 custom bridge
-  await l2Token.setBridge(await l1Bridge.l2Bridge());
-
-  return {
-    l1Token: l1Token.address,
-    l2Token: l2Token.address,
-    l1Bridge: l1Bridge.address,
-    l2Bridge: await l1Bridge.l2Bridge(),
-  };
+  await altTokenMintTx.wait();
+  console.log('Minting tokens on L1 finished');
 }
 
 /*
-Deploy token to the L2 network through deposit transaction.
-Deploy approval token and it's paymaster.
-Deploy custom bridges for custom token.
- */
+Send base token to L2 in case L2 in non-ETH base chain.
+*/
+async function sendTokenToL2(l1TokenAddress: string) {
+  const priorityOpResponse = await wallet.deposit({
+    token: l1TokenAddress,
+    to: await wallet.getAddress(),
+    amount: ethers.utils.parseEther('10000'),
+    approveERC20: true,
+    approveBaseERC20: true,
+    refundRecipient: await wallet.getAddress(),
+  });
+  const receipt = await priorityOpResponse.waitFinalize();
+  console.log(`Send funds tx: ${receipt.transactionHash}`);
+}
+
 async function main() {
-  console.log('===== Depositing DAI to L2 =====');
-  const l2TokenAddress = await createTokenL2(TokensL1[0].address);
-  console.log(`L2 DAI address: ${l2TokenAddress}`);
+  const baseToken = await wallet.getBaseToken();
+  console.log(`Wallet address: ${await wallet.getAddress()}`);
+  console.log(`Base token L1: ${baseToken}`);
+
+  console.log(
+    `L1 base token balance before: ${await wallet.getBalanceL1(baseToken)}`
+  );
+  console.log(`L2 base token balance before: ${await wallet.getBalance()}`);
+
+  await mintTokensOnL1(baseToken);
+  await sendTokenToL2(baseToken);
+
+  console.log(
+    `L1 base token balance after: ${await wallet.getBalanceL1(baseToken)}`
+  );
+  console.log(`L2 base token balance after: ${await wallet.getBalance()} \n`);
+
+  if (baseToken !== utils.ETH_ADDRESS_IN_CONTRACTS) {
+    const l2EthAddress = await wallet.l2TokenAddress(
+      utils.ETH_ADDRESS_IN_CONTRACTS
+    );
+    console.log(`Eth L1: ${utils.ETH_ADDRESS_IN_CONTRACTS}`);
+    console.log(`Eth L2: ${l2EthAddress}`);
+
+    console.log(`L1 eth balance before: ${await wallet.getBalanceL1()}`);
+    console.log(
+      `L2 eth balance before: ${await wallet.getBalance(l2EthAddress)}`
+    );
+
+    await mintTokensOnL1(utils.ETH_ADDRESS_IN_CONTRACTS);
+    await sendTokenToL2(utils.ETH_ADDRESS_IN_CONTRACTS);
+
+    console.log(`L1 eth balance after: ${await wallet.getBalanceL1()}`);
+    console.log(
+      `L2 eth balance after: ${await wallet.getBalance(l2EthAddress)}\n`
+    );
+  }
+
+  const l2DAIAddress = await wallet.l2TokenAddress(DAI_L1);
+  console.log(`DAI L1: ${DAI_L1}`);
+  console.log(`DAI L2: ${l2DAIAddress}`);
+
+  console.log(`L1 DAI balance before: ${await wallet.getBalanceL1(DAI_L1)}`);
+  console.log(
+    `L2 DAI balance before: ${await wallet.getBalance(l2DAIAddress)}`
+  );
+
+  await mintTokensOnL1(DAI_L1);
+  await sendTokenToL2(DAI_L1);
+  console.log(`L1 DAI balance after: ${await wallet.getBalanceL1(DAI_L1)}`);
+  console.log(`L2 DAI balance after: ${await wallet.getBalance(l2DAIAddress)}`);
 
   console.log('===== Deploying token and paymaster =====');
   const {token, paymaster} = await deployPaymasterAndToken();
@@ -174,21 +191,6 @@ async function main() {
   console.log(`Paymaster: ${paymaster}`);
   console.log(`Paymaster ETH balance: ${await provider.getBalance(paymaster)}`);
   console.log(`Wallet Crown balance: ${await wallet.getBalance(token)}`);
-
-  console.log('===== Deploying custom bridges =====');
-  const customAddresses = await deployCustomBridges();
-  const {l1Token, l2Token, l1Bridge, l2Bridge} = customAddresses;
-  console.log(`L1 USDC address: ${l1Token}`);
-  console.log(`L2 USDC address: ${l2Token}`);
-  console.log(`L1 custom bridge address: ${l1Bridge}`);
-  console.log(`L2 custom bridge address: ${l2Bridge}`);
-  console.log(`L1 USDC balance: ${await wallet.getBalanceL1(l1Token)}`);
-  console.log(`L2 USDC balance: ${await wallet.getBalance(l2Token)}`);
-
-  fs.writeFileSync(
-    'tests/files/customBridge.json',
-    utils.toJSON(customAddresses)
-  );
 }
 
 main()
