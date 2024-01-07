@@ -24,9 +24,9 @@ describe("Provider", () => {
         await tx.wait();
     });
 
-    describe("#getMainContractAddress()", () => {
+    describe("#getBridgehubContractAddress()", () => {
         it("should return the address of main contract", async () => {
-            const result = await provider.getMainContractAddress();
+            const result = await provider.getBridgehubContractAddress();
             expect(result).not.to.be.null;
         });
     });
@@ -293,7 +293,7 @@ describe("Provider", () => {
         it("should return gas estimation of L1 transaction", async () => {
             const result = await provider.estimateGasL1({
                 from: ADDRESS,
-                to: await provider.getMainContractAddress(),
+                to: await provider.getBridgehubContractAddress(),
                 value: 7_000_000_000,
                 customData: {
                     gasPerPubdata: 800,
@@ -306,7 +306,7 @@ describe("Provider", () => {
     describe("#estimateL1ToL2Execute()", () => {
         it("should return gas estimation of L1 to L2 transaction", async () => {
             const result = await provider.estimateL1ToL2Execute({
-                contractAddress: await provider.getMainContractAddress(),
+                contractAddress: await provider.getBridgehubContractAddress(),
                 calldata: "0x",
                 caller: ADDRESS,
                 l2Value: 7_000_000_000,
