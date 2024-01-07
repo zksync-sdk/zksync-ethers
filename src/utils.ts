@@ -13,19 +13,19 @@ import {TypedDataDomain, TypedDataField} from '@ethersproject/abstract-signer';
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
 import {Ierc20Factory as IERC20Factory} from './typechain/Ierc20Factory';
-import {Il1BridgeFactory as IL1BridgeFactory} from './typechain/Il1BridgeFactory';
 import {AbiCoder} from 'ethers/lib/utils';
 
 export * from './paymaster-utils';
 export * from './smart-account-utils';
 export {EIP712_TYPES} from './signer';
 
-import IZkSyncABI from '../abi/IZkSync.json';
+import IZkSyncABI from '../abi/IZkSyncStateTransition.json';
+import IBridgehubABI from '../abi/IBridgehub.json';
 import IContractDeployerABI from '../abi/IContractDeployer.json';
 import IL1MessengerABI from '../abi/IL1Messenger.json';
 import IERC20ABI from '../abi/IERC20.json';
 import IERC1271ABI from '../abi/IERC1271.json';
-import IL1BridgeABI from '../abi/IL1Bridge.json';
+import IL1BridgeABI from '../abi/IL1ERC20Bridge.json';
 import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
 
@@ -34,6 +34,12 @@ import INonceHolderABI from '../abi/INonceHolder.json';
  * @constant
  */
 export const ZKSYNC_MAIN_ABI = new utils.Interface(IZkSyncABI);
+
+/**
+ * The ABI of the `Bridgehub` interface.
+ * @constant
+ */
+export const BRIDGEHUB_ABI = new utils.Interface(IBridgehubABI);
 
 /**
  * The ABI for the `IContractDeployer` interface, which is utilized for deploying smart contracts.
@@ -84,6 +90,19 @@ export const NONCE_HOLDER_ABI = new utils.Interface(INonceHolderABI);
 export const ETH_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 /**
+ * The address of the L1 `ETH` token.
+ * @constant
+ */
+export const LEGACY_ETH_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+/**
+ * In the contracts the zero address can not be used, use one instead.
+ * @constant
+ */
+export const ETH_ADDRESS_IN_CONTRACTS =
+  '0x0000000000000000000000000000000000000001';
+
+/**
  * The formal address for the `Bootloader`.
  * @constant
  */
@@ -107,8 +126,16 @@ export const L1_MESSENGER_ADDRESS =
 /**
  * The address of the L2 `ETH` token.
  * @constant
+ * @deprecated In favor of {@link L2_BASE_TOKEN_ADDRESS}.
  */
 export const L2_ETH_TOKEN_ADDRESS =
+  '0x000000000000000000000000000000000000800a';
+
+/**
+ * The address of the base token.
+ * @constant
+ */
+export const L2_BASE_TOKEN_ADDRESS =
   '0x000000000000000000000000000000000000800a';
 
 /**
@@ -222,12 +249,13 @@ export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
  * @example
  *
  * const isL1ETH = utils.isETH(utils.ETH_ADDRESS); // true
- * const isL2ETH = utils.isETH(utils.L2_ETH_TOKEN_ADDRESS); // true
+ * const isL2ETH = utils.isETH(utils.ETH_ADDRESS_IN_CONTRACTS); // true
  */
-export function isETH(token: Address): boolean {
+export function isETH(token: Address) {
   return (
-    token.toLowerCase() === ETH_ADDRESS ||
-    token.toLowerCase() === L2_ETH_TOKEN_ADDRESS
+    isAddressEq(token, LEGACY_ETH_ADDRESS) ||
+    isAddressEq(token, L2_BASE_TOKEN_ADDRESS) ||
+    isAddressEq(token.toLowerCase(), ETH_ADDRESS_IN_CONTRACTS)
   );
 }
 
@@ -307,7 +335,7 @@ export function getDeployedContracts(
         log =>
           log.topics[0] ===
             utils.id('ContractDeployed(address,bytes32,address)') &&
-          log.address === CONTRACT_DEPLOYER_ADDRESS
+          isAddressEq(log.address, CONTRACT_DEPLOYER_ADDRESS)
       )
       // Take the last topic (deployed contract address as U256) and extract address from it (U160).
       .map(log => {
@@ -783,7 +811,7 @@ export function getL2HashFromPriorityOp(
 ): string {
   let txHash: string | null = null;
   for (const log of txReceipt.logs) {
-    if (log.address.toLowerCase() !== zkSyncAddress.toLowerCase()) {
+    if (!isAddressEq(log.address, zkSyncAddress)) {
       continue;
     }
 
@@ -871,11 +899,20 @@ export async function getERC20DefaultBridgeData(
   l1TokenAddress: string,
   provider: ethers.providers.Provider
 ): Promise<string> {
+  if (isAddressEq(l1TokenAddress, LEGACY_ETH_ADDRESS)) {
+    l1TokenAddress = ETH_ADDRESS_IN_CONTRACTS;
+  }
   const token = IERC20Factory.connect(l1TokenAddress, provider);
 
-  const name = await token.name();
-  const symbol = await token.symbol();
-  const decimals = await token.decimals();
+  const name = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+    ? 'Ether'
+    : await token.name();
+  const symbol = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+    ? 'ETH'
+    : await token.symbol();
+  const decimals = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+    ? 18
+    : await token.decimals();
 
   const coder = new AbiCoder();
 
@@ -950,7 +987,10 @@ function isECDSASignatureCorrect(
   signature: SignatureLike
 ): boolean {
   try {
-    return address === ethers.utils.recoverAddress(msgHash, signature);
+    return isAddressEq(
+      address,
+      ethers.utils.recoverAddress(msgHash, signature)
+    );
   } catch {
     // In case ECDSA signature verification has thrown an error,
     // we simply consider the signature as incorrect.
@@ -1006,10 +1046,8 @@ async function isSignatureCorrect(
   msgHash: string,
   signature: SignatureLike
 ): Promise<boolean> {
-  let isContractAccount = false;
-
   const code = await provider.getCode(address);
-  isContractAccount = ethers.utils.arrayify(code).length !== 0;
+  const isContractAccount = ethers.utils.arrayify(code).length !== 0;
 
   if (!isContractAccount) {
     return isECDSASignatureCorrect(address, msgHash, signature);
@@ -1137,8 +1175,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
   // due to storage slot aggregation, the gas estimation will depend on the address
   // and so estimation for the zero address may be smaller than for the sender.
   from ??= ethers.Wallet.createRandom().address;
-
-  if (token === ETH_ADDRESS) {
+  if (await providerL2.isBaseToken(token)) {
     return await providerL2.estimateL1ToL2Execute({
       contractAddress: to,
       gasPerPubdataByte: gasPerPubdataByte,
@@ -1147,36 +1184,18 @@ export async function estimateDefaultBridgeDepositL2Gas(
       l2Value: amount,
     });
   } else {
-    let value, l1BridgeAddress, l2BridgeAddress, bridgeData;
     const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
-    const l1WethBridge = IL1BridgeFactory.connect(
-      bridgeAddresses.wethL1!,
-      providerL1
-    );
-    let l2WethToken = ethers.constants.AddressZero;
-    try {
-      l2WethToken = await l1WethBridge.l2TokenAddress(token);
-    } catch (e) {
-      // skip
-    }
 
-    if (l2WethToken !== ethers.constants.AddressZero) {
-      value = amount;
-      l1BridgeAddress = bridgeAddresses.wethL1;
-      l2BridgeAddress = bridgeAddresses.wethL2;
-      bridgeData = '0x';
-    } else {
-      value = 0;
-      l1BridgeAddress = bridgeAddresses.erc20L1;
-      l2BridgeAddress = bridgeAddresses.erc20L2;
-      bridgeData = await getERC20DefaultBridgeData(token, providerL1);
-    }
+    const value = 0;
+    const l1BridgeAddress = bridgeAddresses.sharedL1;
+    const l2BridgeAddress = bridgeAddresses.sharedL2;
+    const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
 
     return await estimateCustomBridgeDepositL2Gas(
       providerL2,
-      l1BridgeAddress!,
-      l2BridgeAddress!,
-      token,
+      l1BridgeAddress,
+      l2BridgeAddress,
+      isAddressEq(token, LEGACY_ETH_ADDRESS) ? ETH_ADDRESS_IN_CONTRACTS : token,
       amount,
       to,
       bridgeData,
@@ -1263,7 +1282,7 @@ export async function estimateCustomBridgeDepositL2Gas(
 export function toJSON(object: any): string {
   return JSON.stringify(
     object,
-    (key, value) => {
+    (_, value) => {
       if (typeof value === 'bigint') {
         return value.toString(); // Convert BigInt to string
       }
@@ -1271,4 +1290,16 @@ export function toJSON(object: any): string {
     },
     2
   );
+}
+
+/**
+ * Compares stringified addresses, taking into account the fact that
+ * addresses might be represented in different casing.
+ *
+ * @param a - The first address to compare.
+ * @param b - The second address to compare.
+ * @returns A boolean indicating whether the addresses are equal.
+ */
+export function isAddressEq(a: Address, b: Address): boolean {
+  return a.toLowerCase() === b.toLowerCase();
 }

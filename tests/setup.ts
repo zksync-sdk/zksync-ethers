@@ -1,14 +1,14 @@
 import {
   Provider,
-  types,
   Wallet,
   ContractFactory,
   Contract,
+  types,
   utils,
 } from '../src';
 import {ethers} from 'ethers';
+import {ITestnetErc20TokenFactory} from '../src/typechain/ITestnetErc20TokenFactory';
 
-import TokensL1 from './files/tokens.json';
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
 
@@ -20,6 +20,7 @@ const ethProvider = ethers.getDefaultProvider('http://127.0.0.1:8545');
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
+const DAI_L1 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
 const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4'; // deployed by using create2 and SALT
@@ -82,27 +83,89 @@ async function deployPaymasterAndToken(): Promise<{
   return {token: tokenAddress, paymaster: paymasterAddress};
 }
 
-// Creates token on L2 by depositing
-async function createTokenL2(l1TokenAddress: string): Promise<string> {
-  const priorityOpResponse = await wallet.deposit({
-    token: l1TokenAddress,
-    to: await wallet.getAddress(),
-    amount: 100,
-    approveERC20: true,
-    refundRecipient: await wallet.getAddress(),
-  });
-  await priorityOpResponse.waitFinalize();
-  return await wallet.l2TokenAddress(l1TokenAddress);
+/*
+Mints tokens on L1 in case L2 is non-ETH based chain.
+It mints based token, provided alternative tokens (different from base token) and wETH.
+*/
+async function mintTokensOnL1(l1Token: string) {
+  if (l1Token !== utils.ETH_ADDRESS_IN_CONTRACTS) {
+    const to = ITestnetErc20TokenFactory.connect(l1Token, wallet._signerL1());
+    const mintTx = await to.mint(
+      await wallet.getAddress(),
+      ethers.utils.parseEther('20000')
+    );
+    await mintTx.wait();
+  }
 }
 
 /*
-Deploy token to the L2 network through deposit transaction.
-Deploy approval token and it's paymaster.
- */
+Send base token to L2 in case L2 in non-ETH base chain.
+*/
+async function sendTokenToL2(l1TokenAddress: string) {
+  const priorityOpResponse = await wallet.deposit({
+    token: l1TokenAddress,
+    to: await wallet.getAddress(),
+    amount: ethers.utils.parseEther('10000'),
+    approveERC20: true,
+    approveBaseERC20: true,
+    refundRecipient: await wallet.getAddress(),
+  });
+  const receipt = await priorityOpResponse.waitFinalize();
+  console.log(`Send funds tx: ${receipt.transactionHash}`);
+}
+
 async function main() {
-  console.log('===== Depositing DAI to L2 =====');
-  const l2TokenAddress = await createTokenL2(TokensL1[0].address);
-  console.log(`L2 DAI address: ${l2TokenAddress}`);
+  const baseToken = await wallet.getBaseToken();
+  console.log(`Wallet address: ${await wallet.getAddress()}`);
+  console.log(`Base token L1: ${baseToken}`);
+
+  console.log(
+    `L1 base token balance before: ${await wallet.getBalanceL1(baseToken)}`
+  );
+  console.log(`L2 base token balance before: ${await wallet.getBalance()}`);
+
+  await mintTokensOnL1(baseToken);
+  await sendTokenToL2(baseToken);
+
+  console.log(
+    `L1 base token balance after: ${await wallet.getBalanceL1(baseToken)}`
+  );
+  console.log(`L2 base token balance after: ${await wallet.getBalance()} \n`);
+
+  if (baseToken !== utils.ETH_ADDRESS_IN_CONTRACTS) {
+    const l2EthAddress = await wallet.l2TokenAddress(
+      utils.ETH_ADDRESS_IN_CONTRACTS
+    );
+    console.log(`ETH L1: ${utils.ETH_ADDRESS_IN_CONTRACTS}`);
+    console.log(`ETH L2: ${l2EthAddress}`);
+
+    console.log(`L1 ETH balance before: ${await wallet.getBalanceL1()}`);
+    console.log(
+      `L2 ETH balance before: ${await wallet.getBalance(l2EthAddress)}`
+    );
+
+    await mintTokensOnL1(utils.ETH_ADDRESS_IN_CONTRACTS);
+    await sendTokenToL2(utils.ETH_ADDRESS_IN_CONTRACTS);
+
+    console.log(`L1 ETH balance after: ${await wallet.getBalanceL1()}`);
+    console.log(
+      `L2 ETH balance after: ${await wallet.getBalance(l2EthAddress)}\n`
+    );
+  }
+
+  const l2DAIAddress = await wallet.l2TokenAddress(DAI_L1);
+  console.log(`DAI L1: ${DAI_L1}`);
+  console.log(`DAI L2: ${l2DAIAddress}`);
+
+  console.log(`L1 DAI balance before: ${await wallet.getBalanceL1(DAI_L1)}`);
+  console.log(
+    `L2 DAI balance before: ${await wallet.getBalance(l2DAIAddress)}`
+  );
+
+  await mintTokensOnL1(DAI_L1);
+  await sendTokenToL2(DAI_L1);
+  console.log(`L1 DAI balance after: ${await wallet.getBalanceL1(DAI_L1)}`);
+  console.log(`L2 DAI balance after: ${await wallet.getBalance(l2DAIAddress)}`);
 
   console.log('===== Deploying token and paymaster =====');
   const {token, paymaster} = await deployPaymasterAndToken();

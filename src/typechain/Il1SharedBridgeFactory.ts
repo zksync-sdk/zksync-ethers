@@ -5,18 +5,49 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { Il1Bridge } from "./Il1Bridge";
+import type { Il1SharedBridge } from "./Il1SharedBridge";
 
-export class Il1BridgeFactory {
+export class Il1SharedBridgeFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): Il1Bridge {
-    return new Contract(address, _abi, signerOrProvider) as Il1Bridge;
+  ): Il1SharedBridge {
+    return new Contract(address, _abi, signerOrProvider) as Il1SharedBridge;
   }
 }
 
 const _abi = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "chainId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "l1Token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "BridgehubDepositBaseTokenInitiated",
+    type: "event",
+  },
   {
     anonymous: false,
     inputs: [
@@ -82,7 +113,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "BridgehubDepositInitiatedSharedBridge",
+    name: "BridgehubDepositInitiated",
     type: "event",
   },
   {
@@ -156,7 +187,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "DepositInitiatedSharedBridge",
+    name: "LegacyDepositInitiated",
     type: "event",
   },
   {
@@ -237,6 +268,11 @@ const _abi = [
         internalType: "address",
         name: "_prevMsgSender",
         type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2Value",
+        type: "uint256",
       },
       {
         internalType: "bytes",
@@ -366,13 +402,8 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
         internalType: "address",
-        name: "_l2Receiver",
+        name: "_depositSender",
         type: "address",
       },
       {
@@ -382,39 +413,38 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_mintValue",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
         name: "_amount",
         type: "uint256",
       },
       {
-        internalType: "uint256",
-        name: "_l2TxGasLimit",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2TxGasPerPubdataByte",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_refundRecipient",
-        type: "address",
-      },
-    ],
-    name: "deposit",
-    outputs: [
-      {
         internalType: "bytes32",
-        name: "txHash",
+        name: "_l2TxHash",
         type: "bytes32",
       },
+      {
+        internalType: "uint256",
+        name: "_l2BatchNumber",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2MessageIndex",
+        type: "uint256",
+      },
+      {
+        internalType: "uint16",
+        name: "_l2TxNumberInBatch",
+        type: "uint16",
+      },
+      {
+        internalType: "bytes32[]",
+        name: "_merkleProof",
+        type: "bytes32[]",
+      },
     ],
-    stateMutability: "payable",
+    name: "claimFailedDepositLegacyErc20Bridge",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -439,6 +469,55 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_msgSender",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasLimit",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasPerPubdataByte",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_refundRecipient",
+        type: "address",
+      },
+    ],
+    name: "depositLegacyErc20Bridge",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "txHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -483,6 +562,55 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
+        name: "_l2BatchNumber",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2MessageIndex",
+        type: "uint256",
+      },
+      {
+        internalType: "uint16",
+        name: "_l2TxNumberInBatch",
+        type: "uint16",
+      },
+      {
+        internalType: "bytes",
+        name: "_message",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes32[]",
+        name: "_merkleProof",
+        type: "bytes32[]",
+      },
+    ],
+    name: "finalizeWithdrawalLegacyErc20Bridge",
+    outputs: [
+      {
+        internalType: "address",
+        name: "l1Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
         name: "_chainId",
         type: "uint256",
       },
@@ -497,12 +625,25 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "isWithdrawalFinalizedShared",
+    name: "isWithdrawalFinalized",
     outputs: [
       {
         internalType: "bool",
         name: "",
         type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "l1WethAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -525,6 +666,45 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "legacyBridge",
+    outputs: [
+      {
+        internalType: "contract IL1ERC20Bridge",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+    ],
+    name: "receiveEth",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_eraFirstPostUpgradeBatch",
+        type: "uint256",
+      },
+    ],
+    name: "setEraFirstPostUpgradeBatch",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ];
