@@ -2,7 +2,7 @@ import { BigNumber, BigNumberish, BytesLike, Contract, ethers, providers, utils 
 import { ExternalProvider } from "@ethersproject/providers";
 import { ConnectionInfo, poll } from "@ethersproject/web";
 import { Ierc20Factory as IERC20Factory } from "../typechain/Ierc20Factory";
-import { IEthTokenFactory as IEthTokenFactory } from "../typechain/IEthTokenFactory";
+import { IEthTokenFactory } from "../typechain/IEthTokenFactory";
 import { Il2BridgeFactory as IL2BridgeFactory } from "../typechain/Il2BridgeFactory";
 import {
     Address,
@@ -47,6 +47,7 @@ let defaultFormatter: Formatter = null;
 export class Provider extends ethers.providers.JsonRpcProvider {
     private static _nextPollId = 1;
     protected contractAddresses: {
+        bridgehubContract?: Address;
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
@@ -554,8 +555,15 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     async getBridgehubContractAddress(): Promise<Address> {
+        if (!this.contractAddresses.bridgehubContract) {
+            this.contractAddresses.bridgehubContract = await this.send("zks_getBridgehubContract", []);
+        }
+        return this.contractAddresses.bridgehubContract;
+    }
+
+    async getMainContractAddress(): Promise<Address> {
         if (!this.contractAddresses.mainContract) {
-            this.contractAddresses.mainContract = await this.send("zks_getBridgehubContract", []);
+            this.contractAddresses.mainContract = await this.send("zks_getMainContract", []);
         }
         return this.contractAddresses.mainContract;
     }
@@ -825,7 +833,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         l1TxResponse: ethers.providers.TransactionResponse,
     ): Promise<TransactionResponse> {
         const receipt = await l1TxResponse.wait();
-        const l2Hash = getL2HashFromPriorityOp(receipt, await this.getBridgehubContractAddress());
+        const l2Hash = getL2HashFromPriorityOp(receipt, await this.getMainContractAddress());
 
         let status = null;
         do {

@@ -26,6 +26,7 @@ describe("Provider", () => {
     });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     describe("#constructor()", () => {
         it("Provider(null) should return a `Provider` connected to local network when URL is not defined", async () => {
             const provider = new Provider(null);
@@ -62,6 +63,15 @@ describe("Provider", () => {
 
     describe("#getMainContractAddress()", () => {
 =======
+=======
+    describe("#getMainContractAddress()", () => {
+        it("should return the address of main contract", async () => {
+            const result = await provider.getMainContractAddress();
+            expect(result).not.to.be.null;
+        });
+    });
+
+>>>>>>> 086b87e (feat: add support for deposing native tokens in `Wallet.deposit`)
     describe("#getBridgehubContractAddress()", () => {
 >>>>>>> a1411a9 (feat: migrate to Bridgehub)
         it("should return the address of main contract", async () => {
