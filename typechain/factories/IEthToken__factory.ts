@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IEthToken } from "./IEthToken";
+import type { IEthToken } from "../IEthToken";
 
-export class IEthTokenFactory {
+export class IEthToken__factory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IBridgehub } from "./IBridgehub";
+import type { IBridgehub } from "../IBridgehub";
 
-export class IBridgehubFactory {
+export class IBridgehub__factory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

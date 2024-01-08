@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { Il1Messenger } from "./Il1Messenger";
+import type { Il1Messenger } from "../Il1Messenger";
 
-export class Il1MessengerFactory {
+export class Il1Messenger__factory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
