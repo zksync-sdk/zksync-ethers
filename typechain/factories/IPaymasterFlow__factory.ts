@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IPaymasterFlow } from "./IPaymasterFlow";
+import type { IPaymasterFlow } from "../IPaymasterFlow";
 
-export class IPaymasterFlowFactory {
+export class IPaymasterFlow__factory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

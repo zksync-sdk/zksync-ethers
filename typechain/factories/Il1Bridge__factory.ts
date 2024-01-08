@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { Il1Bridge } from "./Il1Bridge";
+import type { Il1Bridge } from "../Il1Bridge";
 
-export class Il1BridgeFactory {
+export class Il1Bridge__factory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IContractDeployer } from "./IContractDeployer";
+import type { IContractDeployer } from "../IContractDeployer";
 
-export class IContractDeployerFactory {
+export class IContractDeployer__factory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

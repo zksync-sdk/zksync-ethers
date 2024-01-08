@@ -19,6 +19,7 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
+import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
 
 interface INonceHolderInterface extends ethers.utils.Interface {
   functions: {
@@ -122,11 +123,39 @@ export class INonceHolder extends Contract {
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  on(event: EventFilter | string, listener: Listener): this;
-  once(event: EventFilter | string, listener: Listener): this;
-  addListener(eventName: EventFilter | string, listener: Listener): this;
-  removeAllListeners(eventName: EventFilter | string): this;
-  removeListener(eventName: any, listener: Listener): this;
+  listeners(eventName?: string): Array<Listener>;
+  off(eventName: string, listener: Listener): this;
+  on(eventName: string, listener: Listener): this;
+  once(eventName: string, listener: Listener): this;
+  removeListener(eventName: string, listener: Listener): this;
+  removeAllListeners(eventName?: string): this;
+
+  listeners<T, G>(
+    eventFilter?: TypedEventFilter<T, G>
+  ): Array<TypedListener<T, G>>;
+  off<T, G>(
+    eventFilter: TypedEventFilter<T, G>,
+    listener: TypedListener<T, G>
+  ): this;
+  on<T, G>(
+    eventFilter: TypedEventFilter<T, G>,
+    listener: TypedListener<T, G>
+  ): this;
+  once<T, G>(
+    eventFilter: TypedEventFilter<T, G>,
+    listener: TypedListener<T, G>
+  ): this;
+  removeListener<T, G>(
+    eventFilter: TypedEventFilter<T, G>,
+    listener: TypedListener<T, G>
+  ): this;
+  removeAllListeners<T, G>(eventFilter: TypedEventFilter<T, G>): this;
+
+  queryFilter<T, G>(
+    event: TypedEventFilter<T, G>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEvent<T & G>>>;
 
   interface: INonceHolderInterface;
 
@@ -134,58 +163,42 @@ export class INonceHolder extends Contract {
     getDeploymentNonce(
       _address: string,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     "getDeploymentNonce(address)"(
       _address: string,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     getMinNonce(
       _address: string,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     "getMinNonce(address)"(
       _address: string,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     getRawNonce(
       _address: string,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     "getRawNonce(address)"(
       _address: string,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     getValueUnderNonce(
       _key: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     "getValueUnderNonce(uint256)"(
       _key: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<{
-      0: BigNumber;
-    }>;
+    ): Promise<[BigNumber]>;
 
     increaseMinNonce(
       _value: BigNumberish,
@@ -221,17 +234,13 @@ export class INonceHolder extends Contract {
       _address: string,
       _nonce: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<{
-      0: boolean;
-    }>;
+    ): Promise<[boolean]>;
 
     "isNonceUsed(address,uint256)"(
       _address: string,
       _nonce: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<{
-      0: boolean;
-    }>;
+    ): Promise<[boolean]>;
 
     setValueUnderNonce(
       _key: BigNumberish,
@@ -250,18 +259,14 @@ export class INonceHolder extends Contract {
       _key: BigNumberish,
       _shouldBeUsed: boolean,
       overrides?: CallOverrides
-    ): Promise<{
-      0: void;
-    }>;
+    ): Promise<[void]>;
 
     "validateNonceUsage(address,uint256,bool)"(
       _address: string,
       _key: BigNumberish,
       _shouldBeUsed: boolean,
       overrides?: CallOverrides
-    ): Promise<{
-      0: void;
-    }>;
+    ): Promise<[void]>;
   };
 
   getDeploymentNonce(
@@ -481,7 +486,10 @@ export class INonceHolder extends Contract {
       accountAddress: string | null,
       key: BigNumberish | null,
       value: null
-    ): EventFilter;
+    ): TypedEventFilter<
+      [string, BigNumber, BigNumber],
+      { accountAddress: string; key: BigNumber; value: BigNumber }
+    >;
   };
 
   estimateGas: {
