@@ -18,8 +18,8 @@ import { AbiCoder } from "ethers/lib/utils";
 
 export * from "./paymaster-utils";
 
-export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IStateTransitionChain.json").abi);
-export const BRIDGEHUB_ABI = new utils.Interface(require("../abi/IBridgehub.json").abi);
+export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IStateTransitionChain.json"));
+export const BRIDGEHUB_ABI = new utils.Interface(require("../abi/IBridgehub.json"));
 export const CONTRACT_DEPLOYER = new utils.Interface(require("../abi/IContractDeployer.json"));
 export const L1_MESSENGER = new utils.Interface(require("../abi/IL1Messenger.json"));
 export const IERC20 = new utils.Interface(require("../abi/IERC20.json"));
