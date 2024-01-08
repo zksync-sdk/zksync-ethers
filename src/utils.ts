@@ -18,7 +18,8 @@ import { AbiCoder } from "ethers/lib/utils";
 
 export * from "./paymaster-utils";
 
-export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IZkSync.json"));
+export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IStateTransitionChain.json").abi);
+export const BRIDGEHUB_ABI = new utils.Interface(require("../abi/IBridgehub.json").abi);
 export const CONTRACT_DEPLOYER = new utils.Interface(require("../abi/IContractDeployer.json"));
 export const L1_MESSENGER = new utils.Interface(require("../abi/IL1Messenger.json"));
 export const IERC20 = new utils.Interface(require("../abi/IERC20.json"));
@@ -29,6 +30,8 @@ export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder
 export const PAYMASTER_FLOW_ABI = new utils.Interface(require("../abi/IPaymasterFlow.json"));
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+// in the contracts we can't use the zero address, we we use one
+export const ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
 export const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
 export const CONTRACT_DEPLOYER_ADDRESS = "0x0000000000000000000000000000000000008006";
 export const L1_MESSENGER_ADDRESS = "0x0000000000000000000000000000000000008008";
