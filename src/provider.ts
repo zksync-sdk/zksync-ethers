@@ -1,9 +1,9 @@
 import { BigNumber, BigNumberish, BytesLike, Contract, ethers, providers, utils } from "ethers";
 import { ExternalProvider } from "@ethersproject/providers";
 import { ConnectionInfo, poll } from "@ethersproject/web";
-import { Ierc20Factory as IERC20Factory } from "../typechain/Ierc20Factory";
-import { IEthTokenFactory as IEthTokenFactory } from "../typechain/IEthTokenFactory";
-import { Il2BridgeFactory as IL2BridgeFactory } from "../typechain/Il2BridgeFactory";
+import { Ierc20__factory as IERC20Factory } from "../typechain/factories/Ierc20__factory";
+import { IEthToken__factory as IEthTokenFactory } from "../typechain/factories/IEthToken__factory";
+import { Il2Bridge__factory as IL2BridgeFactory } from "../typechain/factories/Il2Bridge__factory";
 import {
     Address,
     BalancesMap,
