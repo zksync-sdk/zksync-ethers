@@ -20,7 +20,6 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
 
 interface Il1BridgeInterface extends ethers.utils.Interface {
   functions: {
@@ -135,39 +134,11 @@ export class Il1Bridge extends Contract {
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  listeners(eventName?: string): Array<Listener>;
-  off(eventName: string, listener: Listener): this;
-  on(eventName: string, listener: Listener): this;
-  once(eventName: string, listener: Listener): this;
-  removeListener(eventName: string, listener: Listener): this;
-  removeAllListeners(eventName?: string): this;
-
-  listeners<T, G>(
-    eventFilter?: TypedEventFilter<T, G>
-  ): Array<TypedListener<T, G>>;
-  off<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  on<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  once<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  removeListener<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  removeAllListeners<T, G>(eventFilter: TypedEventFilter<T, G>): this;
-
-  queryFilter<T, G>(
-    event: TypedEventFilter<T, G>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEvent<T & G>>>;
+  on(event: EventFilter | string, listener: Listener): this;
+  once(event: EventFilter | string, listener: Listener): this;
+  addListener(eventName: EventFilter | string, listener: Listener): this;
+  removeAllListeners(eventName: EventFilter | string): this;
+  removeListener(eventName: any, listener: Listener): this;
 
   interface: Il1BridgeInterface;
 
@@ -261,28 +232,40 @@ export class Il1Bridge extends Contract {
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     "isWithdrawalFinalized(uint256,uint256,uint256)"(
       chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
-    l2Bridge(overrides?: CallOverrides): Promise<[string]>;
+    l2Bridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "l2Bridge()"(overrides?: CallOverrides): Promise<[string]>;
+    "l2Bridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
     l2TokenAddress(
       _l1Token: string,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     "l2TokenAddress(address)"(
       _l1Token: string,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
   };
 
   bridgehubDeposit(
@@ -513,20 +496,14 @@ export class Il1Bridge extends Contract {
       to: string | null,
       l1Token: string | null,
       amount: null
-    ): TypedEventFilter<
-      [string, string, BigNumber],
-      { to: string; l1Token: string; amount: BigNumber }
-    >;
+    ): EventFilter;
 
     ClaimedFailedDepositSharedBridge(
       chainId: BigNumberish | null,
       to: string | null,
       l1Token: string | null,
       amount: null
-    ): TypedEventFilter<
-      [BigNumber, string, string, BigNumber],
-      { chainId: BigNumber; to: string; l1Token: string; amount: BigNumber }
-    >;
+    ): EventFilter;
 
     DepositInitiated(
       l2DepositTxHash: BytesLike | null,
@@ -534,16 +511,7 @@ export class Il1Bridge extends Contract {
       to: string | null,
       l1Token: null,
       amount: null
-    ): TypedEventFilter<
-      [string, string, string, string, BigNumber],
-      {
-        l2DepositTxHash: string;
-        from: string;
-        to: string;
-        l1Token: string;
-        amount: BigNumber;
-      }
-    >;
+    ): EventFilter;
 
     DepositInitiatedSharedBridge(
       chainId: BigNumberish | null,
@@ -552,36 +520,20 @@ export class Il1Bridge extends Contract {
       to: null,
       l1Token: null,
       amount: null
-    ): TypedEventFilter<
-      [BigNumber, string, string, string, string, BigNumber],
-      {
-        chainId: BigNumber;
-        l2DepositTxHash: string;
-        from: string;
-        to: string;
-        l1Token: string;
-        amount: BigNumber;
-      }
-    >;
+    ): EventFilter;
 
     WithdrawalFinalized(
       to: string | null,
       l1Token: string | null,
       amount: null
-    ): TypedEventFilter<
-      [string, string, BigNumber],
-      { to: string; l1Token: string; amount: BigNumber }
-    >;
+    ): EventFilter;
 
     WithdrawalFinalizedSharedBridge(
       chainId: BigNumberish | null,
       to: string | null,
       l1Token: string | null,
       amount: null
-    ): TypedEventFilter<
-      [BigNumber, string, string, BigNumber],
-      { chainId: BigNumber; to: string; l1Token: string; amount: BigNumber }
-    >;
+    ): EventFilter;
   };
 
   estimateGas: {

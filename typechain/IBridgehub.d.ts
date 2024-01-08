@@ -20,7 +20,6 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
 
 interface IBridgehubInterface extends ethers.utils.Interface {
   functions: {
@@ -232,39 +231,11 @@ export class IBridgehub extends Contract {
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  listeners(eventName?: string): Array<Listener>;
-  off(eventName: string, listener: Listener): this;
-  on(eventName: string, listener: Listener): this;
-  once(eventName: string, listener: Listener): this;
-  removeListener(eventName: string, listener: Listener): this;
-  removeAllListeners(eventName?: string): this;
-
-  listeners<T, G>(
-    eventFilter?: TypedEventFilter<T, G>
-  ): Array<TypedListener<T, G>>;
-  off<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  on<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  once<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  removeListener<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  removeAllListeners<T, G>(eventFilter: TypedEventFilter<T, G>): this;
-
-  queryFilter<T, G>(
-    event: TypedEventFilter<T, G>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEvent<T & G>>>;
+  on(event: EventFilter | string, listener: Listener): this;
+  once(event: EventFilter | string, listener: Listener): this;
+  addListener(eventName: EventFilter | string, listener: Listener): this;
+  removeAllListeners(eventName: EventFilter | string): this;
+  removeListener(eventName: any, listener: Listener): this;
 
   interface: IBridgehubInterface;
 
@@ -272,30 +243,46 @@ export class IBridgehub extends Contract {
     baseToken(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     "baseToken(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     baseTokenBridge(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     "baseTokenBridge(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
-    getName(overrides?: CallOverrides): Promise<[string]>;
+    getName(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "getName()"(overrides?: CallOverrides): Promise<[string]>;
+    "getName()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    governor(overrides?: CallOverrides): Promise<[string]>;
+    governor(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "governor()"(overrides?: CallOverrides): Promise<[string]>;
+    "governor()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
     l2TransactionBaseCost(
       _chainId: BigNumberish,
@@ -303,7 +290,9 @@ export class IBridgehub extends Contract {
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    ): Promise<{
+      0: BigNumber;
+    }>;
 
     "l2TransactionBaseCost(uint256,uint256,uint256,uint256)"(
       _chainId: BigNumberish,
@@ -311,7 +300,9 @@ export class IBridgehub extends Contract {
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    ): Promise<{
+      0: BigNumber;
+    }>;
 
     newChain(
       _chainId: BigNumberish,
@@ -374,7 +365,9 @@ export class IBridgehub extends Contract {
       _merkleProof: BytesLike[],
       _status: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     "proveL1ToL2TransactionStatus(uint256,bytes32,uint256,uint256,uint16,bytes32[],uint8)"(
       _chainId: BigNumberish,
@@ -385,7 +378,9 @@ export class IBridgehub extends Contract {
       _merkleProof: BytesLike[],
       _status: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     proveL2LogInclusion(
       _chainId: BigNumberish,
@@ -401,7 +396,9 @@ export class IBridgehub extends Contract {
       },
       _proof: BytesLike[],
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     "proveL2LogInclusion(uint256,uint256,uint256,tuple,bytes32[])"(
       _chainId: BigNumberish,
@@ -417,7 +414,9 @@ export class IBridgehub extends Contract {
       },
       _proof: BytesLike[],
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     proveL2MessageInclusion(
       _chainId: BigNumberish,
@@ -430,7 +429,9 @@ export class IBridgehub extends Contract {
       },
       _proof: BytesLike[],
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     "proveL2MessageInclusion(uint256,uint256,uint256,tuple,bytes32[])"(
       _chainId: BigNumberish,
@@ -443,7 +444,9 @@ export class IBridgehub extends Contract {
       },
       _proof: BytesLike[],
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     requestL2Transaction(
       _request: {
@@ -490,46 +493,66 @@ export class IBridgehub extends Contract {
     stateTransition(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     "stateTransition(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     stateTransitionIsRegistered(
       _stateTransition: string,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     "stateTransitionIsRegistered(address)"(
       _stateTransition: string,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     tokenBridgeIsRegistered(
       _baseTokenBridge: string,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     "tokenBridgeIsRegistered(address)"(
       _baseTokenBridge: string,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     tokenIsRegistered(
       _baseToken: string,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
     "tokenIsRegistered(address)"(
       _baseToken: string,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<{
+      0: boolean;
+    }>;
 
-    wethBridge(overrides?: CallOverrides): Promise<[string]>;
+    wethBridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "wethBridge()"(overrides?: CallOverrides): Promise<[string]>;
+    "wethBridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
   };
 
   baseToken(_chainId: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -1054,10 +1077,7 @@ export class IBridgehub extends Contract {
       chainId: BigNumberish | null,
       stateTransition: null,
       chainGovernance: string | null
-    ): TypedEventFilter<
-      [BigNumber, string, string],
-      { chainId: BigNumber; stateTransition: string; chainGovernance: string }
-    >;
+    ): EventFilter;
   };
 
   estimateGas: {

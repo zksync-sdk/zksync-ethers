@@ -19,7 +19,6 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
 
 interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   functions: {
@@ -207,62 +206,54 @@ export class IZkSyncStateTransition extends Contract {
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  listeners(eventName?: string): Array<Listener>;
-  off(eventName: string, listener: Listener): this;
-  on(eventName: string, listener: Listener): this;
-  once(eventName: string, listener: Listener): this;
-  removeListener(eventName: string, listener: Listener): this;
-  removeAllListeners(eventName?: string): this;
-
-  listeners<T, G>(
-    eventFilter?: TypedEventFilter<T, G>
-  ): Array<TypedListener<T, G>>;
-  off<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  on<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  once<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  removeListener<T, G>(
-    eventFilter: TypedEventFilter<T, G>,
-    listener: TypedListener<T, G>
-  ): this;
-  removeAllListeners<T, G>(eventFilter: TypedEventFilter<T, G>): this;
-
-  queryFilter<T, G>(
-    event: TypedEventFilter<T, G>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEvent<T & G>>>;
+  on(event: EventFilter | string, listener: Listener): this;
+  once(event: EventFilter | string, listener: Listener): this;
+  addListener(eventName: EventFilter | string, listener: Listener): this;
+  removeAllListeners(eventName: EventFilter | string): this;
+  removeListener(eventName: any, listener: Listener): this;
 
   interface: IZkSyncStateTransitionInterface;
 
   functions: {
-    bridgehub(overrides?: CallOverrides): Promise<[string]>;
+    bridgehub(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<[string]>;
+    "bridgehub()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    genesisUpgrade(overrides?: CallOverrides): Promise<[string]>;
+    genesisUpgrade(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "genesisUpgrade()"(overrides?: CallOverrides): Promise<[string]>;
+    "genesisUpgrade()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    getName(overrides?: CallOverrides): Promise<[string]>;
+    getName(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "getName()"(overrides?: CallOverrides): Promise<[string]>;
+    "getName()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    governor(overrides?: CallOverrides): Promise<[string]>;
+    governor(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "governor()"(overrides?: CallOverrides): Promise<[string]>;
+    "governor()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    initialCutHash(overrides?: CallOverrides): Promise<[string]>;
+    initialCutHash(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "initialCutHash()"(overrides?: CallOverrides): Promise<[string]>;
+    "initialCutHash()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
     initialize(
       _initalizeData: {
@@ -326,9 +317,13 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    protocolVersion(overrides?: CallOverrides): Promise<[BigNumber]>;
+    protocolVersion(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
 
-    "protocolVersion()"(overrides?: CallOverrides): Promise<[BigNumber]>;
+    "protocolVersion()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
 
     setNewVersionUpgrade(
       _cutData: {
@@ -395,20 +390,32 @@ export class IZkSyncStateTransition extends Contract {
     stateTransitionChain(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     "stateTransitionChain(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
-    storedBatchZero(overrides?: CallOverrides): Promise<[string]>;
+    storedBatchZero(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    "storedBatchZero()"(overrides?: CallOverrides): Promise<[string]>;
+    "storedBatchZero()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
-    totalChains(overrides?: CallOverrides): Promise<[BigNumber]>;
+    totalChains(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
 
-    "totalChains()"(overrides?: CallOverrides): Promise<[BigNumber]>;
+    "totalChains()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
 
     upgradeChainFromVersion(
       _chainId: BigNumberish,
@@ -445,12 +452,16 @@ export class IZkSyncStateTransition extends Contract {
     upgradeCutHash(
       _protocolVersion: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
 
     "upgradeCutHash(uint256)"(
       _protocolVersion: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<{
+      0: string;
+    }>;
   };
 
   bridgehub(overrides?: CallOverrides): Promise<string>;
@@ -875,10 +886,7 @@ export class IZkSyncStateTransition extends Contract {
     StateTransitionNewChain(
       _chainId: BigNumberish | null,
       _stateTransitionChainContract: string | null
-    ): TypedEventFilter<
-      [BigNumber, string],
-      { _chainId: BigNumber; _stateTransitionChainContract: string }
-    >;
+    ): EventFilter;
   };
 
   estimateGas: {

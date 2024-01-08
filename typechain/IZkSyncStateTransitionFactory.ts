@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IZkSyncStateTransition } from "../IZkSyncStateTransition";
+import type { IZkSyncStateTransition } from "./IZkSyncStateTransition";
 
-export class IZkSyncStateTransition__factory {
+export class IZkSyncStateTransitionFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

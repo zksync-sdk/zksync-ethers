@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { ITestnetErc20Token } from "../ITestnetErc20Token";
+import type { ITestnetErc20Token } from "./ITestnetErc20Token";
 
-export class ITestnetErc20Token__factory {
+export class ITestnetErc20TokenFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

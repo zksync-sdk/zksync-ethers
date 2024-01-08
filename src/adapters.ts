@@ -1,11 +1,11 @@
 import {BigNumber, BigNumberish, BytesLike, ethers} from "ethers";
-import {Ierc20__factory as IERC20Factory} from "../typechain/factories/Ierc20__factory";
-import {Il1Bridge__factory as IL1BridgeFactory} from "../typechain/factories/Il1Bridge__factory";
-import {Il2Bridge__factory as IL2BridgeFactory} from "../typechain/factories/Il2Bridge__factory";
-import {IBridgehub__factory as IBridgehubFactory} from "../typechain/factories/IBridgehub__factory";
+import {Ierc20Factory as IERC20Factory} from "../typechain/Ierc20Factory";
+import {Il1BridgeFactory as IL1BridgeFactory} from "../typechain/Il1BridgeFactory";
+import {Il2BridgeFactory as IL2BridgeFactory} from "../typechain/Il2BridgeFactory";
+import {IBridgehubFactory as IBridgehubFactory} from "../typechain/IBridgehubFactory";
 import {IBridgehub} from "../typechain/IBridgehub";
-import {INonceHolder__factory as INonceHolderFactory} from "../typechain/factories/INonceHolder__factory";
-import {IStateTransitionChain__factory as IStateTransitionChainFactory} from "../typechain/factories/IStateTransitionChain__factory";
+import {INonceHolderFactory} from "../typechain/INonceHolderFactory";
+import {IStateTransitionChainFactory} from "../typechain/IStateTransitionChainFactory";
 import {IStateTransitionChain} from "../typechain/IStateTransitionChain";
 import {Provider} from "./provider";
 import {

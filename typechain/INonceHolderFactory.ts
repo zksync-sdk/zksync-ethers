@@ -5,9 +5,9 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { INonceHolder } from "../INonceHolder";
+import type { INonceHolder } from "./INonceHolder";
 
-export class INonceHolder__factory {
+export class INonceHolderFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider

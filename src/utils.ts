@@ -12,8 +12,8 @@ import {
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Provider } from "./provider";
 import { EIP712Signer } from "./signer";
-import { Ierc20__factory as IERC20Factory } from "../typechain/factories/Ierc20__factory";
-import { Il1Bridge__factory as IL1BridgeFactory } from "../typechain/factories/Il1Bridge__factory";
+import { Ierc20Factory as IERC20Factory } from "../typechain/Ierc20Factory";
+import { Il1BridgeFactory as IL1BridgeFactory } from "../typechain/Il1BridgeFactory";
 import { AbiCoder } from "ethers/lib/utils";
 
 export * from "./paymaster-utils";
