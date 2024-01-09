@@ -203,6 +203,17 @@ function AdapterL1(Base) {
             else {
                 const mintValue = parseInt(depositTx.data.slice(2 + 8 + 3 * 64, 2 + 8 + 4 * 64), 16);
                 // we are depositing a non-eth and non-base token to a non-eth based chain. We go through the bridgehub, and give approval for both tokens
+                if (transaction.approveBaseERC20) {
+                    // We only request the allowance if the current one is not enough.
+                    const allowance = await this.getAllowanceL1(baseTokenAddress, baseTokenBridge);
+                    if (allowance.lt(mintValue)) {
+                        const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
+                            bridgeAddress: baseTokenBridge,
+                            ...transaction.approveBaseOverrides,
+                        });
+                        await approveTx.wait();
+                    }
+                }
                 if (transaction.approveERC20) {
                     let l2WethToken = ethers_1.ethers.constants.AddressZero;
                     try {
@@ -222,17 +233,6 @@ function AdapterL1(Base) {
                         const approveTx = await this.approveERC20(transaction.token, transaction.amount, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
-                        });
-                        await approveTx.wait();
-                    }
-                }
-                if (transaction.approveBaseERC20) {
-                    // We only request the allowance if the current one is not enough.
-                    const allowance = await this.getAllowanceL1(baseTokenAddress, baseTokenBridge);
-                    if (allowance.lt(mintValue)) {
-                        const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
-                            bridgeAddress: baseTokenBridge,
-                            ...transaction.approveBaseOverrides,
                         });
                         await approveTx.wait();
                     }
