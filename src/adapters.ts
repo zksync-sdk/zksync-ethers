@@ -200,6 +200,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
+            approveBaseOverrides?: ethers.Overrides;
             customBridgeData?: BytesLike;
         }): Promise<PriorityOpResponse> {
             const depositTx = await this.getDepositTx(transaction);
@@ -268,7 +269,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                             mintValue,
                             {
                                 bridgeAddress: baseTokenBridge,
-                                ...transaction.approveOverrides,
+                                ...transaction.approveBaseOverrides,
                             },
                         );
                         await approveTx.wait();
@@ -296,7 +297,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                             mintValue,
                             {
                                 bridgeAddress: baseTokenBridge,
-                                ...transaction.approveOverrides,
+                                ...transaction.approveBaseOverrides,
                             },
                         );
                         await approveTx.wait();
@@ -349,7 +350,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                             mintValue,
                             {
                                 bridgeAddress: baseTokenBridge,
-                                ...transaction.approveOverrides,
+                                ...transaction.approveBaseOverrides,
                             },
                         );
                         await approveTx.wait();
