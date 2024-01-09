@@ -43,6 +43,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
+            approveBaseOverrides?: ethers.Overrides;
             customBridgeData?: BytesLike;
         }): Promise<PriorityOpResponse>;
         estimateGasDeposit(transaction: {

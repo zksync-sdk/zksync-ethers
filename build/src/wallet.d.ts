@@ -66,6 +66,7 @@ declare const Wallet_base: {
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
+            approveBaseOverrides?: ethers.Overrides;
             customBridgeData?: ethers.utils.BytesLike;
         }): Promise<import("./types").PriorityOpResponse>;
         estimateGasDeposit(transaction: {

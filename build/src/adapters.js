@@ -170,7 +170,7 @@ function AdapterL1(Base) {
                     if (allowance.lt(mintValue)) {
                         const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
                             bridgeAddress: baseTokenBridge,
-                            ...transaction.approveOverrides,
+                            ...transaction.approveBaseOverrides,
                         });
                         await approveTx.wait();
                     }
@@ -189,7 +189,7 @@ function AdapterL1(Base) {
                     if (allowance.lt(mintValue)) {
                         const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
                             bridgeAddress: baseTokenBridge,
-                            ...transaction.approveOverrides,
+                            ...transaction.approveBaseOverrides,
                         });
                         await approveTx.wait();
                     }
@@ -232,7 +232,7 @@ function AdapterL1(Base) {
                     if (allowance.lt(mintValue)) {
                         const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
                             bridgeAddress: baseTokenBridge,
-                            ...transaction.approveOverrides,
+                            ...transaction.approveBaseOverrides,
                         });
                         await approveTx.wait();
                     }

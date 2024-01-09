@@ -105,6 +105,7 @@ declare const L1Signer_base: {
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
+            approveBaseOverrides?: ethers.Overrides;
             customBridgeData?: ethers.utils.BytesLike;
         }): Promise<import("./types").PriorityOpResponse>;
         estimateGasDeposit(transaction: {
@@ -286,6 +287,7 @@ declare const L1VoidSigner_base: {
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
+            approveBaseOverrides?: ethers.Overrides;
             customBridgeData?: ethers.utils.BytesLike;
         }): Promise<import("./types").PriorityOpResponse>;
         estimateGasDeposit(transaction: {
