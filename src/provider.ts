@@ -544,12 +544,16 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
+        wethBridgeL1?: Address;
+        wethBridgeL2?: Address;
     };
 
     override contractAddresses(): {
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
+        wethBridgeL1?: Address;
+        wethBridgeL2?: Address;
     } {
         return this._contractAddresses;
     }
@@ -608,12 +612,16 @@ export class BrowserProvider extends JsonRpcApiProvider(ethers.BrowserProvider) 
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
+        wethBridgeL1?: Address;
+        wethBridgeL2?: Address;
     };
 
     override contractAddresses(): {
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
+        wethBridgeL1?: Address;
+        wethBridgeL2?: Address;
     } {
         return this._contractAddresses;
     }
