@@ -14,7 +14,7 @@ on:
         options:
           - latest
           - beta
-          - legacy-ethers-v5
+          - legacy-ethers-v5-latest
           - legacy-ethers-v5-beta
 jobs:
   zksync:
