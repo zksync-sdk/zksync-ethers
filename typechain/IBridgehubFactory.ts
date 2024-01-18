@@ -22,14 +22,14 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint64",
+        internalType: "uint256",
         name: "chainId",
-        type: "uint64",
+        type: "uint256",
       },
       {
         indexed: false,
         internalType: "address",
-        name: "stateTransition",
+        name: "stateTransitionManager",
         type: "address",
       },
       {
@@ -41,6 +41,45 @@ const _abi = [
     ],
     name: "NewChain",
     type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_stateTransitionManager",
+        type: "address",
+      },
+    ],
+    name: "addStateTransitionManager",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+    ],
+    name: "addToken",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_tokenBridge",
+        type: "address",
+      },
+    ],
+    name: "addTokenBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
@@ -81,21 +120,63 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "getName",
-    outputs: [
+    inputs: [
       {
-        internalType: "string",
-        name: "",
-        type: "string",
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_stateTransitionManager",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_baseToken",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_baseTokenBridge",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_salt",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_governor",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "_initData",
+        type: "bytes",
       },
     ],
-    stateMutability: "view",
+    name: "createNewChain",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "chainId",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
-    inputs: [],
-    name: "governor",
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+    ],
+    name: "getStateTransition",
     outputs: [
       {
         internalType: "address",
@@ -138,94 +219,6 @@ const _abi = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_stateTransition",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_baseToken",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_baseTokenBridge",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_salt",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_governor",
-        type: "address",
-      },
-      {
-        internalType: "bytes",
-        name: "_initData",
-        type: "bytes",
-      },
-    ],
-    name: "newChain",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "chainId",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_stateTransition",
-        type: "address",
-      },
-    ],
-    name: "newStateTransition",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_token",
-        type: "address",
-      },
-    ],
-    name: "newToken",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_tokenBridge",
-        type: "address",
-      },
-    ],
-    name: "newTokenBridge",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -407,6 +400,19 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "_stateTransitionManager",
+        type: "address",
+      },
+    ],
+    name: "removeStateTransitionManager",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         components: [
           {
             internalType: "uint256",
@@ -414,19 +420,14 @@ const _abi = [
             type: "uint256",
           },
           {
-            internalType: "address",
-            name: "payer",
-            type: "address",
+            internalType: "uint256",
+            name: "mintValue",
+            type: "uint256",
           },
           {
             internalType: "address",
             name: "l2Contract",
             type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "mintValue",
-            type: "uint256",
           },
           {
             internalType: "uint256",
@@ -459,12 +460,78 @@ const _abi = [
             type: "address",
           },
         ],
-        internalType: "struct IBridgehub.L2TransactionRequest",
+        internalType: "struct L2TransactionRequestDirect",
         name: "_request",
         type: "tuple",
       },
     ],
     name: "requestL2Transaction",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "canonicalTxHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "chainId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "mintValue",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l2Value",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l2GasLimit",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l2GasPerPubdataByteLimit",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "refundRecipient",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "secondBridgeAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "secondBridgeValue",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "secondBridgeCalldata",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct L2TransactionRequestTwoBridgesOuter",
+        name: "_request",
+        type: "tuple",
+      },
+    ],
+    name: "requestL2TransactionTwoBridges",
     outputs: [
       {
         internalType: "bytes32",
@@ -496,7 +563,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "stateTransition",
+    name: "stateTransitionManager",
     outputs: [
       {
         internalType: "address",
@@ -511,11 +578,11 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "_stateTransition",
+        name: "_stateTransitionManager",
         type: "address",
       },
     ],
-    name: "stateTransitionIsRegistered",
+    name: "stateTransitionManagerIsRegistered",
     outputs: [
       {
         internalType: "bool",
