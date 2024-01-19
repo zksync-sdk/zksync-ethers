@@ -259,6 +259,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     await this._signerL1().sendTransaction(depositTx),
                 );
             } else if (transaction.token == ETH_ADDRESS) {
+                // Depositing ETH into a non-ETH based chain.
+                // Use requestL2TransactionTwoBridges, secondBridge is the wETH bridge.
+                // Give approval for the base token, and transfer ether value to the wethBridge (and not weth).
+
                 // kl todo the numbers are of for this method because we started using struct. Find the values.
                 const mintValue = parseInt(depositTx.data.slice(2+8+3*64, 2+8+4*64), 16);
                 // we are depositing eth into a non-eth based chain. We go through the weth bridge. 
@@ -466,8 +470,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
 
             if ((token == ETH_ADDRESS) && (baseTokenAddress == ETH_ADDRESS_IN_CONTRACTS)) {
-                // we are depositing Eth to an Eth based chain
-                // we can call the bridgehub directly, like we did with the diamondProxy
+                // Depositing ETH to an ETH based chain.
+                // Call the BridgeHub directly, like it's done with the DiamondProxy.
                 overrides.value ??= baseCost.add(operatorTip).add(amount);
 
                 return {
@@ -481,24 +485,24 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     ...tx,
                 };
             } else if (baseTokenAddress == ETH_ADDRESS_IN_CONTRACTS) {
-                // we are depositing some token to an Eth based chain
-                // we can use the erc20 bridge as we did so before
+                // Depositing token to an ETH based chain.
+                // Use the ERC20 bridge as done before.
                 overrides.value ??= baseCost.add(operatorTip);
                 await checkBaseCost(baseCost, overrides.value);
 
-                let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
+                const refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
                 const args: [BigNumberish, Address, Address, BigNumberish, BigNumberish, BigNumberish, BigNumberish, Address] = [
                     (await this._providerL2().getNetwork()).chainId,
                     to,
                     token,
-                    await overrides.value, // TODO CHANGE THIS
+                    BigNumber.from(0),
                     amount,
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
                     refundRecipient,
                 ];
 
-                // check if we're depositing weth
+                // Check whether wETH is being deposited.
                 let l2WethToken = ethers.constants.AddressZero;
                 try {
                     l2WethToken = await bridgeContracts.weth.l2TokenAddress(tx.token);
@@ -510,17 +514,18 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                         : bridgeContracts.erc20;
                 return await bridge.populateTransaction.deposit(...args, overrides);
             } else if (token == ETH_ADDRESS) {
-                // we are depositing eth into a non-eth based chain. 
-                // we use requestL2TransactionTwoBridges, secondBridge is the Weth bridge. We give approval for the base token, and transfer ether value to the wethBridge ( and not weth)
+                // Depositing ETH into a non-ETH based chain.
+                // Use requestL2TransactionTwoBridges, secondBridge is the wETH bridge.
+                // Give approval for the base token, and transfer ether value to the wethBridge (and not weth).
                 overrides.value ??= amount;
-                let mintValue = baseCost.add(operatorTip); // of the base token, not eth
+                const mintValue = baseCost.add(operatorTip); // of the base token, not eth
                 await checkBaseCost(baseCost, mintValue);
                 const secondBridgeCalldata = ethers.utils.defaultAbiCoder.encode(
                     ["address", "uint256", "address"],
                     [ETH_ADDRESS_IN_CONTRACTS, amount, to]
                 );
                 const wethBridgeAddress = await bridgeContracts.weth.address;
-                let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
+                const refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
                 const args: {chainId: BigNumberish; mintValue: BigNumberish; l2Value: BigNumberish; l2GasLimit: BigNumberish; l2GasPerPubdataByteLimit: BigNumberish; refundRecipient: string; secondBridgeAddress: string; secondBridgeValue: BigNumberish; secondBridgeCalldata: BytesLike} = {
                     chainId: (await this._providerL2().getNetwork()).chainId,
                     mintValue, 
@@ -536,8 +541,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 return await bridgehub.populateTransaction.requestL2TransactionTwoBridges(args, overrides);
             } else if (token == baseTokenAddress){
                 overrides.value ??= 0;
-                // we are bridging the base token to a non-eth based chain. We go through the bridgehub. 
-                // we have to give approvals for the baseTokenBridge
+                // Depositing the base token to a non-eth based chain.
+                // Goes through the BridgeHub.
+                // Have to give approvals for the baseTokenBridge.
                 return {
                     contractAddress: to,
                     calldata: "0x",
@@ -546,10 +552,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     ...tx,
                 };
             } else {
-                // we are bridging not eth and not the base token to a non-eth based chain
-                // we use requestL2TransactionTwoBridges, secondBridge is the token's bridge
-                // we have to give approvals for the baseTokenBridge and the token's bridge
-                let mintValue = baseCost.add(operatorTip);
+                // Depositing non-ETH and not the base token to a non-ETH based chain.
+                // Use requestL2TransactionTwoBridges, secondBridge is the token's bridge.
+                // Have to give approvals for the baseTokenBridge and the token's bridge
+                const mintValue = baseCost.add(operatorTip);
                 await checkBaseCost(baseCost, mintValue);
                 overrides.value ??= 0;
                 const secondBridgeCalldata = ethers.utils.defaultAbiCoder.encode(
@@ -557,7 +563,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     [token, amount, to]
                 );
                                         
-                let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
+                const refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
                 const args: {chainId: BigNumberish; mintValue: BigNumberish; l2Value: BigNumberish; l2GasLimit: BigNumberish; l2GasPerPubdataByteLimit: BigNumberish; refundRecipient: string; secondBridgeAddress: string; secondBridgeValue: BigNumberish; secondBridgeCalldata: BytesLike} = {
                     chainId: (await this._providerL2().getNetwork()).chainId,
                     mintValue,// of the base token
