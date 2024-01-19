@@ -30,7 +30,7 @@ export const L2_BRIDGE_ABI = new utils.Interface(require("../abi/IL2Bridge.json"
 export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder.json"));
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
-// in the contracts we can't use the zero address, we we use one
+// in the contracts the zero address can not be used, use one instead
 export const ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
 export const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
 export const CONTRACT_DEPLOYER_ADDRESS = "0x0000000000000000000000000000000000008006";
