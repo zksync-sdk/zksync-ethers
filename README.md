@@ -76,7 +76,7 @@ const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 ```ts
 const ethBalance = await wallet.getBalance(); // balance on zkSync Era network
 
-const ethBalanceL1 = await wallet.getBalanceL1(); // balance on goerli network
+const ethBalanceL1 = await wallet.getBalanceL1(); // balance on Sepolia network
 ```
 
 ### Transfer funds
