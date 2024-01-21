@@ -9,9 +9,6 @@ import {
     PaymasterParams,
 } from "./types";
 
-/** @deprecated This ABI is here for backward compatibility - please use utils.PAYMASTER_FLOW_ABI instead */
-export const IPaymasterFlow = new ethers.Interface(require("../abi/IPaymasterFlow.json"));
-
 export function getApprovalBasedPaymasterInput(paymasterInput: ApprovalBasedPaymasterInput): BytesLike {
     return PAYMASTER_FLOW_ABI.encodeFunctionData("approvalBased", [
         paymasterInput.token,
