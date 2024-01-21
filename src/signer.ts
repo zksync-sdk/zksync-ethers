@@ -36,7 +36,7 @@ export class EIP712Signer {
     }
 
     static getSignInput(transaction: TransactionRequest) {
-        const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice;
+        const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0n;
         const maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
         const gasPerPubdataByteLimit =
             transaction.customData?.gasPerPubdata || DEFAULT_GAS_PER_PUBDATA_LIMIT;
@@ -44,14 +44,14 @@ export class EIP712Signer {
             txType: transaction.type,
             from: transaction.from,
             to: transaction.to,
-            gasLimit: transaction.gasLimit,
+            gasLimit: transaction.gasLimit || 0n,
             gasPerPubdataByteLimit: gasPerPubdataByteLimit,
             maxFeePerGas,
             maxPriorityFeePerGas,
             paymaster: transaction.customData?.paymasterParams?.paymaster || ethers.ZeroAddress,
-            nonce: transaction.nonce,
-            value: transaction.value,
-            data: transaction.data,
+            nonce: transaction.nonce || 0,
+            value: transaction.value || 0n,
+            data: transaction.data || "0x",
             factoryDeps: transaction.customData?.factoryDeps?.map((dep: any) => hashBytecode(dep)) || [],
             paymasterInput: transaction.customData?.paymasterParams?.paymasterInput || "0x",
         };
