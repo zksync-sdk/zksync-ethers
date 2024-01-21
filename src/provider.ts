@@ -605,6 +605,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     }
 }
 
+/* c8 ignore start */
 export class BrowserProvider extends JsonRpcApiProvider(ethers.BrowserProvider) {
     #request: (method: string, params: Array<any> | Record<string, any>) => Promise<any>;
 
@@ -728,3 +729,4 @@ export class BrowserProvider extends JsonRpcApiProvider(ethers.BrowserProvider) 
         return gas > metamaskMinimum || isEIP712 ? gas : metamaskMinimum;
     }
 }
+/* c8 ignore stop */

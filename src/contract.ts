@@ -1,24 +1,26 @@
 import {
-    BytesLike,
-    InterfaceAbi,
-    Interface,
-    ethers,
-    ContractRunner,
     BaseContract,
-    ContractTransactionResponse,
+    BytesLike,
     ContractDeployTransaction,
     ContractMethodArgs,
+    ContractRunner,
+    ContractTransactionResponse,
+    ethers,
+    Interface,
+    InterfaceAbi,
 } from "ethers";
 import {
-    hashBytecode,
     CONTRACT_DEPLOYER,
     CONTRACT_DEPLOYER_ADDRESS,
+    DEFAULT_GAS_PER_PUBDATA_LIMIT,
     EIP712_TX_TYPE,
     getDeployedContracts,
-    DEFAULT_GAS_PER_PUBDATA_LIMIT,
+    hashBytecode,
 } from "./utils";
-import { AccountAbstractionVersion, DeploymentType } from "./types";
-export { Contract } from "ethers";
+import {AccountAbstractionVersion, DeploymentType} from "./types";
+
+/* c8 ignore next */
+export {Contract} from "ethers";
 
 export class ContractFactory<
     A extends Array<any> = Array<any>,
@@ -67,9 +69,8 @@ export class ContractFactory<
             }
         }
 
-        if (
-            overrides.customData &&
-            overrides.customData.factoryDeps &&
+        if (overrides.customData &&
+            overrides.customData.factoryDeps != null &&
             !Array.isArray(overrides.customData.factoryDeps)
         ) {
             throw new Error("Invalid 'factoryDeps' format. It should be an array of bytecodes.");
@@ -81,7 +82,7 @@ export class ContractFactory<
     ): Promise<ContractDeployTransaction> {
         let constructorArgs: any[];
         let overrides: ethers.Overrides = {
-            customData: { factoryDeps: [], salt: ethers.ZeroHash },
+            customData: {factoryDeps: [], salt: ethers.ZeroHash},
         };
 
         // The overrides will be popped out in this call:
@@ -117,7 +118,7 @@ export class ContractFactory<
         };
 
         tx.customData ??= {};
-        tx.customData.factoryDeps ??= overrides.customData.factoryDeps || [];
+        tx.customData.factoryDeps ??= overrides.customData.factoryDeps;
         tx.customData.gasPerPubdata ??= DEFAULT_GAS_PER_PUBDATA_LIMIT;
 
         // The number of factory deps is relatively low, so it is efficient enough.
@@ -168,9 +169,9 @@ export class ContractFactory<
         ...args: ContractMethodArgs<A>
     ): Promise<
         BaseContract & { deploymentTransaction(): ContractTransactionResponse } & Omit<
-                I,
-                keyof BaseContract
-            >
+        I,
+        keyof BaseContract
+    >
     > {
         const contract = await super.deploy(...args);
         const deployTxReceipt = await this.runner?.provider?.getTransactionReceipt(
@@ -188,9 +189,9 @@ export class ContractFactory<
             contract.interface.fragments,
             contract.runner,
         ) as BaseContract & { deploymentTransaction(): ContractTransactionResponse } & Omit<
-                I,
-                keyof BaseContract
-            >;
+            I,
+            keyof BaseContract
+        >;
 
         // @ts-ignore
         contractWithCorrectAddress.deploymentTransaction = () => contract.deploymentTransaction();

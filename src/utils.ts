@@ -1,4 +1,4 @@
-import { AbiCoder, BigNumberish, BytesLike, ethers, SignatureLike } from "ethers";
+import {AbiCoder, BigNumberish, BytesLike, ethers, SignatureLike} from "ethers";
 import {
     Address,
     DeploymentInfo,
@@ -9,9 +9,9 @@ import {
     PriorityQueueType,
     TransactionLike,
 } from "./types";
-import { Provider } from "./provider";
-import { EIP712Signer } from "./signer";
-import { IERC20__factory, IL1Bridge__factory } from "../typechain";
+import {Provider} from "./provider";
+import {EIP712Signer} from "./signer";
+import {IERC20__factory, IL1Bridge__factory} from "../typechain";
 
 export * from "./paymaster-utils";
 
@@ -179,7 +179,7 @@ export function serializeEip712(transaction: TransactionLike, signature?: ethers
 
     if (signature) {
         const sig = ethers.Signature.from(signature);
-        fields.push(sig.yParity);
+        fields.push(ethers.toBeArray(sig.yParity));
         fields.push(ethers.toBeArray(sig.r));
         fields.push(ethers.toBeArray(sig.s));
     } else {
@@ -256,15 +256,15 @@ export function parseEip712(payload: ethers.BytesLike): TransactionLike {
     }
 
     function handleNumber(value: string): bigint {
-        if (value === "0x") {
+        if (!value || value === "0x") {
             return 0n;
         }
         return BigInt(value);
     }
 
-    function arrayToPaymasterParams(arr: string[]): PaymasterParams | undefined {
+    function arrayToPaymasterParams(arr: string[]): PaymasterParams | null {
         if (arr.length == 0) {
-            return undefined;
+            return null;
         }
         if (arr.length != 2) {
             throw new Error(
@@ -480,9 +480,7 @@ async function isSignatureCorrect(
     }
 }
 
-// Returns `true` or `false` depending on whether the account abstraction's
-// signature is correct. Note, that while currently it does not do any `async` actions.
-// in the future it will. That's why the `Promise<boolean>` is returned.
+// Returns `true` or `false` depending on whether the account abstraction's signature is correct.
 export async function isMessageSignatureCorrect(
     provider: Provider,
     address: string,
@@ -493,9 +491,7 @@ export async function isMessageSignatureCorrect(
     return await isSignatureCorrect(provider, address, msgHash, signature);
 }
 
-// Returns `true` or `false` depending on whether the account abstraction's
-// EIP712 signature is correct. Note, that while currently it does not do any `async` actions.
-// in the future it will. That's why the `Promise<boolean>` is returned.
+// Returns `true` or `false` depending on whether the account abstraction's EIP712 signature is correct.
 export async function isTypedDataSignatureCorrect(
     provider: Provider,
     address: string,
