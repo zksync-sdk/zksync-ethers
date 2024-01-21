@@ -4,7 +4,7 @@ import { DEFAULT_GAS_PER_PUBDATA_LIMIT, EIP712_TX_TYPE, hashBytecode, serializeE
 import { Address, Signature, TransactionLike, TransactionRequest, TransactionResponse } from "./types";
 import { AdapterL1, AdapterL2 } from "./adapters";
 
-export const eip712Types = {
+export const EIP712_TYPES = {
     Transaction: [
         { name: "txType", type: "uint256" },
         { name: "from", type: "uint256" },
@@ -60,7 +60,7 @@ export class EIP712Signer {
     async sign(transaction: TransactionRequest): Promise<Signature> {
         return await this.ethSigner.signTypedData(
             await this.eip712Domain,
-            eip712Types,
+            EIP712_TYPES,
             EIP712Signer.getSignInput(transaction),
         );
     }
@@ -74,7 +74,7 @@ export class EIP712Signer {
             version: "2",
             chainId: transaction.chainId,
         };
-        return ethers.TypedDataEncoder.hash(domain, eip712Types, EIP712Signer.getSignInput(transaction));
+        return ethers.TypedDataEncoder.hash(domain, EIP712_TYPES, EIP712Signer.getSignInput(transaction));
     }
 }
 
