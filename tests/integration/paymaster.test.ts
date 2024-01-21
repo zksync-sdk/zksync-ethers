@@ -15,7 +15,7 @@ describe("Paymaster", () => {
     const paymasterPath = "../files/Paymaster.json";
 
     describe("#ApprovalBased", () => {
-        it("use ERC20 token to pay transaction fee", async () => {
+        it("use the ERC20 token to pay transaction fee", async () => {
             const INIT_MINT_AMOUNT = 10;
             const MINT_AMOUNT = 3;
             const MINIMAL_ALLOWANCE = 1;
