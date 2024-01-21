@@ -33,7 +33,7 @@
         "@types/node": "^20.5.2",
         "c8": "^8.0.1",
         "chai": "^4.3.10",
-        "ethers": "6.9.0",
+        "ethers": "6.7.1",
         "mocha": "^10.2.0",
         "ncp": "^2.0.0",
         "prettier": "3.0.3",
@@ -42,13 +42,13 @@
         "typescript": "^5.1.6"
     },
     "peerDependencies": {
-        "ethers": "^6.9.0"
+        "ethers": "^6.7.1"
     },
     "scripts": {
-        "test:prepare": "cd  tests/setup/ && ./setup.sh && cd ../..",
-        "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test:prepare": "ts-node tests/setup.ts",
+        "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
         "test:wait": "ts-node tests/wait.ts",
-        "test": "mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test": "mocha -r ts-node/register tests/**/*.test.ts",
         "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
         "lint": "prettier . --write",
         "lint:check": "prettier . --check",
