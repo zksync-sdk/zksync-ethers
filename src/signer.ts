@@ -74,7 +74,11 @@ export class EIP712Signer {
             version: "2",
             chainId: transaction.chainId,
         };
-        return ethers.TypedDataEncoder.hash(domain, EIP712_TYPES, EIP712Signer.getSignInput(transaction));
+        return ethers.TypedDataEncoder.hash(
+            domain,
+            EIP712_TYPES,
+            EIP712Signer.getSignInput(transaction),
+        );
     }
 
     async getDomain(): Promise<ethers.TypedDataDomain> {
@@ -115,10 +119,13 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
             transaction.type = 0;
         }
         if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-            return await super.sendTransaction(transaction) as TransactionResponse;
+            return (await super.sendTransaction(transaction)) as TransactionResponse;
         } else {
             const address = await this.getAddress();
-            const from = transaction.from == null ? address : await ethers.resolveAddress(transaction.from as Address);
+            const from =
+                transaction.from == null
+                    ? address
+                    : await ethers.resolveAddress(transaction.from as Address);
             if (from.toLowerCase() != address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }
@@ -203,10 +210,13 @@ export class VoidSigner extends AdapterL2(ethers.VoidSigner) {
             transaction.type = 0;
         }
         if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-            return await super.sendTransaction(transaction) as TransactionResponse;
+            return (await super.sendTransaction(transaction)) as TransactionResponse;
         } else {
             const address = await this.getAddress();
-            const from = transaction.from == null ? address : await ethers.resolveAddress(transaction.from as Address);
+            const from =
+                transaction.from == null
+                    ? address
+                    : await ethers.resolveAddress(transaction.from as Address);
             if (from.toLowerCase() != address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }

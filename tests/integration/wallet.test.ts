@@ -1,10 +1,10 @@
 import * as chai from "chai";
 import "../custom-matchers";
-import {Provider, types, utils, Wallet} from "../../src";
-import {ethers} from "ethers";
+import { Provider, types, utils, Wallet } from "../../src";
+import { ethers } from "ethers";
 import * as fs from "fs";
 
-const {expect} = chai;
+const { expect } = chai;
 
 describe("Wallet", () => {
     const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
@@ -87,14 +87,16 @@ describe("Wallet", () => {
             try {
                 await wallet.approveERC20(utils.ETH_ADDRESS, 5);
             } catch (e) {
-                expect(e.message).to.be.equal("ETH token can't be approved. The address of the token does not exist on L1.")
+                expect(e.message).to.be.equal(
+                    "ETH token can't be approved. The address of the token does not exist on L1.",
+                );
             }
         }).timeout(5_000);
     });
 
     describe("#getBaseCost()", () => {
         it("should return a base cost of L1 transaction", async () => {
-            const result = await wallet.getBaseCost({gasLimit: 100_000});
+            const result = await wallet.getBaseCost({ gasLimit: 100_000 });
             expect(result).not.to.be.null;
         });
     });
@@ -140,7 +142,7 @@ describe("Wallet", () => {
             try {
                 wallet.ethWallet();
             } catch (e) {
-                expect(e.message).to.be.equal("L1 provider missing: use `connectToL1` to specify")
+                expect(e.message).to.be.equal("L1 provider missing: use `connectToL1` to specify");
             }
         });
     });
@@ -410,9 +412,8 @@ describe("Wallet", () => {
             try {
                 await wallet.claimFailedDeposit(tx.hash);
             } catch (e) {
-                expect(e.message).to.be.equal("Cannot claim successful deposit")
+                expect(e.message).to.be.equal("Cannot claim successful deposit");
             }
-
         }).timeout(30_000);
     });
 
@@ -462,16 +463,19 @@ describe("Wallet", () => {
             expect(result).to.be.deep.equal(FEE_DATA);
         }).timeout(10_000);
 
-
         it("should throw an error when there is not enough balance for the deposit", async () => {
             try {
-                const randomWallet = new Wallet(ethers.Wallet.createRandom().privateKey, provider, ethProvider);
+                const randomWallet = new Wallet(
+                    ethers.Wallet.createRandom().privateKey,
+                    provider,
+                    ethProvider,
+                );
                 await randomWallet.getFullRequiredDepositFee({
                     token: DAI_L1,
                     to: await wallet.getAddress(),
                 });
             } catch (e) {
-                expect(e.message).to.include("Not enough balance for deposit.")
+                expect(e.message).to.include("Not enough balance for deposit.");
             }
         }).timeout(10_000);
     });
@@ -596,18 +600,20 @@ describe("Wallet", () => {
             const result = await wallet.signTransaction({
                 type: 2,
                 to: RECEIVER,
-                value: BigInt(7_000_000_000)
+                value: BigInt(7_000_000_000),
             });
-            expect(result).to.be.equal("0x02f869808080840ee6b2808094a61464658afeaf65cccaafd3a512b69a83b776188501a13b860080c001a0ea6c3f7588b7b4e5652e0372aa09d772b59689ee0e51445b3b7d69bffd5d9e77a046387a8dfa24ab22d3427cd85035b91abc28e1876813873ea0b41f2bdc9ef778");
+            expect(result).to.be.equal(
+                "0x02f869808080840ee6b2808094a61464658afeaf65cccaafd3a512b69a83b776188501a13b860080c001a0ea6c3f7588b7b4e5652e0372aa09d772b59689ee0e51445b3b7d69bffd5d9e77a046387a8dfa24ab22d3427cd85035b91abc28e1876813873ea0b41f2bdc9ef778",
+            );
         }).timeout(25_000);
 
         it("should return a signed EIP712 transaction", async () => {
             const result = await wallet.signTransaction({
                 type: utils.EIP712_TX_TYPE,
                 to: RECEIVER,
-                value: ethers.parseEther("1")
+                value: ethers.parseEther("1"),
             });
-            expect(result).not.to.be.null
+            expect(result).not.to.be.null;
         }).timeout(25_000);
 
         it("should throw an error when `tx.from` is mismatched from private key", async () => {
@@ -616,10 +622,10 @@ describe("Wallet", () => {
                     type: utils.EIP712_TX_TYPE,
                     from: RECEIVER,
                     to: RECEIVER,
-                    value: 7_000_000_000
-                })
+                    value: 7_000_000_000,
+                });
             } catch (e) {
-                expect(e.message).to.be.equal("Transaction `from` address mismatch")
+                expect(e.message).to.be.equal("Transaction `from` address mismatch");
             }
         }).timeout(25_000);
     });
@@ -627,22 +633,22 @@ describe("Wallet", () => {
     describe("#populateTransaction()", () => {
         it("should return a populated transaction", async () => {
             const TX = {
-                to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+                to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
                 value: BigInt(7_000_000_000),
                 type: utils.EIP712_TX_TYPE,
-                from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 gasLimit: BigInt(154_379),
                 chainId: BigInt(270),
-                data: '0x',
-                customData: {gasPerPubdata: 50_000, factoryDeps: []},
-                gasPrice: BigInt(250_000_000)
-            }
+                data: "0x",
+                customData: { gasPerPubdata: 50_000, factoryDeps: [] },
+                gasPrice: BigInt(250_000_000),
+            };
 
             const result = await wallet.populateTransaction({
                 type: utils.EIP712_TX_TYPE,
                 to: RECEIVER,
-                value: 7_000_000_000
-            })
+                value: 7_000_000_000,
+            });
             expect(result).to.be.deepEqualExcluding(TX, ["nonce"]);
         }).timeout(25_000);
     });

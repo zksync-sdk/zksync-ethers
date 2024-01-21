@@ -299,7 +299,7 @@ export class Transaction extends ethers.Transaction {
             if (tx.value != null) result.value = tx.value;
             if (tx.chainId != null) result.chainId = tx.chainId;
             if (tx.signature != null) result.signature = EthersSignature.from(tx.signature);
-            result.accessList = null
+            result.accessList = null;
 
             if (tx.from != null) {
                 assertArgument(result.isSigned(), "unsigned transaction cannot define from", "tx", tx);

@@ -17,10 +17,10 @@ import {
     getDeployedContracts,
     hashBytecode,
 } from "./utils";
-import {AccountAbstractionVersion, DeploymentType} from "./types";
+import { AccountAbstractionVersion, DeploymentType } from "./types";
 
 /* c8 ignore next */
-export {Contract} from "ethers";
+export { Contract } from "ethers";
 
 export class ContractFactory<
     A extends Array<any> = Array<any>,
@@ -69,7 +69,8 @@ export class ContractFactory<
             }
         }
 
-        if (overrides.customData &&
+        if (
+            overrides.customData &&
             overrides.customData.factoryDeps != null &&
             !Array.isArray(overrides.customData.factoryDeps)
         ) {
@@ -82,7 +83,7 @@ export class ContractFactory<
     ): Promise<ContractDeployTransaction> {
         let constructorArgs: any[];
         let overrides: ethers.Overrides = {
-            customData: {factoryDeps: [], salt: ethers.ZeroHash},
+            customData: { factoryDeps: [], salt: ethers.ZeroHash },
         };
 
         // The overrides will be popped out in this call:
@@ -169,9 +170,9 @@ export class ContractFactory<
         ...args: ContractMethodArgs<A>
     ): Promise<
         BaseContract & { deploymentTransaction(): ContractTransactionResponse } & Omit<
-        I,
-        keyof BaseContract
-    >
+                I,
+                keyof BaseContract
+            >
     > {
         const contract = await super.deploy(...args);
         const deployTxReceipt = await this.runner?.provider?.getTransactionReceipt(
@@ -189,9 +190,9 @@ export class ContractFactory<
             contract.interface.fragments,
             contract.runner,
         ) as BaseContract & { deploymentTransaction(): ContractTransactionResponse } & Omit<
-            I,
-            keyof BaseContract
-        >;
+                I,
+                keyof BaseContract
+            >;
 
         // @ts-ignore
         contractWithCorrectAddress.deploymentTransaction = () => contract.deploymentTransaction();

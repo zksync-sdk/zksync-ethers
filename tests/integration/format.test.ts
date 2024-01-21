@@ -1,9 +1,9 @@
 import * as chai from "chai";
 import "../custom-matchers";
-import {Provider, types} from "../../src";
-import {ethers} from "ethers";
+import { Provider, types } from "../../src";
+import { ethers } from "ethers";
 
-const {expect} = chai;
+const { expect } = chai;
 
 describe("format", () => {
     const provider = Provider.getDefaultProvider(types.Network.Localhost);
@@ -17,8 +17,8 @@ describe("format", () => {
                 gasLimit: BigInt(21_000),
                 value: BigInt(1_000_000),
                 nonce: BigInt(0),
-                data: "0x"
-            }
+                data: "0x",
+            };
             const result = provider._wrapTransactionResponse(value, await provider.getNetwork());
             expect(result.to).to.be.equal(ethers.ZeroAddress);
         });
@@ -32,8 +32,8 @@ describe("format", () => {
                 value: BigInt(1_000_000),
                 nonce: BigInt(0),
                 data: "0x",
-                creates: null
-            }
+                creates: null,
+            };
             const result = provider._wrapTransactionResponse(value, await provider.getNetwork());
             expect(result.to).to.be.null;
         });
@@ -48,8 +48,8 @@ describe("format", () => {
                 value: BigInt(1_000_000),
                 nonce: BigInt(0),
                 data: "0x",
-                accessList: null
-            }
+                accessList: null,
+            };
             const result = provider._wrapTransactionResponse(value, await provider.getNetwork());
             expect(result.accessList).to.has.lengthOf(0);
         });
@@ -64,7 +64,7 @@ describe("format", () => {
                 value: BigInt(1_000_000),
                 nonce: BigInt(0),
                 data: "0x",
-            }
+            };
             const result = provider._wrapTransactionResponse(value, await provider.getNetwork());
             expect(result.blockHash).to.be.null;
         });
@@ -77,8 +77,4 @@ describe("format", () => {
             }
         });
     });
-
 });
-
-
-
