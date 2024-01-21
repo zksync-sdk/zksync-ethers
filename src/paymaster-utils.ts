@@ -1,5 +1,4 @@
 import { BytesLike, ethers } from "ethers";
-import { PAYMASTER_FLOW_ABI } from "./utils";
 
 import {
     Address,
@@ -8,6 +7,8 @@ import {
     PaymasterInput,
     PaymasterParams,
 } from "./types";
+
+export const PAYMASTER_FLOW_ABI = new ethers.Interface(require("../abi/IPaymasterFlow.json"));
 
 export function getApprovalBasedPaymasterInput(paymasterInput: ApprovalBasedPaymasterInput): BytesLike {
     return PAYMASTER_FLOW_ABI.encodeFunctionData("approvalBased", [
