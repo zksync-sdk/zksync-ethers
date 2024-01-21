@@ -24,7 +24,6 @@ export const IERC1271 = new ethers.Interface(require("../abi/IERC1271.json"));
 export const L1_BRIDGE_ABI = new ethers.Interface(require("../abi/IL1Bridge.json"));
 export const L2_BRIDGE_ABI = new ethers.Interface(require("../abi/IL2Bridge.json"));
 export const NONCE_HOLDER_ABI = new ethers.Interface(require("../abi/INonceHolder.json"));
-export const PAYMASTER_FLOW_ABI = new ethers.Interface(require("../abi/IPaymasterFlow.json"));
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
