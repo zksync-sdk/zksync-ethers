@@ -1,7 +1,17 @@
-import { expect } from "chai";
-import { utils } from "../../src";
+import {expect} from "chai";
+import {types, utils} from "../../src";
+import {ethers} from "ethers";
 
 describe("utils", () => {
+    describe("#getHashedL2ToL1Msg()", () => {
+        it("should return a hashed L2 to L1 message", async () => {
+            const withdrawETHMessage = "0x6c0960f936615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000000000000000000000000000000000001a13b8600"
+            const withdrawETHMessageHash = "0xd8c80ecb64619e343f57c3b133c6c6d8dd0572dd3488f1ca3276c5b7fd3a938d"
+            const result = utils.getHashedL2ToL1Msg("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", withdrawETHMessage, 0)
+            expect(result).to.be.equal(withdrawETHMessageHash)
+        });
+    });
+
     describe("#isETH()", () => {
         it("should return true for L1 ETH address", async () => {
             const result = utils.isETH(utils.ETH_ADDRESS);
@@ -15,14 +25,14 @@ describe("utils", () => {
     });
 
     describe("#createAddress()", () => {
-        it("should return the correct address", async () => {
+        it("should return a correct address", async () => {
             const address = utils.createAddress("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", 1);
             expect(address).to.be.equal("0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021");
         });
     });
 
     describe("#create2Address()", () => {
-        it("should return the correct address", async () => {
+        it("should return a correct address", async () => {
             const address = utils.create2Address(
                 "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 "0x010001cb6a6e8d5f6829522f19fa9568660e0a9cd53b2e8be4deb0a679452e41",
@@ -63,7 +73,7 @@ describe("utils", () => {
     });
 
     describe("#checkBaseCost()", () => {
-        it("throws an error if the base cost bigger than value", async () => {
+        it("should throw an error if the base cost bigger than value", async () => {
             const baseCost = 100;
             const value = 99;
             try {
@@ -73,6 +83,59 @@ describe("utils", () => {
                     `The base cost of performing the priority operation is higher than the provided value parameter for the transaction: baseCost: ${baseCost}, provided value: ${value}`,
                 );
             }
+        });
+    });
+
+    describe("#serializeEip712()", () => {
+        it("should throw an error when `tx.chainId` is not specified", async () => {
+            try {
+                utils.serializeEip712({});
+            } catch (e) {
+                expect(e.message).to.be.equal("Transaction chainId isn't set");
+            }
+        });
+
+        it("should throw an error when `tx.from` is not specified", async () => {
+            try {
+                utils.serializeEip712({chainId: 270});
+            } catch (e) {
+                expect(e.message).to.be.equal("Explicitly providing `from` field is required for EIP712 transactions");
+            }
+        });
+
+        it("should throw an error when `tx.customData.customSignature` is empty", async () => {
+            try {
+                utils.serializeEip712({
+                    chainId: 270,
+                    from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                    customData: {
+                        customSignature: ""
+                    }
+                });
+            } catch (e) {
+                expect(e.message).to.be.equal("Empty signatures are not supported");
+            }
+        });
+
+        it("should return a serialized transaction with populated default values", async () => {
+            const tx = "0x71ea8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0";
+            const result = utils.serializeEip712({
+                chainId: 270,
+                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049"
+            }, null);
+            expect(result).to.be.equal(tx);
+        });
+
+        it("should return a serialized transaction with provided signature", async () => {
+            const tx = "0x71f87f8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0";
+            const signature = ethers.Signature.from("0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a");
+            const result = utils.serializeEip712({
+                chainId: 270,
+                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+                value: 1_000_000
+            }, signature);
+            expect(result).to.be.equal(tx);
         });
     });
 
@@ -99,6 +162,86 @@ describe("utils", () => {
                     156, 213, 59, 46, 139, 228, 222, 176, 166, 121, 69, 46, 65,
                 ]),
             );
+        });
+
+        it("should throw an error when empty string is provided", async () => {
+            try {
+                utils.hashBytecode("0x0002");
+            } catch (e) {
+                expect(e.message).to.be.equal("The bytecode length in bytes must be divisible by 32");
+            }
+        });
+
+        it("should throw an error when bytecode is has even number of 32-byte words", async () => {
+            try {
+                utils.hashBytecode(`0x${"00020000000000020009000000000002".repeat(2)}`);
+            } catch (e) {
+                expect(e.message).to.be.equal(`Bytecode can not be longer than ${utils.MAX_BYTECODE_LEN_BYTES} bytes`);
+            }
+        });
+
+
+        // it("should throw an error when bytecode is bigger and maximum allowed length", async () => {
+        //     try {
+        //         utils.hashBytecode("0x" + "00020000000000020009000000000002".repeat(utils.MAX_BYTECODE_LEN_BYTES+1));
+        //     } catch (e) {
+        //         expect(e.message).to.be.equal(`Bytecode can not be longer than ${utils.MAX_BYTECODE_LEN_BYTES} bytes`);
+        //     }
+        // });
+    });
+
+    describe("#parseEip712()", () => {
+        it("should parse a transaction with a signature", async () => {
+            const tx: types.TransactionLike = {
+                type: 113,
+                nonce: 0,
+                maxPriorityFeePerGas: BigInt(0),
+                maxFeePerGas: BigInt(0),
+                gasLimit: BigInt(0),
+                to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+                value: BigInt(1000000),
+                data: "0x",
+                chainId: BigInt(270),
+                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                customData: {
+                    gasPerPubdata: BigInt(50000),
+                    factoryDeps: [],
+                    customSignature: "0x",
+                    paymasterParams: null
+                },
+                hash: "0x9ed410ce33179ac1ff6b721060605afc72d64febfe0c08cacab5a246602131ee"
+            }
+
+            const serializedTx = "0x71f87f8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0";
+            const result = utils.parseEip712(serializedTx);
+            expect(result).to.be.deep.equal(tx);
+        });
+
+        it("should parse a transaction without a signature", async () => {
+            const tx: types.TransactionLike = {
+                type: 113,
+                nonce: 0,
+                maxPriorityFeePerGas: BigInt(0),
+                maxFeePerGas: BigInt(0),
+                gasLimit: BigInt(0),
+                to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+                value: BigInt(0),
+                data: "0x",
+                chainId: BigInt(270),
+                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                customData: {
+                    gasPerPubdata: BigInt(50000),
+                    factoryDeps: [],
+                    customSignature: "0x",
+                    paymasterParams: null
+                },
+                hash: "0x7d3aab3e3d06d6a702228d911c2a9afaccddd52514fb89dc9d0ff81a67bfff04"
+            }
+
+            const serializedTx = "0x71f83e8080808094a61464658afeaf65cccaafd3a512b69a83b77618808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0";
+
+            const result = utils.parseEip712(serializedTx);
+            expect(result).to.be.deep.equal(tx);
         });
     });
 });
