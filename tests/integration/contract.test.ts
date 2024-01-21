@@ -1,9 +1,9 @@
 import * as chai from "chai";
 import "../custom-matchers";
-import {ContractFactory, Provider, types, Wallet, Contract} from "../../src";
-import {ethers} from "ethers";
+import { ContractFactory, Provider, types, Wallet, Contract } from "../../src";
+import { ethers } from "ethers";
 
-const {expect} = chai;
+const { expect } = chai;
 
 describe("ContractFactory", () => {
     const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
@@ -107,9 +107,7 @@ describe("ContractFactory", () => {
                 wallet,
                 "createAccount",
             );
-            const paymasterContract = await accountFactory.deploy(
-                await provider.l2TokenAddress(DAI_L1),
-            );
+            const paymasterContract = await accountFactory.deploy(await provider.l2TokenAddress(DAI_L1));
 
             const code = await provider.getCode(await paymasterContract.getAddress());
             expect(code).not.to.be.null;
@@ -120,7 +118,7 @@ describe("ContractFactory", () => {
             const bytecode: string = require(storagePath).contracts["Storage.sol:Storage"].bin;
             const factory = new ContractFactory(abi, bytecode, wallet, "create2");
             const contract = await factory.deploy({
-                customData: {salt: ethers.hexlify(ethers.randomBytes(32))},
+                customData: { salt: ethers.hexlify(ethers.randomBytes(32)) },
             });
 
             const code = await provider.getCode(await contract.getAddress());
@@ -132,7 +130,7 @@ describe("ContractFactory", () => {
             const bytecode: string = require(tokenPath).bytecode;
             const factory = new ContractFactory(abi, bytecode, wallet, "create2");
             const contract = await factory.deploy("Ducat", "Ducat", 18, {
-                customData: {salt: ethers.hexlify(ethers.randomBytes(32))},
+                customData: { salt: ethers.hexlify(ethers.randomBytes(32)) },
             });
 
             const code = await provider.getCode(await contract.getAddress());
@@ -149,7 +147,7 @@ describe("ContractFactory", () => {
             const contract = (await factory.deploy({
                 customData: {
                     salt: ethers.hexlify(ethers.randomBytes(32)),
-                    factoryDeps: [require(demoPath).contracts["Foo.sol:Foo"].bin]
+                    factoryDeps: [require(demoPath).contracts["Foo.sol:Foo"].bin],
                 },
             })) as Contract;
 
@@ -168,7 +166,7 @@ describe("ContractFactory", () => {
             );
             const paymasterContract = await accountFactory.deploy(
                 await provider.l2TokenAddress(DAI_L1),
-                {customData: {salt: ethers.hexlify(ethers.randomBytes(32))}},
+                { customData: { salt: ethers.hexlify(ethers.randomBytes(32)) } },
             );
 
             const code = await provider.getCode(await paymasterContract.getAddress());
@@ -205,7 +203,7 @@ describe("ContractFactory", () => {
 
             try {
                 await factory.getDeployTransaction("Ducat", "Ducat", 18, {
-                    customData: {salt: "0000"}
+                    customData: { salt: "0000" },
                 });
             } catch (e) {
                 expect(e.message).to.be.equal("Invalid salt provided.");
@@ -219,7 +217,7 @@ describe("ContractFactory", () => {
 
             try {
                 await factory.getDeployTransaction("Ducat", "Ducat", 18, {
-                    customData: {salt: "0x000"}
+                    customData: { salt: "0x000" },
                 });
             } catch (e) {
                 expect(e.message).to.be.equal("Invalid salt provided.");
@@ -235,24 +233,27 @@ describe("ContractFactory", () => {
                 await factory.getDeployTransaction("Ducat", "Ducat", 18, {
                     customData: {
                         salt: ethers.hexlify(ethers.randomBytes(32)),
-                        factoryDeps: "0"
-                    }
+                        factoryDeps: "0",
+                    },
                 });
             } catch (e) {
-                expect(e.message).to.be.equal("Invalid 'factoryDeps' format. It should be an array of bytecodes.");
+                expect(e.message).to.be.equal(
+                    "Invalid 'factoryDeps' format. It should be an array of bytecodes.",
+                );
             }
 
             try {
                 await factory.getDeployTransaction("Ducat", "Ducat", 18, {
                     customData: {
                         salt: ethers.hexlify(ethers.randomBytes(32)),
-                        factoryDeps: ""
-                    }
+                        factoryDeps: "",
+                    },
                 });
             } catch (e) {
-                expect(e.message).to.be.equal("Invalid 'factoryDeps' format. It should be an array of bytecodes.");
+                expect(e.message).to.be.equal(
+                    "Invalid 'factoryDeps' format. It should be an array of bytecodes.",
+                );
             }
         }).timeout(10_000);
-
-    })
+    });
 });

@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import "../custom-matchers";
-import {utils, EIP712Signer} from "../../src";
-import {ethers} from "ethers";
+import { utils, EIP712Signer } from "../../src";
+import { ethers } from "ethers";
 
 const { expect } = chai;
 
@@ -33,7 +33,7 @@ describe("EIP712Signer", () => {
                 chainId: BigInt(270),
                 gasPrice: BigInt(250_000_000),
                 gasLimit: BigInt(21_000),
-                customData: {}
+                customData: {},
             });
             expect(result).to.be.deep.equal(tx);
         });

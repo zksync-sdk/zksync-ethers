@@ -1,4 +1,4 @@
-import {AbiCoder, BigNumberish, BytesLike, ethers, SignatureLike} from "ethers";
+import { AbiCoder, BigNumberish, BytesLike, ethers, SignatureLike } from "ethers";
 import {
     Address,
     DeploymentInfo,
@@ -9,12 +9,12 @@ import {
     PriorityQueueType,
     TransactionLike,
 } from "./types";
-import {Provider} from "./provider";
-import {EIP712Signer} from "./signer";
-import {IERC20__factory, IL1Bridge__factory} from "../typechain";
+import { Provider } from "./provider";
+import { EIP712Signer } from "./signer";
+import { IERC20__factory, IL1Bridge__factory } from "../typechain";
 
 export * from "./paymaster-utils";
-export {EIP712_TYPES} from "./signer";
+export { EIP712_TYPES } from "./signer";
 
 export const ZKSYNC_MAIN_ABI = new ethers.Interface(require("../abi/IZkSync.json"));
 export const CONTRACT_DEPLOYER = new ethers.Interface(require("../abi/IContractDeployer.json"));
