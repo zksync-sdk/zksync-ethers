@@ -199,10 +199,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             if (transaction.token == ETH_ADDRESS) {
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
                 const gasLimit = scaleGasLimit(baseGasLimit);
-
-                depositTx.overrides ??= {};
                 depositTx.overrides.gasLimit ??= gasLimit;
-
                 return this.requestExecute(depositTx);
             } else {
                 const bridgeContracts = await this.getL1BridgeContracts();
@@ -346,8 +343,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     contractAddress: to,
                     calldata: "0x",
                     l2Value: amount,
-                    // For some reason typescript can not deduce that we've already set the tx.l2GasLimit
-                    l2GasLimit: tx.l2GasLimit!,
                     ...tx,
                 };
             } else {
@@ -873,12 +868,7 @@ async function insertGasPrice(l1Provider: ethers.Provider, overrides: ethers.Ove
 }
 
 function getBaseCostFromFeeData(feeData: ethers.FeeData): bigint {
-    if (!feeData.maxFeePerGas) {
-        throw new Error("MaxFeePerGas is null");
-    }
-    if (!feeData.maxPriorityFeePerGas) {
-        throw new Error("MaxPriorityFeePerGas is null");
-    }
     // reverse the logic implemented in the abstract-provider.ts (line 917)
+    // @ts-ignore
     return (feeData.maxFeePerGas - feeData.maxPriorityFeePerGas) / 2n;
 }

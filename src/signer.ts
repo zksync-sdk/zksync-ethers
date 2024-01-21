@@ -84,6 +84,7 @@ export class EIP712Signer {
 // const provider = new BrowserProvider(window.ethereum);
 // const signer = provider.getSigner();
 // const tx = await signer.sendTransaction({ ... });
+/* c8 ignore start */
 export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     // @ts-ignore
     public override provider: Provider;
@@ -110,10 +111,10 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
             transaction.type = 0;
         }
         if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-            return (await super.sendTransaction(transaction)) as TransactionResponse;
+            return await super.sendTransaction(transaction) as TransactionResponse;
         } else {
             const address = await this.getAddress();
-            const from = await ethers.resolveAddress(transaction.from as Address);
+            const from = transaction.from == null ? address : await ethers.resolveAddress(transaction.from as Address);
             if (from.toLowerCase() != address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }
@@ -129,7 +130,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
                 customData: this._fillCustomData(transaction.customData ?? {}),
                 from,
             };
-            tx.customData ??= {};
+            // @ts-ignore
             tx.customData.customSignature = await this.eip712.sign(tx);
 
             const txBytes = serializeEip712(tx);
@@ -172,7 +173,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     }
 }
 
-export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
+export class VoidSigner extends AdapterL2(ethers.VoidSigner) {
     // @ts-ignore
     public override provider: Provider;
     // @ts-ignore
@@ -186,8 +187,8 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
         return this.provider;
     }
 
-    static from(signer: ethers.VoidSigner & { provider: Provider }, chainId: number): L2VoidSigner {
-        const newSigner: L2VoidSigner = Object.setPrototypeOf(signer, L2VoidSigner.prototype);
+    static from(signer: ethers.VoidSigner & { provider: Provider }, chainId: number): VoidSigner {
+        const newSigner: VoidSigner = Object.setPrototypeOf(signer, VoidSigner.prototype);
         newSigner.eip712 = new EIP712Signer(newSigner, chainId);
         return newSigner;
     }
@@ -198,10 +199,10 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
             transaction.type = 0;
         }
         if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-            return (await super.sendTransaction(transaction)) as TransactionResponse;
+            return await super.sendTransaction(transaction) as TransactionResponse;
         } else {
             const address = await this.getAddress();
-            const from = await ethers.resolveAddress(transaction.from as Address);
+            const from = transaction.from == null ? address : await ethers.resolveAddress(transaction.from as Address);
             if (from.toLowerCase() != address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }
@@ -217,7 +218,7 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
                 customData: this._fillCustomData(transaction.customData ?? {}),
                 from,
             };
-            tx.customData ??= {};
+            // @ts-ignore
             tx.customData.customSignature = await this.eip712.sign(tx);
 
             const txBytes = serializeEip712(tx);
@@ -227,11 +228,11 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
 }
 
 // This class is to be used on the frontend with metamask injection.
-// It only contains L1 operations. For L2 operations, see Signer.
+// It only contains L1 operations. For L2 operations, see VoidSigner.
 // Sample usage:
 // const ethProvider = new ethers.BrowserProvider(window.ethereum);
 // const provider = new Provider('<rpc_url>');
-// const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+// const signer = L1Signer.from(provider.getSigner(), provider);
 // const tx = await signer.deposit({ ... });
 export class L1VoidSigner extends AdapterL1(ethers.VoidSigner) {
     // @ts-ignore
@@ -260,3 +261,4 @@ export class L1VoidSigner extends AdapterL1(ethers.VoidSigner) {
         return this;
     }
 }
+/* c8 ignore stop */

@@ -111,10 +111,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
             if (from.toLowerCase() != this.address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }
-            transaction.customData ??= {};
-            transaction.customData.customSignature = await this.eip712.sign(transaction);
             const populated = await this.populateTransaction(transaction);
-
+            // @ts-ignore
+            populated.customData.customSignature = await this.eip712.sign(populated);
             return serializeEip712(populated);
         }
     }
