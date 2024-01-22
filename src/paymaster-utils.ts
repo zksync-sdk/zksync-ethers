@@ -8,10 +8,10 @@ import {
     PaymasterParams,
 } from "./types";
 
-export const IPaymasterFlow = new ethers.utils.Interface(require("../abi/IPaymasterFlow.json"));
+export const PAYMASTER_FLOW_ABI = new ethers.utils.Interface(require("../abi/IPaymasterFlow.json"));
 
 export function getApprovalBasedPaymasterInput(paymasterInput: ApprovalBasedPaymasterInput): BytesLike {
-    return IPaymasterFlow.encodeFunctionData("approvalBased", [
+    return PAYMASTER_FLOW_ABI.encodeFunctionData("approvalBased", [
         paymasterInput.token,
         paymasterInput.minimalAllowance,
         paymasterInput.innerInput,
@@ -19,7 +19,7 @@ export function getApprovalBasedPaymasterInput(paymasterInput: ApprovalBasedPaym
 }
 
 export function getGeneralPaymasterInput(paymasterInput: GeneralPaymasterInput): BytesLike {
-    return IPaymasterFlow.encodeFunctionData("general", [paymasterInput.innerInput]);
+    return PAYMASTER_FLOW_ABI.encodeFunctionData("general", [paymasterInput.innerInput]);
 }
 
 export function getPaymasterParams(
