@@ -17,6 +17,7 @@ import { Il1BridgeFactory as IL1BridgeFactory } from "../typechain/Il1BridgeFact
 import { AbiCoder } from "ethers/lib/utils";
 
 export * from "./paymaster-utils";
+export { EIP712_TYPES } from "./signer";
 
 export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IZkSync.json"));
 export const CONTRACT_DEPLOYER = new utils.Interface(require("../abi/IContractDeployer.json"));
