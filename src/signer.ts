@@ -79,6 +79,10 @@ export class EIP712Signer {
         };
         return TypedDataEncoder.hash(domain, EIP712_TYPES, EIP712Signer.getSignInput(transaction));
     }
+
+    async getDomain(): Promise<ethers.TypedDataDomain> {
+        return await this.eip712Domain;
+    }
 }
 
 // This class is to be used on the frontend, with metamask injection.
