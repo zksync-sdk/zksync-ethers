@@ -333,9 +333,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     contractAddress: to,
                     calldata: "0x",
                     l2Value: amount,
-                    // For some reason typescript can not deduce that we've already set the
-                    // tx.l2GasLimit
-                    l2GasLimit: tx.l2GasLimit!,
                     ...tx,
                 };
             } else {
