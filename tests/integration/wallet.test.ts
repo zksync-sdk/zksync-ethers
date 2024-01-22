@@ -137,7 +137,7 @@ describe("Wallet", () => {
             expect(ethWallet.provider).to.be.equal(ethProvider);
         });
 
-        it("should throw  an error when L1 `Wallet` is not specified in constructor", async () => {
+        it("should throw  an error when L1 `Provider` is not specified in constructor", async () => {
             const wallet = new Wallet(PRIVATE_KEY, provider);
             try {
                 wallet.ethWallet();
@@ -173,6 +173,28 @@ describe("Wallet", () => {
     });
 
     describe("#populateTransaction()", () => {
+        it("should return a populated transaction", async () => {
+            const tx = {
+                to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+                value: BigInt(7_000_000_000),
+                type: utils.EIP712_TX_TYPE,
+                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                nonce: await wallet.getNonce("pending"),
+                gasLimit: BigInt(154_379),
+                chainId: BigInt(270),
+                data: "0x",
+                customData: { gasPerPubdata: 50_000, factoryDeps: [] },
+                gasPrice: BigInt(250_000_000),
+            };
+
+            const result = await wallet.populateTransaction({
+                type: utils.EIP712_TX_TYPE,
+                to: RECEIVER,
+                value: 7_000_000_000,
+            });
+            expect(result).to.be.deep.equal(tx);
+        }).timeout(25_000);
+
         it("should return a populated transaction with default values if are omitted", async () => {
             const tx = {
                 to: RECEIVER,
@@ -290,7 +312,6 @@ describe("Wallet", () => {
                 value: BigInt(288_992_000_000_000),
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 to: await (await wallet.getL1BridgeContracts()).erc20.getAddress(),
-                data: "0xe8b99b1b00000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049000000000000000000000000881567b68502e6d7a7a3556ff4313b637ba47f4e0000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000008e0f6000000000000000000000000000000000000000000000000000000000000032000000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
             };
             const result = await wallet.getDepositTx({
                 token: DAI_L1,
@@ -419,7 +440,7 @@ describe("Wallet", () => {
 
     describe("#getFullRequiredDepositFee()", () => {
         it("should return a fee for ETH token deposit", async () => {
-            const FEE_DATA = {
+            const feeData = {
                 baseCost: BigInt(285_096_500_000_000),
                 l1GasLimit: BigInt(132_711),
                 l2GasLimit: "0x8b351",
@@ -430,7 +451,7 @@ describe("Wallet", () => {
                 token: utils.ETH_ADDRESS,
                 to: await wallet.getAddress(),
             });
-            expect(result).to.be.deep.equal(FEE_DATA);
+            expect(result).to.be.deep.equal(feeData);
         });
 
         it("should throw an error when there is not enough allowance to cover the deposit", async () => {
@@ -445,7 +466,7 @@ describe("Wallet", () => {
         }).timeout(10_000);
 
         it("should return a fee for DAI token deposit", async () => {
-            const FEE_DATA = {
+            const feeData = {
                 baseCost: BigInt(288_992_000_000_000),
                 l1GasLimit: BigInt(253_177),
                 l2GasLimit: "0x8d1c0",
@@ -460,7 +481,7 @@ describe("Wallet", () => {
                 token: DAI_L1,
                 to: await wallet.getAddress(),
             });
-            expect(result).to.be.deep.equal(FEE_DATA);
+            expect(result).to.be.deep.equal(feeData);
         }).timeout(10_000);
 
         it("should throw an error when there is not enough balance for the deposit", async () => {
@@ -627,29 +648,6 @@ describe("Wallet", () => {
             } catch (e) {
                 expect(e.message).to.be.equal("Transaction `from` address mismatch");
             }
-        }).timeout(25_000);
-    });
-
-    describe("#populateTransaction()", () => {
-        it("should return a populated transaction", async () => {
-            const TX = {
-                to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
-                value: BigInt(7_000_000_000),
-                type: utils.EIP712_TX_TYPE,
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                gasLimit: BigInt(154_379),
-                chainId: BigInt(270),
-                data: "0x",
-                customData: { gasPerPubdata: 50_000, factoryDeps: [] },
-                gasPrice: BigInt(250_000_000),
-            };
-
-            const result = await wallet.populateTransaction({
-                type: utils.EIP712_TX_TYPE,
-                to: RECEIVER,
-                value: 7_000_000_000,
-            });
-            expect(result).to.be.deepEqualExcluding(TX, ["nonce"]);
         }).timeout(25_000);
     });
 });
