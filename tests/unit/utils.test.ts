@@ -111,7 +111,7 @@ describe("utils", () => {
             }
         });
 
-        it("should throw an error when `tx.customData.customSignature` is empty", async () => {
+        it("should throw an error when `tx.customData.customSignature` is empty string", async () => {
             try {
                 utils.serializeEip712({
                     chainId: 270,
