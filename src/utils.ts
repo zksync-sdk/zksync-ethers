@@ -75,7 +75,7 @@ export function layer1TxDefaults() {
     };
 }
 
-export function getHashedL2ToL1Msg(sender: Address, msg: BytesLike, txNumberInBlock: number) {
+export function getHashedL2ToL1Msg(sender: Address, msg: BytesLike, txNumberInBlock: number): string {
     const encodedMsg = new Uint8Array([
         0, // l2ShardId
         1, // isService
@@ -342,7 +342,7 @@ function getSignature(transaction: any, ethSignature?: EthereumSignature): Uint8
     return new Uint8Array([...r, ...s, v]);
 }
 
-export function eip712TxHash(transaction: any, ethSignature?: EthereumSignature) {
+export function eip712TxHash(transaction: any, ethSignature?: EthereumSignature): string {
     const signedDigest = EIP712Signer.getSignedDigest(transaction);
     const hashedSignature = ethers.keccak256(getSignature(transaction, ethSignature));
 
