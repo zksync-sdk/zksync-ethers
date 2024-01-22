@@ -47,10 +47,10 @@
         "ethers": "~5.7.0"
     },
     "scripts": {
-        "test:prepare": "cd  tests/setup/ && ./setup.sh && cd ../..",
-        "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test:prepare": "ts-node tests/setup.ts",
+        "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
         "test:wait": "ts-node tests/wait.ts",
-        "test": "mocha -r ts-node/register tests/unit/*.test.ts tests/integration/*.test.ts",
+        "test": "mocha -r ts-node/register tests/**/*.test.ts",
         "build": "tsc && cp -f typechain/*.d.ts build/typechain && ncp ./abi ./build/abi",
         "lint": "prettier . --write",
         "lint:check": "prettier . --check",
