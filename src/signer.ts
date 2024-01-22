@@ -6,7 +6,7 @@ import { TypedDataDomain, TypedDataSigner } from "@ethersproject/abstract-signer
 import { _TypedDataEncoder as TypedDataEncoder } from "@ethersproject/hash";
 import { AdapterL1, AdapterL2 } from "./adapters";
 
-export const eip712Types = {
+export const EIP712_TYPES = {
     Transaction: [
         { name: "txType", type: "uint256" },
         { name: "from", type: "uint256" },
@@ -63,7 +63,7 @@ export class EIP712Signer {
     async sign(transaction: TransactionRequest): Promise<Signature> {
         return await this.ethSigner._signTypedData(
             await this.eip712Domain,
-            eip712Types,
+            EIP712_TYPES,
             EIP712Signer.getSignInput(transaction),
         );
     }
@@ -77,7 +77,7 @@ export class EIP712Signer {
             version: "2",
             chainId: transaction.chainId,
         };
-        return TypedDataEncoder.hash(domain, eip712Types, EIP712Signer.getSignInput(transaction));
+        return TypedDataEncoder.hash(domain, EIP712_TYPES, EIP712Signer.getSignInput(transaction));
     }
 }
 
