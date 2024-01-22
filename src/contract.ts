@@ -61,7 +61,7 @@ export class ContractFactory extends ethers.ContractFactory {
 
         if (
             overrides.customData &&
-            overrides.customData.factoryDeps &&
+            overrides.customData.factoryDeps != null &&
             !Array.isArray(overrides.customData.factoryDeps)
         ) {
             throw new Error("Invalid 'factoryDeps' format. It should be an array of bytecodes.");
