@@ -468,10 +468,8 @@ async function isSignatureCorrect(
     msgHash: string,
     signature: SignatureLike,
 ): Promise<boolean> {
-    let isContractAccount = false;
-
     const code = await provider.getCode(address);
-    isContractAccount = ethers.getBytes(code).length != 0;
+    const isContractAccount = ethers.getBytes(code).length != 0;
 
     if (!isContractAccount) {
         return isECDSASignatureCorrect(address, msgHash, signature);
