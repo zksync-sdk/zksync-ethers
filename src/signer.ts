@@ -50,7 +50,8 @@ export class EIP712Signer {
             gasPerPubdataByteLimit: gasPerPubdataByteLimit,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            paymaster: transaction.customData?.paymasterParams?.paymaster || ethers.constants.AddressZero,
+            paymaster:
+                transaction.customData?.paymasterParams?.paymaster || ethers.constants.AddressZero,
             nonce: transaction.nonce || 0,
             value: transaction.value || 0,
             data: transaction.data || "0x",

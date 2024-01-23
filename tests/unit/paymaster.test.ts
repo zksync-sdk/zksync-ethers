@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import "../custom-matchers";
 import { utils, types } from "../../src";
-import {BigNumber} from "ethers";
+import { BigNumber } from "ethers";
 
 const { expect } = chai;
 

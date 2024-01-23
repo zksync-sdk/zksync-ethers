@@ -285,7 +285,7 @@ describe("Wallet", () => {
                 maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 value: BigNumber.from(288_992_000_000_000),
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                to: (await wallet.getL1BridgeContracts()).erc20.address
+                to: (await wallet.getL1BridgeContracts()).erc20.address,
             };
             const result = await wallet.getDepositTx({
                 token: DAI_L1,
