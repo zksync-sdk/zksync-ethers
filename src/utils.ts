@@ -79,9 +79,9 @@ export function getHashedL2ToL1Msg(sender: Address, msg: BytesLike, txNumberInBl
     const encodedMsg = new Uint8Array([
         0, // l2ShardId
         1, // isService
-        ...ethers.getBytes(ethers.zeroPadBytes(ethers.toBeHex(txNumberInBlock), 2)),
+        ...ethers.getBytes(ethers.zeroPadValue(ethers.toBeHex(txNumberInBlock), 2)),
         ...ethers.getBytes(L1_MESSENGER_ADDRESS),
-        ...ethers.getBytes(ethers.zeroPadBytes(sender, 32)),
+        ...ethers.getBytes(ethers.zeroPadValue(sender, 32)),
         ...ethers.getBytes(ethers.keccak256(msg)),
     ]);
 
