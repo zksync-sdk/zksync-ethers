@@ -186,7 +186,7 @@ export function serialize(transaction: ethers.providers.TransactionRequest, sign
     }
     const from = transaction.from;
 
-    const meta: Eip712Meta = transaction.customData;
+    const meta: Eip712Meta = transaction.customData ?? {};
 
     let maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0;
     let maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
@@ -285,9 +285,9 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
         return BigNumber.from(value);
     }
 
-    function arrayToPaymasterParams(arr: string[]): PaymasterParams | undefined {
+    function arrayToPaymasterParams(arr: string[]): PaymasterParams | null {
         if (arr.length == 0) {
-            return undefined;
+            return null;
         }
         if (arr.length != 2) {
             throw new Error(

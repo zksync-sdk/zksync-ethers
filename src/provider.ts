@@ -897,6 +897,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 }
 
+/* c8 ignore start */
 export class Web3Provider extends Provider {
     readonly provider: ExternalProvider;
 
@@ -935,3 +936,4 @@ export class Web3Provider extends Provider {
         return gas.gt(metamaskMinimum) || isEIP712 ? gas : metamaskMinimum;
     }
 }
+/* c8 ignore stop */

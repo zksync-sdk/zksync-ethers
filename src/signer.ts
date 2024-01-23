@@ -90,6 +90,7 @@ export class EIP712Signer {
 // const provider = new zkweb3.Web3Provider(window.ethereum);
 // const signer = provider.getSigner();
 // const tx = await signer.sendTransaction({ ... });
+/* c8 ignore start */
 export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
     public override provider: Provider;
     public eip712: EIP712Signer;
@@ -175,3 +176,4 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
         return this;
     }
 }
+/* c8 ignore stop */
