@@ -38,25 +38,25 @@ describe("Provider", () => {
         it("should return a provider connected to local network", async () => {
             const provider = Provider.getDefaultProvider(types.Network.Localhost);
             const network = await provider.getNetwork();
-            expect(network.matches(types.Network.Localhost)).not.to.be.true;
+            expect(network.chainId).to.be.equal(BigInt(270));
         });
 
         it("should return a provider connected to Goerli network", async () => {
             const provider = Provider.getDefaultProvider(types.Network.Goerli);
             const network = await provider.getNetwork();
-            expect(network.matches(types.Network.Goerli)).not.to.be.true;
+            expect(network.chainId).to.be.equal(BigInt(280));
         });
 
         it("should return a provider connected to Sepolia network", async () => {
             const provider = Provider.getDefaultProvider(types.Network.Sepolia);
             const network = await provider.getNetwork();
-            expect(network.matches(types.Network.Sepolia)).not.to.be.true;
+            expect(network.chainId).to.be.equal(BigInt(300));
         });
 
         it("should return a provider connected to main network", async () => {
             const provider = Provider.getDefaultProvider(types.Network.Mainnet);
             const network = await provider.getNetwork();
-            expect(network.matches(types.Network.Mainnet)).not.to.be.true;
+            expect(network.chainId).to.be.equal(BigInt(324));
         });
     });
 
