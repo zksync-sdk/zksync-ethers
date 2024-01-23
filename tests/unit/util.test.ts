@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { utils } from "../../src";
-import { ethers, BigNumber} from "ethers";
-
+import { ethers, BigNumber } from "ethers";
 
 describe("utils", () => {
     describe("#getHashedL2ToL1Msg()", () => {
