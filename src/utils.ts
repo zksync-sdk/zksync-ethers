@@ -335,8 +335,8 @@ function getSignature(transaction: any, ethSignature?: EthereumSignature): Uint8
         throw new Error("No signature provided");
     }
 
-    const r = ethers.getBytes(ethers.zeroPadBytes(ethSignature.r, 32));
-    const s = ethers.getBytes(ethers.zeroPadBytes(ethSignature.s, 32));
+    const r = ethers.getBytes(ethers.zeroPadValue(ethSignature.r, 32));
+    const s = ethers.getBytes(ethers.zeroPadValue(ethSignature.s, 32));
     const v = ethSignature.v;
 
     return new Uint8Array([...r, ...s, v]);
