@@ -525,7 +525,6 @@ export interface RawBlockTransaction {
     raw_bytes: string;
 }
 
-
 export interface FinalizeWithdrawalParams {
     l1BatchNumber: number | null;
     l2MessageIndex: number;
