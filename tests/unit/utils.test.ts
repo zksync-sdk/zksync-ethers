@@ -8,7 +8,7 @@ describe("utils", () => {
             const withdrawETHMessage =
                 "0x6c0960f936615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000000000000000000000000000000000001a13b8600";
             const withdrawETHMessageHash =
-                "0xd8c80ecb64619e343f57c3b133c6c6d8dd0572dd3488f1ca3276c5b7fd3a938d";
+                "0x521bd25904766c83fe868d6a29cbffa011afd8a1754f6c9a52b053b693e42f18";
             const result = utils.getHashedL2ToL1Msg(
                 "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 withdrawETHMessage,
