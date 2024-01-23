@@ -4,5 +4,5 @@
     "clean": true,
     "all": true,
     "include": ["src/*"],
-    "exclude": ["tests/*", "typechain/*"]
+    "exclude": ["tests/*", "typechain/*", "src/index.ts"]
 }
