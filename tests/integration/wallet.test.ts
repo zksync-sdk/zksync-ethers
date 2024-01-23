@@ -263,8 +263,8 @@ describe("Wallet", () => {
                 operatorTip: 0,
                 overrides: {
                     from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                    maxFeePerGas: BigInt(1_000_000_010),
-                    maxPriorityFeePerGas: BigInt(1_000_000_000),
+                    maxFeePerGas: BigInt(1_500_000_010),
+                    maxPriorityFeePerGas: BigInt(1_500_000_000),
                     value: BigInt(288_213_007_000_000),
                 },
                 gasPerPubdataByte: 800,
@@ -291,8 +291,8 @@ describe("Wallet", () => {
                 operatorTip: 0,
                 overrides: {
                     from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                    maxFeePerGas: BigInt(1_000_000_010),
-                    maxPriorityFeePerGas: BigInt(1_000_000_000),
+                    maxFeePerGas: BigInt(1_500_000_010),
+                    maxPriorityFeePerGas: BigInt(1_500_000_000),
                     value: BigInt(288_213_007_000_000),
                 },
                 gasPerPubdataByte: 800,
@@ -307,8 +307,8 @@ describe("Wallet", () => {
 
         it("should return a DAI deposit transaction", async () => {
             const tx = {
-                maxFeePerGas: BigInt(1_000_000_010),
-                maxPriorityFeePerGas: BigInt(1_000_000_000),
+                maxFeePerGas: BigInt(1_500_000_010),
+                maxPriorityFeePerGas: BigInt(1_500_000_000),
                 value: BigInt(288_992_000_000_000),
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 to: await (await wallet.getL1BridgeContracts()).erc20.getAddress(),
@@ -444,8 +444,8 @@ describe("Wallet", () => {
                 baseCost: BigInt(285_096_500_000_000),
                 l1GasLimit: BigInt(132_711),
                 l2GasLimit: "0x8b351",
-                maxFeePerGas: BigInt(1_000_000_010),
-                maxPriorityFeePerGas: BigInt(1_000_000_000),
+                maxFeePerGas: BigInt(1_500_000_010),
+                maxPriorityFeePerGas: BigInt(1_500_000_000),
             };
             const result = await wallet.getFullRequiredDepositFee({
                 token: utils.ETH_ADDRESS,
@@ -470,8 +470,8 @@ describe("Wallet", () => {
                 baseCost: BigInt(288_992_000_000_000),
                 l1GasLimit: BigInt(253_177),
                 l2GasLimit: "0x8d1c0",
-                maxFeePerGas: BigInt(1_000_000_010),
-                maxPriorityFeePerGas: BigInt(1_000_000_000),
+                maxFeePerGas: BigInt(1_500_000_010),
+                maxPriorityFeePerGas: BigInt(1_500_000_000),
             };
 
             const tx = await wallet.approveERC20(DAI_L1, 5);
