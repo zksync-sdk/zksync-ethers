@@ -90,17 +90,19 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
             // use legacy txs by default
             transaction.type = 0;
         }
-        transaction = await super.populateTransaction(transaction);
-        if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-            return transaction;
-        }
 
+        if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
+            return await super.populateTransaction(transaction);
+        }
         transaction.type = EIP712_TX_TYPE;
-        transaction.value ??= 0;
-        transaction.data ??= "0x";
-        transaction.customData = this._fillCustomData(transaction.customData);
-        transaction.gasPrice = await this.provider.getGasPrice();
-        return transaction;
+        const populated = await super.populateTransaction(transaction);
+
+        populated.type = EIP712_TX_TYPE;
+        populated.value ??= 0;
+        populated.data ??= "0x";
+        populated.customData = this._fillCustomData(transaction.customData);
+        populated.gasPrice = await this.provider.getGasPrice();
+        return populated;
     }
 
     override async signTransaction(transaction: TransactionRequest): Promise<string> {
@@ -114,9 +116,10 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
             if (transaction.from.toLowerCase() != this.address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }
-            transaction.customData.customSignature = await this.eip712.sign(transaction);
+            const populated = await this.populateTransaction(transaction);
+            populated.customData.customSignature = await this.eip712.sign(transaction);
 
-            return serialize(transaction);
+            return serialize(populated);
         }
     }
 
