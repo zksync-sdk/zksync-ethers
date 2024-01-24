@@ -17,7 +17,8 @@ describe("Wallet", () => {
     const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
     const TOKENS_L1 = require("../tokens.json");
-    const DAI_L1 = TOKENS_L1[0].address;
+    // const DAI_L1 = TOKENS_L1[0].address;
+    const DAI_L1 = "0x5E6D086F5eC079ADFF4FB3774CDf3e8D6a34F7E9";
 
     describe("#constructor()", () => {
         it("`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider", async () => {

@@ -11,9 +11,10 @@ describe("Provider", () => {
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
     const TOKENS_L1 = require("../tokens.json");
-    const DAI_L1 = TOKENS_L1[0].address;
+    // const DAI_L1 = TOKENS_L1[0].address;
+    const DAI_L1 = "0x5E6D086F5eC079ADFF4FB3774CDf3e8D6a34F7E9";
 
-    let tx = null;
+    let tx;
 
     before("setup", async function () {
         this.timeout(25_000);
@@ -25,11 +26,9 @@ describe("Provider", () => {
         await tx.wait();
     });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     describe("#constructor()", () => {
         it("Provider(null) should return a `Provider` connected to local network when URL is not defined", async () => {
-            const provider = new Provider(null);
+            const provider = new Provider(undefined);
             const network = await provider.getNetwork();
             expect(network.chainId).to.be.equal(9);
         });
@@ -62,18 +61,13 @@ describe("Provider", () => {
     });
 
     describe("#getMainContractAddress()", () => {
-=======
-=======
-    describe("#getMainContractAddress()", () => {
         it("should return the address of main contract", async () => {
             const result = await provider.getMainContractAddress();
             expect(result).not.to.be.null;
         });
     });
 
->>>>>>> 086b87e (feat: add support for deposing native tokens in `Wallet.deposit`)
     describe("#getBridgehubContractAddress()", () => {
->>>>>>> a1411a9 (feat: migrate to Bridgehub)
         it("should return the address of main contract", async () => {
             const result = await provider.getBridgehubContractAddress();
             expect(result).not.to.be.null;
@@ -338,13 +332,13 @@ describe("Provider", () => {
             expect(result).to.be.deep.equal(WITHDRAW_TX);
         });
 
-        it("should throw an error when `tx.to=null && tx.from=null`", async () => {
+        it("should throw an error when `tx.to=undefined && tx.from=undefined`", async () => {
             try {
                 await provider.getWithdrawTx({
                     token: utils.ETH_ADDRESS,
                     amount: 5,
-                    to: null,
-                    from: null,
+                    to: undefined,
+                    from: undefined,
                 });
             } catch (e) {
                 expect(e).not.to.be.equal("withdrawal target address is undefined");
