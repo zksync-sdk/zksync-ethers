@@ -29,13 +29,13 @@ To begin, it is useful to have a basic understanding of the types of objects ava
 ## 🛠 Prerequisites
 
 -   `node: >= 18` ([installation guide](https://nodejs.org/en/download/package-manager))
--   `ethers: ^6.7.1`
+-   `ethers: ^5.7.0`
 
 ## 📥 Installation & Setup
 
 ```bash
 yarn add zksync-ethers
-yarn add ethers@6 # ethers is a peer dependency of zksync-ethers
+yarn add ethers@5 # ethers is a peer dependency of zksync-ethers
 ```
 
 ## 📝 Examples
