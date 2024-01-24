@@ -730,7 +730,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return await this.estimateGas(transferTx);
     }
 
-    static getDefaultProvider(zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost) {
+    static getDefaultProvider(zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost): Provider {
         if (process.env.ZKSYNC_WEB3_API_URL) {
             return new Provider(process.env.ZKSYNC_WEB3_API_URL);
         }
