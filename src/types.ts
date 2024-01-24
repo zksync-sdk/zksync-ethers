@@ -277,3 +277,12 @@ export interface RawBlockTransaction {
     received_timestamp_ms: number;
     raw_bytes: string;
 }
+
+export interface FinalizeWithdrawalParams {
+    l1BatchNumber: number | null;
+    l2MessageIndex: number;
+    l2TxNumberInBlock: number | null;
+    message: any;
+    sender: string;
+    proof: string[];
+}
