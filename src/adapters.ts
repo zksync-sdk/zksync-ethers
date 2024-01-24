@@ -9,7 +9,8 @@ import {
     Address,
     BalancesMap,
     BlockTag,
-    Eip712Meta, FinalizeWithdrawalParams,
+    Eip712Meta,
+    FinalizeWithdrawalParams,
     FullDepositFee,
     PriorityOpResponse,
     TransactionResponse,
@@ -514,7 +515,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             };
         }
 
-        async finalizeWithdrawalParams(withdrawalHash: BytesLike, index: number = 0): Promise<FinalizeWithdrawalParams> {
+        async finalizeWithdrawalParams(
+            withdrawalHash: BytesLike,
+            index: number = 0,
+        ): Promise<FinalizeWithdrawalParams> {
             const { log, l1BatchTxId } = await this._getWithdrawalLog(withdrawalHash, index);
             const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
             const sender = ethers.utils.hexDataSlice(log.topics[1], 12);
