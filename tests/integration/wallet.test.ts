@@ -182,7 +182,7 @@ describe("Wallet", () => {
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 nonce: await wallet.getNonce("pending"),
                 chainId: 270,
-                gasPrice: BigNumber.from(250_000_000),
+                gasPrice: BigNumber.from(100_000_000),
             };
             const result = await wallet.populateTransaction({
                 to: RECEIVER,
@@ -228,11 +228,12 @@ describe("Wallet", () => {
 
     describe("#getDepositTx()", () => {
         it("should return ETH deposit transaction", async () => {
-            const tx = {
+            const transaction = {
                 contractAddress: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 calldata: "0x",
                 l2Value: 7_000_000,
-                l2GasLimit: BigNumber.from("0x08cbaa"),
+                l2GasLimit: BigNumber.from("0x062e3d"),
+                mintValue: BigNumber.from("0xbf1aaa82be30"),
                 token: "0x0000000000000000000000000000000000000000",
                 to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 amount: 7_000_000,
@@ -241,25 +242,26 @@ describe("Wallet", () => {
                 overrides: {
                     maxFeePerGas: BigNumber.from(1_500_000_010),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                    value: BigNumber.from(288_213_007_000_000),
+                    value: BigNumber.from(210_121_250_750_000),
                 },
                 gasPerPubdataByte: 800,
             };
-            const result = await wallet.getDepositTx({
+            const {tx, mintValue} = await wallet.getDepositTx({
                 token: utils.ETH_ADDRESS,
                 to: await wallet.getAddress(),
                 amount: 7_000_000,
                 refundRecipient: await wallet.getAddress(),
             });
-            expect(result).to.be.deep.equal(tx);
+            expect(tx).to.be.deep.equal(transaction);
         });
 
         it("should return a deposit transaction with `tx.to == Wallet.getAddress()` when `tx.to` is not specified", async () => {
-            const tx = {
+            const transaction = {
                 contractAddress: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 calldata: "0x",
                 l2Value: 7_000_000,
-                l2GasLimit: BigNumber.from("0x8cbaa"),
+                l2GasLimit: BigNumber.from("0x062e3d"),
+                mintValue: BigNumber.from("0xbf1aaa82be30"),
                 token: "0x0000000000000000000000000000000000000000",
                 to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 amount: 7_000_000,
@@ -268,34 +270,34 @@ describe("Wallet", () => {
                 overrides: {
                     maxFeePerGas: BigNumber.from(1_500_000_010),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                    value: BigNumber.from(288_213_007_000_000),
+                    value: BigNumber.from(210_121_250_750_000),
                 },
                 gasPerPubdataByte: 800,
             };
-            const result = await wallet.getDepositTx({
+            const {tx, mintValue } = await wallet.getDepositTx({
                 token: utils.ETH_ADDRESS,
                 amount: 7_000_000,
                 refundRecipient: await wallet.getAddress(),
             });
-            expect(result).to.be.deep.equal(tx);
+            expect(tx).to.be.deep.equal(transaction);
         });
 
         it("should return DAI deposit transaction", async () => {
-            const tx = {
+            const transaction = {
                 maxFeePerGas: BigNumber.from(1_500_000_010),
                 maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                value: BigNumber.from(288_992_000_000_000),
+                value: BigNumber.from(210_121_243_750_000),
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 to: (await wallet.getL1BridgeContracts()).erc20.address,
             };
-            const result = await wallet.getDepositTx({
+            const {tx, mintValue } = await wallet.getDepositTx({
                 token: DAI_L1,
                 to: await wallet.getAddress(),
                 amount: 5,
                 refundRecipient: await wallet.getAddress(),
             });
-            result.to = result.to.toLowerCase();
-            expect(result).to.be.deepEqualExcluding(tx, ["data"]);
+            tx.to = tx.to.toLowerCase();
+            expect(tx).to.be.deepEqualExcluding(transaction, ["data"]);
         });
     });
 
@@ -307,7 +309,7 @@ describe("Wallet", () => {
                 amount: 5,
                 refundRecipient: await wallet.getAddress(),
             });
-            expect(result.eq(BigNumber.from(132_711))).to.be.true;
+            expect(result.eq(BigNumber.from(215_017))).to.be.true;
         });
 
         it("should return gas estimation for DAI deposit transaction", async () => {
@@ -317,7 +319,7 @@ describe("Wallet", () => {
                 amount: 5,
                 refundRecipient: await wallet.getAddress(),
             });
-            expect(result.eq(BigNumber.from(253_418))).to.be.true;
+            expect(result.eq(BigNumber.from(345_206))).to.be.true;
         });
     });
 
@@ -417,9 +419,9 @@ describe("Wallet", () => {
     describe("#getFullRequiredDepositFee()", () => {
         it("should return fee for ETH token deposit", async () => {
             const FEE_DATA = {
-                baseCost: BigNumber.from(285_096_500_000_000),
-                l1GasLimit: BigNumber.from(132_711),
-                l2GasLimit: BigNumber.from("0x08b351"),
+                baseCost: BigNumber.from(207_964_281_250_000),
+                l1GasLimit: BigNumber.from(215_017),
+                l2GasLimit: BigNumber.from(400_895),
                 maxFeePerGas: BigNumber.from(1_500_000_010),
                 maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
             };
@@ -443,9 +445,9 @@ describe("Wallet", () => {
 
         it("should return fee for DAI token deposit", async () => {
             const FEE_DATA = {
-                baseCost: BigNumber.from(288_992_000_000_000),
-                l1GasLimit: BigNumber.from(253_177),
-                l2GasLimit: BigNumber.from("0x08d1c0"),
+                baseCost: BigNumber.from(210_121_243_750_000),
+                l1GasLimit: BigNumber.from(344_966),
+                l2GasLimit: BigNumber.from(405_053),
                 maxFeePerGas: BigNumber.from(1_500_000_010),
                 maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
             };
@@ -598,9 +600,10 @@ describe("Wallet", () => {
                 type: 2,
                 to: RECEIVER,
                 value: BigNumber.from(7_000_000_000),
+                nonce: 0
             });
             expect(result).to.be.equal(
-                "0x02f869808080840ee6b2808094a61464658afeaf65cccaafd3a512b69a83b776188501a13b860080c001a0ea6c3f7588b7b4e5652e0372aa09d772b59689ee0e51445b3b7d69bffd5d9e77a046387a8dfa24ab22d3427cd85035b91abc28e1876813873ea0b41f2bdc9ef778",
+                "0x02f8698080808405f5e1008094a61464658afeaf65cccaafd3a512b69a83b776188501a13b860080c001a059e46987c3c5cafd906c5555d7d17f6b6ba1e32904a93161e3393c34b7017a00a00c1c7d76669bf9aaab20d6ab329a428bd9e982b598ce169e99aae35317a02a39",
             );
         }).timeout(25_000);
 

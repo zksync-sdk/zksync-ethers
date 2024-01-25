@@ -89,7 +89,7 @@ async function sendFundsOnL2() {
 
 
 async function main() {
-    await mintTokensOnL1(DAI_L1);
+    // await mintTokensOnL1(DAI_L1);
 
     const l2TokenAddress = await createTokenL2(DAI_L1);
     console.log(`L2 DAI address: ${l2TokenAddress}`);

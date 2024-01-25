@@ -387,13 +387,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
         }): Promise<ethers.BigNumber> {
-            const depositTx = await this.getDepositTx(transaction);
+            const {tx, mintValue} = await this.getDepositTx(transaction);
 
             let baseGasLimit: BigNumber;
             if (transaction.token == ETH_ADDRESS) {
-                baseGasLimit = await this.estimateGasRequestExecute(depositTx);
+                baseGasLimit = await this.estimateGasRequestExecute(tx);
             } else {
-                baseGasLimit = await this._providerL1().estimateGas(depositTx);
+                baseGasLimit = await this._providerL1().estimateGas(tx);
             }
 
             return scaleGasLimit(baseGasLimit);
