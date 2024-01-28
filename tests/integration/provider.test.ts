@@ -141,8 +141,10 @@ describe("Provider", () => {
     });
 
     describe("#getBytecodeByHash(txHash)", () => {
-        it("should return bytecode of a contract", async () => { 
-            const testnetPaymasterBytecode = await provider.getCode(await provider.getTestnetPaymasterAddress() as string);
+        it("should return bytecode of a contract", async () => {
+            const testnetPaymasterBytecode = await provider.getCode(
+                (await provider.getTestnetPaymasterAddress()) as string,
+            );
             const tokenFactoryDepsHash = ethers.utils.hexlify(
                 utils.hashBytecode(testnetPaymasterBytecode),
             );
