@@ -877,9 +877,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         };
     }
 
-
-    async getPriorityOpConfirmation(txHash: string, index: number = 0){
-        const { l2ToL1LogIndex, l2ToL1Log, l1BatchTxId } = await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
+    async getPriorityOpConfirmation(txHash: string, index: number = 0) {
+        const { l2ToL1LogIndex, l2ToL1Log, l1BatchTxId } =
+            await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
         const proof = await this.getLogProof(txHash, l2ToL1LogIndex);
         return {
             l1BatchNumber: l2ToL1Log.l1BatchNumber,
