@@ -488,7 +488,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             overrides?: ethers.PayableOverrides;
         }): Promise<BigNumber> {
             const tx = await this.getDepositTx(transaction);
-
+            
             let baseGasLimit: BigNumber;
             if (transaction.token == ETH_ADDRESS) {
                 baseGasLimit = await this.estimateGasRequestExecute(tx);
@@ -685,7 +685,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             overrides.value ??= amount;
             const mintValue = baseCost.add(operatorTip); // of the base token, not eth
             await checkBaseCost(baseCost, mintValue);
-            overrides.value ??= 0;
             const secondBridgeCalldata = ethers.utils.defaultAbiCoder.encode(
                 ["address", "uint256", "address"],
                 [ETH_ADDRESS_IN_CONTRACTS, 0, to],
