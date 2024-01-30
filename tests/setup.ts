@@ -49,8 +49,8 @@ async function mintTokensOnL1(alternativeToken: string) {
 
     console.log(`Minting tokens on L1`);
 
-    const testnetToken = ITestnetErc20TokenFactory.connect(baseTokenAddress, wallet._signerL1());
-    const baseTokenMintTx = await testnetToken.mint(
+    const baseToken = ITestnetErc20TokenFactory.connect(baseTokenAddress, wallet._signerL1());
+    const baseTokenMintTx = await baseToken.mint(
         await wallet.getAddress(),
         ethers.utils.parseEther("100"),
     );

@@ -443,7 +443,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             return result;
         }
         result.eip712Meta = {
-            gasPerPubdata: utils.hexValue(transaction.customData.gasPerPubdata ?? 0),
+            gasPerPubdata: utils.hexValue(transaction.customData.gasPerPubdataByte ?? 0),
         } as any;
         transaction.type = EIP712_TX_TYPE;
         if (transaction.customData.factoryDeps) {
@@ -707,7 +707,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         tx.overrides ??= {};
         tx.overrides.from ??= tx.from;
 
-        if (tx.token == null || tx.token == ETH_ADDRESS) {
+        if (tx.token == null || tx.token == ETH_ADDRESS) {// TODO: || tx.token == baseToken
             return {
                 ...(await ethers.utils.resolveProperties(tx.overrides)),
                 to: tx.to,

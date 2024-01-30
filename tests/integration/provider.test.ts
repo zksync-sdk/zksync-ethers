@@ -8,7 +8,8 @@ describe("Provider", () => {
     const RECEIVER = "0xa61464658AfeAf65CccaaFD3a512b69A83B77618";
 
     const provider = Provider.getDefaultProvider();
-    const wallet = new Wallet(PRIVATE_KEY, provider);
+    const ethProvider = ethers.getDefaultProvider("http://localhost:8545");
+    const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider); // overwritten transfer method use L1 network
 
     const TOKENS_L1 = require("../tokens.json");
     // const DAI_L1 = TOKENS_L1[0].address;
