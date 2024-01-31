@@ -415,7 +415,9 @@ describe("Wallet", async () => {
                 const amount = 5;
                 const approveParams = await wallet.getDepositAllowanceParams(token, amount);
 
-                await (await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)).wait();
+                await (
+                    await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)
+                ).wait();
 
                 const result = await wallet.estimateGasDeposit({
                     token: utils.ETH_ADDRESS,
@@ -431,7 +433,9 @@ describe("Wallet", async () => {
                 const amount = 5;
                 const approveParams = await wallet.getDepositAllowanceParams(token, amount);
 
-                await (await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)).wait();
+                await (
+                    await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)
+                ).wait();
 
                 const result = await wallet.estimateGasDeposit({
                     token: token,
@@ -447,8 +451,12 @@ describe("Wallet", async () => {
                 const amount = 5;
                 const approveParams = await wallet.getDepositAllowanceParams(token, amount);
 
-                await (await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)).wait();
-                await (await wallet.approveERC20(approveParams[1].token, approveParams[1].allowance)).wait();
+                await (
+                    await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)
+                ).wait();
+                await (
+                    await wallet.approveERC20(approveParams[1].token, approveParams[1].allowance)
+                ).wait();
 
                 const result = await wallet.estimateGasDeposit({
                     token: token,
@@ -900,18 +908,18 @@ describe("Wallet", async () => {
             expect(balanceAfterTransfer.sub(balanceBeforeTransfer).eq(amount)).to.be.true;
         }).timeout(25_000);
 
-        if(isETHBasedChain) {
+        if (isETHBasedChain) {
             it("should transfer base token", async () => {
                 const amount = 7_000_000_000;
-                const token = await wallet.getBaseToken(); 
-                const balanceBeforeTransfer = await provider.getBalance(RECEIVER, 'latest', token);
+                const token = await wallet.getBaseToken();
+                const balanceBeforeTransfer = await provider.getBalance(RECEIVER, "latest", token);
                 const tx = await wallet.transfer({
                     token: token,
                     to: RECEIVER,
                     amount: amount,
                 });
                 const result = await tx.wait();
-                const balanceAfterTransfer = await provider.getBalance(RECEIVER, 'latest', token);
+                const balanceAfterTransfer = await provider.getBalance(RECEIVER, "latest", token);
                 expect(result).not.to.be.null;
                 expect(balanceAfterTransfer.sub(balanceBeforeTransfer).isZero()).to.be.true;
             }).timeout(25_000);
@@ -930,7 +938,6 @@ describe("Wallet", async () => {
                 expect(balanceAfterTransfer.sub(balanceBeforeTransfer).eq(amount)).to.be.true;
             }).timeout(25_000);
         }
-        
     });
 
     describe("#signTransaction()", () => {

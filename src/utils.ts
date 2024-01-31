@@ -12,14 +12,14 @@ import {
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Provider } from "./provider";
 import { EIP712Signer } from "./signer";
-import { Ierc20Factory as IERC20Factory } from "../typechain/Ierc20Factory";
-import { Il1BridgeFactory as IL1BridgeFactory } from "../typechain/Il1BridgeFactory";
+import { Ierc20Factory } from "../typechain/Ierc20Factory";
+import { Il1BridgeFactory } from "../typechain/Il1BridgeFactory";
 import { AbiCoder } from "ethers/lib/utils";
 
 export * from "./paymaster-utils";
 export { EIP712_TYPES } from "./signer";
 
-export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IStateTransitionChain.json"));
+export const ZKSYNC_MAIN_ABI = new utils.Interface(require("../abi/IZkSyncStateTransition.json"));
 export const BRIDGEHUB_ABI = new utils.Interface(require("../abi/IBridgehub.json"));
 export const CONTRACT_DEPLOYER = new utils.Interface(require("../abi/IContractDeployer.json"));
 export const L1_MESSENGER = new utils.Interface(require("../abi/IL1Messenger.json"));
@@ -426,7 +426,7 @@ export async function getERC20DefaultBridgeData(
     l1TokenAddress: string,
     provider: ethers.providers.Provider,
 ): Promise<string> {
-    const token = IERC20Factory.connect(l1TokenAddress, provider);
+    const token = Ierc20Factory.connect(l1TokenAddress, provider);
 
     const name = await token.name();
     const symbol = await token.symbol();
@@ -562,7 +562,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
     } else {
         let value, l1BridgeAddress, l2BridgeAddress, bridgeData;
         const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
-        const l1WethBridge = IL1BridgeFactory.connect(bridgeAddresses.wethL1, providerL1);
+        const l1WethBridge = Il1BridgeFactory.connect(bridgeAddresses.wethL1, providerL1);
         let l2WethToken = ethers.constants.AddressZero;
         try {
             l2WethToken = await l1WethBridge.l2TokenAddress(token);

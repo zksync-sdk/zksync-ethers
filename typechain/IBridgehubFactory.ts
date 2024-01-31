@@ -450,6 +450,11 @@ const _abi = [
             type: "uint256",
           },
           {
+            internalType: "uint256",
+            name: "l1GasPriceConverted",
+            type: "uint256",
+          },
+          {
             internalType: "bytes[]",
             name: "factoryDeps",
             type: "bytes[]",
@@ -503,6 +508,11 @@ const _abi = [
           {
             internalType: "uint256",
             name: "l2GasPerPubdataByteLimit",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l1GasPriceConverted",
             type: "uint256",
           },
           {

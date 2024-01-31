@@ -5,14 +5,14 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { Il1Bridge } from "./Il1Bridge";
+import type { Il1WethBridge } from "./Il1WethBridge";
 
-export class Il1BridgeFactory {
+export class Il1WethBridgeFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): Il1Bridge {
-    return new Contract(address, _abi, signerOrProvider) as Il1Bridge;
+  ): Il1WethBridge {
+    return new Contract(address, _abi, signerOrProvider) as Il1WethBridge;
   }
 }
 
@@ -509,6 +509,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "l1WethAddress",
+    outputs: [
+      {
+        internalType: "address payable",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -517,6 +530,25 @@ const _abi = [
       },
     ],
     name: "l2BridgeAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+    ],
+    name: "l2WethAddress",
     outputs: [
       {
         internalType: "address",

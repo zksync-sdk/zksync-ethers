@@ -16,7 +16,7 @@ const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
 // only for zk stack because everytime tokens addresses are
 // different
-const DAI_L1 = "0x5E6D086F5eC079ADFF4FB3774CDf3e8D6a34F7E9";
+const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";
 
 /*
 Deploy a token to the L2 network through deposit transaction.
@@ -43,18 +43,19 @@ async function mintTokensOnL1(alternativeToken: string) {
     const chainId = (await provider.getNetwork()).chainId;
     let baseTokenAddress = await bridgehub.baseToken(chainId);
     baseTokenAddress = baseTokenAddress == ETH_ADDRESS_IN_CONTRACTS ? ETH_ADDRESS : baseTokenAddress;
-    if (baseTokenAddress == ETH_ADDRESS) {
-        return;
-    }
 
     console.log(`Minting tokens on L1`);
 
-    const baseToken = ITestnetErc20TokenFactory.connect(baseTokenAddress, wallet._signerL1());
-    const baseTokenMintTx = await baseToken.mint(
-        await wallet.getAddress(),
-        ethers.utils.parseEther("100"),
-    );
-    await baseTokenMintTx.wait();
+
+    if (baseTokenAddress != ETH_ADDRESS) {
+        const baseToken = ITestnetErc20TokenFactory.connect(baseTokenAddress, wallet._signerL1());
+        const baseTokenMintTx = await baseToken.mint(
+            await wallet.getAddress(),
+            ethers.utils.parseEther("100"),
+        );
+    await baseTokenMintTx.wait();    
+    }
+    
 
     const altToken = ITestnetErc20TokenFactory.connect(alternativeToken, wallet._signerL1());
     const altTokenMintTx = await altToken.mint(
@@ -96,12 +97,16 @@ async function sendFundsOnL2() {
 }
 
 async function main() {
-    await mintTokensOnL1(DAI_L1);
+    console.log(`Balance: ${await wallet.getBalance()}`)
+    console.log(`Balance: ${await wallet.getBalanceL1()}`)
+    // await mintTokensOnL1(DAI_L1);
 
-    const l2TokenAddress = await createTokenL2(DAI_L1);
-    console.log(`L2 DAI address: ${l2TokenAddress}`);
+    // const l2TokenAddress = await createTokenL2(DAI_L1);
+    // console.log(`L2 DAI address: ${l2TokenAddress}`);
 
     await sendFundsOnL2();
+    console.log(`Balance: ${await wallet.getBalance()}`)
+    console.log(`Balance: ${await wallet.getBalanceL1()}`)
 }
 
 main()

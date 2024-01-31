@@ -1,9 +1,9 @@
 import { BigNumber, BigNumberish, BytesLike, Contract, ethers, providers, utils } from "ethers";
 import { ExternalProvider } from "@ethersproject/providers";
 import { ConnectionInfo, poll } from "@ethersproject/web";
-import { Ierc20Factory as IERC20Factory } from "../typechain/Ierc20Factory";
+import { Ierc20Factory } from "../typechain/Ierc20Factory";
 import { IEthTokenFactory } from "../typechain/IEthTokenFactory";
-import { Il2BridgeFactory as IL2BridgeFactory } from "../typechain/Il2BridgeFactory";
+import { Il2BridgeFactory } from "../typechain/Il2BridgeFactory";
 import {
     Address,
     BalancesMap,
@@ -382,7 +382,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             return await super.getBalance(address, tag);
         } else {
             try {
-                let token = IERC20Factory.connect(tokenAddress, this);
+                let token = Ierc20Factory.connect(tokenAddress, this);
                 return await token.balanceOf(address, { blockTag: tag });
             } catch {
                 return BigNumber.from(0);
@@ -396,7 +396,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
+        const l2WethBridge = Il2BridgeFactory.connect(bridgeAddresses.wethL2, this);
         try {
             const l2WethToken = await l2WethBridge.l2TokenAddress(token);
             // If the token is Wrapped Ether, return its L2 token address
@@ -404,7 +404,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                 return l2WethToken;
             }
         } catch (e) {}
-        const l2Erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
+        const l2Erc20Bridge = Il2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
         return await l2Erc20Bridge.l2TokenAddress(token);
     }
 
@@ -414,7 +414,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
+        const l2WethBridge = Il2BridgeFactory.connect(bridgeAddresses.wethL2, this);
         try {
             const l1WethToken = await l2WethBridge.l1TokenAddress(token);
             // If the token is Wrapped Ether, return its L1 token address
@@ -422,7 +422,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                 return l1WethToken;
             }
         } catch (e) {}
-        const erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
+        const erc20Bridge = Il2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
         return await erc20Bridge.l1TokenAddress(token);
     }
 
@@ -669,7 +669,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
         if (tx.bridgeAddress == null) {
             const bridgeAddresses = await this.getDefaultBridgeAddresses();
-            const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
+            const l2WethBridge = Il2BridgeFactory.connect(bridgeAddresses.wethL2, this);
             let l1WethToken = ethers.constants.AddressZero;
             try {
                 l1WethToken = await l2WethBridge.l1TokenAddress(tx.token);
@@ -680,7 +680,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                     : bridgeAddresses.erc20L2;
         }
 
-        const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
+        const bridge = Il2BridgeFactory.connect(tx.bridgeAddress!, this);
         return bridge.populateTransaction.withdraw(tx.to, tx.token, tx.amount, tx.overrides);
     }
 
@@ -707,14 +707,15 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         tx.overrides ??= {};
         tx.overrides.from ??= tx.from;
 
-        if (tx.token == null || tx.token == ETH_ADDRESS) {// TODO: || tx.token == baseToken
+        if (tx.token == null || tx.token == ETH_ADDRESS) {
+            // TODO: || tx.token == baseToken
             return {
                 ...(await ethers.utils.resolveProperties(tx.overrides)),
                 to: tx.to,
                 value: tx.amount,
             };
         } else {
-            const token = IERC20Factory.connect(tx.token, this);
+            const token = Ierc20Factory.connect(tx.token, this);
             return await token.populateTransaction.transfer(tx.to, tx.amount, tx.overrides);
         }
     }

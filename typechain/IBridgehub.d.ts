@@ -136,6 +136,7 @@ interface IBridgehubInterface extends ethers.utils.Interface {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       }
@@ -150,6 +151,7 @@ interface IBridgehubInterface extends ethers.utils.Interface {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -500,6 +502,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -515,6 +518,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -528,6 +532,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -543,6 +548,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -817,6 +823,7 @@ export class IBridgehub extends Contract {
       l2Calldata: BytesLike;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
+      l1GasPriceConverted: BigNumberish;
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
@@ -832,6 +839,7 @@ export class IBridgehub extends Contract {
       l2Calldata: BytesLike;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
+      l1GasPriceConverted: BigNumberish;
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
@@ -845,6 +853,7 @@ export class IBridgehub extends Contract {
       l2Value: BigNumberish;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
+      l1GasPriceConverted: BigNumberish;
       refundRecipient: string;
       secondBridgeAddress: string;
       secondBridgeValue: BigNumberish;
@@ -860,6 +869,7 @@ export class IBridgehub extends Contract {
       l2Value: BigNumberish;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
+      l1GasPriceConverted: BigNumberish;
       refundRecipient: string;
       secondBridgeAddress: string;
       secondBridgeValue: BigNumberish;
@@ -1117,6 +1127,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1132,6 +1143,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1145,6 +1157,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1160,6 +1173,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1426,6 +1440,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1441,6 +1456,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1454,6 +1470,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1469,6 +1486,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1730,6 +1748,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1745,6 +1764,7 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1758,6 +1778,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1773,6 +1794,7 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;

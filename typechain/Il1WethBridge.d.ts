@@ -21,7 +21,7 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface Il1BridgeInterface extends ethers.utils.Interface {
+interface Il1WethBridgeInterface extends ethers.utils.Interface {
   functions: {
     "bridgehub()": FunctionFragment;
     "bridgehubConfirmL2Transaction(uint256,bytes32,bytes32)": FunctionFragment;
@@ -32,7 +32,9 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     "depositHappened(uint256,bytes32)": FunctionFragment;
     "finalizeWithdrawal(uint256,uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "isWithdrawalFinalizedShared(uint256,uint256,uint256)": FunctionFragment;
+    "l1WethAddress()": FunctionFragment;
     "l2BridgeAddress(uint256)": FunctionFragment;
+    "l2WethAddress(uint256)": FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: "bridgehub", values?: undefined): string;
@@ -95,7 +97,15 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "l1WethAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "l2BridgeAddress",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "l2WethAddress",
     values: [BigNumberish]
   ): string;
 
@@ -130,7 +140,15 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "l1WethAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "l2BridgeAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2WethAddress",
     data: BytesLike
   ): Result;
 
@@ -157,7 +175,7 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
   ): EventFragment;
 }
 
-export class Il1Bridge extends Contract {
+export class Il1WethBridge extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -168,7 +186,7 @@ export class Il1Bridge extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: Il1BridgeInterface;
+  interface: Il1WethBridgeInterface;
 
   functions: {
     bridgehub(overrides?: CallOverrides): Promise<{
@@ -327,6 +345,14 @@ export class Il1Bridge extends Contract {
       0: boolean;
     }>;
 
+    l1WethAddress(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "l1WethAddress()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -335,6 +361,20 @@ export class Il1Bridge extends Contract {
     }>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    l2WethAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "l2WethAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
@@ -486,12 +526,26 @@ export class Il1Bridge extends Contract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  l1WethAddress(overrides?: CallOverrides): Promise<string>;
+
+  "l1WethAddress()"(overrides?: CallOverrides): Promise<string>;
+
   l2BridgeAddress(
     _chainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
   "l2BridgeAddress(uint256)"(
+    _chainId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  l2WethAddress(
+    _chainId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "l2WethAddress(uint256)"(
     _chainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
@@ -663,12 +717,26 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    l1WethAddress(overrides?: CallOverrides): Promise<string>;
+
+    "l1WethAddress()"(overrides?: CallOverrides): Promise<string>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    l2WethAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "l2WethAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
@@ -859,12 +927,26 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    l1WethAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "l1WethAddress()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    l2WethAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "l2WethAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1015,12 +1097,26 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    l1WethAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "l1WethAddress()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    l2WethAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "l2WethAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;

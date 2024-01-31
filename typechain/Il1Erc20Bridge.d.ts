@@ -21,18 +21,24 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface Il1BridgeInterface extends ethers.utils.Interface {
+interface Il1Erc20BridgeInterface extends ethers.utils.Interface {
   functions: {
     "bridgehub()": FunctionFragment;
     "bridgehubConfirmL2Transaction(uint256,bytes32,bytes32)": FunctionFragment;
     "bridgehubDeposit(uint256,address,bytes)": FunctionFragment;
     "bridgehubDepositBaseToken(uint256,address,address,uint256)": FunctionFragment;
-    "claimFailedDeposit(uint256,address,address,uint256,bytes32,uint256,uint256,uint16,bytes32[])": FunctionFragment;
+    "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])": FunctionFragment;
     "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)": FunctionFragment;
+    "depositAmount(address,address,bytes32)": FunctionFragment;
     "depositHappened(uint256,bytes32)": FunctionFragment;
     "finalizeWithdrawal(uint256,uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "isWithdrawalFinalizedShared(uint256,uint256,uint256)": FunctionFragment;
+    "l2Bridge()": FunctionFragment;
     "l2BridgeAddress(uint256)": FunctionFragment;
+    "l2TokenAddress(address)": FunctionFragment;
+    "l2TokenAddressSharedBridge(uint256,address)": FunctionFragment;
+    "l2TokenBeacon()": FunctionFragment;
+    "l2TokenBeaconAddress(uint256)": FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: "bridgehub", values?: undefined): string;
@@ -51,10 +57,8 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "claimFailedDeposit",
     values: [
-      BigNumberish,
       string,
       string,
-      BigNumberish,
       BytesLike,
       BigNumberish,
       BigNumberish,
@@ -76,6 +80,10 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "depositAmount",
+    values: [string, string, BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "depositHappened",
     values: [BigNumberish, BytesLike]
   ): string;
@@ -94,8 +102,25 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     functionFragment: "isWithdrawalFinalizedShared",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "l2Bridge", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "l2BridgeAddress",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "l2TokenAddress",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "l2TokenAddressSharedBridge",
+    values: [BigNumberish, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "l2TokenBeacon",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "l2TokenBeaconAddress",
     values: [BigNumberish]
   ): string;
 
@@ -118,6 +143,10 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "depositAmount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "depositHappened",
     data: BytesLike
   ): Result;
@@ -129,16 +158,36 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     functionFragment: "isWithdrawalFinalizedShared",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "l2Bridge", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "l2BridgeAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2TokenAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2TokenAddressSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2TokenBeacon",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2TokenBeaconAddress",
     data: BytesLike
   ): Result;
 
   events: {
     "BridgehubDepositFinalized(uint256,bytes32,bytes32)": EventFragment;
     "BridgehubDepositInitiatedSharedBridge(uint256,bytes32,address,address,address,uint256)": EventFragment;
+    "ClaimedFailedDeposit(address,address,uint256)": EventFragment;
     "ClaimedFailedDepositSharedBridge(uint256,address,address,uint256)": EventFragment;
+    "DepositInitiated(bytes32,address,address,address,uint256)": EventFragment;
     "DepositInitiatedSharedBridge(uint256,bytes32,address,address,address,uint256)": EventFragment;
+    "WithdrawalFinalized(address,address,uint256)": EventFragment;
     "WithdrawalFinalizedSharedBridge(uint256,address,address,uint256)": EventFragment;
   };
 
@@ -146,18 +195,21 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
   getEvent(
     nameOrSignatureOrTopic: "BridgehubDepositInitiatedSharedBridge"
   ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ClaimedFailedDeposit"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "ClaimedFailedDepositSharedBridge"
   ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DepositInitiated"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "DepositInitiatedSharedBridge"
   ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WithdrawalFinalized"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "WithdrawalFinalizedSharedBridge"
   ): EventFragment;
 }
 
-export class Il1Bridge extends Contract {
+export class Il1Erc20Bridge extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -168,7 +220,7 @@ export class Il1Bridge extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: Il1BridgeInterface;
+  interface: Il1Erc20BridgeInterface;
 
   functions: {
     bridgehub(overrides?: CallOverrides): Promise<{
@@ -223,11 +275,9 @@ export class Il1Bridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    claimFailedDeposit(
-      _chainId: BigNumberish,
+    "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])"(
       _depositSender: string,
       _l1Token: string,
-      _amount: BigNumberish,
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -249,7 +299,7 @@ export class Il1Bridge extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    deposit(
+    "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
       _chainId: BigNumberish,
       _l2Receiver: string,
       _l1Token: string,
@@ -261,16 +311,37 @@ export class Il1Bridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
-      _chainId: BigNumberish,
+    "deposit(address,address,uint256,uint256,uint256)"(
       _l2Receiver: string,
       _l1Token: string,
-      _mintValue: BigNumberish,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    "deposit(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
       overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    depositAmount(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "depositAmount(address,address,bytes32)"(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     depositHappened(
@@ -327,6 +398,14 @@ export class Il1Bridge extends Contract {
       0: boolean;
     }>;
 
+    l2Bridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -335,6 +414,58 @@ export class Il1Bridge extends Contract {
     }>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    l2TokenAddress(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "l2TokenAddress(address)"(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    l2TokenAddressSharedBridge(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "l2TokenAddressSharedBridge(uint256,address)"(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    l2TokenBeacon(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "l2TokenBeacon()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    l2TokenBeaconAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "l2TokenBeaconAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
@@ -390,11 +521,9 @@ export class Il1Bridge extends Contract {
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  claimFailedDeposit(
-    _chainId: BigNumberish,
+  "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])"(
     _depositSender: string,
     _l1Token: string,
-    _amount: BigNumberish,
     _l2TxHash: BytesLike,
     _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
@@ -416,7 +545,7 @@ export class Il1Bridge extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  deposit(
+  "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
     _chainId: BigNumberish,
     _l2Receiver: string,
     _l1Token: string,
@@ -428,16 +557,37 @@ export class Il1Bridge extends Contract {
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
-    _chainId: BigNumberish,
+  "deposit(address,address,uint256,uint256,uint256)"(
     _l2Receiver: string,
     _l1Token: string,
-    _mintValue: BigNumberish,
+    _amount: BigNumberish,
+    _l2TxGasLimit: BigNumberish,
+    _l2TxGasPerPubdataByte: BigNumberish,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  "deposit(address,address,uint256,uint256,uint256,address)"(
+    _l2Receiver: string,
+    _l1Token: string,
     _amount: BigNumberish,
     _l2TxGasLimit: BigNumberish,
     _l2TxGasPerPubdataByte: BigNumberish,
     _refundRecipient: string,
     overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  depositAmount(
+    _account: string,
+    _l1Token: string,
+    _depositL2TxHash: BytesLike,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "depositAmount(address,address,bytes32)"(
+    _account: string,
+    _l1Token: string,
+    _depositL2TxHash: BytesLike,
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   depositHappened(
@@ -486,12 +636,49 @@ export class Il1Bridge extends Contract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  l2Bridge(overrides?: CallOverrides): Promise<string>;
+
+  "l2Bridge()"(overrides?: CallOverrides): Promise<string>;
+
   l2BridgeAddress(
     _chainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
   "l2BridgeAddress(uint256)"(
+    _chainId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  l2TokenAddress(_l1Token: string, overrides?: CallOverrides): Promise<string>;
+
+  "l2TokenAddress(address)"(
+    _l1Token: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  l2TokenAddressSharedBridge(
+    _chainId: BigNumberish,
+    _l1Token: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "l2TokenAddressSharedBridge(uint256,address)"(
+    _chainId: BigNumberish,
+    _l1Token: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  l2TokenBeacon(overrides?: CallOverrides): Promise<string>;
+
+  "l2TokenBeacon()"(overrides?: CallOverrides): Promise<string>;
+
+  l2TokenBeaconAddress(
+    _chainId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "l2TokenBeaconAddress(uint256)"(
     _chainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
@@ -567,11 +754,9 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    claimFailedDeposit(
-      _chainId: BigNumberish,
+    "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])"(
       _depositSender: string,
       _l1Token: string,
-      _amount: BigNumberish,
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -593,18 +778,6 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    deposit(
-      _chainId: BigNumberish,
-      _l2Receiver: string,
-      _l1Token: string,
-      _mintValue: BigNumberish,
-      _amount: BigNumberish,
-      _l2TxGasLimit: BigNumberish,
-      _l2TxGasPerPubdataByte: BigNumberish,
-      _refundRecipient: string,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
     "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
       _chainId: BigNumberish,
       _l2Receiver: string,
@@ -616,6 +789,39 @@ export class Il1Bridge extends Contract {
       _refundRecipient: string,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    "deposit(address,address,uint256,uint256,uint256)"(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "deposit(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    depositAmount(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "depositAmount(address,address,bytes32)"(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     depositHappened(
       _chainId: BigNumberish,
@@ -663,12 +869,52 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    l2Bridge(overrides?: CallOverrides): Promise<string>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<string>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    l2TokenAddress(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "l2TokenAddress(address)"(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    l2TokenAddressSharedBridge(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "l2TokenAddressSharedBridge(uint256,address)"(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    l2TokenBeacon(overrides?: CallOverrides): Promise<string>;
+
+    "l2TokenBeacon()"(overrides?: CallOverrides): Promise<string>;
+
+    l2TokenBeaconAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "l2TokenBeaconAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
@@ -690,10 +936,24 @@ export class Il1Bridge extends Contract {
       amount: null
     ): EventFilter;
 
+    ClaimedFailedDeposit(
+      to: string | null,
+      l1Token: string | null,
+      amount: null
+    ): EventFilter;
+
     ClaimedFailedDepositSharedBridge(
       chainId: BigNumberish | null,
       to: string | null,
       l1Token: string | null,
+      amount: null
+    ): EventFilter;
+
+    DepositInitiated(
+      l2DepositTxHash: BytesLike | null,
+      from: string | null,
+      to: string | null,
+      l1Token: null,
       amount: null
     ): EventFilter;
 
@@ -703,6 +963,12 @@ export class Il1Bridge extends Contract {
       from: string | null,
       to: null,
       l1Token: null,
+      amount: null
+    ): EventFilter;
+
+    WithdrawalFinalized(
+      to: string | null,
+      l1Token: string | null,
       amount: null
     ): EventFilter;
 
@@ -763,11 +1029,9 @@ export class Il1Bridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    claimFailedDeposit(
-      _chainId: BigNumberish,
+    "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])"(
       _depositSender: string,
       _l1Token: string,
-      _amount: BigNumberish,
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -789,7 +1053,7 @@ export class Il1Bridge extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    deposit(
+    "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
       _chainId: BigNumberish,
       _l2Receiver: string,
       _l1Token: string,
@@ -801,16 +1065,37 @@ export class Il1Bridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
-      _chainId: BigNumberish,
+    "deposit(address,address,uint256,uint256,uint256)"(
       _l2Receiver: string,
       _l1Token: string,
-      _mintValue: BigNumberish,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    "deposit(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
       overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    depositAmount(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "depositAmount(address,address,bytes32)"(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     depositHappened(
@@ -859,12 +1144,52 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    l2Bridge(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    l2TokenAddress(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "l2TokenAddress(address)"(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    l2TokenAddressSharedBridge(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "l2TokenAddressSharedBridge(uint256,address)"(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    l2TokenBeacon(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "l2TokenBeacon()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    l2TokenBeaconAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "l2TokenBeaconAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -919,11 +1244,9 @@ export class Il1Bridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    claimFailedDeposit(
-      _chainId: BigNumberish,
+    "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])"(
       _depositSender: string,
       _l1Token: string,
-      _amount: BigNumberish,
       _l2TxHash: BytesLike,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -945,7 +1268,7 @@ export class Il1Bridge extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    deposit(
+    "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
       _chainId: BigNumberish,
       _l2Receiver: string,
       _l1Token: string,
@@ -957,16 +1280,37 @@ export class Il1Bridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)"(
-      _chainId: BigNumberish,
+    "deposit(address,address,uint256,uint256,uint256)"(
       _l2Receiver: string,
       _l1Token: string,
-      _mintValue: BigNumberish,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "deposit(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
       overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    depositAmount(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "depositAmount(address,address,bytes32)"(
+      _account: string,
+      _l1Token: string,
+      _depositL2TxHash: BytesLike,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     depositHappened(
@@ -1015,12 +1359,52 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    l2Bridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "l2BridgeAddress(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    l2TokenAddress(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "l2TokenAddress(address)"(
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    l2TokenAddressSharedBridge(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "l2TokenAddressSharedBridge(uint256,address)"(
+      _chainId: BigNumberish,
+      _l1Token: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    l2TokenBeacon(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "l2TokenBeacon()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    l2TokenBeaconAddress(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "l2TokenBeaconAddress(uint256)"(
       _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;

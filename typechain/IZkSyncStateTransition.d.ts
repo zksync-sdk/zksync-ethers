@@ -14,6 +14,7 @@ import {
   Contract,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   CallOverrides,
 } from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
@@ -22,115 +23,461 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   functions: {
-    "bridgehub()": FunctionFragment;
-    "genesisUpgrade()": FunctionFragment;
+    "acceptGovernor()": FunctionFragment;
+    "bridgehubRequestL2Transaction(tuple)": FunctionFragment;
+    "commitBatches(tuple,tuple[])": FunctionFragment;
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])": FunctionFragment;
+    "executeBatches(tuple[])": FunctionFragment;
+    "executeBatchesSharedBridge(uint256,tuple[])": FunctionFragment;
+    "executeUpgrade(tuple)": FunctionFragment;
+    "facetAddress(bytes4)": FunctionFragment;
+    "facetAddresses()": FunctionFragment;
+    "facetFunctionSelectors(address)": FunctionFragment;
+    "facets()": FunctionFragment;
+    "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
+    "freezeDiamond()": FunctionFragment;
+    "getBaseToken()": FunctionFragment;
+    "getBaseTokenBridge()": FunctionFragment;
+    "getBridgehub()": FunctionFragment;
+    "getFirstUnprocessedPriorityTx()": FunctionFragment;
+    "getGovernor()": FunctionFragment;
+    "getL2BootloaderBytecodeHash()": FunctionFragment;
+    "getL2DefaultAccountBytecodeHash()": FunctionFragment;
+    "getL2SystemContractsUpgradeBatchNumber()": FunctionFragment;
+    "getL2SystemContractsUpgradeTxHash()": FunctionFragment;
     "getName()": FunctionFragment;
-    "governor()": FunctionFragment;
-    "initialCutHash()": FunctionFragment;
-    "initialize(tuple)": FunctionFragment;
-    "newChain(uint256,address,address,address,bytes)": FunctionFragment;
-    "protocolVersion()": FunctionFragment;
-    "setNewVersionUpgrade(tuple,uint256,uint256)": FunctionFragment;
-    "setUpgradeDiamondCut(tuple,uint256)": FunctionFragment;
-    "stateTransitionChain(uint256)": FunctionFragment;
-    "storedBatchZero()": FunctionFragment;
-    "totalChains()": FunctionFragment;
-    "upgradeChainFromVersion(uint256,uint256,tuple)": FunctionFragment;
-    "upgradeCutHash(uint256)": FunctionFragment;
+    "getPendingGovernor()": FunctionFragment;
+    "getPriorityQueueSize()": FunctionFragment;
+    "getPriorityTxMaxGasLimit()": FunctionFragment;
+    "getProtocolVersion()": FunctionFragment;
+    "getStateTransitionManager()": FunctionFragment;
+    "getTotalBatchesCommitted()": FunctionFragment;
+    "getTotalBatchesExecuted()": FunctionFragment;
+    "getTotalBatchesVerified()": FunctionFragment;
+    "getTotalPriorityTxs()": FunctionFragment;
+    "getVerifier()": FunctionFragment;
+    "getVerifierParams()": FunctionFragment;
+    "isDiamondStorageFrozen()": FunctionFragment;
+    "isEthWithdrawalFinalized(uint256,uint256)": FunctionFragment;
+    "isFacetFreezable(address)": FunctionFragment;
+    "isFunctionFreezable(bytes4)": FunctionFragment;
+    "isValidator(address)": FunctionFragment;
+    "l2LogsRootHash(uint256)": FunctionFragment;
+    "l2TransactionBaseCost(uint256,uint256,uint256)": FunctionFragment;
+    "priorityQueueFrontOperation()": FunctionFragment;
+    "proveBatches(tuple,tuple[],tuple)": FunctionFragment;
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)": FunctionFragment;
+    "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)": FunctionFragment;
+    "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])": FunctionFragment;
+    "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])": FunctionFragment;
+    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)": FunctionFragment;
+    "revertBatches(uint256)": FunctionFragment;
+    "revertBatchesSharedBridge(uint256,uint256)": FunctionFragment;
+    "setPendingGovernor(address)": FunctionFragment;
+    "setPorterAvailability(bool)": FunctionFragment;
+    "setPriorityTxMaxGasLimit(uint256)": FunctionFragment;
+    "setValidator(address,bool)": FunctionFragment;
+    "storedBatchHash(uint256)": FunctionFragment;
+    "unfreezeDiamond()": FunctionFragment;
+    "upgradeChainFromVersion(uint256,tuple)": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "bridgehub", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "genesisUpgrade",
+    functionFragment: "acceptGovernor",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgehubRequestL2Transaction",
+    values: [
+      {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      }
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "commitBatches",
+    values: [
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "commitBatchesSharedBridge",
+    values: [
+      BigNumberish,
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "executeBatches",
+    values: [
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "executeBatchesSharedBridge",
+    values: [
+      BigNumberish,
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "executeUpgrade",
+    values: [
+      {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      }
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddress",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddresses",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetFunctionSelectors",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "finalizeEthWithdrawal",
+    values: [BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "freezeDiamond",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBaseToken",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBaseTokenBridge",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBridgehub",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getFirstUnprocessedPriorityTx",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getGovernor",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getL2BootloaderBytecodeHash",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getL2DefaultAccountBytecodeHash",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getL2SystemContractsUpgradeBatchNumber",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getL2SystemContractsUpgradeTxHash",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "getName", values?: undefined): string;
-  encodeFunctionData(functionFragment: "governor", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "initialCutHash",
+    functionFragment: "getPendingGovernor",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
+    functionFragment: "getPriorityQueueSize",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPriorityTxMaxGasLimit",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getProtocolVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getStateTransitionManager",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTotalBatchesCommitted",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTotalBatchesExecuted",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTotalBatchesVerified",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTotalPriorityTxs",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getVerifier",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getVerifierParams",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isDiamondStorageFrozen",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isEthWithdrawalFinalized",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isFacetFreezable",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isFunctionFreezable",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "isValidator", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "l2LogsRootHash",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "l2TransactionBaseCost",
+    values: [BigNumberish, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "priorityQueueFrontOperation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "proveBatches",
     values: [
       {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
       }
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "newChain",
-    values: [BigNumberish, string, string, string, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "protocolVersion",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setNewVersionUpgrade",
+    functionFragment: "proveBatchesSharedBridge",
     values: [
-      {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
       BigNumberish,
-      BigNumberish
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setUpgradeDiamondCut",
-    values: [
       {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
       },
+      {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      }
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "proveL1ToL2TransactionStatus",
+    values: [
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike[],
       BigNumberish
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "stateTransitionChain",
+    functionFragment: "proveL2LogInclusion",
+    values: [
+      BigNumberish,
+      BigNumberish,
+      {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      BytesLike[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "proveL2MessageInclusion",
+    values: [
+      BigNumberish,
+      BigNumberish,
+      { txNumberInBatch: BigNumberish; sender: string; data: BytesLike },
+      BytesLike[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "requestL2Transaction",
+    values: [
+      string,
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BytesLike[],
+      string
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "revertBatches",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "storedBatchZero",
-    values?: undefined
+    functionFragment: "revertBatchesSharedBridge",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "totalChains",
+    functionFragment: "setPendingGovernor",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setPorterAvailability",
+    values: [boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setPriorityTxMaxGasLimit",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setValidator",
+    values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "storedBatchHash",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unfreezeDiamond",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "upgradeChainFromVersion",
     values: [
       BigNumberish,
-      BigNumberish,
       {
         facetCuts: {
           facet: string;
@@ -143,62 +490,267 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
       }
     ]
   ): string;
-  encodeFunctionData(
-    functionFragment: "upgradeCutHash",
-    values: [BigNumberish]
-  ): string;
 
-  decodeFunctionResult(functionFragment: "bridgehub", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "genesisUpgrade",
+    functionFragment: "acceptGovernor",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "bridgehubRequestL2Transaction",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "commitBatches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "commitBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "executeBatches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "executeBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "executeUpgrade",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddresses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetFunctionSelectors",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "finalizeEthWithdrawal",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "freezeDiamond",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getBaseToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getBaseTokenBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getBridgehub",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getFirstUnprocessedPriorityTx",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getGovernor",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getL2BootloaderBytecodeHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getL2DefaultAccountBytecodeHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getL2SystemContractsUpgradeBatchNumber",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getL2SystemContractsUpgradeTxHash",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getName", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "governor", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "initialCutHash",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "newChain", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "protocolVersion",
+    functionFragment: "getPendingGovernor",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setNewVersionUpgrade",
+    functionFragment: "getPriorityQueueSize",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setUpgradeDiamondCut",
+    functionFragment: "getPriorityTxMaxGasLimit",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "stateTransitionChain",
+    functionFragment: "getProtocolVersion",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "storedBatchZero",
+    functionFragment: "getStateTransitionManager",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "totalChains",
+    functionFragment: "getTotalBatchesCommitted",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTotalBatchesExecuted",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTotalBatchesVerified",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTotalPriorityTxs",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getVerifier",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getVerifierParams",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isDiamondStorageFrozen",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isEthWithdrawalFinalized",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isFacetFreezable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isFunctionFreezable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isValidator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2LogsRootHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2TransactionBaseCost",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "priorityQueueFrontOperation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "proveBatches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "proveBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "proveL1ToL2TransactionStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "proveL2LogInclusion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "proveL2MessageInclusion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "requestL2Transaction",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "revertBatches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "revertBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setPendingGovernor",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setPorterAvailability",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setPriorityTxMaxGasLimit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setValidator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "storedBatchHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "unfreezeDiamond",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "upgradeChainFromVersion",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "upgradeCutHash",
     data: BytesLike
   ): Result;
 
   events: {
-    "StateTransitionNewChain(uint256,address)": EventFragment;
+    "BlockCommit(uint256,bytes32,bytes32)": EventFragment;
+    "BlockExecution(uint256,bytes32,bytes32)": EventFragment;
+    "BlocksRevert(uint256,uint256,uint256)": EventFragment;
+    "BlocksVerification(uint256,uint256)": EventFragment;
+    "EthWithdrawalFinalized(address,uint256)": EventFragment;
+    "ExecuteUpgrade(tuple)": EventFragment;
+    "Freeze()": EventFragment;
+    "IsPorterAvailableStatusUpdate(bool)": EventFragment;
+    "NewFeeParams(tuple,tuple)": EventFragment;
+    "NewGovernor(address,address)": EventFragment;
+    "NewPendingGovernor(address,address)": EventFragment;
+    "NewPriorityRequest(uint256,bytes32,uint64,tuple,bytes[])": EventFragment;
+    "NewPriorityTxMaxGasLimit(uint256,uint256)": EventFragment;
+    "ProposeTransparentUpgrade(tuple,uint256,bytes32)": EventFragment;
+    "Unfreeze()": EventFragment;
+    "ValidatorStatusUpdate(address,bool)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "StateTransitionNewChain"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BlockCommit"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BlockExecution"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BlocksRevert"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BlocksVerification"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "EthWithdrawalFinalized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ExecuteUpgrade"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Freeze"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "IsPorterAvailableStatusUpdate"
+  ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewFeeParams"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewGovernor"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewPendingGovernor"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewPriorityRequest"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewPriorityTxMaxGasLimit"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ProposeTransparentUpgrade"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Unfreeze"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ValidatorStatusUpdate"): EventFragment;
 }
 
 export class IZkSyncStateTransition extends Contract {
@@ -215,19 +767,375 @@ export class IZkSyncStateTransition extends Contract {
   interface: IZkSyncStateTransitionInterface;
 
   functions: {
-    bridgehub(overrides?: CallOverrides): Promise<{
+    acceptGovernor(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "acceptGovernor()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    commitBatches(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "commitBatches(tuple,tuple[])"(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    executeBatches(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    executeUpgrade(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "executeUpgrade(tuple)"(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    facetAddress(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<{
+      facet: string;
       0: string;
     }>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<{
+    "facetAddress(bytes4)"(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<{
+      facet: string;
       0: string;
     }>;
 
-    genesisUpgrade(overrides?: CallOverrides): Promise<{
+    facetAddresses(overrides?: CallOverrides): Promise<{
+      facets: string[];
+      0: string[];
+    }>;
+
+    "facetAddresses()"(overrides?: CallOverrides): Promise<{
+      facets: string[];
+      0: string[];
+    }>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string[];
+    }>;
+
+    "facetFunctionSelectors(address)"(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string[];
+    }>;
+
+    facets(overrides?: CallOverrides): Promise<{
+      0: { addr: string; selectors: string[]; 0: string; 1: string[] }[];
+    }>;
+
+    "facets()"(overrides?: CallOverrides): Promise<{
+      0: { addr: string; selectors: string[]; 0: string; 1: string[] }[];
+    }>;
+
+    finalizeEthWithdrawal(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    freezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
-    "genesisUpgrade()"(overrides?: CallOverrides): Promise<{
+    "getBaseToken()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getBaseTokenBridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getFirstUnprocessedPriorityTx(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getFirstUnprocessedPriorityTx()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    getGovernor(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getGovernor()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getL2BootloaderBytecodeHash()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getL2DefaultAccountBytecodeHash(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getL2DefaultAccountBytecodeHash()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getL2SystemContractsUpgradeBatchNumber(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getL2SystemContractsUpgradeBatchNumber()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber;
+    }>;
+
+    getL2SystemContractsUpgradeTxHash(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getL2SystemContractsUpgradeTxHash()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
@@ -239,186 +1147,537 @@ export class IZkSyncStateTransition extends Contract {
       0: string;
     }>;
 
-    governor(overrides?: CallOverrides): Promise<{
+    getPendingGovernor(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
-    "governor()"(overrides?: CallOverrides): Promise<{
+    "getPendingGovernor()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
-    initialCutHash(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "initialCutHash()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    initialize(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
-      },
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "initialize(tuple)"(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
-      },
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    newChain(
-      _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "newChain(uint256,address,address,address,bytes)"(
-      _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    protocolVersion(overrides?: CallOverrides): Promise<{
+    getPriorityQueueSize(overrides?: CallOverrides): Promise<{
       0: BigNumber;
     }>;
 
-    "protocolVersion()"(overrides?: CallOverrides): Promise<{
+    "getPriorityQueueSize()"(overrides?: CallOverrides): Promise<{
       0: BigNumber;
     }>;
 
-    setNewVersionUpgrade(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
+    getPriorityTxMaxGasLimit(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getPriorityTxMaxGasLimit()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    getProtocolVersion(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getProtocolVersion()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    getStateTransitionManager(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getStateTransitionManager()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getTotalBatchesCommitted(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getTotalBatchesCommitted()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    getTotalBatchesExecuted(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getTotalBatchesExecuted()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    getTotalBatchesVerified(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getTotalBatchesVerified()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    getTotalPriorityTxs(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "getTotalPriorityTxs()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    getVerifier(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getVerifier()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    getVerifierParams(overrides?: CallOverrides): Promise<{
+      0: {
+        recursionNodeLevelVkHash: string;
+        recursionLeafLevelVkHash: string;
+        recursionCircuitsSetVksHash: string;
+        0: string;
+        1: string;
+        2: string;
+      };
+    }>;
+
+    "getVerifierParams()"(overrides?: CallOverrides): Promise<{
+      0: {
+        recursionNodeLevelVkHash: string;
+        recursionLeafLevelVkHash: string;
+        recursionCircuitsSetVksHash: string;
+        0: string;
+        1: string;
+        2: string;
+      };
+    }>;
+
+    isDiamondStorageFrozen(overrides?: CallOverrides): Promise<{
+      0: boolean;
+    }>;
+
+    "isDiamondStorageFrozen()"(overrides?: CallOverrides): Promise<{
+      0: boolean;
+    }>;
+
+    isEthWithdrawalFinalized(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    "isEthWithdrawalFinalized(uint256,uint256)"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    isFacetFreezable(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      isFreezable: boolean;
+      0: boolean;
+    }>;
+
+    "isFacetFreezable(address)"(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      isFreezable: boolean;
+      0: boolean;
+    }>;
+
+    isFunctionFreezable(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    "isFunctionFreezable(bytes4)"(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    isValidator(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    "isValidator(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    l2LogsRootHash(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      merkleRoot: string;
+      0: string;
+    }>;
+
+    "l2LogsRootHash(uint256)"(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      merkleRoot: string;
+      0: string;
+    }>;
+
+    l2TransactionBaseCost(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber;
+    }>;
+
+    "l2TransactionBaseCost(uint256,uint256,uint256)"(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber;
+    }>;
+
+    priorityQueueFrontOperation(overrides?: CallOverrides): Promise<{
+      0: {
+        canonicalTxHash: string;
+        expirationTimestamp: BigNumber;
+        layer2Tip: BigNumber;
+        0: string;
+        1: BigNumber;
+        2: BigNumber;
+      };
+    }>;
+
+    "priorityQueueFrontOperation()"(overrides?: CallOverrides): Promise<{
+      0: {
+        canonicalTxHash: string;
+        expirationTimestamp: BigNumber;
+        layer2Tip: BigNumber;
+        0: string;
+        1: BigNumber;
+        2: BigNumber;
+      };
+    }>;
+
+    proveBatches(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
       },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "setNewVersionUpgrade(tuple,uint256,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
+    "proveBatches(tuple,tuple[],tuple)"(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
       },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    setUpgradeDiamondCut(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "setUpgradeDiamondCut(tuple,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    stateTransitionChain(
+    proveBatchesSharedBridge(
       _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    proveL1ToL2TransactionStatus(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)"(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    proveL2LogInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    proveL2MessageInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<{
+      0: boolean;
+    }>;
+
+    requestL2Transaction(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    revertBatches(
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "revertBatches(uint256)"(
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    revertBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "revertBatchesSharedBridge(uint256,uint256)"(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setPendingGovernor(
+      _newPendingGovernor: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setPendingGovernor(address)"(
+      _newPendingGovernor: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setPorterAvailability(
+      _zkPorterIsAvailable: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setPorterAvailability(bool)"(
+      _zkPorterIsAvailable: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setPriorityTxMaxGasLimit(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setPriorityTxMaxGasLimit(uint256)"(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setValidator(
+      _validator: string,
+      _active: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setValidator(address,bool)"(
+      _validator: string,
+      _active: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    storedBatchHash(
+      _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
-    "stateTransitionChain(uint256)"(
-      _chainId: BigNumberish,
+    "storedBatchHash(uint256)"(
+      _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
-    storedBatchZero(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
+    unfreezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
 
-    "storedBatchZero()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    totalChains(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
-    }>;
-
-    "totalChains()"(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
-    }>;
+    "unfreezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
 
     upgradeChainFromVersion(
-      _chainId: BigNumberish,
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -433,8 +1692,7 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "upgradeChainFromVersion(uint256,uint256,tuple)"(
-      _chainId: BigNumberish,
+    "upgradeChainFromVersion(uint256,tuple)"(
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -448,190 +1706,777 @@ export class IZkSyncStateTransition extends Contract {
       },
       overrides?: Overrides
     ): Promise<ContractTransaction>;
-
-    upgradeCutHash(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
-
-    "upgradeCutHash(uint256)"(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
   };
 
-  bridgehub(overrides?: CallOverrides): Promise<string>;
+  acceptGovernor(overrides?: Overrides): Promise<ContractTransaction>;
 
-  "bridgehub()"(overrides?: CallOverrides): Promise<string>;
+  "acceptGovernor()"(overrides?: Overrides): Promise<ContractTransaction>;
 
-  genesisUpgrade(overrides?: CallOverrides): Promise<string>;
+  bridgehubRequestL2Transaction(
+    _request: {
+      sender: string;
+      contractL2: string;
+      mintValue: BigNumberish;
+      l2Value: BigNumberish;
+      l2Calldata: BytesLike;
+      l2GasLimit: BigNumberish;
+      l2GasPerPubdataByteLimit: BigNumberish;
+      l1GasPriceConverted: BigNumberish;
+      factoryDeps: BytesLike[];
+      refundRecipient: string;
+    },
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
 
-  "genesisUpgrade()"(overrides?: CallOverrides): Promise<string>;
+  "bridgehubRequestL2Transaction(tuple)"(
+    _request: {
+      sender: string;
+      contractL2: string;
+      mintValue: BigNumberish;
+      l2Value: BigNumberish;
+      l2Calldata: BytesLike;
+      l2GasLimit: BigNumberish;
+      l2GasPerPubdataByteLimit: BigNumberish;
+      l1GasPriceConverted: BigNumberish;
+      factoryDeps: BytesLike[];
+      refundRecipient: string;
+    },
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  commitBatches(
+    _lastCommittedBatchData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _newBatchesData: {
+      batchNumber: BigNumberish;
+      timestamp: BigNumberish;
+      indexRepeatedStorageChanges: BigNumberish;
+      newStateRoot: BytesLike;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      bootloaderHeapInitialContentsHash: BytesLike;
+      eventsQueueStateHash: BytesLike;
+      systemLogs: BytesLike;
+      totalL2ToL1Pubdata: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "commitBatches(tuple,tuple[])"(
+    _lastCommittedBatchData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _newBatchesData: {
+      batchNumber: BigNumberish;
+      timestamp: BigNumberish;
+      indexRepeatedStorageChanges: BigNumberish;
+      newStateRoot: BytesLike;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      bootloaderHeapInitialContentsHash: BytesLike;
+      eventsQueueStateHash: BytesLike;
+      systemLogs: BytesLike;
+      totalL2ToL1Pubdata: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  commitBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _lastCommittedBatchData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _newBatchesData: {
+      batchNumber: BigNumberish;
+      timestamp: BigNumberish;
+      indexRepeatedStorageChanges: BigNumberish;
+      newStateRoot: BytesLike;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      bootloaderHeapInitialContentsHash: BytesLike;
+      eventsQueueStateHash: BytesLike;
+      systemLogs: BytesLike;
+      totalL2ToL1Pubdata: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+    _chainId: BigNumberish,
+    _lastCommittedBatchData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _newBatchesData: {
+      batchNumber: BigNumberish;
+      timestamp: BigNumberish;
+      indexRepeatedStorageChanges: BigNumberish;
+      newStateRoot: BytesLike;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      bootloaderHeapInitialContentsHash: BytesLike;
+      eventsQueueStateHash: BytesLike;
+      systemLogs: BytesLike;
+      totalL2ToL1Pubdata: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  executeBatches(
+    _batchesData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "executeBatches(tuple[])"(
+    _batchesData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  executeBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _batchesData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "executeBatchesSharedBridge(uint256,tuple[])"(
+    _chainId: BigNumberish,
+    _batchesData: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  executeUpgrade(
+    _diamondCut: {
+      facetCuts: {
+        facet: string;
+        action: BigNumberish;
+        isFreezable: boolean;
+        selectors: BytesLike[];
+      }[];
+      initAddress: string;
+      initCalldata: BytesLike;
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "executeUpgrade(tuple)"(
+    _diamondCut: {
+      facetCuts: {
+        facet: string;
+        action: BigNumberish;
+        isFreezable: boolean;
+        selectors: BytesLike[];
+      }[];
+      initAddress: string;
+      initCalldata: BytesLike;
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  facetAddress(
+    _selector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "facetAddress(bytes4)"(
+    _selector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+  "facetAddresses()"(overrides?: CallOverrides): Promise<string[]>;
+
+  facetFunctionSelectors(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  "facetFunctionSelectors(address)"(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  facets(
+    overrides?: CallOverrides
+  ): Promise<{ addr: string; selectors: string[]; 0: string; 1: string[] }[]>;
+
+  "facets()"(
+    overrides?: CallOverrides
+  ): Promise<{ addr: string; selectors: string[]; 0: string; 1: string[] }[]>;
+
+  finalizeEthWithdrawal(
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
+    _message: BytesLike,
+    _merkleProof: BytesLike[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
+    _message: BytesLike,
+    _merkleProof: BytesLike[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  freezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+  getBaseToken(overrides?: CallOverrides): Promise<string>;
+
+  "getBaseToken()"(overrides?: CallOverrides): Promise<string>;
+
+  getBaseTokenBridge(overrides?: CallOverrides): Promise<string>;
+
+  "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<string>;
+
+  getBridgehub(overrides?: CallOverrides): Promise<string>;
+
+  "getBridgehub()"(overrides?: CallOverrides): Promise<string>;
+
+  getFirstUnprocessedPriorityTx(overrides?: CallOverrides): Promise<BigNumber>;
+
+  "getFirstUnprocessedPriorityTx()"(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getGovernor(overrides?: CallOverrides): Promise<string>;
+
+  "getGovernor()"(overrides?: CallOverrides): Promise<string>;
+
+  getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<string>;
+
+  "getL2BootloaderBytecodeHash()"(overrides?: CallOverrides): Promise<string>;
+
+  getL2DefaultAccountBytecodeHash(overrides?: CallOverrides): Promise<string>;
+
+  "getL2DefaultAccountBytecodeHash()"(
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  getL2SystemContractsUpgradeBatchNumber(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  "getL2SystemContractsUpgradeBatchNumber()"(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getL2SystemContractsUpgradeTxHash(overrides?: CallOverrides): Promise<string>;
+
+  "getL2SystemContractsUpgradeTxHash()"(
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   getName(overrides?: CallOverrides): Promise<string>;
 
   "getName()"(overrides?: CallOverrides): Promise<string>;
 
-  governor(overrides?: CallOverrides): Promise<string>;
+  getPendingGovernor(overrides?: CallOverrides): Promise<string>;
 
-  "governor()"(overrides?: CallOverrides): Promise<string>;
+  "getPendingGovernor()"(overrides?: CallOverrides): Promise<string>;
 
-  initialCutHash(overrides?: CallOverrides): Promise<string>;
+  getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "initialCutHash()"(overrides?: CallOverrides): Promise<string>;
+  "getPriorityQueueSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-  initialize(
-    _initalizeData: {
-      governor: string;
-      genesisUpgrade: string;
-      genesisBatchHash: BytesLike;
-      genesisIndexRepeatedStorageChanges: BigNumberish;
-      genesisBatchCommitment: BytesLike;
-      diamondCut: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      };
-      protocolVersion: BigNumberish;
-    },
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  getPriorityTxMaxGasLimit(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "initialize(tuple)"(
-    _initalizeData: {
-      governor: string;
-      genesisUpgrade: string;
-      genesisBatchHash: BytesLike;
-      genesisIndexRepeatedStorageChanges: BigNumberish;
-      genesisBatchCommitment: BytesLike;
-      diamondCut: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      };
-      protocolVersion: BigNumberish;
-    },
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  "getPriorityTxMaxGasLimit()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-  newChain(
-    _chainId: BigNumberish,
-    _baseToken: string,
-    _baseTokenBridge: string,
-    _governor: string,
-    _diamondCut: BytesLike,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "newChain(uint256,address,address,address,bytes)"(
-    _chainId: BigNumberish,
-    _baseToken: string,
-    _baseTokenBridge: string,
-    _governor: string,
-    _diamondCut: BytesLike,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-  protocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
+  getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
 
-  "protocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+  "getStateTransitionManager()"(overrides?: CallOverrides): Promise<string>;
 
-  setNewVersionUpgrade(
-    _cutData: {
-      facetCuts: {
-        facet: string;
-        action: BigNumberish;
-        isFreezable: boolean;
-        selectors: BytesLike[];
-      }[];
-      initAddress: string;
-      initCalldata: BytesLike;
-    },
-    _oldProtocolVersion: BigNumberish,
-    _newProtocolVersion: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  getTotalBatchesCommitted(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "setNewVersionUpgrade(tuple,uint256,uint256)"(
-    _cutData: {
-      facetCuts: {
-        facet: string;
-        action: BigNumberish;
-        isFreezable: boolean;
-        selectors: BytesLike[];
-      }[];
-      initAddress: string;
-      initCalldata: BytesLike;
-    },
-    _oldProtocolVersion: BigNumberish,
-    _newProtocolVersion: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  "getTotalBatchesCommitted()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-  setUpgradeDiamondCut(
-    _cutData: {
-      facetCuts: {
-        facet: string;
-        action: BigNumberish;
-        isFreezable: boolean;
-        selectors: BytesLike[];
-      }[];
-      initAddress: string;
-      initCalldata: BytesLike;
-    },
-    _oldProtocolVersion: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  getTotalBatchesExecuted(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "setUpgradeDiamondCut(tuple,uint256)"(
-    _cutData: {
-      facetCuts: {
-        facet: string;
-        action: BigNumberish;
-        isFreezable: boolean;
-        selectors: BytesLike[];
-      }[];
-      initAddress: string;
-      initCalldata: BytesLike;
-    },
-    _oldProtocolVersion: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  "getTotalBatchesExecuted()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-  stateTransitionChain(
-    _chainId: BigNumberish,
+  getTotalBatchesVerified(overrides?: CallOverrides): Promise<BigNumber>;
+
+  "getTotalBatchesVerified()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getTotalPriorityTxs(overrides?: CallOverrides): Promise<BigNumber>;
+
+  "getTotalPriorityTxs()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getVerifier(overrides?: CallOverrides): Promise<string>;
+
+  "getVerifier()"(overrides?: CallOverrides): Promise<string>;
+
+  getVerifierParams(
+    overrides?: CallOverrides
+  ): Promise<{
+    recursionNodeLevelVkHash: string;
+    recursionLeafLevelVkHash: string;
+    recursionCircuitsSetVksHash: string;
+    0: string;
+    1: string;
+    2: string;
+  }>;
+
+  "getVerifierParams()"(
+    overrides?: CallOverrides
+  ): Promise<{
+    recursionNodeLevelVkHash: string;
+    recursionLeafLevelVkHash: string;
+    recursionCircuitsSetVksHash: string;
+    0: string;
+    1: string;
+    2: string;
+  }>;
+
+  isDiamondStorageFrozen(overrides?: CallOverrides): Promise<boolean>;
+
+  "isDiamondStorageFrozen()"(overrides?: CallOverrides): Promise<boolean>;
+
+  isEthWithdrawalFinalized(
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  "isEthWithdrawalFinalized(uint256,uint256)"(
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isFacetFreezable(_facet: string, overrides?: CallOverrides): Promise<boolean>;
+
+  "isFacetFreezable(address)"(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isFunctionFreezable(
+    _selector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  "isFunctionFreezable(bytes4)"(
+    _selector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isValidator(_address: string, overrides?: CallOverrides): Promise<boolean>;
+
+  "isValidator(address)"(
+    _address: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  l2LogsRootHash(
+    _batchNumber: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  "stateTransitionChain(uint256)"(
-    _chainId: BigNumberish,
+  "l2LogsRootHash(uint256)"(
+    _batchNumber: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  storedBatchZero(overrides?: CallOverrides): Promise<string>;
+  l2TransactionBaseCost(
+    _gasPrice: BigNumberish,
+    _l2GasLimit: BigNumberish,
+    _l2GasPerPubdataByteLimit: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
-  "storedBatchZero()"(overrides?: CallOverrides): Promise<string>;
+  "l2TransactionBaseCost(uint256,uint256,uint256)"(
+    _gasPrice: BigNumberish,
+    _l2GasLimit: BigNumberish,
+    _l2GasPerPubdataByteLimit: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
-  totalChains(overrides?: CallOverrides): Promise<BigNumber>;
+  priorityQueueFrontOperation(
+    overrides?: CallOverrides
+  ): Promise<{
+    canonicalTxHash: string;
+    expirationTimestamp: BigNumber;
+    layer2Tip: BigNumber;
+    0: string;
+    1: BigNumber;
+    2: BigNumber;
+  }>;
 
-  "totalChains()"(overrides?: CallOverrides): Promise<BigNumber>;
+  "priorityQueueFrontOperation()"(
+    overrides?: CallOverrides
+  ): Promise<{
+    canonicalTxHash: string;
+    expirationTimestamp: BigNumber;
+    layer2Tip: BigNumber;
+    0: string;
+    1: BigNumber;
+    2: BigNumber;
+  }>;
+
+  proveBatches(
+    _prevBatch: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _committedBatches: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    _proof: {
+      recursiveAggregationInput: BigNumberish[];
+      serializedProof: BigNumberish[];
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "proveBatches(tuple,tuple[],tuple)"(
+    _prevBatch: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _committedBatches: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    _proof: {
+      recursiveAggregationInput: BigNumberish[];
+      serializedProof: BigNumberish[];
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  proveBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _prevBatch: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _committedBatches: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    _proof: {
+      recursiveAggregationInput: BigNumberish[];
+      serializedProof: BigNumberish[];
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+    _chainId: BigNumberish,
+    _prevBatch: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    },
+    _committedBatches: {
+      batchNumber: BigNumberish;
+      batchHash: BytesLike;
+      indexRepeatedStorageChanges: BigNumberish;
+      numberOfLayer1Txs: BigNumberish;
+      priorityOperationsHash: BytesLike;
+      l2LogsTreeRoot: BytesLike;
+      timestamp: BigNumberish;
+      commitment: BytesLike;
+    }[],
+    _proof: {
+      recursiveAggregationInput: BigNumberish[];
+      serializedProof: BigNumberish[];
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  proveL1ToL2TransactionStatus(
+    _l2TxHash: BytesLike,
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
+    _merkleProof: BytesLike[],
+    _status: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)"(
+    _l2TxHash: BytesLike,
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
+    _merkleProof: BytesLike[],
+    _status: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  proveL2LogInclusion(
+    _batchNumber: BigNumberish,
+    _index: BigNumberish,
+    _log: {
+      l2ShardId: BigNumberish;
+      isService: boolean;
+      txNumberInBatch: BigNumberish;
+      sender: string;
+      key: BytesLike;
+      value: BytesLike;
+    },
+    _proof: BytesLike[],
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
+    _batchNumber: BigNumberish,
+    _index: BigNumberish,
+    _log: {
+      l2ShardId: BigNumberish;
+      isService: boolean;
+      txNumberInBatch: BigNumberish;
+      sender: string;
+      key: BytesLike;
+      value: BytesLike;
+    },
+    _proof: BytesLike[],
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  proveL2MessageInclusion(
+    _batchNumber: BigNumberish,
+    _index: BigNumberish,
+    _message: {
+      txNumberInBatch: BigNumberish;
+      sender: string;
+      data: BytesLike;
+    },
+    _proof: BytesLike[],
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
+    _batchNumber: BigNumberish,
+    _index: BigNumberish,
+    _message: {
+      txNumberInBatch: BigNumberish;
+      sender: string;
+      data: BytesLike;
+    },
+    _proof: BytesLike[],
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  requestL2Transaction(
+    _contractL2: string,
+    _l2Value: BigNumberish,
+    _calldata: BytesLike,
+    _l2GasLimit: BigNumberish,
+    _l2GasPerPubdataByteLimit: BigNumberish,
+    _factoryDeps: BytesLike[],
+    _refundRecipient: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+    _contractL2: string,
+    _l2Value: BigNumberish,
+    _calldata: BytesLike,
+    _l2GasLimit: BigNumberish,
+    _l2GasPerPubdataByteLimit: BigNumberish,
+    _factoryDeps: BytesLike[],
+    _refundRecipient: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  revertBatches(
+    _newLastBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "revertBatches(uint256)"(
+    _newLastBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  revertBatchesSharedBridge(
+    _chainId: BigNumberish,
+    _newLastBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "revertBatchesSharedBridge(uint256,uint256)"(
+    _chainId: BigNumberish,
+    _newLastBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setPendingGovernor(
+    _newPendingGovernor: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setPendingGovernor(address)"(
+    _newPendingGovernor: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setPorterAvailability(
+    _zkPorterIsAvailable: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setPorterAvailability(bool)"(
+    _zkPorterIsAvailable: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setPriorityTxMaxGasLimit(
+    _newPriorityTxMaxGasLimit: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setPriorityTxMaxGasLimit(uint256)"(
+    _newPriorityTxMaxGasLimit: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setValidator(
+    _validator: string,
+    _active: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setValidator(address,bool)"(
+    _validator: string,
+    _active: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  storedBatchHash(
+    _batchNumber: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "storedBatchHash(uint256)"(
+    _batchNumber: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  unfreezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "unfreezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
 
   upgradeChainFromVersion(
-    _chainId: BigNumberish,
     _protocolVersion: BigNumberish,
     _cutData: {
       facetCuts: {
@@ -646,8 +2491,7 @@ export class IZkSyncStateTransition extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "upgradeChainFromVersion(uint256,uint256,tuple)"(
-    _chainId: BigNumberish,
+  "upgradeChainFromVersion(uint256,tuple)"(
     _protocolVersion: BigNumberish,
     _cutData: {
       facetCuts: {
@@ -661,186 +2505,784 @@ export class IZkSyncStateTransition extends Contract {
     },
     overrides?: Overrides
   ): Promise<ContractTransaction>;
-
-  upgradeCutHash(
-    _protocolVersion: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  "upgradeCutHash(uint256)"(
-    _protocolVersion: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
 
   callStatic: {
-    bridgehub(overrides?: CallOverrides): Promise<string>;
+    acceptGovernor(overrides?: CallOverrides): Promise<void>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<string>;
+    "acceptGovernor()"(overrides?: CallOverrides): Promise<void>;
 
-    genesisUpgrade(overrides?: CallOverrides): Promise<string>;
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: CallOverrides
+    ): Promise<string>;
 
-    "genesisUpgrade()"(overrides?: CallOverrides): Promise<string>;
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    commitBatches(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "commitBatches(tuple,tuple[])"(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    executeBatches(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    executeUpgrade(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "executeUpgrade(tuple)"(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    facetAddress(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "facetAddress(bytes4)"(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+    "facetAddresses()"(overrides?: CallOverrides): Promise<string[]>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    "facetFunctionSelectors(address)"(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<{ addr: string; selectors: string[]; 0: string; 1: string[] }[]>;
+
+    "facets()"(
+      overrides?: CallOverrides
+    ): Promise<{ addr: string; selectors: string[]; 0: string; 1: string[] }[]>;
+
+    finalizeEthWithdrawal(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    freezeDiamond(overrides?: CallOverrides): Promise<void>;
+
+    "freezeDiamond()"(overrides?: CallOverrides): Promise<void>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<string>;
+
+    "getBaseToken()"(overrides?: CallOverrides): Promise<string>;
+
+    getBaseTokenBridge(overrides?: CallOverrides): Promise<string>;
+
+    "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<string>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<string>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<string>;
+
+    getFirstUnprocessedPriorityTx(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "getFirstUnprocessedPriorityTx()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getGovernor(overrides?: CallOverrides): Promise<string>;
+
+    "getGovernor()"(overrides?: CallOverrides): Promise<string>;
+
+    getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<string>;
+
+    "getL2BootloaderBytecodeHash()"(overrides?: CallOverrides): Promise<string>;
+
+    getL2DefaultAccountBytecodeHash(overrides?: CallOverrides): Promise<string>;
+
+    "getL2DefaultAccountBytecodeHash()"(
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    getL2SystemContractsUpgradeBatchNumber(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "getL2SystemContractsUpgradeBatchNumber()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getL2SystemContractsUpgradeTxHash(
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "getL2SystemContractsUpgradeTxHash()"(
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     getName(overrides?: CallOverrides): Promise<string>;
 
     "getName()"(overrides?: CallOverrides): Promise<string>;
 
-    governor(overrides?: CallOverrides): Promise<string>;
+    getPendingGovernor(overrides?: CallOverrides): Promise<string>;
 
-    "governor()"(overrides?: CallOverrides): Promise<string>;
+    "getPendingGovernor()"(overrides?: CallOverrides): Promise<string>;
 
-    initialCutHash(overrides?: CallOverrides): Promise<string>;
+    getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "initialCutHash()"(overrides?: CallOverrides): Promise<string>;
+    "getPriorityQueueSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    initialize(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
-      },
+    getPriorityTxMaxGasLimit(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getPriorityTxMaxGasLimit()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
+
+    "getStateTransitionManager()"(overrides?: CallOverrides): Promise<string>;
+
+    getTotalBatchesCommitted(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalBatchesCommitted()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalBatchesExecuted(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalBatchesExecuted()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalBatchesVerified(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalBatchesVerified()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalPriorityTxs(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalPriorityTxs()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getVerifier(overrides?: CallOverrides): Promise<string>;
+
+    "getVerifier()"(overrides?: CallOverrides): Promise<string>;
+
+    getVerifierParams(
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<{
+      recursionNodeLevelVkHash: string;
+      recursionLeafLevelVkHash: string;
+      recursionCircuitsSetVksHash: string;
+      0: string;
+      1: string;
+      2: string;
+    }>;
 
-    "initialize(tuple)"(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
-      },
+    "getVerifierParams()"(
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<{
+      recursionNodeLevelVkHash: string;
+      recursionLeafLevelVkHash: string;
+      recursionCircuitsSetVksHash: string;
+      0: string;
+      1: string;
+      2: string;
+    }>;
 
-    newChain(
-      _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
+    isDiamondStorageFrozen(overrides?: CallOverrides): Promise<boolean>;
+
+    "isDiamondStorageFrozen()"(overrides?: CallOverrides): Promise<boolean>;
+
+    isEthWithdrawalFinalized(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
-    "newChain(uint256,address,address,address,bytes)"(
-      _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
+    "isEthWithdrawalFinalized(uint256,uint256)"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
-    protocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "protocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setNewVersionUpgrade(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
+    isFacetFreezable(
+      _facet: string,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
-    "setNewVersionUpgrade(tuple,uint256,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
+    "isFacetFreezable(address)"(
+      _facet: string,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
-    setUpgradeDiamondCut(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
+    isFunctionFreezable(
+      _selector: BytesLike,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
-    "setUpgradeDiamondCut(tuple,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
+    "isFunctionFreezable(bytes4)"(
+      _selector: BytesLike,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
-    stateTransitionChain(
-      _chainId: BigNumberish,
+    isValidator(_address: string, overrides?: CallOverrides): Promise<boolean>;
+
+    "isValidator(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    l2LogsRootHash(
+      _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    "stateTransitionChain(uint256)"(
-      _chainId: BigNumberish,
+    "l2LogsRootHash(uint256)"(
+      _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    storedBatchZero(overrides?: CallOverrides): Promise<string>;
+    l2TransactionBaseCost(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "storedBatchZero()"(overrides?: CallOverrides): Promise<string>;
+    "l2TransactionBaseCost(uint256,uint256,uint256)"(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    totalChains(overrides?: CallOverrides): Promise<BigNumber>;
+    priorityQueueFrontOperation(
+      overrides?: CallOverrides
+    ): Promise<{
+      canonicalTxHash: string;
+      expirationTimestamp: BigNumber;
+      layer2Tip: BigNumber;
+      0: string;
+      1: BigNumber;
+      2: BigNumber;
+    }>;
 
-    "totalChains()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "priorityQueueFrontOperation()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      canonicalTxHash: string;
+      expirationTimestamp: BigNumber;
+      layer2Tip: BigNumber;
+      0: string;
+      1: BigNumber;
+      2: BigNumber;
+    }>;
+
+    proveBatches(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "proveBatches(tuple,tuple[],tuple)"(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    proveBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    proveL1ToL2TransactionStatus(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)"(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    proveL2LogInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    proveL2MessageInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    requestL2Transaction(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    revertBatches(
+      _newLastBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "revertBatches(uint256)"(
+      _newLastBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    revertBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "revertBatchesSharedBridge(uint256,uint256)"(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setPendingGovernor(
+      _newPendingGovernor: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setPendingGovernor(address)"(
+      _newPendingGovernor: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setPorterAvailability(
+      _zkPorterIsAvailable: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setPorterAvailability(bool)"(
+      _zkPorterIsAvailable: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setPriorityTxMaxGasLimit(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setPriorityTxMaxGasLimit(uint256)"(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setValidator(
+      _validator: string,
+      _active: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setValidator(address,bool)"(
+      _validator: string,
+      _active: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    storedBatchHash(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "storedBatchHash(uint256)"(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    unfreezeDiamond(overrides?: CallOverrides): Promise<void>;
+
+    "unfreezeDiamond()"(overrides?: CallOverrides): Promise<void>;
 
     upgradeChainFromVersion(
-      _chainId: BigNumberish,
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -855,8 +3297,7 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "upgradeChainFromVersion(uint256,uint256,tuple)"(
-      _chainId: BigNumberish,
+    "upgradeChainFromVersion(uint256,tuple)"(
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -870,194 +3311,827 @@ export class IZkSyncStateTransition extends Contract {
       },
       overrides?: CallOverrides
     ): Promise<void>;
-
-    upgradeCutHash(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    "upgradeCutHash(uint256)"(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
   };
 
   filters: {
-    StateTransitionNewChain(
-      _chainId: BigNumberish | null,
-      _stateTransitionChainContract: string | null
+    BlockCommit(
+      batchNumber: BigNumberish | null,
+      batchHash: BytesLike | null,
+      commitment: BytesLike | null
+    ): EventFilter;
+
+    BlockExecution(
+      batchNumber: BigNumberish | null,
+      batchHash: BytesLike | null,
+      commitment: BytesLike | null
+    ): EventFilter;
+
+    BlocksRevert(
+      totalBatchesCommitted: null,
+      totalBatchesVerified: null,
+      totalBatchesExecuted: null
+    ): EventFilter;
+
+    BlocksVerification(
+      previousLastVerifiedBatch: BigNumberish | null,
+      currentLastVerifiedBatch: BigNumberish | null
+    ): EventFilter;
+
+    EthWithdrawalFinalized(to: string | null, amount: null): EventFilter;
+
+    ExecuteUpgrade(diamondCut: null): EventFilter;
+
+    Freeze(): EventFilter;
+
+    IsPorterAvailableStatusUpdate(isPorterAvailable: null): EventFilter;
+
+    NewFeeParams(oldFeeParams: null, newFeeParams: null): EventFilter;
+
+    NewGovernor(
+      oldGovernor: string | null,
+      newGovernor: string | null
+    ): EventFilter;
+
+    NewPendingGovernor(
+      oldPendingGovernor: string | null,
+      newPendingGovernor: string | null
+    ): EventFilter;
+
+    NewPriorityRequest(
+      txId: null,
+      txHash: null,
+      expirationTimestamp: null,
+      transaction: null,
+      factoryDeps: null
+    ): EventFilter;
+
+    NewPriorityTxMaxGasLimit(
+      oldPriorityTxMaxGasLimit: null,
+      newPriorityTxMaxGasLimit: null
+    ): EventFilter;
+
+    ProposeTransparentUpgrade(
+      diamondCut: null,
+      proposalId: BigNumberish | null,
+      proposalSalt: null
+    ): EventFilter;
+
+    Unfreeze(): EventFilter;
+
+    ValidatorStatusUpdate(
+      validatorAddress: string | null,
+      isActive: null
     ): EventFilter;
   };
 
   estimateGas: {
-    bridgehub(overrides?: CallOverrides): Promise<BigNumber>;
+    acceptGovernor(overrides?: Overrides): Promise<BigNumber>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "acceptGovernor()"(overrides?: Overrides): Promise<BigNumber>;
 
-    genesisUpgrade(overrides?: CallOverrides): Promise<BigNumber>;
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
 
-    "genesisUpgrade()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    commitBatches(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "commitBatches(tuple,tuple[])"(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    executeBatches(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    executeUpgrade(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "executeUpgrade(tuple)"(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    facetAddress(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "facetAddress(bytes4)"(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "facetAddresses()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "facetFunctionSelectors(address)"(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facets(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "facets()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    finalizeEthWithdrawal(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    freezeDiamond(overrides?: Overrides): Promise<BigNumber>;
+
+    "freezeDiamond()"(overrides?: Overrides): Promise<BigNumber>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getBaseToken()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getBaseTokenBridge(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getBaseTokenBridge()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getFirstUnprocessedPriorityTx(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "getFirstUnprocessedPriorityTx()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getGovernor(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getGovernor()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getL2BootloaderBytecodeHash()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getL2DefaultAccountBytecodeHash(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "getL2DefaultAccountBytecodeHash()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getL2SystemContractsUpgradeBatchNumber(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "getL2SystemContractsUpgradeBatchNumber()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getL2SystemContractsUpgradeTxHash(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "getL2SystemContractsUpgradeTxHash()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getName(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getName()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    governor(overrides?: CallOverrides): Promise<BigNumber>;
+    getPendingGovernor(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "governor()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "getPendingGovernor()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    initialCutHash(overrides?: CallOverrides): Promise<BigNumber>;
+    getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "initialCutHash()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "getPriorityQueueSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    initialize(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
-      },
-      overrides?: Overrides
-    ): Promise<BigNumber>;
+    getPriorityTxMaxGasLimit(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "initialize(tuple)"(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
-      },
-      overrides?: Overrides
-    ): Promise<BigNumber>;
+    "getPriorityTxMaxGasLimit()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    newChain(
-      _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
+    getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "newChain(uint256,address,address,address,bytes)"(
-      _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
+    "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    protocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
+    getStateTransitionManager(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "protocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setNewVersionUpgrade(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setNewVersionUpgrade(tuple,uint256,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    setUpgradeDiamondCut(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setUpgradeDiamondCut(tuple,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    stateTransitionChain(
-      _chainId: BigNumberish,
+    "getStateTransitionManager()"(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "stateTransitionChain(uint256)"(
-      _chainId: BigNumberish,
+    getTotalBatchesCommitted(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalBatchesCommitted()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalBatchesExecuted(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalBatchesExecuted()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalBatchesVerified(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalBatchesVerified()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalPriorityTxs(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getTotalPriorityTxs()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getVerifier(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getVerifier()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getVerifierParams(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getVerifierParams()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isDiamondStorageFrozen(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "isDiamondStorageFrozen()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isEthWithdrawalFinalized(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    storedBatchZero(overrides?: CallOverrides): Promise<BigNumber>;
+    "isEthWithdrawalFinalized(uint256,uint256)"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "storedBatchZero()"(overrides?: CallOverrides): Promise<BigNumber>;
+    isFacetFreezable(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    totalChains(overrides?: CallOverrides): Promise<BigNumber>;
+    "isFacetFreezable(address)"(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "totalChains()"(overrides?: CallOverrides): Promise<BigNumber>;
+    isFunctionFreezable(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "isFunctionFreezable(bytes4)"(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isValidator(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "isValidator(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    l2LogsRootHash(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "l2LogsRootHash(uint256)"(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    l2TransactionBaseCost(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "l2TransactionBaseCost(uint256,uint256,uint256)"(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    priorityQueueFrontOperation(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "priorityQueueFrontOperation()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    proveBatches(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "proveBatches(tuple,tuple[],tuple)"(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    proveBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
+      _chainId: BigNumberish,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    proveL1ToL2TransactionStatus(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)"(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    proveL2LogInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    proveL2MessageInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    requestL2Transaction(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    revertBatches(
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "revertBatches(uint256)"(
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    revertBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "revertBatchesSharedBridge(uint256,uint256)"(
+      _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setPendingGovernor(
+      _newPendingGovernor: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setPendingGovernor(address)"(
+      _newPendingGovernor: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setPorterAvailability(
+      _zkPorterIsAvailable: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setPorterAvailability(bool)"(
+      _zkPorterIsAvailable: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setPriorityTxMaxGasLimit(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setPriorityTxMaxGasLimit(uint256)"(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setValidator(
+      _validator: string,
+      _active: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setValidator(address,bool)"(
+      _validator: string,
+      _active: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    storedBatchHash(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "storedBatchHash(uint256)"(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    unfreezeDiamond(overrides?: Overrides): Promise<BigNumber>;
+
+    "unfreezeDiamond()"(overrides?: Overrides): Promise<BigNumber>;
 
     upgradeChainFromVersion(
-      _chainId: BigNumberish,
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -1072,8 +4146,7 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "upgradeChainFromVersion(uint256,uint256,tuple)"(
-      _chainId: BigNumberish,
+    "upgradeChainFromVersion(uint256,tuple)"(
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -1086,27 +4159,347 @@ export class IZkSyncStateTransition extends Contract {
         initCalldata: BytesLike;
       },
       overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    upgradeCutHash(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "upgradeCutHash(uint256)"(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    bridgehub(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    acceptGovernor(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "acceptGovernor()"(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    genesisUpgrade(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    bridgehubRequestL2Transaction(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
 
-    "genesisUpgrade()"(
+    "bridgehubRequestL2Transaction(tuple)"(
+      _request: {
+        sender: string;
+        contractL2: string;
+        mintValue: BigNumberish;
+        l2Value: BigNumberish;
+        l2Calldata: BytesLike;
+        l2GasLimit: BigNumberish;
+        l2GasPerPubdataByteLimit: BigNumberish;
+        l1GasPriceConverted: BigNumberish;
+        factoryDeps: BytesLike[];
+        refundRecipient: string;
+      },
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    commitBatches(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "commitBatches(tuple,tuple[])"(
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    commitBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "commitBatchesSharedBridge(uint256,tuple,tuple[])"(
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _newBatchesData: {
+        batchNumber: BigNumberish;
+        timestamp: BigNumberish;
+        indexRepeatedStorageChanges: BigNumberish;
+        newStateRoot: BytesLike;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        bootloaderHeapInitialContentsHash: BytesLike;
+        eventsQueueStateHash: BytesLike;
+        systemLogs: BytesLike;
+        totalL2ToL1Pubdata: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    executeBatches(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "executeBatches(tuple[])"(
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    executeBatchesSharedBridge(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "executeBatchesSharedBridge(uint256,tuple[])"(
+      _chainId: BigNumberish,
+      _batchesData: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    executeUpgrade(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "executeUpgrade(tuple)"(
+      _diamondCut: {
+        facetCuts: {
+          facet: string;
+          action: BigNumberish;
+          isFreezable: boolean;
+          selectors: BytesLike[];
+        }[];
+        initAddress: string;
+        initCalldata: BytesLike;
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    facetAddress(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "facetAddress(bytes4)"(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "facetAddresses()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "facetFunctionSelectors(address)"(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facets(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "facets()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    finalizeEthWithdrawal(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    freezeDiamond(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    "freezeDiamond()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    getBaseToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getBaseToken()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getBaseTokenBridge(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getBaseTokenBridge()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getBridgehub(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getBridgehub()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getFirstUnprocessedPriorityTx(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getFirstUnprocessedPriorityTx()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getGovernor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getGovernor()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getL2BootloaderBytecodeHash(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getL2BootloaderBytecodeHash()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getL2DefaultAccountBytecodeHash(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getL2DefaultAccountBytecodeHash()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getL2SystemContractsUpgradeBatchNumber(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getL2SystemContractsUpgradeBatchNumber()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getL2SystemContractsUpgradeTxHash(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getL2SystemContractsUpgradeTxHash()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1114,168 +4507,459 @@ export class IZkSyncStateTransition extends Contract {
 
     "getName()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    governor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "governor()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    initialCutHash(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "initialCutHash()"(
+    getPendingGovernor(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    initialize(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
+    "getPendingGovernor()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPriorityQueueSize(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getPriorityQueueSize()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPriorityTxMaxGasLimit(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getPriorityTxMaxGasLimit()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getProtocolVersion(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getProtocolVersion()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getStateTransitionManager(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getStateTransitionManager()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getTotalBatchesCommitted(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getTotalBatchesCommitted()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getTotalBatchesExecuted(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getTotalBatchesExecuted()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getTotalBatchesVerified(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getTotalBatchesVerified()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getTotalPriorityTxs(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getTotalPriorityTxs()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getVerifier(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getVerifier()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getVerifierParams(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getVerifierParams()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isDiamondStorageFrozen(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "isDiamondStorageFrozen()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isEthWithdrawalFinalized(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "isEthWithdrawalFinalized(uint256,uint256)"(
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isFacetFreezable(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "isFacetFreezable(address)"(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isFunctionFreezable(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "isFunctionFreezable(bytes4)"(
+      _selector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isValidator(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "isValidator(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    l2LogsRootHash(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "l2LogsRootHash(uint256)"(
+      _batchNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    l2TransactionBaseCost(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "l2TransactionBaseCost(uint256,uint256,uint256)"(
+      _gasPrice: BigNumberish,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    priorityQueueFrontOperation(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "priorityQueueFrontOperation()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    proveBatches(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
       },
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "initialize(tuple)"(
-      _initalizeData: {
-        governor: string;
-        genesisUpgrade: string;
-        genesisBatchHash: BytesLike;
-        genesisIndexRepeatedStorageChanges: BigNumberish;
-        genesisBatchCommitment: BytesLike;
-        diamondCut: {
-          facetCuts: {
-            facet: string;
-            action: BigNumberish;
-            isFreezable: boolean;
-            selectors: BytesLike[];
-          }[];
-          initAddress: string;
-          initCalldata: BytesLike;
-        };
-        protocolVersion: BigNumberish;
+    "proveBatches(tuple,tuple[],tuple)"(
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
       },
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    newChain(
+    proveBatchesSharedBridge(
       _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "newChain(uint256,address,address,address,bytes)"(
+    "proveBatchesSharedBridge(uint256,tuple,tuple[],tuple)"(
       _chainId: BigNumberish,
-      _baseToken: string,
-      _baseTokenBridge: string,
-      _governor: string,
-      _diamondCut: BytesLike,
+      _prevBatch: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      },
+      _committedBatches: {
+        batchNumber: BigNumberish;
+        batchHash: BytesLike;
+        indexRepeatedStorageChanges: BigNumberish;
+        numberOfLayer1Txs: BigNumberish;
+        priorityOperationsHash: BytesLike;
+        l2LogsTreeRoot: BytesLike;
+        timestamp: BigNumberish;
+        commitment: BytesLike;
+      }[],
+      _proof: {
+        recursiveAggregationInput: BigNumberish[];
+        serializedProof: BigNumberish[];
+      },
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    protocolVersion(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "protocolVersion()"(
+    proveL1ToL2TransactionStatus(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    setNewVersionUpgrade(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
+    "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)"(
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[],
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    proveL2LogInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
       },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _log: {
+        l2ShardId: BigNumberish;
+        isService: boolean;
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        key: BytesLike;
+        value: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    proveL2MessageInclusion(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])"(
+      _batchNumber: BigNumberish,
+      _index: BigNumberish,
+      _message: {
+        txNumberInBatch: BigNumberish;
+        sender: string;
+        data: BytesLike;
+      },
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    requestL2Transaction(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+      _contractL2: string,
+      _l2Value: BigNumberish,
+      _calldata: BytesLike,
+      _l2GasLimit: BigNumberish,
+      _l2GasPerPubdataByteLimit: BigNumberish,
+      _factoryDeps: BytesLike[],
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    revertBatches(
+      _newLastBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "setNewVersionUpgrade(tuple,uint256,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      _newProtocolVersion: BigNumberish,
+    "revertBatches(uint256)"(
+      _newLastBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    setUpgradeDiamondCut(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "setUpgradeDiamondCut(tuple,uint256)"(
-      _cutData: {
-        facetCuts: {
-          facet: string;
-          action: BigNumberish;
-          isFreezable: boolean;
-          selectors: BytesLike[];
-        }[];
-        initAddress: string;
-        initCalldata: BytesLike;
-      },
-      _oldProtocolVersion: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    stateTransitionChain(
+    revertBatchesSharedBridge(
       _chainId: BigNumberish,
-      overrides?: CallOverrides
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "stateTransitionChain(uint256)"(
+    "revertBatchesSharedBridge(uint256,uint256)"(
       _chainId: BigNumberish,
+      _newLastBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setPendingGovernor(
+      _newPendingGovernor: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setPendingGovernor(address)"(
+      _newPendingGovernor: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setPorterAvailability(
+      _zkPorterIsAvailable: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setPorterAvailability(bool)"(
+      _zkPorterIsAvailable: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setPriorityTxMaxGasLimit(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setPriorityTxMaxGasLimit(uint256)"(
+      _newPriorityTxMaxGasLimit: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setValidator(
+      _validator: string,
+      _active: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setValidator(address,bool)"(
+      _validator: string,
+      _active: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    storedBatchHash(
+      _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    storedBatchZero(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "storedBatchZero()"(
+    "storedBatchHash(uint256)"(
+      _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    totalChains(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    unfreezeDiamond(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    "totalChains()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "unfreezeDiamond()"(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     upgradeChainFromVersion(
-      _chainId: BigNumberish,
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -1290,8 +4974,7 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "upgradeChainFromVersion(uint256,uint256,tuple)"(
-      _chainId: BigNumberish,
+    "upgradeChainFromVersion(uint256,tuple)"(
       _protocolVersion: BigNumberish,
       _cutData: {
         facetCuts: {
@@ -1304,16 +4987,6 @@ export class IZkSyncStateTransition extends Contract {
         initCalldata: BytesLike;
       },
       overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    upgradeCutHash(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "upgradeCutHash(uint256)"(
-      _protocolVersion: BigNumberish,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }
