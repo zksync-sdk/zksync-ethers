@@ -1,0 +1,9 @@
+{
+  "smartAccountAddress": "0xf50d466752e2548a5D13129FF3849c09Cd2cC396",
+  "multiAccountAddress": "0xC18cdc6D22AEDE8a761FB478f1777575e26bD02a",
+  "greeterAddress": "0xd1792a3B9Fc33d60C62810D2C2D0fC397Bc5Bf55",
+  "owner2": {
+    "owner2Address": "0xb6f3cD676B37146394809FfA7D1F4d3E2A0dEC23",
+    "owner2PrivateKey": "0x528c7699ca84e6b8ed92673713b9139c320612ff865f32c0ee33bbcd4b742b3b"
+  }
+}

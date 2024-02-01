@@ -2,6 +2,8 @@ import { Provider, types, Wallet } from "../src";
 import { ethers } from "ethers";
 import * as fs from "fs";
 
+import { ContractFactory, SmartAccount } from "../src";
+
 const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
 
 const provider = Provider.getDefaultProvider(types.Network.Localhost);
@@ -12,6 +14,9 @@ const ethWallet = new ethers.Wallet(PRIVATE_KEY, ethProvider);
 
 const tokenContractPath = "./files/Token.json";
 const tokenPath = "./tests/token.json";
+const smartAccountSourcePath = "./files/SimpleAccount.json";
+const multiAccountSourcePath = "./files/TwoUserMultisig.json";
+const greeterPath = "./files/Greeter.json";
 
 async function checkIfTokenNeedsToBeCreated(): Promise<{ l1: boolean; l2: boolean }> {
     if (fs.existsSync(tokenPath)) {
@@ -58,6 +63,58 @@ function writeTokenConfigToFile(token: { l1Address: string; l2Address: string })
     const tokenJSON = JSON.stringify(token, null, 2);
     console.log(`Token: ${tokenJSON}`);
     fs.writeFileSync(tokenPath, tokenJSON);
+}
+
+export async function deploySmartWalletContracts() {
+    console.log("Deploying contract account...");
+    let smartAccountAddress: string;
+    const smartAccountAbi = require(smartAccountSourcePath).abi;
+    const smartAccountBytecode: string = require(smartAccountSourcePath).bytecode;
+    const aaFactory = new ContractFactory(
+        smartAccountAbi,
+        smartAccountBytecode,
+        wallet,
+        "createAccount",
+    );
+    const aaContract = await aaFactory.deploy(wallet.address);
+    smartAccountAddress = await aaContract.getAddress();
+    console.log("smartAccountAddress :>> ", smartAccountAddress);
+
+    console.log("Deploying multisig account...");
+    let multiAccountAddress: string;
+    const multiAccountAbi = require(multiAccountSourcePath).abi;
+    const multitAccountBytecode: string = require(multiAccountSourcePath).bytecode;
+    const aamultiFactory = new ContractFactory(
+        multiAccountAbi,
+        multitAccountBytecode,
+        wallet,
+        "createAccount",
+    );
+    const owner2 = Wallet.createRandom();
+    const aamultiContract = await aamultiFactory.deploy(wallet.address, owner2.address);
+    multiAccountAddress = await aamultiContract.getAddress();
+    console.log("multiAccountAddress :>> ", multiAccountAddress);
+
+    console.log("Deploying greeter contract...");
+    const greeterAbi = require(greeterPath).abi;
+    const greeterBytecode: string = require(greeterPath).bytecode;
+    const greeterFactory = new ContractFactory(greeterAbi, greeterBytecode, wallet, "create");
+    const greeterContract = await greeterFactory.deploy("Hello world!");
+    const greeterAddress = await greeterContract.getAddress();
+    console.log("greeterAddress :>> ", greeterAddress);
+
+    const contracts = {
+        smartAccountAddress,
+        multiAccountAddress,
+        greeterAddress,
+        owner2: {
+            owner2Address: owner2.address,
+            owner2PrivateKey: owner2.privateKey,
+        },
+    };
+
+    fs.writeFileSync("./tests/contracts.json", JSON.stringify(contracts, null, 2));
+    return contracts;
 }
 
 /*
