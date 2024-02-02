@@ -588,7 +588,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
         return resp;
     }
 
-    static getDefaultProvider(zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost) {
+    static getDefaultProvider(zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost): Provider {
         if (process.env.ZKSYNC_WEB3_API_URL) {
             return new Provider(process.env.ZKSYNC_WEB3_API_URL);
         }
