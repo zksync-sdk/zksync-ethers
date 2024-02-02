@@ -262,9 +262,9 @@ export function parseEip712(payload: ethers.BytesLike): TransactionLike {
         return BigInt(value);
     }
 
-    function arrayToPaymasterParams(arr: string[]): PaymasterParams | null {
+    function arrayToPaymasterParams(arr: string[]): PaymasterParams | undefined {
         if (arr.length == 0) {
-            return null;
+            return undefined;
         }
         if (arr.length != 2) {
             throw new Error(

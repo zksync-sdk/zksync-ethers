@@ -14,7 +14,7 @@ describe("Provider", () => {
     const TOKENS_L1 = require("../tokens.json");
     const DAI_L1 = TOKENS_L1[0].address;
 
-    let tx = null;
+    let tx;
 
     before("setup", async function () {
         this.timeout(25_000);
@@ -27,8 +27,8 @@ describe("Provider", () => {
     });
 
     describe("#constructor()", () => {
-        it("Provider(null) should return a `Provider` connected to local network when URL is not defined", async () => {
-            const provider = new Provider(null);
+        it("Provider() should return a `Provider` connected to local network when URL is not defined", async () => {
+            const provider = new Provider();
             const network = await provider.getNetwork();
             expect(network.chainId).to.be.equal(BigInt(270));
         });
@@ -341,13 +341,11 @@ describe("Provider", () => {
             expect(result).to.be.deep.equal(WITHDRAW_TX);
         });
 
-        it("should throw an error when `tx.to=null && tx.from=null`", async () => {
+        it("should throw an error when `tx.to` and `tx.from` are not provided`", async () => {
             try {
                 await provider.getWithdrawTx({
                     token: utils.ETH_ADDRESS,
                     amount: 5,
-                    to: null,
-                    from: null,
                 });
             } catch (e) {
                 expect(e).not.to.be.equal("withdrawal target address is undefined");
