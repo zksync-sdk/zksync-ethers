@@ -35,6 +35,12 @@ describe("Provider", () => {
     });
 
     describe("#getDefaultProvider()", () => {
+        it("should return a provider connected to local network by default", async () => {
+            const provider = Provider.getDefaultProvider();
+            const network = await provider.getNetwork();
+            expect(network.chainId).to.be.equal(BigInt(270));
+        });
+
         it("should return a provider connected to local network", async () => {
             const provider = Provider.getDefaultProvider(types.Network.Localhost);
             const network = await provider.getNetwork();
