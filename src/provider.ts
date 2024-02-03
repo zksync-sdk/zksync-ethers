@@ -601,6 +601,8 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
                 return new Provider("https://sepolia.era.zksync.dev");
             case ZkSyncNetwork.Mainnet:
                 return new Provider("https://mainnet.era.zksync.io");
+            default:
+                return new Provider("http://localhost:3050");
         }
     }
 }
