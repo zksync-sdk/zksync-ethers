@@ -6,11 +6,10 @@ import { TransactionLike, TransactionRequest, TransactionResponse } from "./type
 import { AdapterL1, AdapterL2 } from "./adapters";
 
 export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
-    // @ts-ignore
-    override readonly provider: Provider;
+    override readonly provider!: Provider;
     providerL1?: ethers.Provider;
-    // @ts-ignore
-    public eip712: EIP712Signer;
+
+    public eip712!: EIP712Signer;
 
     override _providerL1() {
         if (this.providerL1 == null) {
@@ -107,7 +106,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
             return await super.signTransaction(tx);
         } else {
             tx.from ??= this.address;
-            let from = await ethers.resolveAddress(tx.from);
+            const from = await ethers.resolveAddress(tx.from);
             if (from.toLowerCase() != this.address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }
