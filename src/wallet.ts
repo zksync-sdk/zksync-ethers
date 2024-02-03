@@ -80,38 +80,38 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         this.providerL1 = providerL1;
     }
 
-    override async populateTransaction(transaction: TransactionRequest): Promise<TransactionLike> {
-        if (transaction.type == null && transaction.customData == null) {
+    override async populateTransaction(tx: TransactionRequest): Promise<TransactionLike> {
+        if (tx.type == null && tx.customData == null) {
             // use legacy txs by default
-            transaction.type = 0;
+            tx.type = 0;
         }
-        if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-            return (await super.populateTransaction(transaction)) as TransactionLike;
+        if (tx.customData == null && tx.type != EIP712_TX_TYPE) {
+            return (await super.populateTransaction(tx)) as TransactionLike;
         }
-        transaction.type = EIP712_TX_TYPE;
-        const populated = (await super.populateTransaction(transaction)) as TransactionLike;
+        tx.type = EIP712_TX_TYPE;
+        const populated = (await super.populateTransaction(tx)) as TransactionLike;
 
         populated.type = EIP712_TX_TYPE;
         populated.value ??= 0;
         populated.data ??= "0x";
-        populated.customData = this._fillCustomData(transaction.customData ?? {});
+        populated.customData = this._fillCustomData(tx.customData ?? {});
         populated.gasPrice = await this.provider.getGasPrice();
         return populated;
     }
 
-    override async signTransaction(transaction: TransactionRequest): Promise<string> {
-        if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-            if (transaction.type == 2 && transaction.maxFeePerGas == null) {
-                transaction.maxFeePerGas = await this.provider.getGasPrice();
+    override async signTransaction(tx: TransactionRequest): Promise<string> {
+        if (tx.customData == null && tx.type != EIP712_TX_TYPE) {
+            if (tx.type == 2 && tx.maxFeePerGas == null) {
+                tx.maxFeePerGas = await this.provider.getGasPrice();
             }
-            return await super.signTransaction(transaction);
+            return await super.signTransaction(tx);
         } else {
-            transaction.from ??= this.address;
-            let from = await ethers.resolveAddress(transaction.from);
+            tx.from ??= this.address;
+            let from = await ethers.resolveAddress(tx.from);
             if (from.toLowerCase() != this.address.toLowerCase()) {
                 throw new Error("Transaction `from` address mismatch");
             }
-            const populated = await this.populateTransaction(transaction);
+            const populated = await this.populateTransaction(tx);
             // @ts-ignore
             populated.customData.customSignature = await this.eip712.sign(populated);
             return serializeEip712(populated);
