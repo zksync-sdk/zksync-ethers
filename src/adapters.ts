@@ -42,6 +42,7 @@ import {
     FinalizeWithdrawalParams,
     FullDepositFee,
     MessageProof,
+    PaymasterParams,
     PriorityOpResponse,
     TransactionResponse,
 } from "./types";
@@ -816,6 +817,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
             amount: BigNumberish;
             to?: Address;
             bridgeAddress?: Address;
+            paymasterParamas?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<TransactionResponse> {
             const withdrawTx = await this._providerL2().getWithdrawTx({
@@ -829,6 +831,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
             to: Address;
             amount: BigNumberish;
             token?: Address;
+            paymasterParamas?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<TransactionResponse> {
             const transferTx = await this._providerL2().getTransferTx({
