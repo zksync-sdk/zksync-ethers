@@ -87,15 +87,15 @@ describe("Paymaster", () => {
             const walletBalanceAfterTx = await wallet.getBalance();
             const walletTokenBalanceAfterTx = await wallet.getBalance(tokenAddress);
 
-            expect(paymasterTokenBalanceBeforeTx == BigInt(0)).to.be.true;
-            expect(walletTokenBalanceBeforeTx == BigInt(INIT_MINT_AMOUNT)).to.be.true;
+            expect(paymasterTokenBalanceBeforeTx === BigInt(0)).to.be.true;
+            expect(walletTokenBalanceBeforeTx === BigInt(INIT_MINT_AMOUNT)).to.be.true;
 
             expect(paymasterBalanceBeforeTx - paymasterBalanceAfterTx >= BigInt(0)).to.be.true;
             expect(paymasterTokenBalanceAfterTx === BigInt(MINIMAL_ALLOWANCE)).to.be.true;
 
             expect(walletBalanceBeforeTx - walletBalanceAfterTx >= BigInt(0)).to.be.true;
             expect(
-                walletTokenBalanceAfterTx ==
+                walletTokenBalanceAfterTx ===
                     walletTokenBalanceBeforeTx - BigInt(MINIMAL_ALLOWANCE) + BigInt(MINT_AMOUNT),
             ).to.be.true;
         }).timeout(30_000);
