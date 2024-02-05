@@ -12,7 +12,7 @@ import { Provider } from "./provider";
 import { EIP712Signer } from "./signer";
 import { Wallet } from "./wallet";
 import { EIP712_TX_TYPE, DEFAULT_GAS_PER_PUBDATA_LIMIT, serializeEip712 } from "./utils";
-import { TransactionResponse, TransactionRequest, TransactionLike, Eip712Meta } from "./types";
+import { Address, TransactionResponse, TransactionRequest, TransactionLike, Eip712Meta } from "./types";
 
 /**
  * The custom signing method is used to sign transactions with a custom logic
@@ -110,8 +110,8 @@ export class SmartAccount extends EIP712Signer implements Signer {
      *         many nodes do not honour this value and silently ignore it [default: ``"latest"``]
      */
     getNonce(blockTag?: BlockTag): Promise<number> {
-        // TODO: implement proper nonce check
-        return Promise.resolve(9999);
+        console.log("in getNonce");
+        return Promise.resolve(this.provider.getTransactionCount(this.address, blockTag));
     }
 
     ////////////////////
@@ -165,7 +165,7 @@ export class SmartAccount extends EIP712Signer implements Signer {
     async populateTransaction(transaction: TransactionRequest): Promise<TransactionLike> {
         // similar to populateTransaction in wallet.ts > populateTransaction
         // but always use EIP712 tx type
-        transaction.from = this.address;
+        transaction.from = await this.getAddress();
         // TODO: populate rest of tx params as in ethers.js > abstract-signer.ts > populateTransaction
         const pop = { ...transaction } as TransactionLike;
 
@@ -211,8 +211,11 @@ export class SmartAccount extends EIP712Signer implements Signer {
      *          node to take into account. In these cases, a manually determined ``gasLimit``
      *          will need to be made.
      */
-    estimateGas(tx: TransactionRequest): Promise<bigint> {
-        return this.provider.estimateGas(tx);
+    async estimateGas(tx: TransactionRequest): Promise<bigint> {
+        const populatedTx = await this.populateCall(tx);
+
+        console.log("populatedTx in estimateGas :>> ", populatedTx);
+        return await this.provider.estimateGas(populatedTx);
     }
 
     /**
@@ -262,9 +265,32 @@ export class SmartAccount extends EIP712Signer implements Signer {
      *  is called first to ensure all necessary properties for the
      *  transaction to be valid have been popualted first.
      */
-    async sendTransaction(tx: TransactionRequest): Promise<TransactionResponse> {
-        const populatedTx = await this.populateTransaction(tx);
-        return await this.provider.broadcastTransaction(await this.signTransaction(populatedTx));
+    async sendTransaction(transaction: TransactionRequest): Promise<TransactionResponse> {
+        // const populatedTx = await this.populateTransaction(tx);
+        // return await this.provider.broadcastTransaction(await this.signTransaction(populatedTx));
+        console.log("in sendTransaction");
+        const from = await this.getAddress();
+        // if (from.toLowerCase() != address.toLowerCase()) {
+        //     throw new Error("Transaction `from` address mismatch");
+        // }
+        const tx: TransactionLike = {
+            type: transaction.type ?? EIP712_TX_TYPE,
+            value: transaction.value ?? 0,
+            data: transaction.data ?? "0x",
+            nonce: transaction.nonce ?? (await this.getNonce()),
+            gasPrice: transaction.gasPrice ?? (await this.provider.getGasPrice()),
+            gasLimit: transaction.gasLimit ?? (await this.estimateGas(transaction)),
+            chainId: transaction.chainId ?? (await this.provider.getNetwork()).chainId,
+            to: await ethers.resolveAddress(transaction.to as Address),
+            customData: this._fillCustomData(transaction.customData ?? {}),
+            from,
+        };
+        console.log("tx in sendTransaction :>> ", tx);
+        tx.customData ??= {};
+        tx.customData.customSignature = await this.sign(tx);
+
+        const txBytes = serializeEip712(tx);
+        return await this.provider.broadcastTransaction(txBytes);
     }
 
     /**
