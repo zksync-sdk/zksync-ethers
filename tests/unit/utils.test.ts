@@ -128,12 +128,10 @@ describe("utils", () => {
         it("should return a serialized transaction with populated default values", async () => {
             const tx =
                 "0x71ea8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0";
-            const result = utils.serializeEip712(
-                {
-                    chainId: 270,
-                    from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                },
-            );
+            const result = utils.serializeEip712({
+                chainId: 270,
+                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+            });
             expect(result).to.be.equal(tx);
         });
 
