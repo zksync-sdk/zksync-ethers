@@ -19,7 +19,7 @@ describe("Wallet", () => {
     const TOKENS_L1 = require("../tokens.json");
     const DAI_L1 = TOKENS_L1[0].address;
 
-    const TOKEN = "0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4"; 
+    const TOKEN = "0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4";
     const PAYMASTER = "0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174";
 
     describe("#constructor()", () => {
@@ -526,7 +526,7 @@ describe("Wallet", () => {
         it("should withdraw ETH to the L1 network using paymaster to cover fee", async () => {
             const amount = 7_000_000_000;
             const minimalAllowance = 1;
-            
+
             const paymasterBalanceBeforeWithdrawal = await provider.getBalance(PAYMASTER);
             const paymasterTokenBalanceBeforeWithdrawal = await provider.getBalance(
                 PAYMASTER,
@@ -535,7 +535,7 @@ describe("Wallet", () => {
             );
             const l2BalanceBeforeWithdrawal = await wallet.getBalance();
             const l2ApprovalTokenBalanceBeforeWithdrawal = await wallet.getBalance(TOKEN);
-            
+
             const withdrawTx = await wallet.withdraw({
                 token: utils.ETH_ADDRESS,
                 to: await wallet.getAddress(),
@@ -545,14 +545,14 @@ describe("Wallet", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             await withdrawTx.waitFinalize();
             expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
             const finalizeWithdrawTx = await wallet.finalizeWithdrawal(withdrawTx.hash);
             const result = await finalizeWithdrawTx.wait();
-            
+
             const paymasterBalanceAfterWithdrawal = await provider.getBalance(PAYMASTER);
             const paymasterTokenBalanceAfterWithdrawal = await provider.getBalance(
                 PAYMASTER,
@@ -562,12 +562,16 @@ describe("Wallet", () => {
             const l2BalanceAfterWithdrawal = await wallet.getBalance();
             const l2ApprovalTokenBalanceAfterWithdrawal = await wallet.getBalance(TOKEN);
 
-            expect(paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= BigInt(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterWithdrawal - paymasterTokenBalanceBeforeWithdrawal).to.be.equal(BigInt(minimalAllowance));
+            expect(paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= BigInt(0)).to.be
+                .true;
+            expect(
+                paymasterTokenBalanceAfterWithdrawal - paymasterTokenBalanceBeforeWithdrawal,
+            ).to.be.equal(BigInt(minimalAllowance));
 
             expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(BigInt(amount));
             expect(
-                l2ApprovalTokenBalanceAfterWithdrawal === l2ApprovalTokenBalanceBeforeWithdrawal - BigInt(minimalAllowance)
+                l2ApprovalTokenBalanceAfterWithdrawal ===
+                    l2ApprovalTokenBalanceBeforeWithdrawal - BigInt(minimalAllowance),
             ).to.be.true;
 
             expect(result).not.to.be.null;
@@ -578,7 +582,7 @@ describe("Wallet", () => {
             const l2DAI = await provider.l2TokenAddress(DAI_L1);
             const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2DAI);
             const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(DAI_L1);
-            
+
             const withdrawTx = await wallet.withdraw({
                 token: l2DAI,
                 to: await wallet.getAddress(),
@@ -601,7 +605,7 @@ describe("Wallet", () => {
             const amount = 5;
             const minimalAllowance = 1;
             const l2DAI = await provider.l2TokenAddress(DAI_L1);
-            
+
             const paymasterBalanceBeforeWithdrawal = await provider.getBalance(PAYMASTER);
             const paymasterTokenBalanceBeforeWithdrawal = await provider.getBalance(
                 PAYMASTER,
@@ -611,7 +615,7 @@ describe("Wallet", () => {
             const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2DAI);
             const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(DAI_L1);
             const l2ApprovalTokenBalanceBeforeWithdrawal = await wallet.getBalance(TOKEN);
-            
+
             const withdrawTx = await wallet.withdraw({
                 token: l2DAI,
                 to: await wallet.getAddress(),
@@ -621,14 +625,14 @@ describe("Wallet", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             await withdrawTx.waitFinalize();
             expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
             const finalizeWithdrawTx = await wallet.finalizeWithdrawal(withdrawTx.hash);
             const result = await finalizeWithdrawTx.wait();
-            
+
             const paymasterBalanceAfterWithdrawal = await provider.getBalance(PAYMASTER);
             const paymasterTokenBalanceAfterWithdrawal = await provider.getBalance(
                 PAYMASTER,
@@ -639,10 +643,14 @@ describe("Wallet", () => {
             const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(DAI_L1);
             const l2ApprovalTokenBalanceAfterWithdrawal = await wallet.getBalance(TOKEN);
 
-            expect(paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= BigInt(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterWithdrawal - paymasterTokenBalanceBeforeWithdrawal).to.be.equal(BigInt(minimalAllowance));
+            expect(paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= BigInt(0)).to.be
+                .true;
             expect(
-                l2ApprovalTokenBalanceAfterWithdrawal === l2ApprovalTokenBalanceBeforeWithdrawal - BigInt(minimalAllowance)
+                paymasterTokenBalanceAfterWithdrawal - paymasterTokenBalanceBeforeWithdrawal,
+            ).to.be.equal(BigInt(minimalAllowance));
+            expect(
+                l2ApprovalTokenBalanceAfterWithdrawal ===
+                    l2ApprovalTokenBalanceBeforeWithdrawal - BigInt(minimalAllowance),
             ).to.be.true;
 
             expect(result).not.to.be.null;
@@ -711,7 +719,7 @@ describe("Wallet", () => {
         it("should transfer ETH using paymaster to cover fee", async () => {
             const amount = 7_000_000_000;
             const minimalAllowance = 1;
-            
+
             const paymasterBalanceBeforeTransfer = await provider.getBalance(PAYMASTER);
             const paymasterTokenBalanceBeforeTransfer = await provider.getBalance(
                 PAYMASTER,
@@ -731,10 +739,10 @@ describe("Wallet", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             const result = await tx.wait();
-            
+
             const paymasterBalanceAfterTransfer = await provider.getBalance(PAYMASTER);
             const paymasterTokenBalanceAfterTransfer = await provider.getBalance(
                 PAYMASTER,
@@ -745,16 +753,22 @@ describe("Wallet", () => {
             const senderApprovalTokenBalanceAfterTransfer = await wallet.getBalance(TOKEN);
             const receiverBalanceAfterTransfer = await provider.getBalance(RECEIVER);
 
-            expect(paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >= BigInt(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterTransfer - paymasterTokenBalanceBeforeTransfer).to.be.equal(BigInt(minimalAllowance));
+            expect(paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >= BigInt(0)).to.be
+                .true;
+            expect(paymasterTokenBalanceAfterTransfer - paymasterTokenBalanceBeforeTransfer).to.be.equal(
+                BigInt(minimalAllowance),
+            );
 
             expect(senderBalanceBeforeTransfer - senderBalanceAfterTransfer).to.be.equal(BigInt(amount));
             expect(
-                senderApprovalTokenBalanceAfterTransfer === senderApprovalTokenBalanceBeforeTransfer - BigInt(minimalAllowance)
+                senderApprovalTokenBalanceAfterTransfer ===
+                    senderApprovalTokenBalanceBeforeTransfer - BigInt(minimalAllowance),
             ).to.be.true;
 
             expect(result).not.to.be.null;
-            expect(receiverBalanceAfterTransfer - receiverBalanceBeforeTransfer).to.be.equal(BigInt(amount));
+            expect(receiverBalanceAfterTransfer - receiverBalanceBeforeTransfer).to.be.equal(
+                BigInt(amount),
+            );
         }).timeout(25_000);
 
         it("should transfer DAI", async () => {
@@ -776,7 +790,7 @@ describe("Wallet", () => {
             const amount = 5;
             const minimalAllowance = 1;
             const l2DAI = await provider.l2TokenAddress(DAI_L1);
-            
+
             const paymasterBalanceBeforeTransfer = await provider.getBalance(PAYMASTER);
             const paymasterTokenBalanceBeforeTransfer = await provider.getBalance(
                 PAYMASTER,
@@ -786,7 +800,7 @@ describe("Wallet", () => {
             const senderBalanceBeforeTransfer = await wallet.getBalance(l2DAI);
             const senderApprovalTokenBalanceBeforeTransfer = await wallet.getBalance(TOKEN);
             const receiverBalanceBeforeTransfer = await provider.getBalance(RECEIVER, "latest", l2DAI);
-            
+
             const tx = await wallet.transfer({
                 token: l2DAI,
                 to: RECEIVER,
@@ -796,7 +810,7 @@ describe("Wallet", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             const result = await tx.wait();
 
@@ -810,16 +824,22 @@ describe("Wallet", () => {
             const senderApprovalTokenBalanceAfterTransfer = await wallet.getBalance(TOKEN);
             const receiverBalanceAfterTransfer = await provider.getBalance(RECEIVER, "latest", l2DAI);
 
-            expect(paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >= BigInt(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterTransfer - paymasterTokenBalanceBeforeTransfer).to.be.equal(BigInt(minimalAllowance));
+            expect(paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >= BigInt(0)).to.be
+                .true;
+            expect(paymasterTokenBalanceAfterTransfer - paymasterTokenBalanceBeforeTransfer).to.be.equal(
+                BigInt(minimalAllowance),
+            );
 
             expect(senderBalanceBeforeTransfer - senderBalanceAfterTransfer).to.be.equal(BigInt(amount));
             expect(
-                senderApprovalTokenBalanceAfterTransfer === senderApprovalTokenBalanceBeforeTransfer - BigInt(minimalAllowance)
+                senderApprovalTokenBalanceAfterTransfer ===
+                    senderApprovalTokenBalanceBeforeTransfer - BigInt(minimalAllowance),
             ).to.be.true;
 
             expect(result).not.to.be.null;
-            expect(receiverBalanceAfterTransfer - receiverBalanceBeforeTransfer).to.be.equal(BigInt(amount));
+            expect(receiverBalanceAfterTransfer - receiverBalanceBeforeTransfer).to.be.equal(
+                BigInt(amount),
+            );
         }).timeout(25_000);
     });
 

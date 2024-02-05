@@ -14,7 +14,7 @@ describe("Provider", () => {
     const TOKENS_L1 = require("../tokens.json");
     const DAI_L1 = TOKENS_L1[0].address;
 
-    const TOKEN = "0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4"; 
+    const TOKEN = "0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4";
     const PAYMASTER = "0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174";
 
     let tx;
@@ -329,9 +329,10 @@ describe("Provider", () => {
                 customData: {
                     paymasterParams: {
                         paymaster: "0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174",
-                        paymasterInput: "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
-                    }
-                }
+                        paymasterInput:
+                            "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+                    },
+                },
             };
             const result = await provider.getWithdrawTx({
                 token: utils.ETH_ADDRESS,
@@ -343,7 +344,7 @@ describe("Provider", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             expect(result).to.be.deep.equal(tx);
         });
@@ -371,9 +372,10 @@ describe("Provider", () => {
                 customData: {
                     paymasterParams: {
                         paymaster: "0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174",
-                        paymasterInput: "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
-                    }
-                }
+                        paymasterInput:
+                            "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+                    },
+                },
             };
             const result = await provider.getWithdrawTx({
                 token: await provider.l2TokenAddress(DAI_L1),
@@ -385,7 +387,7 @@ describe("Provider", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             expect(result).to.be.deepEqualExcluding(tx, ["data"]);
         });
@@ -456,9 +458,10 @@ describe("Provider", () => {
                 customData: {
                     paymasterParams: {
                         paymaster: "0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174",
-                        paymasterInput: "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
-                    }
-                }
+                        paymasterInput:
+                            "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+                    },
+                },
             };
             const result = await provider.getTransferTx({
                 token: utils.ETH_ADDRESS,
@@ -470,7 +473,7 @@ describe("Provider", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             expect(result).to.be.deep.equal(tx);
         });
@@ -498,9 +501,10 @@ describe("Provider", () => {
                 customData: {
                     paymasterParams: {
                         paymaster: "0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174",
-                        paymasterInput: "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
-                    }
-                }
+                        paymasterInput:
+                            "0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+                    },
+                },
             };
             const result = await provider.getTransferTx({
                 token: await provider.l2TokenAddress(DAI_L1),
@@ -512,7 +516,7 @@ describe("Provider", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             expect(result).to.be.deep.equal(tx);
         });
@@ -540,7 +544,7 @@ describe("Provider", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             expect(result > 0).to.be.true;
         });
@@ -568,7 +572,7 @@ describe("Provider", () => {
                     token: TOKEN,
                     minimalAllowance: 1,
                     innerInput: new Uint8Array(),
-                })
+                }),
             });
             expect(result > 0).to.be.be.true;
         });

@@ -302,14 +302,17 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
                 }
 
                 const ethL2Token = IEthToken__factory.connect(L2_ETH_TOKEN_ADDRESS, this);
-                const populatedTx = await ethL2Token.withdraw.populateTransaction(tx.to as Address, tx.overrides);
+                const populatedTx = await ethL2Token.withdraw.populateTransaction(
+                    tx.to as Address,
+                    tx.overrides,
+                );
                 if (tx.paymasterParamas) {
                     return {
                         ...populatedTx,
                         customData: {
                             paymasterParams: tx.paymasterParamas,
                         },
-                    }
+                    };
                 }
                 return populatedTx;
             }
@@ -338,7 +341,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
                     customData: {
                         paymasterParams: tx.paymasterParamas,
                     },
-                }
+                };
             }
             return populatedTx;
         }
@@ -388,14 +391,18 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
                 };
             } else {
                 const token = IERC20__factory.connect(tx.token, this);
-                const populatedTx = await token.transfer.populateTransaction(tx.to, tx.amount, tx.overrides);
+                const populatedTx = await token.transfer.populateTransaction(
+                    tx.to,
+                    tx.amount,
+                    tx.overrides,
+                );
                 if (tx.paymasterParamas) {
                     return {
                         ...populatedTx,
                         customData: {
                             paymasterParams: tx.paymasterParamas,
                         },
-                    }
+                    };
                 }
                 return populatedTx;
             }
