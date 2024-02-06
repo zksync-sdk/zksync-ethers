@@ -14,7 +14,7 @@ import {
     FullDepositFee,
     PriorityOpResponse,
     TransactionResponse,
-    PaymasterParams
+    PaymasterParams,
 } from "./types";
 import {
     BOOTLOADER_FORMAL_ADDRESS,

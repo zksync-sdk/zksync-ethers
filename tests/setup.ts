@@ -29,7 +29,7 @@ async function deployPaymasterAndToken(): Promise<{ token: string; paymaster: st
     const tokenAddress = tokenContract.address;
 
     // mint tokens to wallet
-    const mintTx = await tokenContract.mint(wallet.address,50,);
+    const mintTx = await tokenContract.mint(wallet.address, 50);
     await mintTx.wait();
 
     const paymasterAbi = require(paymasterPath).abi;

@@ -540,12 +540,16 @@ describe("Wallet", () => {
             expect(paymasterBalanceBeforeWithdrawal.sub(paymasterBalanceAfterWithdrawal).gte(0)).to.be
                 .true;
             expect(
-                paymasterTokenBalanceAfterWithdrawal.sub(paymasterTokenBalanceBeforeWithdrawal).eq(minimalAllowance),
+                paymasterTokenBalanceAfterWithdrawal
+                    .sub(paymasterTokenBalanceBeforeWithdrawal)
+                    .eq(minimalAllowance),
             ).to.be.true;
 
             expect(l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).eq(amount)).to.be.true;
             expect(
-                l2ApprovalTokenBalanceAfterWithdrawal.eq(l2ApprovalTokenBalanceBeforeWithdrawal.sub(minimalAllowance)),
+                l2ApprovalTokenBalanceAfterWithdrawal.eq(
+                    l2ApprovalTokenBalanceBeforeWithdrawal.sub(minimalAllowance),
+                ),
             ).to.be.true;
 
             expect(result).not.to.be.null;
@@ -615,13 +619,18 @@ describe("Wallet", () => {
             const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(DAI_L1);
             const l2ApprovalTokenBalanceAfterWithdrawal = await wallet.getBalance(TOKEN);
 
-            expect(paymasterBalanceBeforeWithdrawal.sub(paymasterBalanceAfterWithdrawal).gte(0)).to.be.true;
+            expect(paymasterBalanceBeforeWithdrawal.sub(paymasterBalanceAfterWithdrawal).gte(0)).to.be
+                .true;
             expect(
-                paymasterTokenBalanceAfterWithdrawal.sub(paymasterTokenBalanceBeforeWithdrawal).eq(minimalAllowance)
+                paymasterTokenBalanceAfterWithdrawal
+                    .sub(paymasterTokenBalanceBeforeWithdrawal)
+                    .eq(minimalAllowance),
             ).to.be.true;
 
             expect(
-                l2ApprovalTokenBalanceAfterWithdrawal.eq(l2ApprovalTokenBalanceBeforeWithdrawal.sub(minimalAllowance))
+                l2ApprovalTokenBalanceAfterWithdrawal.eq(
+                    l2ApprovalTokenBalanceBeforeWithdrawal.sub(minimalAllowance),
+                ),
             ).to.be.true;
 
             expect(result).not.to.be.null;
@@ -725,15 +734,22 @@ describe("Wallet", () => {
             const receiverBalanceAfterTransfer = await provider.getBalance(RECEIVER);
 
             expect(paymasterBalanceBeforeTransfer.sub(paymasterBalanceAfterTransfer).gte(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterTransfer.sub(paymasterTokenBalanceBeforeTransfer).eq(minimalAllowance)).to.be.true;
+            expect(
+                paymasterTokenBalanceAfterTransfer
+                    .sub(paymasterTokenBalanceBeforeTransfer)
+                    .eq(minimalAllowance),
+            ).to.be.true;
 
             expect(senderBalanceBeforeTransfer.sub(senderBalanceAfterTransfer).eq(amount)).to.be.true;
             expect(
-                senderApprovalTokenBalanceAfterTransfer.eq(senderApprovalTokenBalanceBeforeTransfer.sub(minimalAllowance))
+                senderApprovalTokenBalanceAfterTransfer.eq(
+                    senderApprovalTokenBalanceBeforeTransfer.sub(minimalAllowance),
+                ),
             ).to.be.true;
 
             expect(result).not.to.be.null;
-            expect(receiverBalanceAfterTransfer.sub(receiverBalanceBeforeTransfer).eq(amount)).to.be.true;
+            expect(receiverBalanceAfterTransfer.sub(receiverBalanceBeforeTransfer).eq(amount)).to.be
+                .true;
         }).timeout(25_000);
 
         it("should transfer DAI", async () => {
@@ -790,15 +806,22 @@ describe("Wallet", () => {
             const receiverBalanceAfterTransfer = await provider.getBalance(RECEIVER, "latest", l2DAI);
 
             expect(paymasterBalanceBeforeTransfer.sub(paymasterBalanceAfterTransfer).gte(0)).to.be.true;
-            expect(paymasterTokenBalanceAfterTransfer.sub(paymasterTokenBalanceBeforeTransfer).eq(minimalAllowance)).to.be.true;
+            expect(
+                paymasterTokenBalanceAfterTransfer
+                    .sub(paymasterTokenBalanceBeforeTransfer)
+                    .eq(minimalAllowance),
+            ).to.be.true;
 
             expect(senderBalanceBeforeTransfer.sub(senderBalanceAfterTransfer).eq(amount)).to.be.true;
             expect(
-                senderApprovalTokenBalanceAfterTransfer.eq(senderApprovalTokenBalanceBeforeTransfer.sub(minimalAllowance)),
+                senderApprovalTokenBalanceAfterTransfer.eq(
+                    senderApprovalTokenBalanceBeforeTransfer.sub(minimalAllowance),
+                ),
             ).to.be.true;
 
             expect(result).not.to.be.null;
-            expect(receiverBalanceAfterTransfer.sub(receiverBalanceBeforeTransfer).eq(amount)).to.be.true;
+            expect(receiverBalanceAfterTransfer.sub(receiverBalanceBeforeTransfer).eq(amount)).to.be
+                .true;
         }).timeout(25_000);
     });
 
