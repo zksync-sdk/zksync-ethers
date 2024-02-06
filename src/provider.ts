@@ -38,6 +38,7 @@ import {
     RawBlockTransaction,
     PaymasterParams,
     TransactionLike,
+    StorageProof,
 } from "./types";
 import {
     isETH,
@@ -267,6 +268,10 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
 
         async getRawBlockTransactions(number: number): Promise<RawBlockTransaction[]> {
             return await this.send("zks_getRawBlockTransactions", [number]);
+        }
+
+        async getProof(address: Address, keys: string[], l1BatchNumber: number): Promise<StorageProof> {
+            return await this.send("zks_getProof", [address, keys, l1BatchNumber]);
         }
 
         async getWithdrawTx(transaction: {
