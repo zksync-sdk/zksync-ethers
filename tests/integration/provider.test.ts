@@ -380,7 +380,9 @@ describe("Provider", () => {
         it("should return a DAI withdraw transaction", async () => {
             const tx = {
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                to: ethers.utils.getAddress((await provider.getDefaultBridgeAddresses()).erc20L2 as string),
+                to: ethers.utils.getAddress(
+                    (await provider.getDefaultBridgeAddresses()).erc20L2 as string,
+                ),
                 data: "0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005",
             };
             const result = await provider.getWithdrawTx({
@@ -395,7 +397,9 @@ describe("Provider", () => {
         it("should return a DAI withdraw transaction with paymaster parameters", async () => {
             const tx = {
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                to: ethers.utils.getAddress((await provider.getDefaultBridgeAddresses()).erc20L2 as string),
+                to: ethers.utils.getAddress(
+                    (await provider.getDefaultBridgeAddresses()).erc20L2 as string,
+                ),
                 data: "0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005",
                 customData: {
                     paymasterParams: {

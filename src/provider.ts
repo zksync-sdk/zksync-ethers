@@ -688,7 +688,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
-        const populatedTx = await bridge.populateTransaction.withdraw(tx.to, tx.token, tx.amount, tx.overrides);
+        const populatedTx = await bridge.populateTransaction.withdraw(
+            tx.to,
+            tx.token,
+            tx.amount,
+            tx.overrides,
+        );
         if (tx.paymasterParamas) {
             return {
                 ...populatedTx,
@@ -745,7 +750,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             };
         } else {
             const token = IERC20Factory.connect(tx.token, this);
-            const populatedTx =  await token.populateTransaction.transfer(tx.to, tx.amount, tx.overrides);
+            const populatedTx = await token.populateTransaction.transfer(tx.to, tx.amount, tx.overrides);
             if (tx.paymasterParamas) {
                 return {
                     ...populatedTx,
