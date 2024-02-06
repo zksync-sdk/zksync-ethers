@@ -537,9 +537,9 @@ export interface FinalizeWithdrawalParams {
 export interface StorageProof {
     address: string;
     storageProof: {
-        key:	string;
-        value:	string;
-        index:  number;
-        proof:	string[];
+        key: string;
+        value: string;
+        index: number;
+        proof: string[];
     }[];
 }

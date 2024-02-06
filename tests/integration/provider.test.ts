@@ -176,28 +176,31 @@ describe("Provider", () => {
             // fetchin the storage proof for rawHonce storage slot in NonceHolder system contract
             // mapping(uint256 => uint256) internal rawNonces;
 
-             // Ensure the address is a 256-bit number by padding it
-             // because rawNonces uses uint256 for mapping addresses and their nonces
+            // Ensure the address is a 256-bit number by padding it
+            // because rawNonces uses uint256 for mapping addresses and their nonces
             const addressPadded = ethers.zeroPadValue(wallet.address, 32);
-    
+
             // Convert the slot number to a hex string and pad it to 32 bytes
             const slotPadded = ethers.zeroPadValue(ethers.toBeHex(0), 32);
-     
+
             // Concatenate the padded address and slot number
             const concatenated = addressPadded + slotPadded.slice(2); // slice to remove '0x' from the slotPadded
-     
+
             // Hash the concatenated string using Keccak-256
             const storageKey = ethers.keccak256(concatenated);
 
             const l1BatchNumber = await provider.getL1BatchNumber();
             try {
-                const result = await provider.getProof(utils.NONCE_HOLDER_ADDRESS, [storageKey], l1BatchNumber);
+                const result = await provider.getProof(
+                    utils.NONCE_HOLDER_ADDRESS,
+                    [storageKey],
+                    l1BatchNumber,
+                );
                 expect(result).not.to.be.null;
             } catch (error) {}
         });
     });
 
-    
     describe("#getTransactionStatus()", () => {
         it("should return the `Committed` status for a mined transaction", async () => {
             const result = await provider.getTransactionStatus(tx.hash);
