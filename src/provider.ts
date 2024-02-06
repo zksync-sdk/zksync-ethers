@@ -25,6 +25,7 @@ import {
     Fee,
     Network as ZkSyncNetwork,
     RawBlockTransaction,
+    StorageProof,
 } from "./types";
 import {
     CONTRACT_DEPLOYER,
@@ -621,6 +622,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     async getRawBlockTransactions(number: number): Promise<RawBlockTransaction[]> {
         return await this.send("zks_getRawBlockTransactions", [number]);
+    }
+
+    async getProof(address: Address, keys: string[], l1BatchNumber: number): Promise<StorageProof> {
+        return await this.send("zks_getProof", [address, keys, l1BatchNumber]);
     }
 
     async getWithdrawTx(transaction: {
