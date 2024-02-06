@@ -721,7 +721,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return await this.estimateGas(transferTx);
     }
 
-    static getDefaultProvider(zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost) {
+    static getDefaultProvider(zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost): Provider {
         if (process.env.ZKSYNC_WEB3_API_URL) {
             return new Provider(process.env.ZKSYNC_WEB3_API_URL);
         }
@@ -734,6 +734,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                 return new Provider("https://sepolia.era.zksync.dev");
             case ZkSyncNetwork.Mainnet:
                 return new Provider("https://mainnet.era.zksync.io");
+            default:
+                return new Provider("http://localhost:3050");
         }
     }
 
