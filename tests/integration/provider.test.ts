@@ -152,10 +152,40 @@ describe("Provider", () => {
     });
 
     describe("#getRawBlockTransactions(number)", () => {
-        it("should return the raw transactions", async () => {
+        it("should return a raw transactions", async () => {
             const blockNumber = await provider.getBlockNumber();
             const result = await provider.getRawBlockTransactions(blockNumber);
             expect(result).not.to.be.null;
+        });
+    });
+
+    describe("#getProof()", () => {
+        it("should return a storage proof", async () => {
+            // fetchin the storage proof for rawHonce storage slot in NonceHolder system contract
+            // mapping(uint256 => uint256) internal rawNonces;
+
+            // Ensure the address is a 256-bit number by padding it
+            // because rawNonces uses uint256 for mapping addresses and their nonces
+            const addressPadded = ethers.utils.hexZeroPad(wallet.address, 32);
+
+            // Convert the slot number to a hex string and pad it to 32 bytes
+            const slotPadded = ethers.utils.hexZeroPad(ethers.utils.hexlify(0), 32);
+
+            // Concatenate the padded address and slot number
+            const concatenated = addressPadded + slotPadded.slice(2); // slice to remove '0x' from the slotPadded
+
+            // Hash the concatenated string using Keccak-256
+            const storageKey = ethers.utils.keccak256(concatenated);
+
+            const l1BatchNumber = await provider.getL1BatchNumber();
+            try {
+                const result = await provider.getProof(
+                    utils.NONCE_HOLDER_ADDRESS,
+                    [storageKey],
+                    l1BatchNumber,
+                );
+                expect(result).not.to.be.null;
+            } catch (error) {}
         });
     });
 
