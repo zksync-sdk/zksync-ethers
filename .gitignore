@@ -4,3 +4,4 @@ tests/token.json
 coverage
 
 .idea
+.vscode
