@@ -285,9 +285,9 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
         return BigNumber.from(value);
     }
 
-    function arrayToPaymasterParams(arr: string[]): PaymasterParams | null {
+    function arrayToPaymasterParams(arr: string[]): PaymasterParams | undefined {
         if (arr.length == 0) {
-            return null;
+            return undefined;
         }
         if (arr.length != 2) {
             throw new Error(

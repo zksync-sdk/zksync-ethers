@@ -26,6 +26,7 @@ import {
     Network as ZkSyncNetwork,
     RawBlockTransaction,
     StorageProof,
+    PaymasterParams,
 } from "./types";
 import {
     CONTRACT_DEPLOYER,
@@ -634,6 +635,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         from?: Address;
         to?: Address;
         bridgeAddress?: Address;
+        paymasterParamas?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<ethers.providers.TransactionRequest> {
         const { ...tx } = transaction;
@@ -660,7 +662,16 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             }
 
             const ethL2Token = IEthTokenFactory.connect(L2_ETH_TOKEN_ADDRESS, this);
-            return ethL2Token.populateTransaction.withdraw(tx.to, tx.overrides);
+            const populatedTx = await ethL2Token.populateTransaction.withdraw(tx.to, tx.overrides);
+            if (tx.paymasterParamas) {
+                return {
+                    ...populatedTx,
+                    customData: {
+                        paymasterParams: tx.paymasterParamas,
+                    },
+                };
+            }
+            return populatedTx;
         }
 
         if (tx.bridgeAddress == null) {
@@ -677,7 +688,16 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
-        return bridge.populateTransaction.withdraw(tx.to, tx.token, tx.amount, tx.overrides);
+        const populatedTx = await bridge.populateTransaction.withdraw(tx.to, tx.token, tx.amount, tx.overrides);
+        if (tx.paymasterParamas) {
+            return {
+                ...populatedTx,
+                customData: {
+                    paymasterParams: tx.paymasterParamas,
+                },
+            };
+        }
+        return populatedTx;
     }
 
     async estimateGasWithdraw(transaction: {
@@ -686,6 +706,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         from?: Address;
         to?: Address;
         bridgeAddress?: Address;
+        paymasterParamas?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<BigNumber> {
         const withdrawTx = await this.getWithdrawTx(transaction);
@@ -697,6 +718,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         amount: BigNumberish;
         from?: Address;
         token?: Address;
+        paymasterParamas?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<ethers.providers.TransactionRequest> {
         const { ...tx } = transaction;
@@ -704,6 +726,18 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         tx.overrides.from ??= tx.from;
 
         if (tx.token == null || tx.token == ETH_ADDRESS) {
+            if (tx.paymasterParamas) {
+                return {
+                    ...(await ethers.utils.resolveProperties(tx.overrides)),
+                    type: EIP712_TX_TYPE,
+                    to: tx.to,
+                    value: tx.amount,
+                    customData: {
+                        paymasterParams: tx.paymasterParamas,
+                    },
+                };
+            }
+
             return {
                 ...(await ethers.utils.resolveProperties(tx.overrides)),
                 to: tx.to,
@@ -711,7 +745,16 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             };
         } else {
             const token = IERC20Factory.connect(tx.token, this);
-            return await token.populateTransaction.transfer(tx.to, tx.amount, tx.overrides);
+            const populatedTx =  await token.populateTransaction.transfer(tx.to, tx.amount, tx.overrides);
+            if (tx.paymasterParamas) {
+                return {
+                    ...populatedTx,
+                    customData: {
+                        paymasterParams: tx.paymasterParamas,
+                    },
+                };
+            }
+            return populatedTx;
         }
     }
 
@@ -720,6 +763,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         amount: BigNumberish;
         from?: Address;
         token?: Address;
+        paymasterParamas?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<BigNumber> {
         const transferTx = await this.getTransferTx(transaction);

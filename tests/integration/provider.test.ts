@@ -360,7 +360,7 @@ describe("Provider", () => {
             expect(result).to.be.deep.equal(WITHDRAW_TX);
         });
 
-        it("should throw an error when `tx.to=null && tx.from=null`", async () => {
+        it("should throw an error when `tx.to` and `tx.from` are not provided", async () => {
             try {
                 await provider.getWithdrawTx({
                     token: utils.ETH_ADDRESS,
