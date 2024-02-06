@@ -134,7 +134,6 @@ describe("utils", () => {
                     chainId: 270,
                     from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 },
-                null,
             );
             expect(result).to.be.equal(tx);
         });
@@ -228,7 +227,7 @@ describe("utils", () => {
                     gasPerPubdata: BigNumber.from(50000),
                     factoryDeps: [],
                     customSignature: "0x",
-                    paymasterParams: null,
+                    paymasterParams: undefined,
                 },
                 hash: "0x9ed410ce33179ac1ff6b721060605afc72d64febfe0c08cacab5a246602131ee",
             };
@@ -255,7 +254,7 @@ describe("utils", () => {
                     gasPerPubdata: BigNumber.from(50000),
                     factoryDeps: [],
                     customSignature: "0x",
-                    paymasterParams: null,
+                    paymasterParams: undefined,
                 },
                 hash: "0x7d3aab3e3d06d6a702228d911c2a9afaccddd52514fb89dc9d0ff81a67bfff04",
             };
