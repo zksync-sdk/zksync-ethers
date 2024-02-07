@@ -137,28 +137,28 @@ export class ContractFactory<
      *
      * @async
      * @param {...ContractMethodArgs} args - Constructor arguments for the contract followed by optional
-     * {@link ethers.Overrides|overrides}. When deploying with CREATE2 opcode slat must be present in overrides.
+     * {@link ethers.Overrides|overrides}. When deploying with CREATE2 method slat must be present in overrides.
      *
      *
      * @example
-     * // Deploy with constructor arguments only using CREATE opcode
+     * // Deploy with constructor arguments only using CREATE method
      * const deployedContract = await contractFactory.deploy(arg1, arg2, ...);
      *
-     * // Deploy with constructor arguments, and factory dependencies using CREATE opcode
+     * // Deploy with constructor arguments, and factory dependencies using CREATE method
      * const deployedContractWithSaltAndDeps = await contractFactory.deploy(arg1, arg2, ..., {
      *   customData: {
      *     factoryDeps: ['0x...']
      *   }
      * });
      *
-     * // Deploy with constructor arguments and custom salt using CREATE2 opcode
+     * // Deploy with constructor arguments and custom salt using CREATE2 method
      * const deployedContractWithSalt = await contractFactory.deploy(arg1, arg2, ..., {
      *   customData: {
      *     salt: '0x...'
      *   }
      * });
      *
-     * // Deploy with constructor arguments, custom salt, and factory dependencies using CREATE2 opcode
+     * // Deploy with constructor arguments, custom salt, and factory dependencies using CREATE2 method
      * const deployedContractWithSaltAndDeps = await contractFactory.deploy(arg1, arg2, ..., {
      *   customData: {
      *     salt: '0x...',
