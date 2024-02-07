@@ -1,3 +1,12 @@
+# [6.2.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.1.0...v6.2.0) (2024-02-07)
+
+
+### Features
+
+* **provider:** `getDefaultProvider()` connects to local network by default ([ae2146d](https://github.com/zksync-sdk/zksync-ethers/commit/ae2146d1c38128de1dfc96369fa48d8e915ef343))
+* **provider:** add `getProof` method for fetching storage proofs ([d364000](https://github.com/zksync-sdk/zksync-ethers/commit/d3640001e8419dc704438063ab8cb37c37a4f86b))
+* **wallet,provider:** add paymaster support for transfer and withdrawal tx ([5cab446](https://github.com/zksync-sdk/zksync-ethers/commit/5cab446b3781ce485e2d2735bdfde654a809d277))
+
 # [6.1.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.0.0...v6.1.0) (2024-01-24)
 
 
