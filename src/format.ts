@@ -33,7 +33,7 @@ export function allowNull(format: FormatFunc, nullValue?: any): FormatFunc {
 export function arrayOf(format: FormatFunc): FormatFunc {
     return (array: any) => {
         if (!Array.isArray(array)) {
-            throw new Error("not an array");
+            throw new Error("Not an array!");
         }
         return array.map((i) => format(i));
     };
@@ -99,7 +99,7 @@ export function formatHash(value: any): string {
 
 export function formatUint256(value: any): string {
     if (!isHexString(value)) {
-        throw new Error("invalid uint256");
+        throw new Error("Invalid uint256!");
     }
     return zeroPadValue(value, 32);
 }

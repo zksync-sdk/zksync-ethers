@@ -13,7 +13,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
 
     override _providerL1() {
         if (this.providerL1 == null) {
-            throw new Error("L1 provider missing: use `connectToL1` to specify");
+            throw new Error("L1 provider missing: use `connectToL1` to specify!");
         }
         return this.providerL1;
     }
@@ -108,7 +108,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
             tx.from ??= this.address;
             const from = await ethers.resolveAddress(tx.from);
             if (from.toLowerCase() != this.address.toLowerCase()) {
-                throw new Error("Transaction `from` address mismatch");
+                throw new Error("Transaction `from` address mismatch!");
             }
             const populated = await this.populateTransaction(tx);
             // @ts-ignore
