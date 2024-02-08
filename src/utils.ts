@@ -160,7 +160,7 @@ export async function checkBaseCost(
     if (baseCost.gt(await value)) {
         throw new Error(
             `The base cost of performing the priority operation is higher than the provided value parameter ` +
-                `for the transaction: baseCost: ${baseCost}, provided value: ${value}`,
+                `for the transaction: baseCost: ${baseCost}, provided value: ${value}!`,
         );
     }
 }
@@ -170,19 +170,19 @@ export function serialize(transaction: ethers.providers.TransactionRequest, sign
         return utils.serializeTransaction(transaction as ethers.PopulatedTransaction, signature);
     }
     if (!transaction.chainId) {
-        throw Error("Transaction chainId isn't set");
+        throw Error("Transaction chainId isn't set!");
     }
 
     function formatNumber(value: BigNumberish, name: string): Uint8Array {
         const result = utils.stripZeros(BigNumber.from(value).toHexString());
         if (result.length > 32) {
-            throw new Error("invalid length for " + name);
+            throw new Error(`Invalid length for ${name}!`);
         }
         return result;
     }
 
     if (!transaction.from) {
-        throw new Error("Explicitly providing `from` field is required for EIP712 transactions");
+        throw new Error("Explicitly providing `from` field is required for EIP712 transactions!");
     }
     const from = transaction.from;
 
@@ -219,7 +219,7 @@ export function serialize(transaction: ethers.providers.TransactionRequest, sign
     fields.push((meta.factoryDeps ?? []).map((dep) => utils.hexlify(dep)));
 
     if (meta.customSignature && ethers.utils.arrayify(meta.customSignature).length == 0) {
-        throw new Error("Empty signatures are not supported");
+        throw new Error("Empty signatures are not supported!");
     }
     fields.push(meta.customSignature || "0x");
 
@@ -240,11 +240,11 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
     const bytecodeAsArray = ethers.utils.arrayify(bytecode);
 
     if (bytecodeAsArray.length % 32 != 0) {
-        throw new Error("The bytecode length in bytes must be divisible by 32");
+        throw new Error("The bytecode length in bytes must be divisible by 32!");
     }
 
     if (bytecodeAsArray.length > MAX_BYTECODE_LEN_BYTES) {
-        throw new Error(`Bytecode can not be longer than ${MAX_BYTECODE_LEN_BYTES} bytes`);
+        throw new Error(`Bytecode can not be longer than ${MAX_BYTECODE_LEN_BYTES} bytes!`);
     }
 
     const hashStr = ethers.utils.sha256(bytecodeAsArray);
@@ -254,7 +254,7 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
     // should be provided in 32-byte words.
     const bytecodeLengthInWords = bytecodeAsArray.length / 32;
     if (bytecodeLengthInWords % 2 == 0) {
-        throw new Error("Bytecode length in 32-byte words must be odd");
+        throw new Error("Bytecode length in 32-byte words must be odd!");
     }
 
     const bytecodeLength = ethers.utils.arrayify(bytecodeLengthInWords);
@@ -291,7 +291,7 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
         }
         if (arr.length != 2) {
             throw new Error(
-                `Invalid paymaster parameters, expected to have length of 2, found ${arr.length}`,
+                `Invalid paymaster parameters, expected to have length of 2, found ${arr.length}!`,
             );
         }
 
@@ -340,7 +340,7 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
     }
 
     if (ethSignature.v !== 0 && ethSignature.v !== 1 && !transaction.customData.customSignature) {
-        throw new Error("Failed to parse signature");
+        throw new Error("Failed to parse signature!");
     }
 
     if (!transaction.customData.customSignature) {
@@ -360,7 +360,7 @@ function getSignature(transaction: any, ethSignature?: EthereumSignature): Uint8
     }
 
     if (!ethSignature) {
-        throw new Error("No signature provided");
+        throw new Error("No signature provided!");
     }
 
     const r = ethers.utils.zeroPad(ethers.utils.arrayify(ethSignature.r), 32);
@@ -395,7 +395,7 @@ export function getL2HashFromPriorityOp(
         } catch {}
     }
     if (!txHash) {
-        throw new Error("Failed to parse tx logs");
+        throw new Error("Failed to parse tx logs!");
     }
 
     return txHash;

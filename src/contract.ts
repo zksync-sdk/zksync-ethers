@@ -44,18 +44,18 @@ export class ContractFactory extends ethers.ContractFactory {
         } else if (this.deploymentType === "create2Account") {
             return CONTRACT_DEPLOYER.encodeFunctionData("create2Account", [...accountDeploymentArgs]);
         } else {
-            throw new Error(`Unsupported deployment type ${this.deploymentType}`);
+            throw new Error(`Unsupported deployment type ${this.deploymentType}!`);
         }
     }
 
     protected checkOverrides(overrides: ethers.PayableOverrides) {
         if (this.deploymentType === "create2" || this.deploymentType === "create2Account") {
             if (!overrides.customData || !overrides.customData.salt) {
-                throw new Error("Salt is required for CREATE2 deployment.");
+                throw new Error("Salt is required for CREATE2 deployment!");
             }
 
             if (!overrides.customData.salt.startsWith("0x") || overrides.customData.salt.length !== 66) {
-                throw new Error("Invalid salt provided.");
+                throw new Error("Invalid salt provided!");
             }
         }
 
@@ -64,7 +64,7 @@ export class ContractFactory extends ethers.ContractFactory {
             overrides.customData.factoryDeps != null &&
             !Array.isArray(overrides.customData.factoryDeps)
         ) {
-            throw new Error("Invalid 'factoryDeps' format. It should be an array of bytecodes.");
+            throw new Error("Invalid 'factoryDeps' format! It should be an array of bytecodes.");
         }
     }
 
@@ -197,7 +197,7 @@ function normalizeBytecode(bytecode: BytesLike | { object: string }) {
 
     // Make sure the final result is valid bytecode
     if (!isHexString(bytecodeHex) || bytecodeHex.length % 2) {
-        throw new Error("invalid bytecode");
+        throw new Error("Invalid bytecode!");
     }
     return bytecodeHex;
 }

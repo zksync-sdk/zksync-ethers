@@ -367,7 +367,7 @@ describe("Provider", () => {
                 amount: 7_000_000_000,
                 to: ADDRESS,
                 from: ADDRESS,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -414,7 +414,7 @@ describe("Provider", () => {
                 amount: 5,
                 to: ADDRESS,
                 from: ADDRESS,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -500,7 +500,7 @@ describe("Provider", () => {
                 amount: 7_000_000_000,
                 to: RECEIVER,
                 from: ADDRESS,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -543,7 +543,7 @@ describe("Provider", () => {
                 amount: 5,
                 to: RECEIVER,
                 from: ADDRESS,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -571,7 +571,7 @@ describe("Provider", () => {
                 amount: 7_000_000_000,
                 to: ADDRESS,
                 from: ADDRESS,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -599,7 +599,7 @@ describe("Provider", () => {
                 amount: 7_000_000_000,
                 to: RECEIVER,
                 from: ADDRESS,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),

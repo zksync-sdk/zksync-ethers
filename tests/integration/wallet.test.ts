@@ -91,7 +91,7 @@ describe("Wallet", () => {
                 await wallet.approveERC20(utils.ETH_ADDRESS, 5);
             } catch (e) {
                 expect(e.message).to.be.equal(
-                    "ETH token can't be approved. The address of the token does not exist on L1.",
+                    "ETH token can't be approved! The address of the token does not exist on L1.",
                 );
             }
         }).timeout(10_000);
@@ -145,7 +145,7 @@ describe("Wallet", () => {
             try {
                 wallet.ethWallet();
             } catch (e) {
-                expect(e.message).to.be.equal("L1 provider missing: use `connectToL1` to specify");
+                expect(e.message).to.be.equal("L1 provider missing: use `connectToL1` to specify!");
             }
         });
     });
@@ -411,7 +411,7 @@ describe("Wallet", () => {
             try {
                 await wallet.claimFailedDeposit(tx.transactionHash);
             } catch (e) {
-                expect(e.message).to.be.equal("Cannot claim successful deposit");
+                expect(e.message).to.be.equal("Cannot claim successful deposit!");
             }
         }).timeout(30_000);
     });
@@ -439,7 +439,7 @@ describe("Wallet", () => {
                     to: await wallet.getAddress(),
                 });
             } catch (e) {
-                expect(e.message).to.be.equal("Not enough allowance to cover the deposit");
+                expect(e.message).to.be.equal("Not enough allowance to cover the deposit!");
             }
         }).timeout(10_000);
 
@@ -474,7 +474,7 @@ describe("Wallet", () => {
                     to: await wallet.getAddress(),
                 });
             } catch (e) {
-                expect(e.message).to.include("Not enough balance for deposit.");
+                expect(e.message).to.include("Not enough balance for deposit!");
             }
         }).timeout(10_000);
     });
@@ -515,7 +515,7 @@ describe("Wallet", () => {
                 token: utils.ETH_ADDRESS,
                 to: await wallet.getAddress(),
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -596,7 +596,7 @@ describe("Wallet", () => {
                 token: l2DAI,
                 to: await wallet.getAddress(),
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -714,7 +714,7 @@ describe("Wallet", () => {
                 token: utils.ETH_ADDRESS,
                 to: RECEIVER,
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -786,7 +786,7 @@ describe("Wallet", () => {
                 token: l2DAI,
                 to: RECEIVER,
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: BigNumber.from(1),
@@ -855,7 +855,7 @@ describe("Wallet", () => {
                     value: 7_000_000_000,
                 });
             } catch (e) {
-                expect(e.message).to.be.equal("Transaction `from` address mismatch");
+                expect(e.message).to.be.equal("Transaction `from` address mismatch!");
             }
         }).timeout(25_000);
     });
