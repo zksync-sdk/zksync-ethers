@@ -67,7 +67,7 @@ export class EIP712Signer {
 
     static getSignedDigest(transaction: TransactionRequest): ethers.BytesLike {
         if (!transaction.chainId) {
-            throw Error("Transaction chainId isn't set");
+            throw Error("Transaction chainId isn't set!");
         }
         const domain = {
             name: "zkSync",
@@ -127,7 +127,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
                     ? address
                     : await ethers.resolveAddress(transaction.from as Address);
             if (from.toLowerCase() != address.toLowerCase()) {
-                throw new Error("Transaction `from` address mismatch");
+                throw new Error("Transaction `from` address mismatch!");
             }
             const tx: TransactionLike = {
                 type: transaction.type ?? EIP712_TX_TYPE,

@@ -139,7 +139,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ): Promise<ethers.TransactionResponse> {
             if (isETH(token)) {
                 throw new Error(
-                    "ETH token can't be approved. The address of the token does not exist on L1.",
+                    "ETH token can't be approved! The address of the token does not exist on L1.",
                 );
             }
 
@@ -451,7 +451,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     baseCost;
                 const formattedRecommendedBalance = ethers.formatEther(recommendedETHBalance);
                 throw new Error(
-                    `Not enough balance for deposit. Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`,
+                    `Not enough balance for deposit! Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH.`,
                 );
             }
 
@@ -464,7 +464,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 amountForEstimate = dummyAmount;
 
                 if ((await this.getAllowanceL1(tx.token)) < amountForEstimate) {
-                    throw new Error("Not enough allowance to cover the deposit");
+                    throw new Error("Not enough allowance to cover the deposit!");
                 }
             }
 
@@ -640,7 +640,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
             const successL2ToL1Log = receipt.l2ToL1Logs[successL2ToL1LogIndex];
             if (successL2ToL1Log.value != ethers.ZeroHash) {
-                throw new Error("Cannot claim successful deposit");
+                throw new Error("Cannot claim successful deposit!");
             }
 
             const tx = await this._providerL2().getTransaction(ethers.hexlify(depositHash));
@@ -864,7 +864,7 @@ async function insertGasPrice(l1Provider: ethers.Provider, overrides: ethers.Ove
         // Sometimes baseFeePerGas is not available, so we use gasPrice instead.
         const baseFee = l1FeeData.maxFeePerGas ? getBaseCostFromFeeData(l1FeeData) : l1FeeData.gasPrice;
         if (!baseFee) {
-            throw new Error("Failed to calculate base fee");
+            throw new Error("Failed to calculate base fee!");
         }
 
         // ethers.js by default uses multiplication by 2, but since the price for the L2 part

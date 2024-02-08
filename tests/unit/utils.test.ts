@@ -86,7 +86,7 @@ describe("utils", () => {
                 await utils.checkBaseCost(baseCost, value);
             } catch (e) {
                 expect(e.message).to.be.equal(
-                    `The base cost of performing the priority operation is higher than the provided value parameter for the transaction: baseCost: ${baseCost}, provided value: ${value}`,
+                    `The base cost of performing the priority operation is higher than the provided value parameter for the transaction: baseCost: ${baseCost}, provided value: ${value}!`,
                 );
             }
         });
@@ -97,7 +97,7 @@ describe("utils", () => {
             try {
                 utils.serializeEip712({});
             } catch (e) {
-                expect(e.message).to.be.equal("Transaction chainId isn't set");
+                expect(e.message).to.be.equal("Transaction chainId isn't set!");
             }
         });
 
@@ -106,7 +106,7 @@ describe("utils", () => {
                 utils.serializeEip712({ chainId: 270 });
             } catch (e) {
                 expect(e.message).to.be.equal(
-                    "Explicitly providing `from` field is required for EIP712 transactions",
+                    "Explicitly providing `from` field is required for EIP712 transactions!",
                 );
             }
         });
@@ -183,7 +183,7 @@ describe("utils", () => {
             try {
                 utils.hashBytecode("0x0002");
             } catch (e) {
-                expect(e.message).to.be.equal("The bytecode length in bytes must be divisible by 32");
+                expect(e.message).to.be.equal("The bytecode length in bytes must be divisible by 32!");
             }
         });
 

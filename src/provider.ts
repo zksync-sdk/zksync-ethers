@@ -286,7 +286,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
             const { ...tx } = transaction;
 
             if (tx.to == null && tx.from == null) {
-                throw new Error("withdrawal target address is undefined");
+                throw new Error("Withdrawal target address is undefined!");
             }
 
             tx.to ??= tx.from;
@@ -303,7 +303,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
                     // To avoid users shooting themselves into the foot, we will always use the amount to withdraw
                     // as the value
 
-                    throw new Error("The tx.value is not equal to the value withdrawn");
+                    throw new Error("The tx.value is not equal to the value withdrawn!");
                 }
 
                 const ethL2Token = IEthToken__factory.connect(L2_ETH_TOKEN_ADDRESS, this);
@@ -476,7 +476,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
 
             const tx = Transaction.from(signedTx);
             if (tx.hash !== hash) {
-                throw new Error("@TODO: the returned hash did not match");
+                throw new Error("@TODO: the returned hash did not match!");
             }
 
             return this._wrapTransactionResponse(<any>tx, network).replaceableTransaction(blockNumber);
