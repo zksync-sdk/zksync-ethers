@@ -1,3 +1,17 @@
+# [5.3.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.2.0...v5.3.0) (2024-02-08)
+
+
+### Features
+
+* **provider, wallet:** fix typo in paymaster parameter name ([72289c0](https://github.com/zksync-sdk/zksync-ethers/commit/72289c09add28c86653fd52c2cd09c4e9b37faac))
+
+
+### BREAKING CHANGES
+
+* **provider, wallet:** Rename function parameter `paymasterParamas` to `paymasterParams` in
+`Provider.getTransferTx()`, `Provider.estimateGasTransfer()`, `Provider.getWithdrawTx()`,
+`Provider.estimateGasWithdraw()`, `Wallet.transfer()`, and `Wallet.withdraw()` methods.
+
 # [5.2.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.1.0...v5.2.0) (2024-02-07)
 
 
