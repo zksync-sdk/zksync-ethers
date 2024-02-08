@@ -127,7 +127,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ): Promise<ethers.providers.TransactionResponse> {
             if (isETH(token)) {
                 throw new Error(
-                    "ETH token can't be approved. The address of the token does not exist on L1.",
+                    "ETH token can't be approved! The address of the token does not exist on L1.",
                 );
             }
 
@@ -439,7 +439,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     .add(baseCost);
                 const formattedRecommendedBalance = ethers.utils.formatEther(recommendedETHBalance);
                 throw new Error(
-                    `Not enough balance for deposit. Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`,
+                    `Not enough balance for deposit! Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH.`,
                 );
             }
 
@@ -452,7 +452,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 amountForEstimate = BigNumber.from(dummyAmount);
 
                 if ((await this.getAllowanceL1(tx.token)) < amountForEstimate) {
-                    throw new Error("Not enough allowance to cover the deposit");
+                    throw new Error("Not enough allowance to cover the deposit!");
                 }
             }
 
@@ -616,7 +616,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
             const successL2ToL1Log = receipt.l2ToL1Logs[successL2ToL1LogIndex];
             if (successL2ToL1Log.value != ethers.constants.HashZero) {
-                throw new Error("Cannot claim successful deposit");
+                throw new Error("Cannot claim successful deposit!");
             }
 
             const tx = await this._providerL2().getTransaction(ethers.utils.hexlify(depositHash));
@@ -785,7 +785,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
             amount: BigNumberish;
             to?: Address;
             bridgeAddress?: Address;
-            paymasterParamas?: PaymasterParams;
+            paymasterParams?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<TransactionResponse> {
             const withdrawTx = await this._providerL2().getWithdrawTx({
@@ -800,7 +800,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
             to: Address;
             amount: BigNumberish;
             token?: Address;
-            paymasterParamas?: PaymasterParams;
+            paymasterParams?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<TransactionResponse> {
             const transferTx = await this._providerL2().getTransferTx({

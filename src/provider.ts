@@ -480,7 +480,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         try {
             return BigNumber.from(result);
         } catch (error) {
-            throw new Error(`bad result from backend (estimateGas): ${result}`);
+            throw new Error(`Bad result from backend (estimateGas): ${result}!`);
         }
     }
 
@@ -499,7 +499,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         try {
             return BigNumber.from(result);
         } catch (error) {
-            throw new Error(`bad result from backend (zks_estimateGasL1ToL2): ${result}`);
+            throw new Error(`Bad result from backend (zks_estimateGasL1ToL2): ${result}!`);
         }
     }
 
@@ -635,13 +635,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         from?: Address;
         to?: Address;
         bridgeAddress?: Address;
-        paymasterParamas?: PaymasterParams;
+        paymasterParams?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<ethers.providers.TransactionRequest> {
         const { ...tx } = transaction;
 
         if (tx.to == null && tx.from == null) {
-            throw new Error("withdrawal target address is undefined");
+            throw new Error("Withdrawal target address is undefined!");
         }
 
         tx.to ??= tx.from;
@@ -658,16 +658,16 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                 // To avoid users shooting themselves into the foot, we will always use the amount to withdraw
                 // as the value
 
-                throw new Error("The tx.value is not equal to the value withdrawn");
+                throw new Error("The tx.value is not equal to the value withdrawn!");
             }
 
             const ethL2Token = IEthTokenFactory.connect(L2_ETH_TOKEN_ADDRESS, this);
             const populatedTx = await ethL2Token.populateTransaction.withdraw(tx.to, tx.overrides);
-            if (tx.paymasterParamas) {
+            if (tx.paymasterParams) {
                 return {
                     ...populatedTx,
                     customData: {
-                        paymasterParams: tx.paymasterParamas,
+                        paymasterParams: tx.paymasterParams,
                     },
                 };
             }
@@ -694,11 +694,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             tx.amount,
             tx.overrides,
         );
-        if (tx.paymasterParamas) {
+        if (tx.paymasterParams) {
             return {
                 ...populatedTx,
                 customData: {
-                    paymasterParams: tx.paymasterParamas,
+                    paymasterParams: tx.paymasterParams,
                 },
             };
         }
@@ -711,7 +711,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         from?: Address;
         to?: Address;
         bridgeAddress?: Address;
-        paymasterParamas?: PaymasterParams;
+        paymasterParams?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<BigNumber> {
         const withdrawTx = await this.getWithdrawTx(transaction);
@@ -723,7 +723,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         amount: BigNumberish;
         from?: Address;
         token?: Address;
-        paymasterParamas?: PaymasterParams;
+        paymasterParams?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<ethers.providers.TransactionRequest> {
         const { ...tx } = transaction;
@@ -731,14 +731,14 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         tx.overrides.from ??= tx.from;
 
         if (tx.token == null || tx.token == ETH_ADDRESS) {
-            if (tx.paymasterParamas) {
+            if (tx.paymasterParams) {
                 return {
                     ...(await ethers.utils.resolveProperties(tx.overrides)),
                     type: EIP712_TX_TYPE,
                     to: tx.to,
                     value: tx.amount,
                     customData: {
-                        paymasterParams: tx.paymasterParamas,
+                        paymasterParams: tx.paymasterParams,
                     },
                 };
             }
@@ -751,11 +751,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         } else {
             const token = IERC20Factory.connect(tx.token, this);
             const populatedTx = await token.populateTransaction.transfer(tx.to, tx.amount, tx.overrides);
-            if (tx.paymasterParamas) {
+            if (tx.paymasterParams) {
                 return {
                     ...populatedTx,
                     customData: {
-                        paymasterParams: tx.paymasterParamas,
+                        paymasterParams: tx.paymasterParams,
                     },
                 };
             }
@@ -768,7 +768,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         amount: BigNumberish;
         from?: Address;
         token?: Address;
-        paymasterParamas?: PaymasterParams;
+        paymasterParams?: PaymasterParams;
         overrides?: ethers.CallOverrides;
     }): Promise<BigNumber> {
         const transferTx = await this.getTransferTx(transaction);
@@ -959,10 +959,10 @@ export class Web3Provider extends Provider {
 
     constructor(provider: ExternalProvider, network?: ethers.providers.Networkish) {
         if (provider == null) {
-            throw new Error("missing provider");
+            throw new Error("Missing provider!");
         }
         if (!provider.request) {
-            throw new Error("provider must implement eip-1193");
+            throw new Error("Provider must implement eip-1193!");
         }
 
         let path = provider.host || provider.path || (provider.isMetaMask ? "metamask" : "eip-1193:");
