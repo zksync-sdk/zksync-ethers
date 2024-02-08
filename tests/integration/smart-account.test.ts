@@ -83,31 +83,30 @@ describe.only("SmartAccount", async () => {
     });
 
     describe("#constructor()", () => {
-        it("`SmartWallet(address, PK, provider)` should return a `SmartWallet` with L2 provider", () => {
+        it("`SmartWallet(address, PK, provider)` should return a `SmartAccount` with provider", () => {
             const smartWallet = new SmartAccount(smartAccountAddress, PRIVATE_KEY, provider);
             expect(smartWallet.privateKeys).to.be.equal(PRIVATE_KEY);
             expect(smartWallet.provider).to.be.equal(provider);
             expect(smartWallet.address).to.be.equal(smartAccountAddress);
         });
-        it("`SmartWallet(address, privateKey, provider, signMethod)` should return a `Wallet` with L1 and L2 provider", async () => {
+        it("`SmartWallet(address, privateKey, provider, signMethod)` should return a `SmartAccount` with provider and custom sign ", async () => {
             // decided to remove ethProvider from constructor as it is not needed for SmartAccounts only EOA accounts
             const wallet = new SmartAccount(smartAccountAddress, PRIVATE_KEY, provider, dummySignMethod);
 
-            // expect(wallet.privateKeys).to.be.equal([PRIVATE_KEY]);
             expect(wallet.provider).to.be.equal(provider);
             expect(wallet.address).to.be.equal(smartAccountAddress);
             expect(wallet.customSigningMethod).to.be.equal(dummySignMethod);
         });
-        it("`SmartWallet(address, [PK, PK2], provider)` should return a `SmartWallet` with L2 provider", () => {
-            // TODO: not implemented yet
-            // const smartWallet = new SmartAccount(
-            //     multiAccountAddress,
-            //     [PRIVATE_KEY, multiAccountPK2],
-            //     provider,
-            // );
-            // expect(smartWallet.provider).to.be.equal(provider);
-            // expect(smartWallet.address).to.be.equal(ADDRESS);
-        });
+        // it("`SmartWallet(address, [PK, PK2], provider)` should return a `SmartAccount` with L2 provider", () => {
+        // TODO: not implemented yet
+        // const smartWallet = new SmartAccount(
+        //     multiAccountAddress,
+        //     [PRIVATE_KEY, multiAccountPK2],
+        //     provider,
+        // );
+        // expect(smartWallet.provider).to.be.equal(provider);
+        // expect(smartWallet.address).to.be.equal(ADDRESS);
+        // });
     });
     describe("class properties", () => {
         it('should have "address" property', () => {
