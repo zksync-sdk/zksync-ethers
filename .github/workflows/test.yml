@@ -23,6 +23,8 @@ jobs:
           node-version: "lts/*"
       - name: Install dependencies
         run: yarn install
+      - name: Build
+        run: yarn build
       - name: Run local-setup
         run: |
           git clone https://github.com/matter-labs/local-setup.git
