@@ -540,7 +540,7 @@ describe("Wallet", () => {
                 token: utils.ETH_ADDRESS,
                 to: await wallet.getAddress(),
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: 1,
@@ -620,7 +620,7 @@ describe("Wallet", () => {
                 token: l2DAI,
                 to: await wallet.getAddress(),
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: 1,
@@ -734,7 +734,7 @@ describe("Wallet", () => {
                 token: utils.ETH_ADDRESS,
                 to: RECEIVER,
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: 1,
@@ -805,7 +805,7 @@ describe("Wallet", () => {
                 token: l2DAI,
                 to: RECEIVER,
                 amount: amount,
-                paymasterParamas: utils.getPaymasterParams(PAYMASTER, {
+                paymasterParams: utils.getPaymasterParams(PAYMASTER, {
                     type: "ApprovalBased",
                     token: TOKEN,
                     minimalAllowance: 1,

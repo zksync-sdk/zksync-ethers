@@ -280,7 +280,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
             from?: Address;
             to?: Address;
             bridgeAddress?: Address;
-            paymasterParamas?: PaymasterParams;
+            paymasterParams?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<EthersTransactionRequest> {
             const { ...tx } = transaction;
@@ -311,11 +311,11 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
                     tx.to as Address,
                     tx.overrides,
                 );
-                if (tx.paymasterParamas) {
+                if (tx.paymasterParams) {
                     return {
                         ...populatedTx,
                         customData: {
-                            paymasterParams: tx.paymasterParamas,
+                            paymasterParams: tx.paymasterParams,
                         },
                     };
                 }
@@ -340,11 +340,11 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
                 tx.amount,
                 tx.overrides,
             );
-            if (tx.paymasterParamas) {
+            if (tx.paymasterParams) {
                 return {
                     ...populatedTx,
                     customData: {
-                        paymasterParams: tx.paymasterParamas,
+                        paymasterParams: tx.paymasterParams,
                     },
                 };
             }
@@ -357,7 +357,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
             from?: Address;
             to?: Address;
             bridgeAddress?: Address;
-            paymasterParamas?: PaymasterParams;
+            paymasterParams?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<bigint> {
             const withdrawTx = await this.getWithdrawTx(transaction);
@@ -369,7 +369,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
             amount: BigNumberish;
             from?: Address;
             token?: Address;
-            paymasterParamas?: PaymasterParams;
+            paymasterParams?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<EthersTransactionRequest> {
             const { ...tx } = transaction;
@@ -377,14 +377,14 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
             tx.overrides.from ??= tx.from;
 
             if (tx.token == null || tx.token == ETH_ADDRESS) {
-                if (tx.paymasterParamas) {
+                if (tx.paymasterParams) {
                     return {
                         ...tx.overrides,
                         type: EIP712_TX_TYPE,
                         to: tx.to,
                         value: tx.amount,
                         customData: {
-                            paymasterParams: tx.paymasterParamas,
+                            paymasterParams: tx.paymasterParams,
                         },
                     };
                 }
@@ -401,11 +401,11 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
                     tx.amount,
                     tx.overrides,
                 );
-                if (tx.paymasterParamas) {
+                if (tx.paymasterParams) {
                     return {
                         ...populatedTx,
                         customData: {
-                            paymasterParams: tx.paymasterParamas,
+                            paymasterParams: tx.paymasterParams,
                         },
                     };
                 }
@@ -418,7 +418,7 @@ export function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiPr
             amount: BigNumberish;
             from?: Address;
             token?: Address;
-            paymasterParamas?: PaymasterParams;
+            paymasterParams?: PaymasterParams;
             overrides?: ethers.Overrides;
         }): Promise<bigint> {
             const transferTx = await this.getTransferTx(transaction);
