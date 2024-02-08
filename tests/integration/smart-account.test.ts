@@ -25,18 +25,6 @@ describe.only("SmartAccount", async () => {
 
     let addresses;
 
-    const edcsaSigningMethod = async (tx: types.TransactionRequest) => {
-        // @ts-ignore
-        // TODO: can I use super here?
-        const signature = await eip712.sign(tx);
-        tx.customData = { customSignature: signature };
-        // return tx.serialized;
-        // @ts-ignore
-        const serializedTx = serializeEip712(tx);
-        console.log("serializedTx :>> ", serializedTx);
-        return serializedTx;
-        // return (0, serializeEip712)(tx);
-    };
     const dummySignMethod = async (
         tx: TransactionRequest,
         defaultSigner: ethers.Signer,

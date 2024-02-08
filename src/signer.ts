@@ -58,7 +58,6 @@ export class EIP712Signer {
     }
 
     async sign(transaction: TransactionRequest): Promise<Signature> {
-        console.log("transaction :>> ", transaction);
         return await this.ethSigner.signTypedData(
             await this.eip712Domain,
             eip712Types,

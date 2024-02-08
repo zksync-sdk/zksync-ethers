@@ -110,7 +110,6 @@ export class SmartAccount extends EIP712Signer implements Signer {
      *         many nodes do not honour this value and silently ignore it [default: ``"latest"``]
      */
     getNonce(blockTag?: BlockTag): Promise<number> {
-        console.log("in getNonce");
         return Promise.resolve(this.provider.getTransactionCount(this.address, blockTag));
     }
 
@@ -131,14 +130,14 @@ export class SmartAccount extends EIP712Signer implements Signer {
 
         // Resolve 'to' address if it's a Promise or in a non-string format
         const resolvedTo = tx.to ? getAddress(tx.to.toString()) : null;
-        const resolvedFrom = tx.from ? getAddress(tx.from.toString()) : null;
-
+        const resolvedFrom = this.address;
         // Ensure all properties conform to TransactionLike<string>
         const result: TransactionLike = {
             ...tx,
             // Make sure 'to' and 'from are string
             to: resolvedTo,
             from: resolvedFrom,
+            type: EIP712_TX_TYPE,
             // Convert/resolve other properties as necessary
         };
 
@@ -189,7 +188,6 @@ export class SmartAccount extends EIP712Signer implements Signer {
         pop.data ??= "0x";
         pop.customData = this._fillCustomData(transaction.customData ?? {});
         pop.gasPrice = await this.provider.getGasPrice();
-        console.log("populated tx :>> ", pop);
         return pop;
     }
 
@@ -214,7 +212,6 @@ export class SmartAccount extends EIP712Signer implements Signer {
     async estimateGas(tx: TransactionRequest): Promise<bigint> {
         const populatedTx = await this.populateCall(tx);
 
-        console.log("populatedTx in estimateGas :>> ", populatedTx);
         return await this.provider.estimateGas(populatedTx);
     }
 
@@ -249,7 +246,6 @@ export class SmartAccount extends EIP712Signer implements Signer {
      */
     async signTransaction(tx: TransactionRequest): Promise<string> {
         if (this.customSigningMethod) {
-            console.log("account has custom sign method");
             return this.customSigningMethod(tx, this.defaultSigner, this.privateKeys);
         } else {
             // default signing as in wallet.ts > signTransaction
@@ -266,13 +262,8 @@ export class SmartAccount extends EIP712Signer implements Signer {
      *  transaction to be valid have been popualted first.
      */
     async sendTransaction(transaction: TransactionRequest): Promise<TransactionResponse> {
-        // const populatedTx = await this.populateTransaction(tx);
-        // return await this.provider.broadcastTransaction(await this.signTransaction(populatedTx));
-        console.log("in sendTransaction");
         const from = await this.getAddress();
-        // if (from.toLowerCase() != address.toLowerCase()) {
-        //     throw new Error("Transaction `from` address mismatch");
-        // }
+
         const tx: TransactionLike = {
             type: transaction.type ?? EIP712_TX_TYPE,
             value: transaction.value ?? 0,
@@ -285,7 +276,6 @@ export class SmartAccount extends EIP712Signer implements Signer {
             customData: this._fillCustomData(transaction.customData ?? {}),
             from,
         };
-        console.log("tx in sendTransaction :>> ", tx);
         tx.customData ??= {};
         tx.customData.customSignature = await this.sign(tx);
 
