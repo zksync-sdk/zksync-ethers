@@ -1,7 +1,7 @@
 name: Validate
 on:
   pull_request:
-    branch: main
+    branches: main
     types: [ opened, reopened, synchronize ]
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Check the code format
-        run: yarn lint:check
+        run: yarn lint
   commits:
     name: Check commits
     runs-on: ubuntu-latest
