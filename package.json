@@ -1,62 +1,68 @@
 {
-    "name": "zksync-ethers",
-    "version": "6.3.0",
-    "main": "build/src/index.js",
-    "types": "build/src/index.d.ts",
-    "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
-    "files": [
-        "build/",
-        "abi/",
-        "src/",
-        "typechain/"
-    ],
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/zksync-sdk/zksync-ethers.git"
-    },
-    "bugs": {
-        "url": "https://github.com/zksync-sdk/zksync-ethers.git/issues"
-    },
-    "homepage": "https://github.com/zksync-sdk/zksync-ethers.git#readme",
-    "keywords": [
-        "zksync",
-        "web3",
-        "ethereum",
-        "layer2"
-    ],
-    "dependencies": {},
-    "devDependencies": {
-        "@typechain/ethers-v6": "^0.5.0",
-        "@types/chai": "^4.3.9",
-        "@types/mocha": "^10.0.1",
-        "@types/node": "^20.5.2",
-        "c8": "^8.0.1",
-        "chai": "^4.3.10",
-        "ethers": "^6.7.1",
-        "mocha": "^10.2.0",
-        "ncp": "^2.0.0",
-        "prettier": "3.0.3",
-        "ts-node": "^10.9.1",
-        "typechain": "^8.3.1",
-        "typescript": "^5.1.6"
-    },
-    "peerDependencies": {
-        "ethers": "^6.7.1"
-    },
-    "scripts": {
-        "test:prepare": "ts-node tests/setup.ts",
-        "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
-        "test:wait": "ts-node tests/wait.ts",
-        "test": "mocha -r ts-node/register tests/**/*.test.ts",
-        "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
-        "lint": "prettier . --write",
-        "lint:check": "prettier . --check",
-        "watch": "tsc --watch",
-        "types:fetch": "cd scripts && ./update-abi.sh && cd ../",
-        "types": "typechain --target ethers-v6 --out-dir typechain abi/*.json"
-    },
-    "publishConfig": {
-        "access": "public"
-    }
+  "name": "zksync-ethers",
+  "version": "6.3.0",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
+  "files": [
+    "build/",
+    "abi/",
+    "src/",
+    "typechain/"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zksync-sdk/zksync-ethers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zksync-sdk/zksync-ethers.git/issues"
+  },
+  "homepage": "https://github.com/zksync-sdk/zksync-ethers.git#readme",
+  "keywords": [
+    "zksync",
+    "web3",
+    "ethereum",
+    "layer2"
+  ],
+  "engines": {
+    "node": ">=18.9.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@typechain/ethers-v6": "^0.5.0",
+    "@types/chai": "^4.3.9",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.5.2",
+    "c8": "^8.0.1",
+    "chai": "^4.3.10",
+    "ethers": "^6.7.1",
+    "mocha": "^10.2.0",
+    "ncp": "^2.0.0",
+    "prettier": "3.0.3",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.3.1",
+    "typescript": "^5.1.6",
+    "gts": "^5.2.0"
+  },
+  "peerDependencies": {
+    "ethers": "^6.7.1"
+  },
+  "scripts": {
+    "test:prepare": "ts-node tests/setup.ts",
+    "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
+    "test:wait": "ts-node tests/wait.ts",
+    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
+    "lint": "gts lint",
+    "lint:fix": "gts fix",
+    "watch": "tsc --watch",
+    "types:fetch": "cd scripts && ./update-abi.sh && cd ../",
+    "types": "typechain --target ethers-v6 --out-dir typechain abi/*.json",
+    "clean": "gts clean",
+    "compile": "tsc"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
