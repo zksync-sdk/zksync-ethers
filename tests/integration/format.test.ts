@@ -73,7 +73,7 @@ describe("format", () => {
             try {
                 provider._wrapTransactionResponse({}, await provider.getNetwork());
             } catch (e) {
-                expect(e.message).to.include("invalid value for value.hash");
+                expect((e as Error).message).to.include("invalid value for value.hash");
             }
         });
     });

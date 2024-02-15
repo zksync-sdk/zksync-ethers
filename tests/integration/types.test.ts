@@ -10,7 +10,7 @@ describe("types", () => {
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
     describe("TransactionResponse", () => {
-        let tx: types.TransactionResponse = null;
+        let tx: types.TransactionResponse;
 
         before("setup", async function () {
             this.timeout(25_000);
@@ -45,7 +45,7 @@ describe("types", () => {
     });
 
     describe("TransactionReceipt", () => {
-        let receipt: types.TransactionReceipt = null;
+        let receipt: types.TransactionReceipt;
 
         before("setup", async function () {
             this.timeout(25_000);
@@ -81,7 +81,7 @@ describe("types", () => {
     });
 
     describe("Block", () => {
-        let block: types.Block = null;
+        let block: types.Block;
 
         before("setup", async function () {
             this.timeout(25_000);
@@ -107,7 +107,7 @@ describe("types", () => {
                 try {
                     await block.getPrefetchedTransaction(0);
                 } catch (e) {
-                    expect(e.message.startsWith("transactions were not prefetched with block request"))
+                    expect((e as Error).message.startsWith("transactions were not prefetched with block request"))
                         .to.be.true;
                 }
             });
@@ -122,7 +122,7 @@ describe("types", () => {
     });
 
     describe("Log", () => {
-        let log: types.Log = null;
+        let log: types.Log;
 
         before("setup", async function () {
             this.timeout(25_000);
@@ -139,7 +139,7 @@ describe("types", () => {
                     blockNumber: receipt.blockNumber,
                     transactionHash: receipt.hash,
                     transactionIndex: receipt.index,
-                    data: null,
+                    data: '0x',
                     address: utils.L2_ETH_TOKEN_ADDRESS,
                     index: 0,
                     removed: false,
@@ -180,8 +180,8 @@ describe("types", () => {
     });
 
     describe("Transaction", () => {
-        let eip712Tx: types.Transaction = null;
-        let eip1559Tx: types.Transaction = null;
+        let eip712Tx: types.Transaction;
+        let eip1559Tx: types.Transaction;
 
         before("setup", async function () {
             this.timeout(25_000);
