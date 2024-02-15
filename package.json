@@ -53,7 +53,7 @@
     "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
     "test:wait": "ts-node tests/wait.ts",
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "build": "yarn types && tsc --strict true && ncp ./abi ./build/abi",
+    "build": "yarn types && tsc && ncp ./abi ./build/abi",
     "lint": "gts lint",
     "lint:fix": "gts fix",
     "watch": "tsc --watch",
