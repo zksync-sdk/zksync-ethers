@@ -69,7 +69,7 @@ describe("EIP712Signer", () => {
             try {
                 EIP712Signer.getSignedDigest({});
             } catch (e) {
-                expect(e.message).to.be.equal("Transaction chainId isn't set!");
+                expect((e as Error).message).to.be.equal("Transaction chainId isn't set!");
             }
         });
     });

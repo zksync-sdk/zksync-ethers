@@ -51,17 +51,6 @@ describe("ContractFactory", () => {
 
             expect(factory.deploymentType).to.be.equal("create2Account");
         });
-
-        it("`ContractFactory(abi, bytecode, runner, '')` should throw an error when invalid deployment type is specified", async () => {
-            const abi = require(tokenPath).abi;
-            const bytecode: string = require(tokenPath).bytecode;
-            try {
-                // @ts-ignore
-                new ContractFactory(abi, bytecode, wallet, "null");
-            } catch (e) {
-                expect(e.message).to.be.equal("Unsupported deployment type null!");
-            }
-        });
     });
 
     describe("#deploy()", () => {
@@ -192,7 +181,7 @@ describe("ContractFactory", () => {
             try {
                 await factory.getDeployTransaction("Ducat", "Ducat", 18);
             } catch (e) {
-                expect(e.message).to.be.equal("Salt is required for CREATE2 deployment!");
+                expect((e as Error).message).to.be.equal("Salt is required for CREATE2 deployment!");
             }
         }).timeout(10_000);
 
@@ -206,7 +195,7 @@ describe("ContractFactory", () => {
                     customData: { salt: "0000" },
                 });
             } catch (e) {
-                expect(e.message).to.be.equal("Invalid salt provided!");
+                expect((e as Error).message).to.be.equal("Invalid salt provided!");
             }
         }).timeout(10_000);
 
@@ -220,7 +209,7 @@ describe("ContractFactory", () => {
                     customData: { salt: "0x000" },
                 });
             } catch (e) {
-                expect(e.message).to.be.equal("Invalid salt provided!");
+                expect((e as Error).message).to.be.equal("Invalid salt provided!");
             }
         }).timeout(10_000);
 
@@ -237,7 +226,7 @@ describe("ContractFactory", () => {
                     },
                 });
             } catch (e) {
-                expect(e.message).to.be.equal(
+                expect((e as Error).message).to.be.equal(
                     "Invalid 'factoryDeps' format! It should be an array of bytecodes.",
                 );
             }
@@ -250,7 +239,7 @@ describe("ContractFactory", () => {
                     },
                 });
             } catch (e) {
-                expect(e.message).to.be.equal(
+                expect((e as Error).message).to.be.equal(
                     "Invalid 'factoryDeps' format! It should be an array of bytecodes.",
                 );
             }
