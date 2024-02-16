@@ -273,7 +273,12 @@ export function JsonRpcApiProvider<
 
     async getDefaultBridgeAddresses() {
       if (!this.contractAddresses().erc20BridgeL1) {
-        const addresses = await this.send('zks_getBridgeContracts', []);
+        const addresses: {
+          l1Erc20DefaultBridge: string;
+          l2Erc20DefaultBridge: string;
+          l1WethBridge: string;
+          l2WethBridge: string;
+        } = await this.send('zks_getBridgeContracts', []);
         this.contractAddresses().erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
         this.contractAddresses().erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
         this.contractAddresses().wethBridgeL1 = addresses.l1WethBridge;
