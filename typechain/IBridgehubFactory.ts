@@ -71,44 +71,12 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_tokenBridge",
-        type: "address",
-      },
-    ],
-    name: "addTokenBridge",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint256",
         name: "_chainId",
         type: "uint256",
       },
     ],
     name: "baseToken",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-    ],
-    name: "baseTokenBridge",
     outputs: [
       {
         internalType: "address",
@@ -137,18 +105,13 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "address",
-        name: "_baseTokenBridge",
-        type: "address",
-      },
-      {
         internalType: "uint256",
         name: "_salt",
         type: "uint256",
       },
       {
         internalType: "address",
-        name: "_governor",
+        name: "_admin",
         type: "address",
       },
       {
@@ -450,11 +413,6 @@ const _abi = [
             type: "uint256",
           },
           {
-            internalType: "uint256",
-            name: "l1GasPriceConverted",
-            type: "uint256",
-          },
-          {
             internalType: "bytes[]",
             name: "factoryDeps",
             type: "bytes[]",
@@ -470,7 +428,7 @@ const _abi = [
         type: "tuple",
       },
     ],
-    name: "requestL2Transaction",
+    name: "requestL2TransactionDirect",
     outputs: [
       {
         internalType: "bytes32",
@@ -508,11 +466,6 @@ const _abi = [
           {
             internalType: "uint256",
             name: "l2GasPerPubdataByteLimit",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "l1GasPriceConverted",
             type: "uint256",
           },
           {
@@ -556,13 +509,26 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "_wethBridge",
+        name: "_sharedBridge",
         type: "address",
       },
     ],
-    name: "setWethBridge",
+    name: "setSharedBridge",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "sharedBridge",
+    outputs: [
+      {
+        internalType: "contract IL1SharedBridge",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -607,25 +573,6 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "_baseTokenBridge",
-        type: "address",
-      },
-    ],
-    name: "tokenBridgeIsRegistered",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
         name: "_baseToken",
         type: "address",
       },
@@ -636,19 +583,6 @@ const _abi = [
         internalType: "bool",
         name: "",
         type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "wethBridge",
-    outputs: [
-      {
-        internalType: "contract IL1Bridge",
-        name: "",
-        type: "address",
       },
     ],
     stateMutability: "view",

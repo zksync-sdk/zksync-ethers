@@ -25,24 +25,21 @@ interface IBridgehubInterface extends ethers.utils.Interface {
   functions: {
     "addStateTransitionManager(address)": FunctionFragment;
     "addToken(address)": FunctionFragment;
-    "addTokenBridge(address)": FunctionFragment;
     "baseToken(uint256)": FunctionFragment;
-    "baseTokenBridge(uint256)": FunctionFragment;
-    "createNewChain(uint256,address,address,address,uint256,address,bytes)": FunctionFragment;
+    "createNewChain(uint256,address,address,uint256,address,bytes)": FunctionFragment;
     "getStateTransition(uint256)": FunctionFragment;
     "l2TransactionBaseCost(uint256,uint256,uint256,uint256)": FunctionFragment;
     "proveL1ToL2TransactionStatus(uint256,bytes32,uint256,uint256,uint16,bytes32[],uint8)": FunctionFragment;
     "proveL2LogInclusion(uint256,uint256,uint256,tuple,bytes32[])": FunctionFragment;
     "proveL2MessageInclusion(uint256,uint256,uint256,tuple,bytes32[])": FunctionFragment;
     "removeStateTransitionManager(address)": FunctionFragment;
-    "requestL2Transaction(tuple)": FunctionFragment;
+    "requestL2TransactionDirect(tuple)": FunctionFragment;
     "requestL2TransactionTwoBridges(tuple)": FunctionFragment;
-    "setWethBridge(address)": FunctionFragment;
+    "setSharedBridge(address)": FunctionFragment;
+    "sharedBridge()": FunctionFragment;
     "stateTransitionManager(uint256)": FunctionFragment;
     "stateTransitionManagerIsRegistered(address)": FunctionFragment;
-    "tokenBridgeIsRegistered(address)": FunctionFragment;
     "tokenIsRegistered(address)": FunctionFragment;
-    "wethBridge()": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -51,28 +48,12 @@ interface IBridgehubInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "addToken", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "addTokenBridge",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "baseToken",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "baseTokenBridge",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "createNewChain",
-    values: [
-      BigNumberish,
-      string,
-      string,
-      string,
-      BigNumberish,
-      string,
-      BytesLike
-    ]
+    values: [BigNumberish, string, string, BigNumberish, string, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getStateTransition",
@@ -126,7 +107,7 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "requestL2Transaction",
+    functionFragment: "requestL2TransactionDirect",
     values: [
       {
         chainId: BigNumberish;
@@ -136,7 +117,6 @@ interface IBridgehubInterface extends ethers.utils.Interface {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       }
@@ -151,7 +131,6 @@ interface IBridgehubInterface extends ethers.utils.Interface {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -160,8 +139,12 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "setWethBridge",
+    functionFragment: "setSharedBridge",
     values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "sharedBridge",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "stateTransitionManager",
@@ -172,16 +155,8 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenBridgeIsRegistered",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "tokenIsRegistered",
     values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "wethBridge",
-    values?: undefined
   ): string;
 
   decodeFunctionResult(
@@ -189,15 +164,7 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "addToken", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "addTokenBridge",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "baseToken", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "baseTokenBridge",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "createNewChain",
     data: BytesLike
@@ -227,7 +194,7 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "requestL2Transaction",
+    functionFragment: "requestL2TransactionDirect",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -235,7 +202,11 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setWethBridge",
+    functionFragment: "setSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "sharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -247,14 +218,9 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "tokenBridgeIsRegistered",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "tokenIsRegistered",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "wethBridge", data: BytesLike): Result;
 
   events: {
     "NewChain(uint256,address,address)": EventFragment;
@@ -297,16 +263,6 @@ export class IBridgehub extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    addTokenBridge(
-      _tokenBridge: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "addTokenBridge(address)"(
-      _tokenBridge: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
     baseToken(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -321,38 +277,22 @@ export class IBridgehub extends Contract {
       0: string;
     }>;
 
-    baseTokenBridge(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
-
-    "baseTokenBridge(uint256)"(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
-
     createNewChain(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "createNewChain(uint256,address,address,address,uint256,address,bytes)"(
+    "createNewChain(uint256,address,address,uint256,address,bytes)"(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -493,7 +433,7 @@ export class IBridgehub extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    requestL2Transaction(
+    requestL2TransactionDirect(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -502,14 +442,13 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "requestL2Transaction(tuple)"(
+    "requestL2TransactionDirect(tuple)"(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -518,7 +457,6 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -532,7 +470,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -548,7 +485,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -557,15 +493,23 @@ export class IBridgehub extends Contract {
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    setWethBridge(
-      _wethBridge: string,
+    setSharedBridge(
+      _sharedBridge: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "setWethBridge(address)"(
-      _wethBridge: string,
+    "setSharedBridge(address)"(
+      _sharedBridge: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
+
+    sharedBridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "sharedBridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
 
     stateTransitionManager(
       _chainId: BigNumberish,
@@ -595,20 +539,6 @@ export class IBridgehub extends Contract {
       0: boolean;
     }>;
 
-    tokenBridgeIsRegistered(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: boolean;
-    }>;
-
-    "tokenBridgeIsRegistered(address)"(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: boolean;
-    }>;
-
     tokenIsRegistered(
       _baseToken: string,
       overrides?: CallOverrides
@@ -621,14 +551,6 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<{
       0: boolean;
-    }>;
-
-    wethBridge(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "wethBridge()"(overrides?: CallOverrides): Promise<{
-      0: string;
     }>;
   };
 
@@ -649,29 +571,9 @@ export class IBridgehub extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  addTokenBridge(
-    _tokenBridge: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "addTokenBridge(address)"(
-    _tokenBridge: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
   baseToken(_chainId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   "baseToken(uint256)"(
-    _chainId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  baseTokenBridge(
-    _chainId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  "baseTokenBridge(uint256)"(
     _chainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
@@ -680,20 +582,18 @@ export class IBridgehub extends Contract {
     _chainId: BigNumberish,
     _stateTransitionManager: string,
     _baseToken: string,
-    _baseTokenBridge: string,
     _salt: BigNumberish,
-    _governor: string,
+    _admin: string,
     _initData: BytesLike,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "createNewChain(uint256,address,address,address,uint256,address,bytes)"(
+  "createNewChain(uint256,address,address,uint256,address,bytes)"(
     _chainId: BigNumberish,
     _stateTransitionManager: string,
     _baseToken: string,
-    _baseTokenBridge: string,
     _salt: BigNumberish,
-    _governor: string,
+    _admin: string,
     _initData: BytesLike,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -814,7 +714,7 @@ export class IBridgehub extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  requestL2Transaction(
+  requestL2TransactionDirect(
     _request: {
       chainId: BigNumberish;
       mintValue: BigNumberish;
@@ -823,14 +723,13 @@ export class IBridgehub extends Contract {
       l2Calldata: BytesLike;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
-      l1GasPriceConverted: BigNumberish;
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "requestL2Transaction(tuple)"(
+  "requestL2TransactionDirect(tuple)"(
     _request: {
       chainId: BigNumberish;
       mintValue: BigNumberish;
@@ -839,7 +738,6 @@ export class IBridgehub extends Contract {
       l2Calldata: BytesLike;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
-      l1GasPriceConverted: BigNumberish;
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
@@ -853,7 +751,6 @@ export class IBridgehub extends Contract {
       l2Value: BigNumberish;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
-      l1GasPriceConverted: BigNumberish;
       refundRecipient: string;
       secondBridgeAddress: string;
       secondBridgeValue: BigNumberish;
@@ -869,7 +766,6 @@ export class IBridgehub extends Contract {
       l2Value: BigNumberish;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
-      l1GasPriceConverted: BigNumberish;
       refundRecipient: string;
       secondBridgeAddress: string;
       secondBridgeValue: BigNumberish;
@@ -878,15 +774,19 @@ export class IBridgehub extends Contract {
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  setWethBridge(
-    _wethBridge: string,
+  setSharedBridge(
+    _sharedBridge: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "setWethBridge(address)"(
-    _wethBridge: string,
+  "setSharedBridge(address)"(
+    _sharedBridge: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
+
+  sharedBridge(overrides?: CallOverrides): Promise<string>;
+
+  "sharedBridge()"(overrides?: CallOverrides): Promise<string>;
 
   stateTransitionManager(
     _chainId: BigNumberish,
@@ -908,16 +808,6 @@ export class IBridgehub extends Contract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  tokenBridgeIsRegistered(
-    _baseTokenBridge: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  "tokenBridgeIsRegistered(address)"(
-    _baseTokenBridge: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
   tokenIsRegistered(
     _baseToken: string,
     overrides?: CallOverrides
@@ -927,10 +817,6 @@ export class IBridgehub extends Contract {
     _baseToken: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
-
-  wethBridge(overrides?: CallOverrides): Promise<string>;
-
-  "wethBridge()"(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
     addStateTransitionManager(
@@ -950,16 +836,6 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    addTokenBridge(
-      _tokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "addTokenBridge(address)"(
-      _tokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     baseToken(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -970,34 +846,22 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    baseTokenBridge(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    "baseTokenBridge(uint256)"(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
     createNewChain(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "createNewChain(uint256,address,address,address,uint256,address,bytes)"(
+    "createNewChain(uint256,address,address,uint256,address,bytes)"(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1118,7 +982,7 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    requestL2Transaction(
+    requestL2TransactionDirect(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -1127,14 +991,13 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: CallOverrides
     ): Promise<string>;
 
-    "requestL2Transaction(tuple)"(
+    "requestL2TransactionDirect(tuple)"(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -1143,7 +1006,6 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1157,7 +1019,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1173,7 +1034,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1182,15 +1042,19 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    setWethBridge(
-      _wethBridge: string,
+    setSharedBridge(
+      _sharedBridge: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "setWethBridge(address)"(
-      _wethBridge: string,
+    "setSharedBridge(address)"(
+      _sharedBridge: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    sharedBridge(overrides?: CallOverrides): Promise<string>;
+
+    "sharedBridge()"(overrides?: CallOverrides): Promise<string>;
 
     stateTransitionManager(
       _chainId: BigNumberish,
@@ -1212,16 +1076,6 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    tokenBridgeIsRegistered(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    "tokenBridgeIsRegistered(address)"(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
     tokenIsRegistered(
       _baseToken: string,
       overrides?: CallOverrides
@@ -1231,10 +1085,6 @@ export class IBridgehub extends Contract {
       _baseToken: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    wethBridge(overrides?: CallOverrides): Promise<string>;
-
-    "wethBridge()"(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
@@ -1263,16 +1113,6 @@ export class IBridgehub extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    addTokenBridge(
-      _tokenBridge: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "addTokenBridge(address)"(
-      _tokenBridge: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
     baseToken(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -1283,34 +1123,22 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    baseTokenBridge(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "baseTokenBridge(uint256)"(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     createNewChain(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "createNewChain(uint256,address,address,address,uint256,address,bytes)"(
+    "createNewChain(uint256,address,address,uint256,address,bytes)"(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -1431,7 +1259,7 @@ export class IBridgehub extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    requestL2Transaction(
+    requestL2TransactionDirect(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -1440,14 +1268,13 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "requestL2Transaction(tuple)"(
+    "requestL2TransactionDirect(tuple)"(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -1456,7 +1283,6 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1470,7 +1296,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1486,7 +1311,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1495,15 +1319,19 @@ export class IBridgehub extends Contract {
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    setWethBridge(
-      _wethBridge: string,
+    setSharedBridge(
+      _sharedBridge: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "setWethBridge(address)"(
-      _wethBridge: string,
+    "setSharedBridge(address)"(
+      _sharedBridge: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
+
+    sharedBridge(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "sharedBridge()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     stateTransitionManager(
       _chainId: BigNumberish,
@@ -1525,16 +1353,6 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    tokenBridgeIsRegistered(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "tokenBridgeIsRegistered(address)"(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     tokenIsRegistered(
       _baseToken: string,
       overrides?: CallOverrides
@@ -1544,10 +1362,6 @@ export class IBridgehub extends Contract {
       _baseToken: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    wethBridge(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "wethBridge()"(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -1571,16 +1385,6 @@ export class IBridgehub extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    addTokenBridge(
-      _tokenBridge: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "addTokenBridge(address)"(
-      _tokenBridge: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
     baseToken(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -1591,34 +1395,22 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    baseTokenBridge(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "baseTokenBridge(uint256)"(
-      _chainId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     createNewChain(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "createNewChain(uint256,address,address,address,uint256,address,bytes)"(
+    "createNewChain(uint256,address,address,uint256,address,bytes)"(
       _chainId: BigNumberish,
       _stateTransitionManager: string,
       _baseToken: string,
-      _baseTokenBridge: string,
       _salt: BigNumberish,
-      _governor: string,
+      _admin: string,
       _initData: BytesLike,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -1739,7 +1531,7 @@ export class IBridgehub extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    requestL2Transaction(
+    requestL2TransactionDirect(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -1748,14 +1540,13 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "requestL2Transaction(tuple)"(
+    "requestL2TransactionDirect(tuple)"(
       _request: {
         chainId: BigNumberish;
         mintValue: BigNumberish;
@@ -1764,7 +1555,6 @@ export class IBridgehub extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -1778,7 +1568,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1794,7 +1583,6 @@ export class IBridgehub extends Contract {
         l2Value: BigNumberish;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         refundRecipient: string;
         secondBridgeAddress: string;
         secondBridgeValue: BigNumberish;
@@ -1803,15 +1591,19 @@ export class IBridgehub extends Contract {
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    setWethBridge(
-      _wethBridge: string,
+    setSharedBridge(
+      _sharedBridge: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "setWethBridge(address)"(
-      _wethBridge: string,
+    "setSharedBridge(address)"(
+      _sharedBridge: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
+
+    sharedBridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "sharedBridge()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     stateTransitionManager(
       _chainId: BigNumberish,
@@ -1833,16 +1625,6 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    tokenBridgeIsRegistered(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "tokenBridgeIsRegistered(address)"(
-      _baseTokenBridge: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     tokenIsRegistered(
       _baseToken: string,
       overrides?: CallOverrides
@@ -1852,9 +1634,5 @@ export class IBridgehub extends Contract {
       _baseToken: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    wethBridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "wethBridge()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

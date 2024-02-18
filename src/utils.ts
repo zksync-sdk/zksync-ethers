@@ -562,23 +562,12 @@ export async function estimateDefaultBridgeDepositL2Gas(
     } else {
         let value, l1BridgeAddress, l2BridgeAddress, bridgeData;
         const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
-        const l1WethBridge = Il1BridgeFactory.connect(bridgeAddresses.wethL1, providerL1);
-        let l2WethToken = ethers.constants.AddressZero;
-        try {
-            l2WethToken = await l1WethBridge.l2TokenAddress(token);
-        } catch (e) {}
 
-        if (l2WethToken != ethers.constants.AddressZero) {
-            value = amount;
-            l1BridgeAddress = bridgeAddresses.wethL1;
-            l2BridgeAddress = bridgeAddresses.wethL2;
-            bridgeData = "0x";
-        } else {
-            value = 0;
-            l1BridgeAddress = bridgeAddresses.erc20L1;
-            l2BridgeAddress = bridgeAddresses.erc20L2;
-            bridgeData = await getERC20DefaultBridgeData(token, providerL1);
-        }
+        value = 0;
+        l1BridgeAddress = bridgeAddresses.sharedL1;
+        l2BridgeAddress = bridgeAddresses.sharedL2;
+        bridgeData = await getERC20DefaultBridgeData(token, providerL1);
+        
 
         return await estimateCustomBridgeDepositL2Gas(
             providerL2,

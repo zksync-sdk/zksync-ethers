@@ -50,9 +50,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         bridgehubContract?: Address;
         mainContract?: Address;
         erc20BridgeL1?: Address;
-        erc20BridgeL2?: Address;
-        wethBridgeL1?: Address;
-        wethBridgeL2?: Address;
+        sharedBridgeL1?: Address;
+        sharedBridgeL2?: Address;
     };
 
     // NOTE: this is almost a complete copy-paste of the parent poll method
@@ -396,16 +395,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = Il2BridgeFactory.connect(bridgeAddresses.wethL2, this);
-        try {
-            const l2WethToken = await l2WethBridge.l2TokenAddress(token);
-            // If the token is Wrapped Ether, return its L2 token address
-            if (l2WethToken != ethers.constants.AddressZero) {
-                return l2WethToken;
-            }
-        } catch (e) {}
-        const l2Erc20Bridge = Il2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
-        return await l2Erc20Bridge.l2TokenAddress(token);
+        const l2SharedBridge = Il2BridgeFactory.connect(bridgeAddresses.sharedL2, this);
+        return await l2SharedBridge.l2TokenAddress(token);
     }
 
     async l1TokenAddress(token: Address) {
@@ -414,16 +405,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = Il2BridgeFactory.connect(bridgeAddresses.wethL2, this);
-        try {
-            const l1WethToken = await l2WethBridge.l1TokenAddress(token);
-            // If the token is Wrapped Ether, return its L1 token address
-            if (l1WethToken != ethers.constants.AddressZero) {
-                return l1WethToken;
-            }
-        } catch (e) {}
-        const erc20Bridge = Il2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
-        return await erc20Bridge.l1TokenAddress(token);
+
+        const sharedBridge = Il2BridgeFactory.connect(bridgeAddresses.sharedL2, this);
+        return await sharedBridge.l1TokenAddress(token);
     }
 
     // This function is used when formatting requests for
@@ -578,15 +562,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         if (!this.contractAddresses.erc20BridgeL1) {
             let addresses = await this.send("zks_getBridgeContracts", []);
             this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
-            this.contractAddresses.erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
-            this.contractAddresses.wethBridgeL1 = addresses.l1WethBridge;
-            this.contractAddresses.wethBridgeL2 = addresses.l2WethBridge;
+            this.contractAddresses.sharedBridgeL1 = addresses.l1SharedBridge;
+            this.contractAddresses.sharedBridgeL2 = addresses.l2SharedBridge;
         }
         return {
             erc20L1: this.contractAddresses.erc20BridgeL1,
-            erc20L2: this.contractAddresses.erc20BridgeL2,
-            wethL1: this.contractAddresses.wethBridgeL1,
-            wethL2: this.contractAddresses.wethBridgeL2,
+            sharedL1: this.contractAddresses.sharedBridgeL1,
+            sharedL2: this.contractAddresses.sharedBridgeL2,
         };
     }
 
@@ -669,15 +651,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
         if (tx.bridgeAddress == null) {
             const bridgeAddresses = await this.getDefaultBridgeAddresses();
-            const l2WethBridge = Il2BridgeFactory.connect(bridgeAddresses.wethL2, this);
-            let l1WethToken = ethers.constants.AddressZero;
-            try {
-                l1WethToken = await l2WethBridge.l1TokenAddress(tx.token);
-            } catch (e) {}
-            tx.bridgeAddress =
-                l1WethToken != ethers.constants.AddressZero
-                    ? bridgeAddresses.wethL2
-                    : bridgeAddresses.erc20L2;
+            tx.bridgeAddress = bridgeAddresses.sharedL2;
         }
 
         const bridge = Il2BridgeFactory.connect(tx.bridgeAddress!, this);

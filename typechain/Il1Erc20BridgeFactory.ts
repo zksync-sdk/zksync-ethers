@@ -18,72 +18,15 @@ export class Il1Erc20BridgeFactory {
 
 const _abi = [
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
-        internalType: "uint256",
-        name: "chainId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "txDataHash",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "l2DepositTxHash",
-        type: "bytes32",
+        internalType: "contract IL1SharedBridge",
+        name: "_sharedBridge",
+        type: "address",
       },
     ],
-    name: "BridgehubDepositFinalized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "chainId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "txDataHash",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "l1Token",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "BridgehubDepositInitiatedSharedBridge",
-    type: "event",
+    stateMutability: "nonpayable",
+    type: "constructor",
   },
   {
     anonymous: false,
@@ -108,37 +51,6 @@ const _abi = [
       },
     ],
     name: "ClaimedFailedDeposit",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "chainId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "l1Token",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "ClaimedFailedDepositSharedBridge",
     type: "event",
   },
   {
@@ -183,49 +95,6 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
-        name: "chainId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "l2DepositTxHash",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "l1Token",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "DepositInitiatedSharedBridge",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
         internalType: "address",
         name: "to",
         type: "address",
@@ -247,404 +116,146 @@ const _abi = [
     type: "event",
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
-        internalType: "uint256",
-        name: "chainId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
         internalType: "address",
-        name: "to",
+        name: "_depositSender",
         type: "address",
       },
       {
-        indexed: true,
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "_l2TxHash",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2BatchNumber",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2MessageIndex",
+        type: "uint256",
+      },
+      {
+        internalType: "uint16",
+        name: "_l2TxNumberInBatch",
+        type: "uint16",
+      },
+      {
+        internalType: "bytes32[]",
+        name: "_merkleProof",
+        type: "bytes32[]",
+      },
+    ],
+    name: "claimFailedDeposit",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasLimit",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasPerPubdataByte",
+        type: "uint256",
+      },
+    ],
+    name: "deposit",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "l2TxHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasLimit",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasPerPubdataByte",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_refundRecipient",
+        type: "address",
+      },
+    ],
+    name: "deposit",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "l2TxHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
         internalType: "address",
         name: "l1Token",
         type: "address",
       },
       {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "WithdrawalFinalizedSharedBridge",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "bridgehub",
-    outputs: [
-      {
-        internalType: "contract IBridgehub",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
         internalType: "bytes32",
-        name: "_txDataHash",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "_txHash",
-        type: "bytes32",
-      },
-    ],
-    name: "bridgehubConfirmL2Transaction",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_prevMsgSender",
-        type: "address",
-      },
-      {
-        internalType: "bytes",
-        name: "_data",
-        type: "bytes",
-      },
-    ],
-    name: "bridgehubDeposit",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "magicValue",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "l2Contract",
-            type: "address",
-          },
-          {
-            internalType: "bytes",
-            name: "l2Calldata",
-            type: "bytes",
-          },
-          {
-            internalType: "bytes[]",
-            name: "factoryDeps",
-            type: "bytes[]",
-          },
-          {
-            internalType: "bytes32",
-            name: "txDataHash",
-            type: "bytes32",
-          },
-        ],
-        internalType: "struct L2TransactionRequestTwoBridgesInner",
-        name: "request",
-        type: "tuple",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_prevMsgSender",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-    ],
-    name: "bridgehubDepositBaseToken",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_depositSender",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "bytes32",
-        name: "_l2TxHash",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2BatchNumber",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2MessageIndex",
-        type: "uint256",
-      },
-      {
-        internalType: "uint16",
-        name: "_l2TxNumberInBatch",
-        type: "uint16",
-      },
-      {
-        internalType: "bytes32[]",
-        name: "_merkleProof",
-        type: "bytes32[]",
-      },
-    ],
-    name: "claimFailedDeposit",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_depositSender",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "_l2TxHash",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2BatchNumber",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2MessageIndex",
-        type: "uint256",
-      },
-      {
-        internalType: "uint16",
-        name: "_l2TxNumberInBatch",
-        type: "uint16",
-      },
-      {
-        internalType: "bytes32[]",
-        name: "_merkleProof",
-        type: "bytes32[]",
-      },
-    ],
-    name: "claimFailedDeposit",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_l2Receiver",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_mintValue",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2TxGasLimit",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2TxGasPerPubdataByte",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_refundRecipient",
-        type: "address",
-      },
-    ],
-    name: "deposit",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "txHash",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_l2Receiver",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2TxGasLimit",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2TxGasPerPubdataByte",
-        type: "uint256",
-      },
-    ],
-    name: "deposit",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "txHash",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_l2Receiver",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2TxGasLimit",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2TxGasPerPubdataByte",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_refundRecipient",
-        type: "address",
-      },
-    ],
-    name: "deposit",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "txHash",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_account",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "bytes32",
-        name: "_depositL2TxHash",
+        name: "depositL2TxHash",
         type: "bytes32",
       },
     ],
@@ -656,40 +267,11 @@ const _abi = [
         type: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "_l2TxHash",
-        type: "bytes32",
-      },
-    ],
-    name: "depositHappened",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
       {
         internalType: "uint256",
         name: "_l2BatchNumber",
@@ -722,28 +304,30 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "initialize",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
-        name: "_chainId",
+        name: "l2BatchNumber",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "_l2BatchNumber",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2MessageIndex",
+        name: "l2ToL1MessageNumber",
         type: "uint256",
       },
     ],
-    name: "isWithdrawalFinalizedShared",
+    name: "isWithdrawalFinalized",
     outputs: [
       {
         internalType: "bool",
-        name: "",
+        name: "isFinalized",
         type: "bool",
       },
     ],
@@ -753,25 +337,6 @@ const _abi = [
   {
     inputs: [],
     name: "l2Bridge",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-    ],
-    name: "l2BridgeAddress",
     outputs: [
       {
         internalType: "address",
@@ -802,30 +367,6 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-    ],
-    name: "l2TokenAddressSharedBridge",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [],
     name: "l2TokenBeacon",
     outputs: [
@@ -839,17 +380,24 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-    ],
-    name: "l2TokenBeaconAddress",
+    inputs: [],
+    name: "l2TokenProxyBytecodeHash",
     outputs: [
       {
-        internalType: "address",
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "sharedBridge",
+    outputs: [
+      {
+        internalType: "contract IL1SharedBridge",
         name: "",
         type: "address",
       },
