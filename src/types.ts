@@ -15,12 +15,13 @@ import {
   eip712TxHash,
 } from './utils';
 
-// 0x-prefixed, hex encoded, ethereum account address
+/** 0x-prefixed, hex encoded, ethereum account address. */
 export type Address = string;
-// 0x-prefixed, hex encoded, ECDSA signature.
+
+/** 0x-prefixed, hex encoded, ECDSA signature. */
 export type Signature = string;
 
-// Ethereum network
+/** Ethereum network. */
 export enum Network {
   Mainnet = 1,
   Ropsten = 3,
@@ -30,36 +31,59 @@ export enum Network {
   Localhost = 9,
 }
 
+/** Enumerated list of priority queue types. */
 export enum PriorityQueueType {
   Deque = 0,
   HeapBuffer = 1,
   Heap = 2,
 }
 
+/** Enumerated list of priority operation tree types. */
 export enum PriorityOpTree {
   Full = 0,
   Rollup = 1,
 }
 
+/** Enumerated list of transaction status types. */
 export enum TransactionStatus {
+  /** Transaction not found. */
   NotFound = 'not-found',
+  /** Transaction is processing. */
   Processing = 'processing',
+  /** Transaction has been committed. */
   Committed = 'committed',
+  /** Transaction has been finalized. */
   Finalized = 'finalized',
 }
 
+/** Type defining a paymaster by its address and the bytestream input. */
 export type PaymasterParams = {
+  /** The address of the paymaster. */
   paymaster: Address;
+  /** The bytestream input for the paymaster. */
   paymasterInput: BytesLike;
 };
 
+/** Contains EIP712 transaction metadata. */
 export type Eip712Meta = {
+  /** The maximum amount of gas the user is willing to pay for a single byte of pubdata. */
   gasPerPubdata?: BigNumberish;
+  /** An array of bytes containing the bytecode of the contract being deployed and any related contracts it can deploy. */
   factoryDeps?: BytesLike[];
+  /** Custom signature used for cases where the signer's account is not an EOA. */
   customSignature?: BytesLike;
+  /** Parameters for configuring the custom paymaster for the transaction. */
   paymasterParams?: PaymasterParams;
 };
 
+/**
+ * Specifies a specific block. This can be represented by:
+ * - A numeric value (number, bigint, or hexadecimal string) representing the block height, where the genesis block is block 0.
+ *   A negative value indicates the block number should be deducted from the most recent block.
+ * - A block hash as a string, specifying a specific block by its block hash.
+ *   This allows potentially orphaned blocks to be specified without ambiguity, but many backends do not support this for some operations.
+ * - Constants representing special blocks such as 'committed', 'finalized', 'latest', 'earliest', or 'pending'.
+ */
 export type BlockTag =
   | BigNumberish
   | string // block hash
@@ -69,12 +93,14 @@ export type BlockTag =
   | 'earliest'
   | 'pending';
 
+/** Pipe-delimited choice of deployment types. */
 export type DeploymentType =
   | 'create'
   | 'createAccount'
   | 'create2'
   | 'create2Account';
 
+/** Bridged token. */
 export interface Token {
   l1Address: Address;
   l2Address: Address;
@@ -83,21 +109,33 @@ export interface Token {
   decimals: number;
 }
 
+/** Represents the transaction fee parameters. */
 export interface Fee {
-  readonly gasLimit: bigint;
-  readonly gasPerPubdataLimit: bigint;
-  readonly maxPriorityFeePerGas: bigint;
-  readonly maxFeePerGas: bigint;
+  /** The maximum amount of gas allowed for the transaction. */
+  gasLimit: bigint;
+  /** The maximum amount of gas the user is willing to pay for a single byte of pubdata. */
+  gasPerPubdataLimit: bigint;
+  /** The EIP1559 tip per gas. */
+  maxPriorityFeePerGas: bigint;
+  /** The EIP1559 fee cap per gas. */
+  maxFeePerGas: bigint;
 }
 
+/** Represents a message proof. */
 export interface MessageProof {
   id: number;
   proof: string[];
   root: string;
 }
 
+/**
+ * A `TransactionResponse` is an extension of {@link ethers.TransactionResponse} with additional features for
+ * interacting with zkSync Era.
+ */
 export class TransactionResponse extends ethers.TransactionResponse {
+  /** The batch number on the L1 network. */
   readonly l1BatchNumber: null | number;
+  /** The transaction index within the batch on the L1 network. */
   readonly l1BatchTxIndex: null | number;
 
   constructor(params: any, provider: ethers.Provider) {
@@ -106,6 +144,15 @@ export class TransactionResponse extends ethers.TransactionResponse {
     this.l1BatchTxIndex = params.l1BatchTxIndex;
   }
 
+  /**
+   * Waits for this transaction to be mined and have a specified number of confirmation blocks.
+   * Resolves once the transaction has `confirmations` blocks including it.
+   * If `confirmations` is 0 and the transaction has not been mined, it resolves to `null`.
+   * Otherwise, it waits until enough confirmations have completed.
+   *
+   * @param confirmations The number of confirmation blocks. Defaults to 1.
+   * @returns A promise that resolves to the transaction receipt.
+   */
   override async wait(confirmations?: number): Promise<TransactionReceipt> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -132,6 +179,7 @@ export class TransactionResponse extends ethers.TransactionResponse {
     return (await super.getBlock()) as Block;
   }
 
+  /** Waits for transaction to be finalized. */
   async waitFinalize(): Promise<TransactionReceipt> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -160,10 +208,18 @@ export class TransactionResponse extends ethers.TransactionResponse {
   }
 }
 
+/**
+ * A `TransactionReceipt` is an extension of {@link ethers.TransactionReceipt} with additional features for
+ * interacting with zkSync Era.
+ */
 export class TransactionReceipt extends ethers.TransactionReceipt {
+  /** The batch number on the L1 network. */
   readonly l1BatchNumber: null | number;
+  /** The transaction index within the batch on the L1 network. */
   readonly l1BatchTxIndex: null | number;
+  /** The logs of L2 to L1 messages. */
   readonly l2ToL1Logs: L2ToL1Log[];
+  /** All logs included in the transaction receipt. */
   readonly _logs: ReadonlyArray<Log>;
 
   constructor(params: any, provider: ethers.Provider) {
@@ -201,8 +257,11 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
   }
 }
 
+/** A `Block` is an extension of {@link ethers.Block} with additional features for interacting with zkSync Era. */
 export class Block extends ethers.Block {
+  /** The batch number on L1. */
   readonly l1BatchNumber: null | number;
+  /** The timestamp of the batch on L1. */
   readonly l1BatchTimestamp: null | number;
 
   constructor(params: any, provider: ethers.Provider) {
@@ -231,11 +290,15 @@ export class Block extends ethers.Block {
   }
 }
 
+/** A `LogParams` is an extension of {@link ethers.LogParams} with additional features for interacting with zkSync Era. */
 export interface LogParams extends ethers.LogParams {
+  /** The batch number on L1. */
   readonly l1BatchNumber: null | number;
 }
 
+/** A `Log` is an extension of {@link ethers.Log} with additional features for interacting with zkSync Era. */
 export class Log extends ethers.Log {
+  /** The batch number on L1. */
   readonly l1BatchNumber: null | number;
 
   constructor(params: LogParams, provider: ethers.Provider) {
@@ -264,11 +327,21 @@ export class Log extends ethers.Log {
   }
 }
 
+/**
+ * A `TransactionLike` is an extension of {@link ethers.TransactionLike} with additional features for interacting
+ * with zkSync Era.
+ */
 export interface TransactionLike extends ethers.TransactionLike {
+  /** The custom data for EIP712 transaction metadata. */
   customData?: null | Eip712Meta;
 }
 
+/**
+ * A `Transaction` is an extension of {@link ethers.Transaction} with additional features for interacting
+ * with zkSync Era.
+ */
 export class Transaction extends ethers.Transaction {
+  /** The custom data for EIP712 transaction metadata. */
   customData?: null | Eip712Meta;
   // super.#type is private and there is no way to override which enforced to
   // introduce following variable
@@ -404,6 +477,9 @@ export class Transaction extends ethers.Transaction {
   }
 }
 
+/**
+ * Represents a L2 to L1 transaction log.
+ */
 export interface L2ToL1Log {
   blockNumber: number;
   blockHash: string;
@@ -418,59 +494,119 @@ export interface L2ToL1Log {
   logIndex: number;
 }
 
+/**
+ * A `TransactionRequest` is an extension of {@link ethers.TransactionRequest} with additional features for interacting
+ * with zkSync Era.
+ */
 export interface TransactionRequest extends EthersTransactionRequest {
+  /** The custom data for EIP712 transaction metadata. */
   customData?: null | Eip712Meta;
 }
 
+/**
+ * Interface representation of priority op response that extends {@link ethers.TransactionResponse} and adds a function
+ * that waits to commit a L1 transaction, including when given on optional confirmation number.
+ */
 export interface PriorityOpResponse extends TransactionResponse {
+  /**
+   * Waits for the L1 transaction to be committed, including waiting for the specified number of confirmations.
+   * @param confirmation The number of confirmations to wait for. Defaults to 1.
+   * @returns A promise that resolves to the transaction receipt once committed.
+   */
   waitL1Commit(confirmation?: number): Promise<ethers.TransactionReceipt>;
 }
 
+/** A map containing accounts and their balances. */
 export type BalancesMap = {[key: string]: bigint};
 
+/** Represents deployment information. */
 export interface DeploymentInfo {
+  /** The account responsible for deployment. */
   sender: Address;
+  /** The hash of the contract/account bytecode. */
   bytecodeHash: string;
+  /** The deployed address of the contract/address. */
   deployedAddress: Address;
 }
 
+/**
+ * Represents the input data structure for an approval-based paymaster.
+ */
 export interface ApprovalBasedPaymasterInput {
+  /** The type of the paymaster input. */
   type: 'ApprovalBased';
+  /** The address of the token to be approved. */
   token: Address;
+  /** The minimum allowance required for the token approval. */
   minimalAllowance: BigNumberish;
+  /** The additional input data. */
   innerInput: BytesLike;
 }
 
+/**
+ * Represents the input data structure for a general paymaster.
+ */
 export interface GeneralPaymasterInput {
+  /** The type of the paymaster input. */
   type: 'General';
+  /** The additional input data. */
   innerInput: BytesLike;
 }
 
+/**
+ * Represents an Ethereum signature consisting of the components `v`, `r`, and `s`.
+ */
 export interface EthereumSignature {
+  /** The recovery id. */
   v: number;
+  /** The "r" value of the signature. */
   r: BytesLike;
+  /** The "s" value of the signature. */
   s: BytesLike;
 }
 
+/**
+ * Represents the input data structure for a paymaster.
+ * It can be either approval-based or general.
+ */
 export type PaymasterInput =
   | ApprovalBasedPaymasterInput
   | GeneralPaymasterInput;
 
+/** Enumerated list of account abstraction versions. */
 export enum AccountAbstractionVersion {
+  /** Used for contracts that are not accounts */
   None = 0,
+  /** Used for contracts that are accounts */
   Version1 = 1,
 }
 
+/**
+ * Enumerated list of account nonce ordering formats.
+ */
 export enum AccountNonceOrdering {
+  /**
+   * Nonces should be ordered in the same way as in externally owned accounts (EOAs).
+   * This means, for instance, that the operator will always wait for a transaction with nonce `X`
+   * before processing a transaction with nonce `X+1`.
+   */
   Sequential = 0,
+  /** Nonces can be ordered in arbitrary order. */
   Arbitrary = 1,
 }
 
+/**
+ * Interface representing contract account information containing details on the supported account abstraction version
+ * and nonce ordering format.
+ */
 export interface ContractAccountInfo {
+  /** The supported account abstraction version. */
   supportedAAVersion: AccountAbstractionVersion;
+  /** The nonce ordering format. */
   nonceOrdering: AccountNonceOrdering;
 }
 
+/** Contains batch information. */
 export interface BatchDetails {
   number: number;
   timestamp: number;
@@ -488,6 +624,7 @@ export interface BatchDetails {
   l2FairGasPrice: number;
 }
 
+/** Contains block information. */
 export interface BlockDetails {
   number: number;
   timestamp: number;
@@ -504,6 +641,7 @@ export interface BlockDetails {
   executedAt?: Date;
 }
 
+/** Contains transaction details information. */
 export interface TransactionDetails {
   isL1Originated: boolean;
   status: string;
@@ -515,15 +653,23 @@ export interface TransactionDetails {
   ethExecuteTxHash?: string;
 }
 
+/** Represents the full deposit fee containing fees for both L1 and L2 transactions. */
 export interface FullDepositFee {
+  /** The maximum fee per gas for L1 transaction. */
   maxFeePerGas?: BigInt;
+  /** The maximum priority fee per gas for L1 transaction. */
   maxPriorityFeePerGas?: BigInt;
+  /** The gas price for L2 transaction. */
   gasPrice?: BigInt;
+  /** The base cost of the deposit transaction on L2. */
   baseCost: BigInt;
+  /** The gas limit for L1 transaction. */
   l1GasLimit: BigInt;
+  /** The gas limit for L2 transaction. */
   l2GasLimit: BigInt;
 }
 
+/** Represents a raw block transaction. */
 export interface RawBlockTransaction {
   common_data: {
     L2: {
@@ -557,6 +703,7 @@ export interface RawBlockTransaction {
   raw_bytes: string;
 }
 
+/** Contains parameters for finalizing the withdrawal transaction. */
 export interface FinalizeWithdrawalParams {
   l1BatchNumber: number | null;
   l2MessageIndex: number;
@@ -566,6 +713,7 @@ export interface FinalizeWithdrawalParams {
   proof: string[];
 }
 
+/** Represents storage proof */
 export interface StorageProof {
   address: string;
   storageProof: {
