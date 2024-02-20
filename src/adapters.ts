@@ -295,17 +295,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const sharedBridge = await bridgehub.sharedBridge();
             const bridgeContracts = await this.getL1BridgeContracts();
             const { tx, mintValue } =
                 await this._getDepositNonBaseTokenToNonETHBasedChainTx(transaction);
 
             if (transaction.approveBaseERC20) {
                 // Only request the allowance if the current one is not enough.
-                const allowance = await this.getAllowanceL1(baseTokenAddress, sharedBridge);
+                const allowance = await this.getAllowanceL1(baseTokenAddress, bridgeContracts.shared.address);
                 if (allowance.lt(mintValue)) {
                     const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
-                        bridgeAddress: sharedBridge,
+                        bridgeAddress: bridgeContracts.shared.address,
                         ...transaction.approveBaseOverrides,
                     });
                     await approveTx.wait();
@@ -313,11 +312,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             }
 
             if (transaction.approveERC20) {
-                const proposedBridge =
-                    bridgeContracts.shared.address;
                 const bridgeAddress = transaction.bridgeAddress
                     ? transaction.bridgeAddress
-                    : proposedBridge;
+                    : bridgeContracts.shared.address;
 
                 // Only request the allowance if the current one is not enough.
                 const allowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
