@@ -40,7 +40,6 @@ import {
     REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
     scaleGasLimit,
     undoL1ToL2Alias,
-    ZKSYNC_MAIN_ABI,
 } from "./utils";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -132,12 +131,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 return ETH_ADDRESS;
             }
 
-            await this._providerL2().getDefaultBridgeAddresses();
-            const erc20Bridge = Il1Erc20BridgeFactory.connect(
-                (await this._providerL2().getDefaultBridgeAddresses()).sharedL1,
+            const bridge = Il1Erc20BridgeFactory.connect(
+                (await this._providerL2().getDefaultBridgeAddresses()).erc20L1, // TODO CHANGE THIS TO SHARED WHEN IT'S FIEXED
                 this._signerL1(),
             );
-            return await erc20Bridge.l2TokenAddress(token);
+            return await bridge.l2TokenAddress(token);
         }
 
         async approveERC20(
@@ -159,10 +157,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             if (bridgeAddress == null) {
                 if (!isETHBasedChain && token == baseToken) {
                     const chainId = (await this._providerL2().getNetwork()).chainId;
-                    bridgeAddress = await (await this.getBridgehubContract()).baseTokenBridge(chainId);
+                    bridgeAddress = await (await this.getBridgehubContract()).sharedBridge();
                 } else {
                     const bridgeContracts = await this.getL1BridgeContracts();
-                    // If the token is Wrapped Ether, return corresponding bridge, otherwise return default ERC20 bridge
                     bridgeAddress = bridgeContracts.shared.address;
                 }
             } else {
@@ -170,7 +167,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             }
 
             overrides ??= {};
-
             return await erc20contract.approve(bridgeAddress, amount, overrides);
         }
 
@@ -194,7 +190,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
         }
 
-        // Returns the parameters for the approve token transaction based on the deposit token and amount.
+        // Returns the parameters for the approval token transaction based on the deposit token and amount.
         // Some deposit transactions require multiple approvals. Existing allowance for the bridge is not checked;
         // allowance is calculated solely based on the specified amount.
         async getDepositAllowanceParams(
@@ -299,17 +295,17 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const baseTokenBridge = await bridgehub.baseTokenBridge(chainId);
+            const sharedBridge = await bridgehub.sharedBridge();
             const bridgeContracts = await this.getL1BridgeContracts();
             const { tx, mintValue } =
                 await this._getDepositNonBaseTokenToNonETHBasedChainTx(transaction);
 
             if (transaction.approveBaseERC20) {
                 // Only request the allowance if the current one is not enough.
-                const allowance = await this.getAllowanceL1(baseTokenAddress, baseTokenBridge);
+                const allowance = await this.getAllowanceL1(baseTokenAddress, sharedBridge);
                 if (allowance.lt(mintValue)) {
                     const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
-                        bridgeAddress: baseTokenBridge,
+                        bridgeAddress: sharedBridge,
                         ...transaction.approveBaseOverrides,
                     });
                     await approveTx.wait();
@@ -365,15 +361,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const baseTokenBridge = await bridgehub.baseTokenBridge(chainId);
+            const sharedBridge = await bridgehub.sharedBridge();
             const { tx, mintValue } = await this._getDepositBaseTokenOnNonETHBasedChainTx(transaction);
 
             if (transaction.approveERC20 || transaction.approveBaseERC20) {
                 // Only request the allowance if the current one is not enough.
-                const allowance = await this.getAllowanceL1(baseTokenAddress, baseTokenBridge);
+                const allowance = await this.getAllowanceL1(baseTokenAddress, sharedBridge);
                 if (allowance.lt(mintValue)) {
                     const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
-                        bridgeAddress: baseTokenBridge,
+                        bridgeAddress: sharedBridge,
                         ...transaction.approveBaseOverrides,
                     });
                     await approveTx.wait();
@@ -410,15 +406,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const baseTokenBridge = await bridgehub.baseTokenBridge(chainId);
+            const sharedBridge = await bridgehub.sharedBridge();
             const { tx, mintValue } = await this._getDepositETHOnNonETHBasedChainTx(transaction);
 
             if (transaction.approveBaseERC20) {
                 // Only request the allowance if the current one is not enough.
-                const allowance = await this.getAllowanceL1(baseTokenAddress, baseTokenBridge);
+                const allowance = await this.getAllowanceL1(baseTokenAddress, sharedBridge);
                 if (allowance.lt(mintValue)) {
                     const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
-                        bridgeAddress: baseTokenBridge,
+                        bridgeAddress: sharedBridge,
                         ...transaction.approveBaseOverrides,
                     });
                     await approveTx.wait();
@@ -452,7 +448,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             customBridgeData?: BytesLike;
         }) {
             const bridgeContracts = await this.getL1BridgeContracts();
-            const tx = await this._getDepositTokenOnETHBasedChainTx(transaction);
+            const {tx, } = await this._getDepositTokenOnETHBasedChainTx(transaction);
 
             if (transaction.approveERC20) {
                 const proposedBridge = bridgeContracts.shared.address;
@@ -620,7 +616,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                         l2GasLimit: l2GasLimit,
                         l2GasPerPubdataByteLimit: gasPerPubdataByte,
                         refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
-                        secondBridgeAddress: bridgeContracts.erc20.address, // depositing weth is not supported currently in this case, deposit eth instead
+                        secondBridgeAddress: bridgeContracts.shared.address,
                         secondBridgeValue: 0,
                         secondBridgeCalldata,
                     },
@@ -644,7 +640,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }) {
             // Depositing the base token to a non-ETH-based chain.
             // Goes through the BridgeHub.
-            // Have to give approvals for the baseTokenBridge.
+            // Have to give approvals for the sharedBridge.
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
 
@@ -718,7 +714,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             return {
                 tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges(
                     {
-                        chainId: (await this._providerL2().getNetwork()).chainId,
+                        chainId,
                         mintValue,
                         l2Value: 0,
                         l2GasLimit: l2GasLimit,
@@ -775,24 +771,31 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 tx.gasPerPubdataByte,
             );
 
-            overrides.value ??= baseCost.add(operatorTip);
-            await checkBaseCost(baseCost, overrides.value);
-
-            // Check whether wETH is being deposited.
-
-            const bridge = bridgeContracts.shared;
-            /// Todo note: we have to use two bridges method here, deposit is depracated
-            return await bridge.populateTransaction.deposit(
-                chainId,
-                to,
-                token,
-                await overrides.value,
-                amount,
-                l2GasLimit,
-                gasPerPubdataByte,
-                refundRecipient ?? ethers.constants.AddressZero,
-                overrides,
+            overrides.value ??= amount;
+            const mintValue = baseCost.add(operatorTip); // of the base token, not eth
+            await checkBaseCost(baseCost, mintValue);
+            const secondBridgeCalldata = ethers.utils.defaultAbiCoder.encode(
+                ["address", "uint256", "address"],
+                [token, 0, to],
             );
+
+            return {
+                tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges(
+                    {
+                        chainId,
+                        mintValue,
+                        l2Value: 0,
+                        l2GasLimit: l2GasLimit,
+                        l2GasPerPubdataByteLimit: gasPerPubdataByte,
+                        refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
+                        secondBridgeAddress: bridgeContracts.shared.address, // TODO use legacy contracts if customBridge is provided
+                        secondBridgeValue: amount,
+                        secondBridgeCalldata,
+                    },
+                    overrides,
+                ),
+                mintValue: mintValue,
+            };
         }
 
         async _getDepositETHOnETHBasedChainTx(transaction: {
@@ -967,9 +970,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             if (tx.bridgeAddress != null) {
                 const bridgeContracts = await this.getL1BridgeContracts();
                 const customBridgeData =
-                    tx.customBridgeData ?? bridgeContracts.weth.address == tx.bridgeAddress
-                        ? "0x"
-                        : await getERC20DefaultBridgeData(tx.token, this._providerL1());
+                    tx.customBridgeData ??= await getERC20DefaultBridgeData(tx.token, this._providerL1());
                 let bridge = Il1BridgeFactory.connect(tx.bridgeAddress, this._signerL1());
                 let l2Address = await bridge.l2Bridge();
                 l2GasLimit ??= await estimateCustomBridgeDepositL2Gas(
@@ -1127,17 +1128,17 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 const l1Bridges = await this.getL1BridgeContracts();
                 // If the destination address matches the address of the L1 WETH contract,
                 // the withdrawal request is processed through the WETH bridge.
-                if (withdrawTo.toLowerCase() == l1Bridges.weth.address.toLowerCase()) {
-                    return await l1Bridges.weth.finalizeWithdrawal(
-                        (await this._providerL2().getNetwork()).chainId,
-                        l1BatchNumber,
-                        l2MessageIndex,
-                        l2TxNumberInBlock,
-                        message,
-                        proof,
-                        overrides ?? {},
-                    );
-                }
+                // if (withdrawTo.toLowerCase() == l1Bridges.weth.address.toLowerCase()) {
+                //     return await l1Bridges.weth.finalizeWithdrawal(
+                //         (await this._providerL2().getNetwork()).chainId,
+                //         l1BatchNumber,
+                //         l2MessageIndex,
+                //         l2TxNumberInBlock,
+                //         message,
+                //         proof,
+                //         overrides ?? {},
+                //     );
+                // }
 
                 const contractAddress = await this._providerL2().getBridgehubContractAddress();
                 const bridgehub = IBridgehubFactory.connect(contractAddress, this._signerL1());

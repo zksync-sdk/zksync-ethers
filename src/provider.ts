@@ -41,6 +41,8 @@ import {
 } from "./utils";
 import { Signer } from "./signer";
 import Formatter = providers.Formatter;
+import { Il1BridgeFactory } from "../typechain/Il1BridgeFactory";
+import { Il1Erc20BridgeFactory } from "../typechain/Il1Erc20BridgeFactory";
 
 let defaultFormatter: Formatter = null;
 
@@ -560,10 +562,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     async getDefaultBridgeAddresses() {
         if (!this.contractAddresses.erc20BridgeL1) {
-            let addresses = await this.send("zks_getBridgeContracts", []);
-            this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
-            this.contractAddresses.sharedBridgeL1 = addresses.l1SharedBridge;
-            this.contractAddresses.sharedBridgeL2 = addresses.l2SharedBridge;
+            const addresses = await this.send("zks_getBridgeContracts", []);
+            this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20Bridge;
+            this.contractAddresses.sharedBridgeL1 = addresses.l1SharedDefaultBridge;
+            this.contractAddresses.sharedBridgeL2 = addresses.l2SharedDefaultBridge;
         }
         return {
             erc20L1: this.contractAddresses.erc20BridgeL1,

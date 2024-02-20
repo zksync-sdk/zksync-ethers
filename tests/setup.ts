@@ -36,7 +36,7 @@ async function createTokenL2(l1TokenAddress: string): Promise<string> {
 
 /*
 Mints tokens on L1 in case L2 is non-ETH based chain.
-It mints based token, provided alterative tokens (different from base token) and wETH.
+It mints based token, provided alternative tokens (different from base token) and wETH.
 */
 async function mintTokensOnL1(alternativeToken: string) {
     const bridgehub = await wallet.getBridgehubContract();
@@ -53,7 +53,7 @@ async function mintTokensOnL1(alternativeToken: string) {
             await wallet.getAddress(),
             ethers.utils.parseEther("100"),
         );
-    await baseTokenMintTx.wait();    
+        await baseTokenMintTx.wait();
     }
     
 
@@ -64,16 +64,16 @@ async function mintTokensOnL1(alternativeToken: string) {
     );
     await altTokenMintTx.wait();
 
-    const wethBridgeAbi = ["function l1WethAddress() view returns (address)"];
-    const wethAbi = ["function deposit() public payable"];
-    const wethBridge = new ethers.Contract(
-        (await wallet.provider.getDefaultBridgeAddresses()).wethL1!,
-        wethBridgeAbi,
-        wallet._signerL1(),
-    );
-    const weth = new ethers.Contract(await wethBridge.l1WethAddress(), wethAbi, wallet._signerL1());
-    const wethDepositTx = await weth.deposit({ value: ethers.utils.parseEther("100") });
-    await wethDepositTx.wait();
+    // const wethBridgeAbi = ["function l1WethAddress() view returns (address)"];
+    // const wethAbi = ["function deposit() public payable"];
+    // const wethBridge = new ethers.Contract(
+    //     (await wallet.provider.getDefaultBridgeAddresses()).wethL1!,
+    //     wethBridgeAbi,
+    //     wallet._signerL1(),
+    // );
+    // const weth = new ethers.Contract(await wethBridge.l1WethAddress(), wethAbi, wallet._signerL1());
+    // const wethDepositTx = await weth.deposit({ value: ethers.utils.parseEther("100") });
+    // await wethDepositTx.wait();
 }
 
 /*
@@ -99,10 +99,15 @@ async function sendFundsOnL2() {
 async function main() {
     console.log(`Balance: ${await wallet.getBalance()}`)
     console.log(`Balance: ${await wallet.getBalanceL1()}`)
-    // await mintTokensOnL1(DAI_L1);
+    
+    await mintTokensOnL1(DAI_L1);
+    console.log(`Balance: ${await wallet.getBalance()}`)
+    console.log(`Balance: ${await wallet.getBalanceL1()}`)
 
-    // const l2TokenAddress = await createTokenL2(DAI_L1);
-    // console.log(`L2 DAI address: ${l2TokenAddress}`);
+    const l2TokenAddress = await createTokenL2(DAI_L1);
+    console.log(`L2 DAI address: ${l2TokenAddress}`);
+    console.log(`Balance: ${await wallet.getBalance()}`)
+    console.log(`Balance: ${await wallet.getBalanceL1()}`)
 
     await sendFundsOnL2();
     console.log(`Balance: ${await wallet.getBalance()}`)

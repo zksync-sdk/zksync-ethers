@@ -131,7 +131,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         return (await super.sendTransaction(transaction)) as TransactionResponse;
     }
 
-    // TODO Remove when getBaseToken is available on L2
+    // TODO Remove if when getBaseToken RPC endpoint is available on L2
     override async transfer(transaction: {
         to: string;
         amount: ethers.BigNumberish;

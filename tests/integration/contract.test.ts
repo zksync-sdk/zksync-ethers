@@ -18,7 +18,7 @@ describe("ContractFactory", () => {
 
     const TOKENS_L1 = require("../tokens.json");
     // const DAI_L1 = TOKENS_L1[0].address;
-    const DAI_L1 = "0x5E6D086F5eC079ADFF4FB3774CDf3e8D6a34F7E9";
+    const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";
 
     describe("#constructor()", () => {
         it("`ContractFactory(abi, bytecode, runner)` should return a `ContractFactory` with `create` deployment", async () => {

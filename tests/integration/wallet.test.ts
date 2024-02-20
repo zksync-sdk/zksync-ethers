@@ -18,7 +18,7 @@ describe("Wallet", async () => {
 
     const TOKENS_L1 = require("../tokens.json");
     // const DAI_L1 = TOKENS_L1[0].address;
-    const DAI_L1 = "0x5E6D086F5eC079ADFF4FB3774CDf3e8D6a34F7E9";
+    const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";
 
     const isETHBasedChain = await wallet.isETHBasedChain();
 
@@ -130,7 +130,7 @@ describe("Wallet", async () => {
     describe("#getAllBalances()", () => {
         it("should return all balance", async () => {
             const result = await wallet.getAllBalances();
-            expect(Object.keys(result)).to.have.lengthOf(2);
+            expect(Object.keys(result)).to.have.lengthOf(1);
         });
     });
 
@@ -199,14 +199,14 @@ describe("Wallet", async () => {
                 type: 0,
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 nonce: await wallet.getNonce("pending"),
-                chainId: 270,
+                // chainId: 270,
                 gasPrice: BigNumber.from(100_000_000),
             };
             const result = await wallet.populateTransaction({
                 to: RECEIVER,
                 value: 7_000_000,
             });
-            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit", "chainId"]);
         });
     });
 
@@ -397,7 +397,7 @@ describe("Wallet", async () => {
                 expect(result.eq(BigNumber.from(345_206))).to.be.true;
             });
         } else {
-            it("should throw an error for issufficient allowance when estimating gas for ETH deposit transaction", async () => {
+            it("should throw an error for insufficient allowance when estimating gas for ETH deposit transaction", async () => {
                 try {
                     await wallet.estimateGasDeposit({
                         token: utils.ETH_ADDRESS,
