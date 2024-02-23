@@ -177,25 +177,23 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const sharedBridge = await bridgehub.sharedBridge();
             const bridgeContracts = await this.getL1BridgeContracts();
             const { tx, mintValue } = await this._getDepositNonBaseTokenToNonETHBasedChainTx(transaction);
             if (transaction.approveBaseERC20) {
                 // Only request the allowance if the current one is not enough.
-                const allowance = await this.getAllowanceL1(baseTokenAddress, sharedBridge);
+                const allowance = await this.getAllowanceL1(baseTokenAddress, bridgeContracts.shared.address);
                 if (allowance.lt(mintValue)) {
                     const approveTx = await this.approveERC20(baseTokenAddress, mintValue, {
-                        bridgeAddress: sharedBridge,
+                        bridgeAddress: bridgeContracts.shared.address,
                         ...transaction.approveBaseOverrides,
                     });
                     await approveTx.wait();
                 }
             }
             if (transaction.approveERC20) {
-                const proposedBridge = bridgeContracts.shared.address;
                 const bridgeAddress = transaction.bridgeAddress
                     ? transaction.bridgeAddress
-                    : proposedBridge;
+                    : bridgeContracts.shared.address;
                 // Only request the allowance if the current one is not enough.
                 const allowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
                 if (allowance.lt(transaction.amount)) {
@@ -425,10 +423,10 @@ function AdapterL1(Base) {
             const { token, operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
             const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
             const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
-            (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = amount);
-            const mintValue = baseCost.add(operatorTip); // of the base token, not eth
+            const mintValue = baseCost.add(operatorTip);
+            (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = mintValue);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
-            const secondBridgeCalldata = ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, 0, to]);
+            const secondBridgeCalldata = ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to]);
             return {
                 tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
                     chainId,
@@ -438,7 +436,7 @@ function AdapterL1(Base) {
                     l2GasPerPubdataByteLimit: gasPerPubdataByte,
                     refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
                     secondBridgeAddress: bridgeContracts.shared.address,
-                    secondBridgeValue: amount,
+                    secondBridgeValue: 0,
                     secondBridgeCalldata,
                 }, overrides),
                 mintValue: mintValue,
