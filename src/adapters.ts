@@ -786,7 +786,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                         l2GasPerPubdataByteLimit: gasPerPubdataByte,
                         refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
                         secondBridgeAddress: bridgeContracts.shared.address, // TODO use legacy contracts if customBridge is provided
-                        secondBridgeValue: amount,
+                        secondBridgeValue: 0,
                         secondBridgeCalldata,
                     },
                     overrides,
