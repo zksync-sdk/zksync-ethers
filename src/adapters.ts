@@ -768,12 +768,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 tx.gasPerPubdataByte,
             );
 
-            overrides.value ??= amount;
-            const mintValue = baseCost.add(operatorTip); // of the base token, not eth
+            const mintValue = baseCost.add(operatorTip); 
+            overrides.value ??= mintValue;
             await checkBaseCost(baseCost, mintValue);
             const secondBridgeCalldata = ethers.utils.defaultAbiCoder.encode(
                 ["address", "uint256", "address"],
-                [token, 0, to],
+                [token, amount, to],
             );
 
             return {
