@@ -24,7 +24,7 @@ describe("Paymaster", () => {
             const bytecode: string = require(tokenPath).bytecode;
             const factory = new ContractFactory(abi, bytecode, wallet);
             const tokenContract = (await factory.deploy("Ducat", "Ducat", 18)) as Contract;
-            const tokenAddress = await tokenContract.address;
+            const tokenAddress = tokenContract.address;
 
             // mint tokens to wallet, so it could pay fee with tokens
             await tokenContract.mint(await wallet.getAddress(), INIT_MINT_AMOUNT);
@@ -38,7 +38,7 @@ describe("Paymaster", () => {
                 "createAccount",
             );
             const paymasterContract = await accountFactory.deploy(tokenAddress);
-            const paymasterAddress = await paymasterContract.address;
+            const paymasterAddress = paymasterContract.address;
 
             // transfer ETH to paymaster so it could pay fee
             const faucetTx = await wallet.transfer({

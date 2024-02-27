@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import "../custom-matchers";
 import { Provider, types, utils, Wallet } from "../../src";
 import { BigNumber, ethers } from "ethers";
 
@@ -164,7 +165,7 @@ describe("Provider", () => {
 
     describe("#getProof()", () => {
         it("should return a storage proof", async () => {
-            // fetchin the storage proof for rawHonce storage slot in NonceHolder system contract
+            // fetching the storage proof for rawNonce storage slot in NonceHolder system contract
             // mapping(uint256 => uint256) internal rawNonces;
 
             // Ensure the address is a 256-bit number by padding it
@@ -334,7 +335,7 @@ describe("Provider", () => {
     describe("#getWithdrawTx()", () => {
         it("should return withdraw transaction", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 value: BigNumber.from(7_000_000_000),
                 to: ethers.utils.getAddress("0x000000000000000000000000000000000000800a"),
                 data: "0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
@@ -350,7 +351,7 @@ describe("Provider", () => {
 
         it("should return an ETH withdraw transaction with paymaster parameters", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 value: BigNumber.from(7_000_000_000),
                 to: ethers.utils.getAddress("0x000000000000000000000000000000000000800a"),
                 data: "0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
@@ -379,7 +380,7 @@ describe("Provider", () => {
 
         it("should return a DAI withdraw transaction", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 to: ethers.utils.getAddress(
                     (await provider.getDefaultBridgeAddresses()).erc20L2 as string,
                 ),
@@ -396,7 +397,7 @@ describe("Provider", () => {
 
         it("should return a DAI withdraw transaction with paymaster parameters", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 to: ethers.utils.getAddress(
                     (await provider.getDefaultBridgeAddresses()).erc20L2 as string,
                 ),
@@ -426,7 +427,7 @@ describe("Provider", () => {
 
         it("should return a withdraw transaction with `tx.from==tx.to` when `tx.to` is not provided", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 value: BigNumber.from(7_000_000_000),
                 to: "0x000000000000000000000000000000000000800A",
                 data: "0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
@@ -468,7 +469,7 @@ describe("Provider", () => {
     describe("#getTransferTx()", () => {
         it("should return transfer transaction", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 to: RECEIVER,
                 value: 7_000_000_000,
             };
@@ -484,7 +485,7 @@ describe("Provider", () => {
         it("should return an ETH transfer transaction with paymaster parameters", async () => {
             const tx = {
                 type: utils.EIP712_TX_TYPE,
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 to: RECEIVER,
                 value: 7_000_000_000,
                 customData: {
@@ -512,7 +513,7 @@ describe("Provider", () => {
 
         it("should return a DAI transfer transaction", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 to: await provider.l2TokenAddress(DAI_L1),
                 data: "0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005",
             };
@@ -527,7 +528,7 @@ describe("Provider", () => {
 
         it("should return a DAI transfer transaction with paymaster parameters", async () => {
             const tx = {
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 to: await provider.l2TokenAddress(DAI_L1),
                 data: "0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005",
                 customData: {

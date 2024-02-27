@@ -1,6 +1,6 @@
 import * as chai from "chai";
 import "../custom-matchers";
-import { Provider, types, utils, Wallet } from "../../src";
+import { Provider, utils, Wallet } from "../../src";
 import { ethers, BigNumber } from "ethers";
 import * as fs from "fs";
 
@@ -180,11 +180,12 @@ describe("Wallet", () => {
             const tx = {
                 to: RECEIVER,
                 value: 7_000_000,
-                type: 0,
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                type: 2,
+                from: ADDRESS,
                 nonce: await wallet.getNonce("pending"),
                 chainId: 270,
-                gasPrice: BigNumber.from(250_000_000),
+                maxFeePerGas: BigNumber.from(2_000_000_000),
+                maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
             };
             const result = await wallet.populateTransaction({
                 to: RECEIVER,
@@ -192,6 +193,209 @@ describe("Wallet", () => {
             });
             expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
         });
+
+        it("should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided", async () => {
+            const tx = {
+                to: RECEIVER,
+                value: 7_000_000,
+                type: 113,
+                from: ADDRESS,
+                nonce: await wallet.getNonce("pending"),
+                data: '0x',
+                chainId: 270,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+                customData: {
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                    factoryDeps: []
+                }
+            };
+            const result = await wallet.populateTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+                customData: {
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                    factoryDeps: []
+                }
+            });
+            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+        });
+
+        it("should return populated transaction when `maxPriorityFeePerGas` and `customData` are provided", async () => {
+            const tx = {
+                to: RECEIVER,
+                value: 7_000_000,
+                type: 113,
+                from: ADDRESS,
+                nonce: await wallet.getNonce("pending"),
+                data: '0x',
+                chainId: 270,
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+                customData: {
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                    factoryDeps: []
+                }
+            };
+            const result = await wallet.populateTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+                customData: {
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT
+                }
+            });
+            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+        });
+
+        it("should return populated transaction when `maxFeePerGas` and `customData` are provided", async () => {
+            const tx = {
+                to: RECEIVER,
+                value: 7_000_000,
+                type: 113,
+                from: ADDRESS,
+                nonce: await wallet.getNonce("pending"),
+                data: '0x',
+                chainId: 270,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                customData: {
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                    factoryDeps: []
+                }
+            };
+            const result = await wallet.populateTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                customData: {
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT
+                }
+            });
+            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+        });
+
+        it("should return populated EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided", async () => {
+            const tx = {
+                to: RECEIVER,
+                value: 7_000_000,
+                type: 2,
+                from: ADDRESS,
+                nonce: await wallet.getNonce("pending"),
+                chainId: 270,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+            };
+            const result = await wallet.populateTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+            });
+            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+        });
+
+        it("should return populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`", async () => {
+            const tx = {
+                to: RECEIVER,
+                value: 7_000_000,
+                type: 2,
+                from: ADDRESS,
+                nonce: await wallet.getNonce("pending"),
+                chainId: 270,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(3_500_000_000),
+            };
+            const result = await wallet.populateTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                gasPrice: BigNumber.from(3_500_000_000),
+            });
+            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+        });
+
+        it("should return populated legacy transaction when `type = 0`", async () => {
+          const tx = {
+              to: RECEIVER,
+              value: 7_000_000,
+              type: 0,
+              from: ADDRESS,
+              nonce: await wallet.getNonce("pending"),
+              chainId: 270,
+              gasPrice: BigNumber.from(250_000_000),
+          };
+          const result = await wallet.populateTransaction({
+              type: 0,
+              to: RECEIVER,
+              value: 7_000_000,
+          });
+          expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+      });
+    });
+
+    describe("#sendTransaction()", () => {
+        it("should send already populated transaction with provided `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` fields", async () => {
+            const populatedTx = await wallet.populateTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+                customData: {
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT
+                }
+            });
+            const tx = await wallet.sendTransaction(populatedTx);
+            const result = await tx.wait();
+            expect(result).not.to.be.null;
+        }).timeout(10_000);
+
+        it("should send EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided", async () => {
+            const tx = await wallet.sendTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+            });
+            const result = await tx.wait();
+            expect(result).not.to.be.null;
+            expect(result.type).to.be.equal(2);
+        }).timeout(10_000);
+
+        it("should return already populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas`", async () => {
+            const populatedTx = await wallet.populateTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                maxFeePerGas: BigNumber.from(3_500_000_000),
+                maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
+            });
+
+            const tx = await wallet.sendTransaction(populatedTx);
+            const result = await tx.wait();
+            expect(result).not.to.be.null;
+            expect(result.type).to.be.equal(2);
+        }).timeout(10_000);
+
+        it("should send EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`", async () => {
+            const tx = await wallet.sendTransaction({
+                to: RECEIVER,
+                value: 7_000_000,
+                gasPrice: BigNumber.from(3_500_000_000),
+            });
+            const result = await tx.wait();
+            expect(result).not.to.be.null;
+            expect(result.type).to.be.equal(2);
+        }).timeout(10_000);
+
+        it("should send legacy transaction when `type = 0`", async () => {
+            const tx = await wallet.sendTransaction({
+                type: 0,
+                to: RECEIVER,
+                value: 7_000_000,
+            });
+            const result = await tx.wait();
+            expect(result).not.to.be.null;
+            expect(result.type).to.be.equal(0);
+        }).timeout(10_000);
     });
 
     describe("#fromMnemonic()", () => {
@@ -231,14 +435,14 @@ describe("Wallet", () => {
     describe("#getDepositTx()", () => {
         it("should return ETH deposit transaction", async () => {
             const tx = {
-                contractAddress: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                contractAddress: ADDRESS,
                 calldata: "0x",
                 l2Value: 7_000_000,
                 l2GasLimit: BigNumber.from("0x08cbaa"),
                 token: "0x0000000000000000000000000000000000000000",
-                to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                to: ADDRESS,
                 amount: 7_000_000,
-                refundRecipient: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                refundRecipient: ADDRESS,
                 operatorTip: BigNumber.from(0),
                 overrides: {
                     maxFeePerGas: BigNumber.from(1_500_000_010),
@@ -258,14 +462,14 @@ describe("Wallet", () => {
 
         it("should return a deposit transaction with `tx.to == Wallet.getAddress()` when `tx.to` is not specified", async () => {
             const tx = {
-                contractAddress: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                contractAddress: ADDRESS,
                 calldata: "0x",
                 l2Value: 7_000_000,
                 l2GasLimit: BigNumber.from("0x8cbaa"),
                 token: "0x0000000000000000000000000000000000000000",
-                to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                to: ADDRESS,
                 amount: 7_000_000,
-                refundRecipient: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                refundRecipient: ADDRESS,
                 operatorTip: BigNumber.from(0),
                 overrides: {
                     maxFeePerGas: BigNumber.from(1_500_000_010),
@@ -287,7 +491,7 @@ describe("Wallet", () => {
                 maxFeePerGas: BigNumber.from(1_500_000_010),
                 maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 value: BigNumber.from(288_992_000_000_000),
-                from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+                from: ADDRESS,
                 to: (await wallet.getL1BridgeContracts()).erc20.address,
             };
             const result = await wallet.getDepositTx({
