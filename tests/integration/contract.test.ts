@@ -180,7 +180,7 @@ describe("ContractFactory", () => {
             const bytecode: string = require(tokenPath).bytecode;
             const factory = new ContractFactory(abi, bytecode, wallet);
 
-            const result = await factory.getDeployTransaction("Ducat", "Ducat", 18);
+            const result = factory.getDeployTransaction("Ducat", "Ducat", 18);
             expect(result).not.to.be.null;
         }).timeout(10_000);
 
@@ -190,7 +190,7 @@ describe("ContractFactory", () => {
             const factory = new ContractFactory(abi, bytecode, wallet, "create2");
 
             try {
-                await factory.getDeployTransaction("Ducat", "Ducat", 18);
+                factory.getDeployTransaction("Ducat", "Ducat", 18);
             } catch (e) {
                 expect(e.message).to.be.equal("Salt is required for CREATE2 deployment!");
             }
@@ -202,7 +202,7 @@ describe("ContractFactory", () => {
             const factory = new ContractFactory(abi, bytecode, wallet, "create2");
 
             try {
-                await factory.getDeployTransaction("Ducat", "Ducat", 18, {
+                factory.getDeployTransaction("Ducat", "Ducat", 18, {
                     customData: { salt: "0000" },
                 });
             } catch (e) {
@@ -216,7 +216,7 @@ describe("ContractFactory", () => {
             const factory = new ContractFactory(abi, bytecode, wallet, "create2");
 
             try {
-                await factory.getDeployTransaction("Ducat", "Ducat", 18, {
+                factory.getDeployTransaction("Ducat", "Ducat", 18, {
                     customData: { salt: "0x000" },
                 });
             } catch (e) {
@@ -230,7 +230,7 @@ describe("ContractFactory", () => {
             const factory = new ContractFactory(abi, bytecode, wallet, "create2");
 
             try {
-                await factory.getDeployTransaction("Ducat", "Ducat", 18, {
+                factory.getDeployTransaction("Ducat", "Ducat", 18, {
                     customData: {
                         salt: ethers.utils.hexlify(ethers.utils.randomBytes(32)),
                         factoryDeps: "0",
@@ -243,7 +243,7 @@ describe("ContractFactory", () => {
             }
 
             try {
-                await factory.getDeployTransaction("Ducat", "Ducat", 18, {
+                factory.getDeployTransaction("Ducat", "Ducat", 18, {
                     customData: {
                         salt: ethers.utils.hexlify(ethers.utils.randomBytes(32)),
                         factoryDeps: "",
