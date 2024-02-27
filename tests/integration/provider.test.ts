@@ -17,7 +17,7 @@ describe("Provider", () => {
     const TOKEN = "0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4";
     const PAYMASTER = "0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174";
 
-    let tx;
+    let tx: types.TransactionResponse;
 
     before("setup", async function () {
         this.timeout(25_000);
