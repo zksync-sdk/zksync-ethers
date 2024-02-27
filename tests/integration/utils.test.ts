@@ -50,7 +50,7 @@ describe('utils', () => {
         chainId: 270,
         from: ADDRESS,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        value: BigInt(7_000_000),
+        value: 7_000_000n,
       };
 
       const eip712Signer = new EIP712Signer(
@@ -81,7 +81,7 @@ describe('utils', () => {
         chainId: 270,
         from: ADDRESS,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        value: BigInt(1_000_000),
+        value: 1_000_000n,
       };
 
       const eip712Signer = new EIP712Signer(

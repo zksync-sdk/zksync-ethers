@@ -183,15 +183,15 @@ describe('Wallet', () => {
     it('should return a populated transaction', async () => {
       const tx = {
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        value: BigInt(7_000_000_000),
+        value: 7_000_000_000n,
         type: utils.EIP712_TX_TYPE,
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
         nonce: await wallet.getNonce('pending'),
-        gasLimit: BigInt(154_379),
-        chainId: BigInt(270),
+        gasLimit: 154_379n,
+        chainId: 270n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
-        gasPrice: BigInt(250_000_000),
+        gasPrice: 250_000_000n,
       };
 
       const result = await wallet.populateTransaction({
@@ -205,12 +205,12 @@ describe('Wallet', () => {
     it('should return a populated transaction with default values if are omitted', async () => {
       const tx = {
         to: RECEIVER,
-        value: BigInt(7_000_000),
+        value: 7_000_000n,
         type: 0,
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
         nonce: await wallet.getNonce('pending'),
-        chainId: BigInt(270),
-        gasPrice: BigInt(250_000_000),
+        chainId: 270n,
+        gasPrice: 250_000_000n,
       };
       const result = await wallet.populateTransaction({
         to: RECEIVER,
@@ -270,9 +270,9 @@ describe('Wallet', () => {
         operatorTip: 0,
         overrides: {
           from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-          maxFeePerGas: BigInt(1_500_000_010),
-          maxPriorityFeePerGas: BigInt(1_500_000_000),
-          value: BigInt(288_213_007_000_000),
+          maxFeePerGas: 1_500_000_010n,
+          maxPriorityFeePerGas: 1_500_000_000n,
+          value: 288_213_007_000_000n,
         },
         gasPerPubdataByte: 800,
       };
@@ -298,9 +298,9 @@ describe('Wallet', () => {
         operatorTip: 0,
         overrides: {
           from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-          maxFeePerGas: BigInt(1_500_000_010),
-          maxPriorityFeePerGas: BigInt(1_500_000_000),
-          value: BigInt(288_213_007_000_000),
+          maxFeePerGas: 1_500_000_010n,
+          maxPriorityFeePerGas: 1_500_000_000n,
+          value: 288_213_007_000_000n,
         },
         gasPerPubdataByte: 800,
       };
@@ -314,9 +314,9 @@ describe('Wallet', () => {
 
     it('should return a DAI deposit transaction', async () => {
       const tx = {
-        maxFeePerGas: BigInt(1_500_000_010),
-        maxPriorityFeePerGas: BigInt(1_500_000_000),
-        value: BigInt(288_992_000_000_000),
+        maxFeePerGas: 1_500_000_010n,
+        maxPriorityFeePerGas: 1_500_000_000n,
+        value: 288_992_000_000_000n,
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
         to: await (await wallet.getL1BridgeContracts()).erc20.getAddress(),
       };
@@ -338,7 +338,7 @@ describe('Wallet', () => {
         amount: 5,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result).to.be.equal(BigInt(132_711));
+      expect(result).to.be.equal(132_711n);
     });
 
     it('should return a gas estimation for the DAI deposit transaction', async () => {
@@ -348,13 +348,13 @@ describe('Wallet', () => {
         amount: 5,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result).to.be.equal(BigInt(253_418));
+      expect(result).to.be.equal(253_418n);
     });
   });
 
   describe('#deposit()', () => {
     it('should deposit ETH to the L2 network', async () => {
-      const amount = 7_000_000_000;
+      const amount = 7_000_000_000n;
       const l2BalanceBeforeDeposit = await wallet.getBalance();
       const l1BalanceBeforeDeposit = await wallet.getBalanceL1();
       const tx = await wallet.deposit({
@@ -367,14 +367,14 @@ describe('Wallet', () => {
       const l2BalanceAfterDeposit = await wallet.getBalance();
       const l1BalanceAfterDeposit = await wallet.getBalanceL1();
       expect(result).not.to.be.null;
-      expect(l2BalanceAfterDeposit - l2BalanceBeforeDeposit >= BigInt(amount))
-        .to.be.true;
-      expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit >= BigInt(amount))
-        .to.be.true;
+      expect(l2BalanceAfterDeposit - l2BalanceBeforeDeposit >= amount).to.be
+        .true;
+      expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit >= amount).to.be
+        .true;
     }).timeout(20_000);
 
     it('should deposit DAI to the L2 network', async () => {
-      const amount = 5;
+      const amount = 5n;
       const l2DAI = await provider.l2TokenAddress(DAI_L1);
       const l2BalanceBeforeDeposit = await wallet.getBalance(l2DAI);
       const l1BalanceBeforeDeposit = await wallet.getBalanceL1(DAI_L1);
@@ -389,14 +389,14 @@ describe('Wallet', () => {
       const l2BalanceAfterDeposit = await wallet.getBalance(l2DAI);
       const l1BalanceAfterDeposit = await wallet.getBalanceL1(DAI_L1);
       expect(result).not.to.be.null;
-      expect(l2BalanceAfterDeposit - l2BalanceBeforeDeposit === BigInt(amount))
-        .to.be.true;
-      expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit === BigInt(amount))
-        .to.be.true;
+      expect(l2BalanceAfterDeposit - l2BalanceBeforeDeposit === amount).to.be
+        .true;
+      expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit === amount).to.be
+        .true;
     }).timeout(20_000);
 
     it('should deposit DAI to the L2 network with approve transaction for allowance', async () => {
-      const amount = 7;
+      const amount = 7n;
       const l2DAI = await provider.l2TokenAddress(DAI_L1);
       const l2BalanceBeforeDeposit = await wallet.getBalance(l2DAI);
       const l1BalanceBeforeDeposit = await wallet.getBalanceL1(DAI_L1);
@@ -412,10 +412,10 @@ describe('Wallet', () => {
       const l2BalanceAfterDeposit = await wallet.getBalance(l2DAI);
       const l1BalanceAfterDeposit = await wallet.getBalanceL1(DAI_L1);
       expect(result).not.to.be.null;
-      expect(l2BalanceAfterDeposit - l2BalanceBeforeDeposit === BigInt(amount))
-        .to.be.true;
-      expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit === BigInt(amount))
-        .to.be.true;
+      expect(l2BalanceAfterDeposit - l2BalanceBeforeDeposit === amount).to.be
+        .true;
+      expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit === amount).to.be
+        .true;
     }).timeout(30_000);
   });
 
@@ -456,11 +456,11 @@ describe('Wallet', () => {
   describe('#getFullRequiredDepositFee()', () => {
     it('should return a fee for ETH token deposit', async () => {
       const feeData = {
-        baseCost: BigInt(285_096_500_000_000),
-        l1GasLimit: BigInt(132_711),
+        baseCost: 285_096_500_000_000n,
+        l1GasLimit: 132_711n,
         l2GasLimit: '0x8b351',
-        maxFeePerGas: BigInt(1_500_000_010),
-        maxPriorityFeePerGas: BigInt(1_500_000_000),
+        maxFeePerGas: 1_500_000_010n,
+        maxPriorityFeePerGas: 1_500_000_000n,
       };
       const result = await wallet.getFullRequiredDepositFee({
         token: utils.ETH_ADDRESS,
@@ -484,11 +484,11 @@ describe('Wallet', () => {
 
     it('should return a fee for DAI token deposit', async () => {
       const feeData = {
-        baseCost: BigInt(288_992_000_000_000),
-        l1GasLimit: BigInt(253_177),
+        baseCost: 288_992_000_000_000n,
+        l1GasLimit: 253_177n,
         l2GasLimit: '0x8d1c0',
-        maxFeePerGas: BigInt(1_500_000_010),
-        maxPriorityFeePerGas: BigInt(1_500_000_000),
+        maxFeePerGas: 1_500_000_010n,
+        maxPriorityFeePerGas: 1_500_000_000n,
       };
 
       const tx = await wallet.approveERC20(DAI_L1, 5);
@@ -522,7 +522,7 @@ describe('Wallet', () => {
 
   describe('#withdraw()', () => {
     it('should withdraw ETH to the L1 network', async () => {
-      const amount = 7_000_000_000;
+      const amount = 7_000_000_000n;
       const l2BalanceBeforeWithdrawal = await wallet.getBalance();
       const withdrawTx = await wallet.withdraw({
         token: utils.ETH_ADDRESS,
@@ -538,14 +538,13 @@ describe('Wallet', () => {
       const result = await finalizeWithdrawTx.wait();
       const l2BalanceAfterWithdrawal = await wallet.getBalance();
       expect(result).not.to.be.null;
-      expect(
-        l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= BigInt(amount)
-      ).to.be.true;
+      expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount).to
+        .be.true;
     }).timeout(25_000);
 
     it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
-      const amount = 7_000_000_000;
-      const minimalAllowance = 1;
+      const amount = 7_000_000_000n;
+      const minimalAllowance = 1n;
 
       const paymasterBalanceBeforeWithdrawal =
         await provider.getBalance(PAYMASTER);
@@ -565,7 +564,7 @@ describe('Wallet', () => {
         paymasterParams: utils.getPaymasterParams(PAYMASTER, {
           type: 'ApprovalBased',
           token: TOKEN,
-          minimalAllowance: 1,
+          minimalAllowance: minimalAllowance,
           innerInput: new Uint8Array(),
         }),
       });
@@ -589,27 +588,26 @@ describe('Wallet', () => {
         await wallet.getBalance(TOKEN);
 
       expect(
-        paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >=
-          BigInt(0)
+        paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= 0n
       ).to.be.true;
       expect(
         paymasterTokenBalanceAfterWithdrawal -
           paymasterTokenBalanceBeforeWithdrawal
-      ).to.be.equal(BigInt(minimalAllowance));
+      ).to.be.equal(minimalAllowance);
 
       expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
-        BigInt(amount)
+        amount
       );
       expect(
         l2ApprovalTokenBalanceAfterWithdrawal ===
-          l2ApprovalTokenBalanceBeforeWithdrawal - BigInt(minimalAllowance)
+          l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance
       ).to.be.true;
 
       expect(result).not.to.be.null;
     }).timeout(25_000);
 
     it('should withdraw DAI to the L1 network', async () => {
-      const amount = 5;
+      const amount = 5n;
       const l2DAI = await provider.l2TokenAddress(DAI_L1);
       const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2DAI);
       const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(DAI_L1);
@@ -631,16 +629,16 @@ describe('Wallet', () => {
 
       expect(result).not.to.be.null;
       expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
-        BigInt(amount)
+        amount
       );
       expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
-        BigInt(amount)
+        amount
       );
     }).timeout(25_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
-      const amount = 5;
-      const minimalAllowance = 1;
+      const amount = 5n;
+      const minimalAllowance = 1n;
       const l2DAI = await provider.l2TokenAddress(DAI_L1);
 
       const paymasterBalanceBeforeWithdrawal =
@@ -662,7 +660,7 @@ describe('Wallet', () => {
         paymasterParams: utils.getPaymasterParams(PAYMASTER, {
           type: 'ApprovalBased',
           token: TOKEN,
-          minimalAllowance: 1,
+          minimalAllowance: minimalAllowance,
           innerInput: new Uint8Array(),
         }),
       });
@@ -687,24 +685,23 @@ describe('Wallet', () => {
         await wallet.getBalance(TOKEN);
 
       expect(
-        paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >=
-          BigInt(0)
+        paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= 0n
       ).to.be.true;
       expect(
         paymasterTokenBalanceAfterWithdrawal -
           paymasterTokenBalanceBeforeWithdrawal
-      ).to.be.equal(BigInt(minimalAllowance));
+      ).to.be.equal(minimalAllowance);
       expect(
         l2ApprovalTokenBalanceAfterWithdrawal ===
-          l2ApprovalTokenBalanceBeforeWithdrawal - BigInt(minimalAllowance)
+          l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance
       ).to.be.true;
 
       expect(result).not.to.be.null;
       expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
-        BigInt(amount)
+        amount
       );
       expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
-        BigInt(amount)
+        amount
       );
     }).timeout(25_000);
   });
@@ -727,13 +724,13 @@ describe('Wallet', () => {
         calldata: '0x',
         l2Value: 7_000_000_000,
       });
-      expect(result > BigInt(0)).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
   describe('#requestExecute()', () => {
     it('should request transaction execution on the L2 network', async () => {
-      const amount = 7_000_000_000;
+      const amount = 7_000_000_000n;
       const l2BalanceBeforeExecution = await wallet.getBalance();
       const l1BalanceBeforeExecution = await wallet.getBalanceL1();
       const tx = await wallet.requestExecute({
@@ -746,18 +743,16 @@ describe('Wallet', () => {
       const l2BalanceAfterExecution = await wallet.getBalance();
       const l1BalanceAfterExecution = await wallet.getBalanceL1();
       expect(result).not.to.be.null;
-      expect(
-        l2BalanceAfterExecution - l2BalanceBeforeExecution >= BigInt(amount)
-      ).to.be.true;
-      expect(
-        l1BalanceBeforeExecution - l1BalanceAfterExecution >= BigInt(amount)
-      ).to.be.true;
+      expect(l2BalanceAfterExecution - l2BalanceBeforeExecution >= amount).to.be
+        .true;
+      expect(l1BalanceBeforeExecution - l1BalanceAfterExecution >= amount).to.be
+        .true;
     }).timeout(10_000);
   });
 
   describe('#transfer()', () => {
     it('should transfer ETH', async () => {
-      const amount = 7_000_000_000;
+      const amount = 7_000_000_000n;
       const balanceBeforeTransfer = await provider.getBalance(RECEIVER);
       const tx = await wallet.transfer({
         token: utils.ETH_ADDRESS,
@@ -767,14 +762,12 @@ describe('Wallet', () => {
       const result = await tx.wait();
       const balanceAfterTransfer = await provider.getBalance(RECEIVER);
       expect(result).not.to.be.null;
-      expect(balanceAfterTransfer - balanceBeforeTransfer).to.be.equal(
-        BigInt(amount)
-      );
+      expect(balanceAfterTransfer - balanceBeforeTransfer).to.be.equal(amount);
     }).timeout(25_000);
 
     it('should transfer ETH using paymaster to cover fee', async () => {
-      const amount = 7_000_000_000;
-      const minimalAllowance = 1;
+      const amount = 7_000_000_000n;
+      const minimalAllowance = 1n;
 
       const paymasterBalanceBeforeTransfer =
         await provider.getBalance(PAYMASTER);
@@ -795,7 +788,7 @@ describe('Wallet', () => {
         paymasterParams: utils.getPaymasterParams(PAYMASTER, {
           type: 'ApprovalBased',
           token: TOKEN,
-          minimalAllowance: 1,
+          minimalAllowance: minimalAllowance,
           innerInput: new Uint8Array(),
         }),
       });
@@ -814,29 +807,28 @@ describe('Wallet', () => {
       const receiverBalanceAfterTransfer = await provider.getBalance(RECEIVER);
 
       expect(
-        paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >=
-          BigInt(0)
+        paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >= 0n
       ).to.be.true;
       expect(
         paymasterTokenBalanceAfterTransfer - paymasterTokenBalanceBeforeTransfer
-      ).to.be.equal(BigInt(minimalAllowance));
+      ).to.be.equal(minimalAllowance);
 
       expect(
         senderBalanceBeforeTransfer - senderBalanceAfterTransfer
-      ).to.be.equal(BigInt(amount));
+      ).to.be.equal(amount);
       expect(
         senderApprovalTokenBalanceAfterTransfer ===
-          senderApprovalTokenBalanceBeforeTransfer - BigInt(minimalAllowance)
+          senderApprovalTokenBalanceBeforeTransfer - minimalAllowance
       ).to.be.true;
 
       expect(result).not.to.be.null;
       expect(
         receiverBalanceAfterTransfer - receiverBalanceBeforeTransfer
-      ).to.be.equal(BigInt(amount));
+      ).to.be.equal(amount);
     }).timeout(25_000);
 
     it('should transfer DAI', async () => {
-      const amount = 5;
+      const amount = 5n;
       const l2DAI = await provider.l2TokenAddress(DAI_L1);
       const balanceBeforeTransfer = await provider.getBalance(
         RECEIVER,
@@ -855,14 +847,12 @@ describe('Wallet', () => {
         l2DAI
       );
       expect(result).not.to.be.null;
-      expect(balanceAfterTransfer - balanceBeforeTransfer).to.be.equal(
-        BigInt(amount)
-      );
+      expect(balanceAfterTransfer - balanceBeforeTransfer).to.be.equal(amount);
     }).timeout(25_000);
 
     it('should transfer DAI using paymaster to cover fee', async () => {
-      const amount = 5;
-      const minimalAllowance = 1;
+      const amount = 5n;
+      const minimalAllowance = 1n;
       const l2DAI = await provider.l2TokenAddress(DAI_L1);
 
       const paymasterBalanceBeforeTransfer =
@@ -888,7 +878,7 @@ describe('Wallet', () => {
         paymasterParams: utils.getPaymasterParams(PAYMASTER, {
           type: 'ApprovalBased',
           token: TOKEN,
-          minimalAllowance: 1,
+          minimalAllowance: minimalAllowance,
           innerInput: new Uint8Array(),
         }),
       });
@@ -911,25 +901,24 @@ describe('Wallet', () => {
       );
 
       expect(
-        paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >=
-          BigInt(0)
+        paymasterBalanceBeforeTransfer - paymasterBalanceAfterTransfer >= 0n
       ).to.be.true;
       expect(
         paymasterTokenBalanceAfterTransfer - paymasterTokenBalanceBeforeTransfer
-      ).to.be.equal(BigInt(minimalAllowance));
+      ).to.be.equal(minimalAllowance);
 
       expect(
         senderBalanceBeforeTransfer - senderBalanceAfterTransfer
-      ).to.be.equal(BigInt(amount));
+      ).to.be.equal(amount);
       expect(
         senderApprovalTokenBalanceAfterTransfer ===
-          senderApprovalTokenBalanceBeforeTransfer - BigInt(minimalAllowance)
+          senderApprovalTokenBalanceBeforeTransfer - minimalAllowance
       ).to.be.true;
 
       expect(result).not.to.be.null;
       expect(
         receiverBalanceAfterTransfer - receiverBalanceBeforeTransfer
-      ).to.be.equal(BigInt(amount));
+      ).to.be.equal(amount);
     }).timeout(25_000);
   });
 
@@ -938,7 +927,7 @@ describe('Wallet', () => {
       const result = await wallet.signTransaction({
         type: 2,
         to: RECEIVER,
-        value: BigInt(7_000_000_000),
+        value: 7_000_000_000n,
       });
       expect(result).to.be.equal(
         '0x02f869808080840ee6b2808094a61464658afeaf65cccaafd3a512b69a83b776188501a13b860080c001a0ea6c3f7588b7b4e5652e0372aa09d772b59689ee0e51445b3b7d69bffd5d9e77a046387a8dfa24ab22d3427cd85035b91abc28e1876813873ea0b41f2bdc9ef778'

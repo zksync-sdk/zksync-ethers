@@ -17,9 +17,9 @@ describe('Paymaster', () => {
 
   describe('#ApprovalBased', () => {
     it('use the ERC20 token to pay transaction fee', async () => {
-      const INIT_MINT_AMOUNT = 10;
-      const MINT_AMOUNT = 3;
-      const MINIMAL_ALLOWANCE = 1;
+      const INIT_MINT_AMOUNT = 10n;
+      const MINT_AMOUNT = 3n;
+      const MINIMAL_ALLOWANCE = 1n;
 
       const abi = require(tokenPath).abi;
       const bytecode: string = require(tokenPath).bytecode;
@@ -97,22 +97,17 @@ describe('Paymaster', () => {
       const walletBalanceAfterTx = await wallet.getBalance();
       const walletTokenBalanceAfterTx = await wallet.getBalance(tokenAddress);
 
-      expect(paymasterTokenBalanceBeforeTx === BigInt(0)).to.be.true;
-      expect(walletTokenBalanceBeforeTx === BigInt(INIT_MINT_AMOUNT)).to.be
-        .true;
+      expect(paymasterTokenBalanceBeforeTx === 0n).to.be.true;
+      expect(walletTokenBalanceBeforeTx === INIT_MINT_AMOUNT).to.be.true;
 
-      expect(paymasterBalanceBeforeTx - paymasterBalanceAfterTx >= BigInt(0)).to
-        .be.true;
-      expect(paymasterTokenBalanceAfterTx === BigInt(MINIMAL_ALLOWANCE)).to.be
+      expect(paymasterBalanceBeforeTx - paymasterBalanceAfterTx >= 0n).to.be
         .true;
+      expect(paymasterTokenBalanceAfterTx === MINIMAL_ALLOWANCE).to.be.true;
 
-      expect(walletBalanceBeforeTx - walletBalanceAfterTx >= BigInt(0)).to.be
-        .true;
+      expect(walletBalanceBeforeTx - walletBalanceAfterTx >= 0n).to.be.true;
       expect(
         walletTokenBalanceAfterTx ===
-          walletTokenBalanceBeforeTx -
-            BigInt(MINIMAL_ALLOWANCE) +
-            BigInt(MINT_AMOUNT)
+          walletTokenBalanceBeforeTx - MINIMAL_ALLOWANCE + MINT_AMOUNT
       ).to.be.true;
     }).timeout(30_000);
   });

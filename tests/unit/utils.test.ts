@@ -187,7 +187,7 @@ describe('utils', () => {
       );
     });
 
-    it('should throw an error when empty string is provided', async () => {
+    it('should throw an error when bytecode is not divisible by 32', async () => {
       try {
         utils.hashBytecode('0x0002');
       } catch (e) {
@@ -221,16 +221,16 @@ describe('utils', () => {
       const tx: types.TransactionLike = {
         type: 113,
         nonce: 0,
-        maxPriorityFeePerGas: BigInt(0),
-        maxFeePerGas: BigInt(0),
-        gasLimit: BigInt(0),
+        maxPriorityFeePerGas: 0n,
+        maxFeePerGas: 0n,
+        gasLimit: 0n,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        value: BigInt(1000000),
+        value: 1_000_000n,
         data: '0x',
-        chainId: BigInt(270),
+        chainId: 270n,
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
         customData: {
-          gasPerPubdata: BigInt(50000),
+          gasPerPubdata: 50_000n,
           factoryDeps: [],
           customSignature: '0x',
           paymasterParams: undefined,
@@ -248,16 +248,16 @@ describe('utils', () => {
       const tx: types.TransactionLike = {
         type: 113,
         nonce: 0,
-        maxPriorityFeePerGas: BigInt(0),
-        maxFeePerGas: BigInt(0),
-        gasLimit: BigInt(0),
+        maxPriorityFeePerGas: 0n,
+        maxFeePerGas: 0n,
+        gasLimit: 0n,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        value: BigInt(0),
+        value: 0n,
         data: '0x',
-        chainId: BigInt(270),
+        chainId: 270n,
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
         customData: {
-          gasPerPubdata: BigInt(50000),
+          gasPerPubdata: 50_000n,
           factoryDeps: [],
           customSignature: '0x',
           paymasterParams: undefined,

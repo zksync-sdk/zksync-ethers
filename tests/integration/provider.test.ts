@@ -34,7 +34,7 @@ describe('Provider', () => {
     it('Provider() should return a `Provider` connected to local network when URL is not defined', async () => {
       const provider = new Provider();
       const network = await provider.getNetwork();
-      expect(network.chainId).to.be.equal(BigInt(270));
+      expect(network.chainId).to.be.equal(270n);
     });
   });
 
@@ -42,31 +42,31 @@ describe('Provider', () => {
     it('should return a provider connected to local network by default', async () => {
       const provider = Provider.getDefaultProvider();
       const network = await provider.getNetwork();
-      expect(network.chainId).to.be.equal(BigInt(270));
+      expect(network.chainId).to.be.equal(270n);
     });
 
     it('should return a provider connected to local network', async () => {
       const provider = Provider.getDefaultProvider(types.Network.Localhost);
       const network = await provider.getNetwork();
-      expect(network.chainId).to.be.equal(BigInt(270));
+      expect(network.chainId).to.be.equal(270n);
     });
 
     it('should return a provider connected to Goerli network', async () => {
       const provider = Provider.getDefaultProvider(types.Network.Goerli);
       const network = await provider.getNetwork();
-      expect(network.chainId).to.be.equal(BigInt(280));
+      expect(network.chainId).to.be.equal(280n);
     });
 
     it('should return a provider connected to Sepolia network', async () => {
       const provider = Provider.getDefaultProvider(types.Network.Sepolia);
       const network = await provider.getNetwork();
-      expect(network.chainId).to.be.equal(BigInt(300));
+      expect(network.chainId).to.be.equal(300n);
     });
 
     it('should return a provider connected to main network', async () => {
       const provider = Provider.getDefaultProvider(types.Network.Mainnet);
       const network = await provider.getNetwork();
-      expect(network.chainId).to.be.equal(BigInt(324));
+      expect(network.chainId).to.be.equal(324n);
     });
   });
 
@@ -102,7 +102,7 @@ describe('Provider', () => {
 
   describe('#getGasPrice()', () => {
     it('should return a gas price', async () => {
-      const GAS_PRICE = BigInt(2_500_000_00);
+      const GAS_PRICE = 250_000_000n;
       const result = await provider.getGasPrice();
       expect(result).to.be.equal(GAS_PRICE);
     });
@@ -178,7 +178,7 @@ describe('Provider', () => {
 
   describe('#getProof()', () => {
     it('should return a storage proof', async () => {
-      // fetchin the storage proof for rawHonce storage slot in NonceHolder system contract
+      // fetching the storage proof for rawNonce storage slot in NonceHolder system contract
       // mapping(uint256 => uint256) internal rawNonces;
 
       // Ensure the address is a 256-bit number by padding it
@@ -349,7 +349,7 @@ describe('Provider', () => {
     it('should return an ETH withdraw transaction', async () => {
       const tx = {
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-        value: BigInt(7_000_000_000),
+        value: 7_000_000_000n,
         to: '0x000000000000000000000000000000000000800a',
         data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
       };
@@ -365,7 +365,7 @@ describe('Provider', () => {
     it('should return an ETH withdraw transaction with paymaster parameters', async () => {
       const tx = {
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-        value: BigInt(7_000_000_000),
+        value: 7_000_000_000n,
         to: '0x000000000000000000000000000000000000800a',
         data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
         customData: {
@@ -437,7 +437,7 @@ describe('Provider', () => {
     it('should return a withdraw transaction with `tx.from==tx.to` when `tx.to` is not provided', async () => {
       const tx = {
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-        value: BigInt(7_000_000_000),
+        value: 7_000_000_000n,
         to: '0x000000000000000000000000000000000000800a',
         data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
       };
@@ -653,7 +653,7 @@ describe('Provider', () => {
       const result = await provider.estimateFee({
         from: ADDRESS,
         to: RECEIVER,
-        value: `0x${BigInt(7_000_000_000).toString(16)}`,
+        value: `0x${7_000_000_000n.toString(16)}`,
       });
       expect(result).not.to.be.null;
     });
