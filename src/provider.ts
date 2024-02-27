@@ -375,7 +375,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return defaultFormatter;
     }
 
-    override async getBalance(address: Address, blockTag?: BlockTag, tokenAddress?: Address): Promise<BigNumber> {
+    override async getBalance(
+        address: Address,
+        blockTag?: BlockTag,
+        tokenAddress?: Address,
+    ): Promise<BigNumber> {
         const tag = this.formatter.blockTag(blockTag);
         if (tokenAddress == null || isETH(tokenAddress)) {
             // requesting ETH balance
@@ -469,9 +473,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     override async estimateGas(transaction: utils.Deferrable<TransactionRequest>): Promise<BigNumber> {
         await this.getNetwork();
-        const params = await utils.resolveProperties({
+        const params = (await utils.resolveProperties({
             transaction: this._getTransactionRequest(transaction),
-        }) as {transaction: TransactionRequest};
+        })) as { transaction: TransactionRequest };
         if (transaction.customData != null) {
             params.transaction.customData = transaction.customData;
         }
@@ -493,7 +497,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             params.transaction.customData = transaction.customData;
         }
         const result = await this.send("zks_estimateGasL1ToL2", [
-            Provider.hexlifyTransaction(params.transaction as ethers.providers.TransactionRequest, { from: true }),
+            Provider.hexlifyTransaction(params.transaction as ethers.providers.TransactionRequest, {
+                from: true,
+            }),
         ]);
         try {
             return BigNumber.from(result);

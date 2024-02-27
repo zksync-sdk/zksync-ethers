@@ -12,11 +12,7 @@ describe("utils", () => {
                 "0x6c0960f936615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000000000000000000000000000000000001a13b8600";
             const withdrawETHMessageHash =
                 "0x521bd25904766c83fe868d6a29cbffa011afd8a1754f6c9a52b053b693e42f18";
-            const result = utils.getHashedL2ToL1Msg(
-                ADDRESS,
-                withdrawETHMessage,
-                0,
-            );
+            const result = utils.getHashedL2ToL1Msg(ADDRESS, withdrawETHMessage, 0);
             expect(result).to.be.equal(withdrawETHMessageHash);
         });
     });
@@ -188,7 +184,9 @@ describe("utils", () => {
             try {
                 utils.hashBytecode("0x0002");
             } catch (e) {
-                expect((e as Error).message).to.be.equal("The bytecode length in bytes must be divisible by 32!");
+                expect((e as Error).message).to.be.equal(
+                    "The bytecode length in bytes must be divisible by 32!",
+                );
             }
         });
 

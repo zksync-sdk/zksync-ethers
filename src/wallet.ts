@@ -1,7 +1,7 @@
 import { EIP712Signer } from "./signer";
 import { Provider } from "./provider";
 import { serialize, EIP712_TX_TYPE } from "./utils";
-import {Bytes, ethers, utils} from "ethers";
+import { Bytes, ethers, utils } from "ethers";
 import { BlockTag, TransactionResponse, TransactionRequest } from "./types";
 import { ProgressCallback } from "@ethersproject/json-wallets";
 import { AdapterL1, AdapterL2 } from "./adapters";
@@ -56,13 +56,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         json: string,
         password?: string | ethers.Bytes,
         callback?: ProgressCallback,
-    ):Promise<Wallet> {
-        const wallet = await super.fromEncryptedJson(json, password as (string | Bytes), callback);
+    ): Promise<Wallet> {
+        const wallet = await super.fromEncryptedJson(json, password as string | Bytes, callback);
         return new Wallet(wallet._signingKey());
     }
 
     static override fromEncryptedJsonSync(json: string, password?: string | ethers.Bytes): Wallet {
-        const wallet = super.fromEncryptedJsonSync(json, password as (string | Bytes));
+        const wallet = super.fromEncryptedJsonSync(json, password as string | Bytes);
         return new Wallet(wallet._signingKey());
     }
 
@@ -85,7 +85,10 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     }
 
     override async populateTransaction(transaction: TransactionRequest): Promise<TransactionRequest> {
-        if ((transaction.type == null || transaction.type !== EIP712_TX_TYPE) && transaction.customData == null) {
+        if (
+            (transaction.type == null || transaction.type !== EIP712_TX_TYPE) &&
+            transaction.customData == null
+        ) {
             return await super.populateTransaction(transaction);
         }
         transaction.type = EIP712_TX_TYPE;
