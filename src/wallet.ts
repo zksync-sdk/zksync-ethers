@@ -79,19 +79,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         super(privateKey, providerL2);
         if (this.provider != null) {
             const chainId = this.getChainId();
-            // @ts-ignore
             this.eip712 = new EIP712Signer(this, chainId);
         }
         this.providerL1 = providerL1;
     }
 
     override async populateTransaction(transaction: TransactionRequest): Promise<TransactionRequest> {
-        if (transaction.type == null && transaction.customData == null) {
-            // use legacy txs by default
-            transaction.type = 0;
-        }
-
-        if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
+        if ((transaction.type == null || transaction.type !== EIP712_TX_TYPE) && transaction.customData == null) {
             return await super.populateTransaction(transaction);
         }
         transaction.type = EIP712_TX_TYPE;
@@ -101,7 +95,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         populated.value ??= 0;
         populated.data ??= "0x";
         populated.customData = this._fillCustomData(transaction.customData);
-        populated.gasPrice = await this.provider.getGasPrice();
+        if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
+            populated.gasPrice = await this.provider.getGasPrice();
+        }
         return populated;
     }
 
@@ -126,8 +122,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     override async sendTransaction(
         transaction: ethers.providers.TransactionRequest,
     ): Promise<TransactionResponse> {
-        // Typescript isn't smart enough to recognise that wallet.sendTransaction
-        // calls provider.sendTransaction which returns our extended type and not ethers' one.
         return (await super.sendTransaction(transaction)) as TransactionResponse;
     }
 }
