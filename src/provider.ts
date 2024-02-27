@@ -43,7 +43,7 @@ import {
 import { Signer } from "./signer";
 import Formatter = providers.Formatter;
 
-let defaultFormatter: Formatter = null;
+let defaultFormatter: Formatter | null = null;
 
 export class Provider extends ethers.providers.JsonRpcProvider {
     private static _nextPollId = 1;
@@ -64,7 +64,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         // Track all running promises, so we can trigger a post-poll once they are complete
         const runners: Array<Promise<void>> = [];
 
-        let blockNumber: number = null;
+        let blockNumber: number;
         try {
             blockNumber = await this._getInternalBlockNumber(100 + this.pollingInterval / 2);
         } catch (error) {
@@ -165,7 +165,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                             this.emit("error", error);
                         });
 
-                    runners.push(runner);
+                    runners.push(runner as Promise<void>);
 
                     break;
                 }
@@ -359,7 +359,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             defaultFormatter.formats.receipt.l1BatchNumber = Formatter.allowNull(number);
             defaultFormatter.formats.receipt.l1BatchTxIndex = Formatter.allowNull(number);
             defaultFormatter.formats.receipt.l2ToL1Logs = Formatter.arrayOf((value) =>
-                Formatter.check((defaultFormatter.formats as any).l2Tol1Log, value),
+                Formatter.check((defaultFormatter!.formats as any).l2Tol1Log, value),
             );
 
             defaultFormatter.formats.block.l1BatchNumber = Formatter.allowNull(number);
@@ -375,14 +375,14 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return defaultFormatter;
     }
 
-    override async getBalance(address: Address, blockTag?: BlockTag, tokenAddress?: Address) {
+    override async getBalance(address: Address, blockTag?: BlockTag, tokenAddress?: Address): Promise<BigNumber> {
         const tag = this.formatter.blockTag(blockTag);
         if (tokenAddress == null || isETH(tokenAddress)) {
             // requesting ETH balance
             return await super.getBalance(address, tag);
         } else {
             try {
-                let token = IERC20Factory.connect(tokenAddress, this);
+                const token = IERC20Factory.connect(tokenAddress, this);
                 return await token.balanceOf(address, { blockTag: tag });
             } catch {
                 return BigNumber.from(0);
@@ -390,13 +390,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
     }
 
-    async l2TokenAddress(token: Address) {
+    async l2TokenAddress(token: Address): Promise<string> {
         if (token == ETH_ADDRESS) {
             return ETH_ADDRESS;
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
+        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2!, this);
         try {
             const l2WethToken = await l2WethBridge.l2TokenAddress(token);
             // If the token is Wrapped Ether, return its L2 token address
@@ -404,17 +404,17 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                 return l2WethToken;
             }
         } catch (e) {}
-        const l2Erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
+        const l2Erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2!, this);
         return await l2Erc20Bridge.l2TokenAddress(token);
     }
 
-    async l1TokenAddress(token: Address) {
+    async l1TokenAddress(token: Address): Promise<string> {
         if (token == ETH_ADDRESS) {
             return ETH_ADDRESS;
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
+        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2!, this);
         try {
             const l1WethToken = await l2WethBridge.l1TokenAddress(token);
             // If the token is Wrapped Ether, return its L1 token address
@@ -422,7 +422,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                 return l1WethToken;
             }
         } catch (e) {}
-        const erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
+        const erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2!, this);
         return await erc20Bridge.l1TokenAddress(token);
     }
 
@@ -471,9 +471,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         await this.getNetwork();
         const params = await utils.resolveProperties({
             transaction: this._getTransactionRequest(transaction),
-        });
+        }) as {transaction: TransactionRequest};
         if (transaction.customData != null) {
-            // @ts-ignore
             params.transaction.customData = transaction.customData;
         }
         const result = await this.perform("estimateGas", params);
@@ -494,7 +493,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             params.transaction.customData = transaction.customData;
         }
         const result = await this.send("zks_estimateGasL1ToL2", [
-            Provider.hexlifyTransaction(params.transaction, { from: true }),
+            Provider.hexlifyTransaction(params.transaction as ethers.providers.TransactionRequest, { from: true }),
         ]);
         try {
             return BigNumber.from(result);
@@ -558,7 +557,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         if (!this.contractAddresses.mainContract) {
             this.contractAddresses.mainContract = await this.send("zks_getMainContract", []);
         }
-        return this.contractAddresses.mainContract;
+        return this.contractAddresses.mainContract!;
     }
 
     async getTestnetPaymasterAddress(): Promise<Address | null> {
@@ -567,9 +566,19 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return await this.send("zks_getTestnetPaymaster", []);
     }
 
-    async getDefaultBridgeAddresses() {
+    async getDefaultBridgeAddresses(): Promise<{
+        erc20L1: string | undefined;
+        erc20L2: string | undefined;
+        wethL1: string | undefined;
+        wethL2: string | undefined;
+    }> {
         if (!this.contractAddresses.erc20BridgeL1) {
-            let addresses = await this.send("zks_getBridgeContracts", []);
+            const addresses: {
+                l1Erc20DefaultBridge: string;
+                l2Erc20DefaultBridge: string;
+                l1WethBridge: string;
+                l2WethBridge: string;
+            } = await this.send("zks_getBridgeContracts", []);
             this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
             this.contractAddresses.erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
             this.contractAddresses.wethBridgeL1 = addresses.l1WethBridge;
@@ -588,7 +597,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     async getAllAccountBalances(address: Address): Promise<BalancesMap> {
-        let balances = await this.send("zks_getAllAccountBalances", [address]);
+        const balances = await this.send("zks_getAllAccountBalances", [address]);
         for (let token in balances) {
             balances[token] = BigNumber.from(balances[token]);
         }
@@ -662,7 +671,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             }
 
             const ethL2Token = IEthTokenFactory.connect(L2_ETH_TOKEN_ADDRESS, this);
-            const populatedTx = await ethL2Token.populateTransaction.withdraw(tx.to, tx.overrides);
+            const populatedTx = await ethL2Token.populateTransaction.withdraw(tx.to!, tx.overrides);
             if (tx.paymasterParams) {
                 return {
                     ...populatedTx,
@@ -676,7 +685,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
         if (tx.bridgeAddress == null) {
             const bridgeAddresses = await this.getDefaultBridgeAddresses();
-            const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
+            const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2!, this);
             let l1WethToken = ethers.constants.AddressZero;
             try {
                 l1WethToken = await l2WethBridge.l1TokenAddress(tx.token);
@@ -689,7 +698,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
         const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
         const populatedTx = await bridge.populateTransaction.withdraw(
-            tx.to,
+            tx.to!,
             tx.token,
             tx.amount,
             tx.overrides,
@@ -851,7 +860,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     // This is inefficient. Status should probably be indicated in the transaction receipt.
-    async getTransactionStatus(txHash: string) {
+    async getTransactionStatus(txHash: string): Promise<TransactionStatus> {
         const tx = await this.getTransaction(txHash);
         if (tx == null) {
             return TransactionStatus.NotFound;
@@ -869,6 +878,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     override async getTransaction(hash: string | Promise<string>): Promise<TransactionResponse> {
         hash = await hash;
         const tx = await super.getTransaction(hash);
+        // @ts-ignore
         return tx ? this._wrapTransaction(tx, hash) : null;
     }
 
@@ -965,7 +975,7 @@ export class Web3Provider extends Provider {
             throw new Error("Provider must implement eip-1193!");
         }
 
-        let path = provider.host || provider.path || (provider.isMetaMask ? "metamask" : "eip-1193:");
+        const path = provider.host || provider.path || (provider.isMetaMask ? "metamask" : "eip-1193:");
         super(path, network);
         this.provider = provider;
     }
@@ -978,7 +988,7 @@ export class Web3Provider extends Provider {
             method = "personal_sign";
             params = [params[1], params[0]];
         }
-        return await this.provider.request({ method, params });
+        return await this.provider.request!({ method, params });
     }
 
     override getSigner(addressOrIndex?: number | string): Signer {

@@ -1,15 +1,15 @@
 import { EIP712Signer } from "./signer";
 import { Provider } from "./provider";
 import { serialize, EIP712_TX_TYPE } from "./utils";
-import { ethers, utils } from "ethers";
+import {Bytes, ethers, utils} from "ethers";
 import { BlockTag, TransactionResponse, TransactionRequest } from "./types";
 import { ProgressCallback } from "@ethersproject/json-wallets";
 import { AdapterL1, AdapterL2 } from "./adapters";
 
 export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
-    override readonly provider: Provider;
+    override readonly provider!: Provider;
     providerL1?: ethers.providers.Provider;
-    public eip712: EIP712Signer;
+    public eip712!: EIP712Signer;
 
     override _providerL1() {
         if (this.providerL1 == null) {
@@ -18,36 +18,36 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         return this.providerL1;
     }
 
-    override _providerL2() {
+    override _providerL2(): Provider {
         return this.provider;
     }
 
-    override _signerL1() {
+    override _signerL1(): ethers.Wallet {
         return this.ethWallet();
     }
 
-    override _signerL2() {
+    override _signerL2(): Wallet {
         return this;
     }
 
-    ethWallet() {
+    ethWallet(): ethers.Wallet {
         return new ethers.Wallet(this._signingKey(), this._providerL1());
     }
 
     // an alias with a better name
-    async getNonce(blockTag?: BlockTag) {
+    async getNonce(blockTag?: BlockTag): Promise<number> {
         return await this.getTransactionCount(blockTag);
     }
 
-    override connect(provider: Provider) {
+    override connect(provider: Provider): Wallet {
         return new Wallet(this._signingKey(), provider, this.providerL1);
     }
 
-    connectToL1(provider: ethers.providers.Provider) {
+    connectToL1(provider: ethers.providers.Provider): Wallet {
         return new Wallet(this._signingKey(), this.provider, provider);
     }
 
-    static override fromMnemonic(mnemonic: string, path?: string, wordlist?: ethers.Wordlist) {
+    static override fromMnemonic(mnemonic: string, path?: string, wordlist?: ethers.Wordlist): Wallet {
         const wallet = super.fromMnemonic(mnemonic, path, wordlist);
         return new Wallet(wallet._signingKey());
     }
@@ -56,13 +56,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         json: string,
         password?: string | ethers.Bytes,
         callback?: ProgressCallback,
-    ) {
-        const wallet = await super.fromEncryptedJson(json, password, callback);
+    ):Promise<Wallet> {
+        const wallet = await super.fromEncryptedJson(json, password as (string | Bytes), callback);
         return new Wallet(wallet._signingKey());
     }
 
-    static override fromEncryptedJsonSync(json: string, password?: string | ethers.Bytes) {
-        const wallet = super.fromEncryptedJsonSync(json, password);
+    static override fromEncryptedJsonSync(json: string, password?: string | ethers.Bytes): Wallet {
+        const wallet = super.fromEncryptedJsonSync(json, password as (string | Bytes));
         return new Wallet(wallet._signingKey());
     }
 
@@ -94,7 +94,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         populated.type = EIP712_TX_TYPE;
         populated.value ??= 0;
         populated.data ??= "0x";
-        populated.customData = this._fillCustomData(transaction.customData);
+        populated.customData = this._fillCustomData(transaction.customData ?? {});
         if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
             populated.gasPrice = await this.provider.getGasPrice();
         }
@@ -113,7 +113,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
                 throw new Error("Transaction `from` address mismatch!");
             }
             const populated = await this.populateTransaction(transaction);
-            populated.customData.customSignature = await this.eip712.sign(transaction);
+            populated.customData!.customSignature = await this.eip712.sign(transaction);
 
             return serialize(populated);
         }

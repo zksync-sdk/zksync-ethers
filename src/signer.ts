@@ -93,8 +93,8 @@ export class EIP712Signer {
 // const tx = await signer.sendTransaction({ ... });
 /* c8 ignore start */
 export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
-    public override provider: Provider;
-    public eip712: EIP712Signer;
+    public override provider!: Provider;
+    public eip712!: EIP712Signer;
 
     override _signerL2() {
         return this;
@@ -133,7 +133,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
             transaction.value ??= 0;
             transaction.data ??= "0x";
             transaction.nonce ??= await this.getNonce();
-            transaction.customData = this._fillCustomData(transaction.customData);
+            transaction.customData = this._fillCustomData(transaction.customData ?? {});
             transaction.gasPrice ??= await this.provider.getGasPrice();
             transaction.gasLimit ??= await this.provider.estimateGas(transaction);
             transaction.chainId ??= (await this.provider.getNetwork()).chainId;
@@ -153,7 +153,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
 // const signer = zkweb3.L1Signer.from(provider.getSigner(), zksyncProvider);
 // const tx = await signer.deposit({ ... });
 export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
-    public providerL2: Provider;
+    public providerL2!: Provider;
     override _providerL2() {
         return this.providerL2;
     }

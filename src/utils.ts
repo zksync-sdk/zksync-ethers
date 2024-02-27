@@ -52,14 +52,14 @@ export const L1_FEE_ESTIMATION_COEF_NUMERATOR = BigNumber.from(12);
 export const L1_FEE_ESTIMATION_COEF_DENOMINATOR = BigNumber.from(10);
 
 // This gas limit will be used for displaying the error messages when the users do not have enough fee.
-export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 400000;
-export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200000;
+export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 400_000;
+export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200_000;
 
 // The large L2 gas per pubdata to sign. This gas is enough to ensure that
 // any reasonable limit will be accepted. Note, that the operator is NOT required to
 // use the honest value of gas per pubdata, and it can use any value up to the one signed by the user.
 // In the future releases, we will provide a way to estimate the current gasPerPubdata.
-export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50000;
+export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50_000;
 
 // It is possible to provide practically any gasPerPubdataByte for L1->L2 transactions, since
 // the cost per gas will be adjusted respectively. We will use 800 as a relatively optimal value for now.
@@ -271,7 +271,7 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
 }
 
 export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction {
-    function handleAddress(value: string): string {
+    function handleAddress(value: string): string | null {
         if (value === "0x") {
             return null;
         }
@@ -381,7 +381,7 @@ export function getL2HashFromPriorityOp(
     txReceipt: ethers.providers.TransactionReceipt,
     zkSyncAddress: Address,
 ): string {
-    let txHash: string = null;
+    let txHash: string | null = null;
     for (const log of txReceipt.logs) {
         if (log.address.toLowerCase() != zkSyncAddress.toLowerCase()) {
             continue;
@@ -559,7 +559,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
     } else {
         let value, l1BridgeAddress, l2BridgeAddress, bridgeData;
         const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
-        const l1WethBridge = IL1BridgeFactory.connect(bridgeAddresses.wethL1, providerL1);
+        const l1WethBridge = IL1BridgeFactory.connect(bridgeAddresses.wethL1!, providerL1);
         let l2WethToken = ethers.constants.AddressZero;
         try {
             l2WethToken = await l1WethBridge.l2TokenAddress(token);
@@ -579,8 +579,8 @@ export async function estimateDefaultBridgeDepositL2Gas(
 
         return await estimateCustomBridgeDepositL2Gas(
             providerL2,
-            l1BridgeAddress,
-            l2BridgeAddress,
+            l1BridgeAddress!,
+            l2BridgeAddress!,
             token,
             amount,
             to,
@@ -608,7 +608,7 @@ export async function estimateCustomBridgeDepositL2Gas(
     gasPerPubdataByte?: BigNumberish,
     l2Value?: BigNumberish,
 ): Promise<BigNumber> {
-    const calldata = await getERC20BridgeCalldata(token, from, to, amount, bridgeData);
+    const calldata = await getERC20BridgeCalldata(token, from!, to, amount, bridgeData);
     return await providerL2.estimateL1ToL2Execute({
         caller: applyL1ToL2Alias(l1BridgeAddress),
         contractAddress: l2BridgeAddress,

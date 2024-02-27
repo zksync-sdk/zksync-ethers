@@ -15,7 +15,7 @@ import { hexlify, isBytes, isHexString } from "@ethersproject/bytes";
 export { Contract } from "ethers";
 
 export class ContractFactory extends ethers.ContractFactory {
-    override readonly signer: Wallet | Signer;
+    override readonly signer!: Wallet | Signer;
     readonly deploymentType: DeploymentType;
 
     constructor(
@@ -92,7 +92,7 @@ export class ContractFactory extends ethers.ContractFactory {
         const bytecodeHash = hashBytecode(this.bytecode);
         const constructorCalldata = utils.arrayify(this.interface.encodeDeploy(constructorArgs));
         const deployCalldata = this.encodeCalldata(
-            overrides.customData.salt,
+            overrides.customData!.salt,
             bytecodeHash,
             constructorCalldata,
         );
@@ -107,7 +107,7 @@ export class ContractFactory extends ethers.ContractFactory {
         };
 
         tx.customData ??= {};
-        tx.customData.factoryDeps ??= overrides.customData.factoryDeps || [];
+        tx.customData.factoryDeps ??= overrides.customData!.factoryDeps;
         tx.customData.gasPerPubdata ??= DEFAULT_GAS_PER_PUBDATA_LIMIT;
 
         // The number of factory deps is relatively low, so it is efficient enough.
@@ -176,13 +176,13 @@ export class ContractFactory extends ethers.ContractFactory {
 }
 
 function normalizeBytecode(bytecode: BytesLike | { object: string }) {
-    let bytecodeHex: string = null;
+    let bytecodeHex: string;
 
     if (typeof bytecode === "string") {
         bytecodeHex = bytecode;
     } else if (isBytes(bytecode)) {
         bytecodeHex = hexlify(bytecode);
-    } else if (bytecode && typeof bytecode.object === "string") {
+    } else if (bytecode) {
         // Allow the bytecode object from the Solidity compiler
         bytecodeHex = (<any>bytecode).object;
     } else {
