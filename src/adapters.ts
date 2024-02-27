@@ -34,9 +34,9 @@ import {
     undoL1ToL2Alias,
     NONCE_HOLDER_ADDRESS,
 } from "./utils";
-import {Il2Bridge} from "../typechain/Il2Bridge";
-import {IZkSync} from "../typechain/IZkSync";
-import {Il1Bridge} from "../typechain/Il1Bridge";
+import { Il2Bridge } from "../typechain/Il2Bridge";
+import { IZkSync } from "../typechain/IZkSync";
+import { Il1Bridge } from "../typechain/Il1Bridge";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -64,7 +64,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             return IZkSyncFactory.connect(address, this._signerL1());
         }
 
-        async getL1BridgeContracts(): Promise<{erc20: Il1Bridge; weth: Il1Bridge}> {
+        async getL1BridgeContracts(): Promise<{ erc20: Il1Bridge; weth: Il1Bridge }> {
             const addresses = await this._providerL2().getDefaultBridgeAddresses();
             return {
                 erc20: IL1BridgeFactory.connect(addresses.erc20L1!, this._signerL1()),
@@ -528,7 +528,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const sender = ethers.utils.hexDataSlice(log.topics[1], 12);
             const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex);
             if (!proof) {
-                throw new Error('Log proof not found!');
+                throw new Error("Log proof not found!");
             }
             const message = ethers.utils.defaultAbiCoder.decode(["bytes"], log.data)[0];
             return {
@@ -599,7 +599,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             // which is returned as `proof.id`.
             const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex);
             if (!proof) {
-                throw new Error('Log proof not found!');
+                throw new Error("Log proof not found!");
             }
 
             if (isETH(sender)) {
@@ -615,7 +615,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             return await l1Bridge.isWithdrawalFinalized(log.l1BatchNumber, proof.id);
         }
 
-        async claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides): Promise<ethers.ContractTransaction> {
+        async claimFailedDeposit(
+            depositHash: BytesLike,
+            overrides?: ethers.Overrides,
+        ): Promise<ethers.ContractTransaction> {
             const receipt = await this._providerL2().getTransactionReceipt(
                 ethers.utils.hexlify(depositHash),
             );
@@ -641,7 +644,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
             const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
             if (!proof) {
-                throw new Error('Log proof not found!');
+                throw new Error("Log proof not found!");
             }
 
             return await l1Bridge.claimFailedDeposit(
@@ -778,7 +781,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
             ).getDeploymentNonce(await this.getAddress());
         }
 
-        async getL2BridgeContracts(): Promise<{erc20: Il2Bridge; weth: Il2Bridge}> {
+        async getL2BridgeContracts(): Promise<{ erc20: Il2Bridge; weth: Il2Bridge }> {
             const addresses = await this._providerL2().getDefaultBridgeAddresses();
             return {
                 erc20: IL2BridgeFactory.connect(addresses.erc20L2!, this._signerL2()),

@@ -145,7 +145,9 @@ describe("Wallet", () => {
             try {
                 wallet.ethWallet();
             } catch (e) {
-                expect((e as Error).message).to.be.equal("L1 provider missing: use `connectToL1` to specify!");
+                expect((e as Error).message).to.be.equal(
+                    "L1 provider missing: use `connectToL1` to specify!",
+                );
             }
         });
     });
@@ -201,14 +203,14 @@ describe("Wallet", () => {
                 type: 113,
                 from: ADDRESS,
                 nonce: await wallet.getNonce("pending"),
-                data: '0x',
+                data: "0x",
                 chainId: 270,
                 maxFeePerGas: BigNumber.from(3_500_000_000),
                 maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
                 customData: {
                     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-                    factoryDeps: []
-                }
+                    factoryDeps: [],
+                },
             };
             const result = await wallet.populateTransaction({
                 to: RECEIVER,
@@ -217,8 +219,8 @@ describe("Wallet", () => {
                 maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
                 customData: {
                     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-                    factoryDeps: []
-                }
+                    factoryDeps: [],
+                },
             });
             expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
         });
@@ -230,21 +232,21 @@ describe("Wallet", () => {
                 type: 113,
                 from: ADDRESS,
                 nonce: await wallet.getNonce("pending"),
-                data: '0x',
+                data: "0x",
                 chainId: 270,
                 maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
                 customData: {
                     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-                    factoryDeps: []
-                }
+                    factoryDeps: [],
+                },
             };
             const result = await wallet.populateTransaction({
                 to: RECEIVER,
                 value: 7_000_000,
                 maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
                 customData: {
-                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT
-                }
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                },
             });
             expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
         });
@@ -256,21 +258,21 @@ describe("Wallet", () => {
                 type: 113,
                 from: ADDRESS,
                 nonce: await wallet.getNonce("pending"),
-                data: '0x',
+                data: "0x",
                 chainId: 270,
                 maxFeePerGas: BigNumber.from(3_500_000_000),
                 customData: {
                     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-                    factoryDeps: []
-                }
+                    factoryDeps: [],
+                },
             };
             const result = await wallet.populateTransaction({
                 to: RECEIVER,
                 value: 7_000_000,
                 maxFeePerGas: BigNumber.from(3_500_000_000),
                 customData: {
-                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT
-                }
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                },
             });
             expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
         });
@@ -315,22 +317,22 @@ describe("Wallet", () => {
         });
 
         it("should return populated legacy transaction when `type = 0`", async () => {
-          const tx = {
-              to: RECEIVER,
-              value: 7_000_000,
-              type: 0,
-              from: ADDRESS,
-              nonce: await wallet.getNonce("pending"),
-              chainId: 270,
-              gasPrice: BigNumber.from(250_000_000),
-          };
-          const result = await wallet.populateTransaction({
-              type: 0,
-              to: RECEIVER,
-              value: 7_000_000,
-          });
-          expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
-      });
+            const tx = {
+                to: RECEIVER,
+                value: 7_000_000,
+                type: 0,
+                from: ADDRESS,
+                nonce: await wallet.getNonce("pending"),
+                chainId: 270,
+                gasPrice: BigNumber.from(250_000_000),
+            };
+            const result = await wallet.populateTransaction({
+                type: 0,
+                to: RECEIVER,
+                value: 7_000_000,
+            });
+            expect(result).to.be.deepEqualExcluding(tx, ["gasLimit"]);
+        });
     });
 
     describe("#sendTransaction()", () => {
@@ -341,8 +343,8 @@ describe("Wallet", () => {
                 maxFeePerGas: BigNumber.from(3_500_000_000),
                 maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
                 customData: {
-                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT
-                }
+                    gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                },
             });
             const tx = await wallet.sendTransaction(populatedTx);
             const result = await tx.wait();
