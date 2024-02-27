@@ -2,7 +2,7 @@ name: Run tests
 on:
   workflow_dispatch:
   pull_request:
-    branch: ethers-v5
+    branches: [ethers-v5]
     types: [ opened, reopened, synchronize ]
 
 permissions:
@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
       - name: Install dependencies
