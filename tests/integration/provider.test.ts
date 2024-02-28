@@ -192,7 +192,9 @@ describe('Provider', () => {
           l1BatchNumber
         );
         expect(result).not.to.be.null;
-      } catch (error) {}
+      } catch (error) {
+        // skip
+      }
     });
   });
 
@@ -656,7 +658,7 @@ describe('Provider', () => {
       const result = await provider.estimateFee({
         from: ADDRESS,
         to: RECEIVER,
-        value: `0x${BigInt(7_000_000_000).toString(16)}`,
+        value: BigNumber.from(7_000_000_000).toHexString(),
       });
       expect(result).not.to.be.null;
     });

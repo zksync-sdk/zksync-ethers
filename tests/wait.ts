@@ -1,4 +1,4 @@
-import {Provider, types, utils} from '../src';
+import {Provider, utils} from '../src';
 
 /*
 Waits until node is ready to receive traffic. It's used to wait for local environment setup.

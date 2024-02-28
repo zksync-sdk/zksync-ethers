@@ -256,10 +256,10 @@ export interface RawBlockTransaction {
     L2: {
       nonce: number;
       fee: {
-        gas_limit: BigInt;
-        max_fee_per_gas: BigInt;
-        max_priority_fee_per_gas: BigInt;
-        gas_per_pubdata_limit: BigInt;
+        gas_limit: BigNumber;
+        max_fee_per_gas: BigNumber;
+        max_priority_fee_per_gas: BigNumber;
+        gas_per_pubdata_limit: BigNumber;
       };
       initiatorAddress: Address;
       signature: Uint8Array;
@@ -278,7 +278,7 @@ export interface RawBlockTransaction {
     calldata: string;
     contractAddress: Address;
     factoryDeps: BytesLike[];
-    value: BigInt;
+    value: BigNumber;
   };
   received_timestamp_ms: number;
   raw_bytes: string;

@@ -128,7 +128,6 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
     signer: ethers.providers.JsonRpcSigner & {provider: Provider}
   ): Signer {
     const newSigner: Signer = Object.setPrototypeOf(signer, Signer.prototype);
-    // @ts-ignore
     newSigner.eip712 = new EIP712Signer(newSigner, newSigner.getChainId());
     return newSigner;
   }
@@ -141,16 +140,16 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
   override async sendTransaction(
     transaction: TransactionRequest
   ): Promise<TransactionResponse> {
-    if (transaction.customData == null && transaction.type == null) {
+    if (!transaction.customData && !transaction.type) {
       // use legacy txs by default
       transaction.type = 0;
     }
-    if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
+    if (!transaction.customData && transaction.type !== EIP712_TX_TYPE) {
       return (await super.sendTransaction(transaction)) as TransactionResponse;
     } else {
       const address = await this.getAddress();
       transaction.from ??= address;
-      if (transaction.from.toLowerCase() != address.toLowerCase()) {
+      if (transaction.from.toLowerCase() !== address.toLowerCase()) {
         throw new Error('Transaction `from` address mismatch!');
       }
       transaction.type = EIP712_TX_TYPE;

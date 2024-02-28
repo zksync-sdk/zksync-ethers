@@ -34,7 +34,7 @@ export function getPaymasterParams(
   paymasterAddress: Address,
   paymasterInput: PaymasterInput
 ): PaymasterParams {
-  if (paymasterInput.type == 'General') {
+  if (paymasterInput.type === 'General') {
     return {
       paymaster: paymasterAddress,
       paymasterInput: getGeneralPaymasterInput(paymasterInput),

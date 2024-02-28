@@ -67,6 +67,7 @@ describe('ContractFactory', () => {
       const abi = require(tokenPath).abi;
       const bytecode: string = require(tokenPath).bytecode;
       try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         new ContractFactory(abi, bytecode, wallet, 'null');
       } catch (e) {

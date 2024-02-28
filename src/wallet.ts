@@ -12,7 +12,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   public eip712!: EIP712Signer;
 
   override _providerL1() {
-    if (this.providerL1 == null) {
+    if (!this.providerL1) {
       throw new Error('L1 provider missing: use `connectToL1` to specify!');
     }
     return this.providerL1;
@@ -91,7 +91,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     providerL1?: ethers.providers.Provider
   ) {
     super(privateKey, providerL2);
-    if (this.provider != null) {
+    if (this.provider) {
       const chainId = this.getChainId();
       this.eip712 = new EIP712Signer(this, chainId);
     }
@@ -102,8 +102,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     transaction: TransactionRequest
   ): Promise<TransactionRequest> {
     if (
-      (transaction.type == null || transaction.type !== EIP712_TX_TYPE) &&
-      transaction.customData == null
+      (!transaction.type || transaction.type !== EIP712_TX_TYPE) &&
+      !transaction.customData
     ) {
       return await super.populateTransaction(transaction);
     }
@@ -123,14 +123,14 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async signTransaction(
     transaction: TransactionRequest
   ): Promise<string> {
-    if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
-      if (transaction.type == 2 && transaction.maxFeePerGas == null) {
+    if (!transaction.customData && transaction.type !== EIP712_TX_TYPE) {
+      if (transaction.type === 2 && !transaction.maxFeePerGas) {
         transaction.maxFeePerGas = await this.provider.getGasPrice();
       }
       return await super.signTransaction(transaction);
     } else {
       transaction.from ??= this.address;
-      if (transaction.from.toLowerCase() != this.address.toLowerCase()) {
+      if (transaction.from.toLowerCase() !== this.address.toLowerCase()) {
         throw new Error('Transaction `from` address mismatch!');
       }
       const populated = await this.populateTransaction(transaction);
