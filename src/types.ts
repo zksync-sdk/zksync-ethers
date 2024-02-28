@@ -469,7 +469,7 @@ export class Transaction extends ethers.Transaction {
   }
 
   override get from(): string | null {
-    return this.#type === EIP712_TX_TYPE ? (this.#from!) : super.from;
+    return this.#type === EIP712_TX_TYPE ? this.#from! : super.from;
   }
   override set from(value: string | null) {
     this.#from = value;

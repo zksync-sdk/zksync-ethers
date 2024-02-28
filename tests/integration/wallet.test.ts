@@ -1154,9 +1154,7 @@ describe('Wallet', () => {
           value: 7_000_000_000,
         });
       } catch (e) {
-        expect((e as Error).message).to.contain(
-          'transaction from mismatch'
-        );
+        expect((e as Error).message).to.contain('transaction from mismatch');
       }
     }).timeout(25_000);
   });

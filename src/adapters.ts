@@ -42,7 +42,6 @@ import {
   Eip712Meta,
   FinalizeWithdrawalParams,
   FullDepositFee,
-  MessageProof,
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
@@ -97,14 +96,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getL1BridgeContracts(): Promise<{erc20: IL1Bridge; weth: IL1Bridge}> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
-        erc20: IL1Bridge__factory.connect(
-          addresses.erc20L1!,
-          this._signerL1()
-        ),
-        weth: IL1Bridge__factory.connect(
-          addresses.wethL1!,
-          this._signerL1()
-        ),
+        erc20: IL1Bridge__factory.connect(addresses.erc20L1!, this._signerL1()),
+        weth: IL1Bridge__factory.connect(addresses.wethL1!, this._signerL1()),
       };
     }
 
@@ -237,11 +230,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         delete overrides.bridgeAddress;
       }
 
-      return await erc20contract.approve(
-        bridgeAddress!,
-        amount,
-        overrides
-      );
+      return await erc20contract.approve(bridgeAddress!, amount, overrides);
     }
 
     /**
@@ -259,8 +248,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }): Promise<bigint> {
       const zksyncContract = await this.getMainContract();
       const parameters = {...layer1TxDefaults(), ...params};
-      parameters.gasPrice ??= (await this._providerL1().getFeeData())
-        .gasPrice!;
+      parameters.gasPrice ??= (await this._providerL1().getFeeData()).gasPrice!;
       parameters.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
 
       return await zksyncContract.l2TransactionBaseCost(
@@ -863,10 +851,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       // `getLogProof` is called not to get proof but
       // to get the index of the corresponding L2->L1 log,
       // which is returned as `proof.id`.
-      const proof = (await this._providerL2().getLogProof(
+      const proof = await this._providerL2().getLogProof(
         withdrawalHash,
         l2ToL1LogIndex
-      ));
+      );
       if (!proof) {
         throw new Error('Log proof not found!');
       }
@@ -891,10 +879,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         this._providerL1()
       );
 
-      return await l1Bridge.isWithdrawalFinalized(
-        log.l1BatchNumber!,
-        proof.id
-      );
+      return await l1Bridge.isWithdrawalFinalized(log.l1BatchNumber!, proof.id);
     }
 
     /**
@@ -1192,14 +1177,8 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getL2BridgeContracts(): Promise<{erc20: IL2Bridge; weth: IL2Bridge}> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
-        erc20: IL2Bridge__factory.connect(
-          addresses.erc20L2!,
-          this._signerL2()
-        ),
-        weth: IL2Bridge__factory.connect(
-          addresses.wethL2!,
-          this._signerL2()
-        ),
+        erc20: IL2Bridge__factory.connect(addresses.erc20L2!, this._signerL2()),
+        weth: IL2Bridge__factory.connect(addresses.wethL2!, this._signerL2()),
       };
     }
 
