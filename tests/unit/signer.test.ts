@@ -6,12 +6,15 @@ import {ethers} from 'ethers';
 const {expect} = chai;
 
 describe('EIP712Signer', () => {
+  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
+  const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
+
   describe('#getSignInput()', () => {
     it('should return a populated transaction', async () => {
       const tx = {
         txType: utils.EIP712_TX_TYPE,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-        to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+        from: ADDRESS,
+        to: RECEIVER,
         gasLimit: 21_000n,
         gasPerPubdataByteLimit: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         maxFeePerGas: 250_000_000n,
@@ -26,9 +29,9 @@ describe('EIP712Signer', () => {
 
       const result = EIP712Signer.getSignInput({
         type: utils.EIP712_TX_TYPE,
-        to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+        to: RECEIVER,
         value: 7_000_000n,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         nonce: 0,
         chainId: 270n,
         gasPrice: 250_000_000n,
@@ -41,8 +44,8 @@ describe('EIP712Signer', () => {
     it('should return a populated transaction with default values', async () => {
       const tx = {
         txType: utils.EIP712_TX_TYPE,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-        to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+        from: ADDRESS,
+        to: RECEIVER,
         gasLimit: 0n,
         gasPerPubdataByteLimit: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         maxFeePerGas: 0n,
@@ -57,8 +60,8 @@ describe('EIP712Signer', () => {
 
       const result = EIP712Signer.getSignInput({
         type: utils.EIP712_TX_TYPE,
-        to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        to: RECEIVER,
+        from: ADDRESS,
       });
       expect(result).to.be.deep.equal(tx);
     });

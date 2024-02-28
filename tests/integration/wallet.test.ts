@@ -463,17 +463,17 @@ describe('Wallet', () => {
   describe('#getDepositTx()', () => {
     it('should return an ETH deposit transaction', async () => {
       const tx = {
-        contractAddress: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        contractAddress: ADDRESS,
         calldata: '0x',
         l2Value: 7_000_000,
         l2GasLimit: '0x8cbaa',
         token: '0x0000000000000000000000000000000000000000',
-        to: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        to: ADDRESS,
         amount: 7_000_000,
-        refundRecipient: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        refundRecipient: ADDRESS,
         operatorTip: 0,
         overrides: {
-          from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+          from: ADDRESS,
           maxFeePerGas: 1_500_000_010n,
           maxPriorityFeePerGas: 1_500_000_000n,
           value: 288_213_007_000_000n,
@@ -491,17 +491,17 @@ describe('Wallet', () => {
 
     it('should return a deposit transaction with `tx.to == Wallet.getAddress()` when `tx.to` is not specified', async () => {
       const tx = {
-        contractAddress: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        contractAddress: ADDRESS,
         calldata: '0x',
         l2Value: 7_000_000,
         l2GasLimit: '0x8cbaa',
         token: '0x0000000000000000000000000000000000000000',
-        to: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        to: ADDRESS,
         amount: 7_000_000,
-        refundRecipient: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        refundRecipient: ADDRESS,
         operatorTip: 0,
         overrides: {
-          from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+          from: ADDRESS,
           maxFeePerGas: 1_500_000_010n,
           maxPriorityFeePerGas: 1_500_000_000n,
           value: 288_213_007_000_000n,
@@ -521,7 +521,7 @@ describe('Wallet', () => {
         maxFeePerGas: 1_500_000_010n,
         maxPriorityFeePerGas: 1_500_000_000n,
         value: 288_992_000_000_000n,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         to: await (await wallet.getL1BridgeContracts()).erc20.getAddress(),
       };
       const result = await wallet.getDepositTx({
