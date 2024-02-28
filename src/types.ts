@@ -4,7 +4,6 @@ import {
   BytesLike,
   ethers,
   Signature as EthersSignature,
-  SignatureLike,
   TransactionRequest as EthersTransactionRequest,
 } from 'ethers';
 import {
@@ -376,7 +375,7 @@ export class Transaction extends ethers.Transaction {
       if (tx.type === EIP712_TX_TYPE) {
         result.type = EIP712_TX_TYPE;
         result.customData = tx.customData;
-        result.from = tx.from as string;
+        result.from = tx.from!;
       }
       if (tx.type !== null && tx.type !== undefined) result.type = tx.type;
       if (tx.to) result.to = tx.to;
@@ -425,7 +424,7 @@ export class Transaction extends ethers.Transaction {
     if (!this.customData && this.#type !== EIP712_TX_TYPE) {
       return super.serialized;
     }
-    return serializeEip712(this, this.signature as SignatureLike);
+    return serializeEip712(this, this.signature!);
   }
 
   override get unsignedSerialized(): string {
@@ -470,7 +469,7 @@ export class Transaction extends ethers.Transaction {
   }
 
   override get from(): string | null {
-    return this.#type === EIP712_TX_TYPE ? (this.#from as string) : super.from;
+    return this.#type === EIP712_TX_TYPE ? (this.#from!) : super.from;
   }
   override set from(value: string | null) {
     this.#from = value;
