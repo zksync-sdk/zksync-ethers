@@ -1020,7 +1020,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
 
   /**
    *
-   * @param privateKey The private key of the account
+   * @param privateKey The private key of the account.
    * @param providerL2 The provider instance for connecting to a L2 network.
    * @param providerL1 The provider instance for connecting to a L1 network.
    *
@@ -1086,22 +1086,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * @throws {Error} If `transaction.from` is mismatched from the private key.
    */
   override async signTransaction(tx: TransactionRequest): Promise<string> {
-    if (!tx.customData && tx.type !== EIP712_TX_TYPE) {
-      if (tx.type === 2 && !tx.maxFeePerGas) {
-        tx.maxFeePerGas = await this.provider.getGasPrice();
-      }
-      return await super.signTransaction(tx);
-    } else {
-      tx.from ??= this.address;
-      const from = await ethers.resolveAddress(tx.from);
-      if (from.toLowerCase() !== this.address.toLowerCase()) {
-        throw new Error('Transaction `from` address mismatch!');
-      }
-      const populated = await this.populateTransaction(tx);
-      populated.customData ??= {};
-      populated.customData.customSignature = await this.eip712.sign(populated);
-      return serializeEip712(populated);
+    const populated = await this.populateTransaction(tx);
+    if (populated.type !== EIP712_TX_TYPE) {
+      return await super.signTransaction(populated);
     }
+
+    populated.customData!.customSignature = await this.eip712.sign(populated);
+    return serializeEip712(populated);
   }
 
   /**
@@ -1114,9 +1105,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async sendTransaction(
     tx: TransactionRequest
   ): Promise<TransactionResponse> {
-    const populatedTx = await this.populateTransaction(tx);
     return await this.provider.broadcastTransaction(
-      await this.signTransaction(populatedTx)
+      await this.signTransaction(tx)
     );
   }
 }
