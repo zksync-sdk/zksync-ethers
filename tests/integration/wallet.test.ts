@@ -182,10 +182,10 @@ describe('Wallet', () => {
   describe('#populateTransaction()', () => {
     it('should return a populated transaction', async () => {
       const tx = {
-        to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+        to: RECEIVER,
         value: 7_000_000_000n,
         type: utils.EIP712_TX_TYPE,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         nonce: await wallet.getNonce('pending'),
         gasLimit: 154_379n,
         chainId: 270n,
@@ -206,11 +206,12 @@ describe('Wallet', () => {
       const tx = {
         to: RECEIVER,
         value: 7_000_000n,
-        type: 0,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        type: 2,
+        from: ADDRESS,
         nonce: await wallet.getNonce('pending'),
         chainId: 270n,
-        gasPrice: 250_000_000n,
+        maxFeePerGas: 1_500_000_000n,
+        maxPriorityFeePerGas: 1_000_000_000n,
       };
       const result = await wallet.populateTransaction({
         to: RECEIVER,
@@ -218,6 +219,209 @@ describe('Wallet', () => {
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
     });
+
+    it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
+      const tx = {
+        to: RECEIVER,
+        value: 7_000_000n,
+        type: 113,
+        from: ADDRESS,
+        nonce: await wallet.getNonce('pending'),
+        data: '0x',
+        chainId: 270n,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+          factoryDeps: [],
+        },
+      };
+      const result = await wallet.populateTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+          factoryDeps: [],
+        },
+      });
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+    });
+
+    it('should return populated transaction when `maxPriorityFeePerGas` and `customData` are provided', async () => {
+      const tx = {
+        to: RECEIVER,
+        value: 7_000_000n,
+        type: 113,
+        from: ADDRESS,
+        nonce: await wallet.getNonce('pending'),
+        data: '0x',
+        chainId: 270n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+          factoryDeps: [],
+        },
+      };
+      const result = await wallet.populateTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        maxPriorityFeePerGas: 2_000_000_000n,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+        },
+      });
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+    });
+
+    it('should return populated transaction when `maxFeePerGas` and `customData` are provided', async () => {
+      const tx = {
+        to: RECEIVER,
+        value: 7_000_000n,
+        type: 113,
+        from: ADDRESS,
+        nonce: await wallet.getNonce('pending'),
+        data: '0x',
+        chainId: 270n,
+        maxFeePerGas: 3_500_000_000n,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+          factoryDeps: [],
+        },
+      };
+      const result = await wallet.populateTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        maxFeePerGas: 3_500_000_000n,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+        },
+      });
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+    });
+
+    it('should return populated EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided', async () => {
+      const tx = {
+        to: RECEIVER,
+        value: 7_000_000n,
+        type: 2,
+        from: ADDRESS,
+        nonce: await wallet.getNonce('pending'),
+        chainId: 270n,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+      };
+      const result = await wallet.populateTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+      });
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+    });
+
+    it('should return populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`', async () => {
+      const tx = {
+        to: RECEIVER,
+        value: 7_000_000n,
+        type: 2,
+        from: ADDRESS,
+        nonce: await wallet.getNonce('pending'),
+        chainId: 270n,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 3_500_000_000n,
+      };
+      const result = await wallet.populateTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        gasPrice: 3_500_000_000n,
+      });
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+    });
+
+    it('should return populated legacy transaction when `type = 0`', async () => {
+      const tx = {
+        to: RECEIVER,
+        value: 7_000_000n,
+        type: 0,
+        from: ADDRESS,
+        nonce: await wallet.getNonce('pending'),
+        chainId: 270n,
+        gasPrice: 250_000_000n,
+      };
+      const result = await wallet.populateTransaction({
+        type: 0,
+        to: RECEIVER,
+        value: 7_000_000,
+      });
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+    });
+  });
+
+  describe('#sendTransaction()', () => {
+    it('should send already populated transaction with provided `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` fields', async () => {
+      const populatedTx = await wallet.populateTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+        },
+      });
+      const tx = await wallet.sendTransaction(populatedTx);
+      const result = await tx.wait();
+      expect(result).not.to.be.null;
+    }).timeout(10_000);
+
+    it('should send EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided', async () => {
+      const tx = await wallet.sendTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+      });
+      const result = await tx.wait();
+      expect(result).not.to.be.null;
+      expect(result.type).to.be.equal(2);
+    }).timeout(10_000);
+
+    it('should return already populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas`', async () => {
+      const populatedTx = await wallet.populateTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 2_000_000_000n,
+      });
+
+      const tx = await wallet.sendTransaction(populatedTx);
+      const result = await tx.wait();
+      expect(result).not.to.be.null;
+      expect(result.type).to.be.equal(2);
+    }).timeout(10_000);
+
+    it('should send EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`', async () => {
+      const tx = await wallet.sendTransaction({
+        to: RECEIVER,
+        value: 7_000_000,
+        gasPrice: 3_500_000_000n,
+      });
+      const result = await tx.wait();
+      expect(result).not.to.be.null;
+      expect(result.type).to.be.equal(2);
+    }).timeout(10_000);
+
+    it('should send legacy transaction when `type = 0`', async () => {
+      const tx = await wallet.sendTransaction({
+        type: 0,
+        to: RECEIVER,
+        value: 7_000_000,
+      });
+      const result = await tx.wait();
+      expect(result).not.to.be.null;
+      expect(result.type).to.be.equal(0);
+    }).timeout(10_000);
   });
 
   describe('#fromMnemonic()', () => {
