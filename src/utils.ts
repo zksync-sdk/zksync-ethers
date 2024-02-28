@@ -1128,7 +1128,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
     let value, l1BridgeAddress, l2BridgeAddress, bridgeData;
     const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
     const l1WethBridge = IL1Bridge__factory.connect(
-      bridgeAddresses.wethL1 as string,
+      bridgeAddresses.wethL1!,
       providerL1
     );
     let l2WethToken = ethers.ZeroAddress;
@@ -1152,8 +1152,8 @@ export async function estimateDefaultBridgeDepositL2Gas(
 
     return await estimateCustomBridgeDepositL2Gas(
       providerL2,
-      l1BridgeAddress as string,
-      l2BridgeAddress as string,
+      l1BridgeAddress!,
+      l2BridgeAddress!,
       token,
       amount,
       to,

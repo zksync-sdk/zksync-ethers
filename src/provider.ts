@@ -227,7 +227,7 @@ export function JsonRpcApiProvider<
       } else {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
         const l2WethBridge = IL2Bridge__factory.connect(
-          bridgeAddresses.wethL2 as string,
+          bridgeAddresses.wethL2!,
           this
         );
         try {
@@ -261,7 +261,7 @@ export function JsonRpcApiProvider<
       } else {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
         const l2WethBridge = IL2Bridge__factory.connect(
-          bridgeAddresses.wethL2 as string,
+          bridgeAddresses.wethL2!,
           this
         );
         try {
@@ -568,7 +568,7 @@ export function JsonRpcApiProvider<
           this
         );
         const populatedTx = await ethL2Token.withdraw.populateTransaction(
-          tx.to as Address,
+          tx.to!,
           tx.overrides
         );
         if (tx.paymasterParams) {
@@ -585,7 +585,7 @@ export function JsonRpcApiProvider<
       if (!tx.bridgeAddress) {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
         const l2WethBridge = IL2Bridge__factory.connect(
-          bridgeAddresses.wethL2 as string,
+          bridgeAddresses.wethL2!,
           this
         );
         let l1WethToken = ethers.ZeroAddress;
@@ -602,7 +602,7 @@ export function JsonRpcApiProvider<
 
       const bridge = IL2Bridge__factory.connect(tx.bridgeAddress!, this);
       const populatedTx = await bridge.withdraw.populateTransaction(
-        tx.to as Address,
+        tx.to!,
         tx.token,
         tx.amount,
         tx.overrides

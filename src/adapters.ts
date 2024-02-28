@@ -98,11 +98,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
         erc20: IL1Bridge__factory.connect(
-          addresses.erc20L1 as string,
+          addresses.erc20L1!,
           this._signerL1()
         ),
         weth: IL1Bridge__factory.connect(
-          addresses.wethL1 as string,
+          addresses.wethL1!,
           this._signerL1()
         ),
       };
@@ -238,7 +238,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
 
       return await erc20contract.approve(
-        bridgeAddress as Address,
+        bridgeAddress!,
         amount,
         overrides
       );
@@ -260,7 +260,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const zksyncContract = await this.getMainContract();
       const parameters = {...layer1TxDefaults(), ...params};
       parameters.gasPrice ??= (await this._providerL1().getFeeData())
-        .gasPrice as BigNumberish;
+        .gasPrice!;
       parameters.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
 
       return await zksyncContract.l2TransactionBaseCost(
@@ -498,7 +498,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const zksyncContract = await this.getMainContract();
 
       const baseCost = await zksyncContract.l2TransactionBaseCost(
-        gasPriceForEstimation as BigNumberish,
+        gasPriceForEstimation!,
         tx.l2GasLimit,
         tx.gasPerPubdataByte
       );
@@ -600,7 +600,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           this._signerL1()
         );
         const l2Address = await bridge.l2Bridge();
-        l2GasLimit ??= await estimateCustomBridgeDepositL2Gas(
+        l2GasLimit = await estimateCustomBridgeDepositL2Gas(
           this._providerL2(),
           tx.bridgeAddress,
           l2Address,
@@ -612,7 +612,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           tx.gasPerPubdataByte
         );
       } else {
-        l2GasLimit ??= await estimateDefaultBridgeDepositL2Gas(
+        l2GasLimit = await estimateDefaultBridgeDepositL2Gas(
           this._providerL1(),
           this._providerL2(),
           tx.token,
@@ -624,7 +624,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
 
       const baseCost = await zksyncContract.l2TransactionBaseCost(
-        gasPriceForMessages as BigNumberish,
+        gasPriceForMessages!,
         l2GasLimit,
         tx.gasPerPubdataByte
       );
@@ -639,7 +639,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
               ? L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT
               : L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT
           ) *
-            BigInt(gasPriceForMessages as BigNumberish) +
+            BigInt(gasPriceForMessages!) +
           baseCost;
         const formattedRecommendedBalance = ethers.formatEther(
           recommendedETHBalance
@@ -686,9 +686,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (tx.overrides.gasPrice) {
         fullCost.gasPrice = BigInt(tx.overrides.gasPrice);
       } else {
-        fullCost.maxFeePerGas = BigInt(tx.overrides.maxFeePerGas as bigint);
+        fullCost.maxFeePerGas = BigInt(tx.overrides.maxFeePerGas!);
         fullCost.maxPriorityFeePerGas = BigInt(
-          tx.overrides.maxPriorityFeePerGas as bigint
+          tx.overrides.maxPriorityFeePerGas!
         );
       }
 
@@ -801,9 +801,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           (await l1Bridges.weth.getAddress()).toLowerCase()
         ) {
           return await l1Bridges.weth.finalizeWithdrawal(
-            l1BatchNumber as number,
+            l1BatchNumber!,
             l2MessageIndex,
-            l2TxNumberInBlock as number,
+            l2TxNumberInBlock!,
             message,
             proof,
             overrides ?? {}
@@ -818,9 +818,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         );
 
         return await zksync.finalizeEthWithdrawal(
-          l1BatchNumber as BigNumberish,
-          l2MessageIndex as BigNumberish,
-          l2TxNumberInBlock as BigNumberish,
+          l1BatchNumber!,
+          l2MessageIndex!,
+          l2TxNumberInBlock!,
           message,
           proof,
           overrides ?? {}
@@ -833,9 +833,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         this._signerL1()
       );
       return await l1Bridge.finalizeWithdrawal(
-        l1BatchNumber as BigNumberish,
-        l2MessageIndex as BigNumberish,
-        l2TxNumberInBlock as BigNumberish,
+        l1BatchNumber!,
+        l2MessageIndex!,
+        l2TxNumberInBlock!,
         message,
         proof,
         overrides ?? {}
@@ -866,7 +866,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const proof = (await this._providerL2().getLogProof(
         withdrawalHash,
         l2ToL1LogIndex
-      )) as MessageProof;
+      ));
       if (!proof) {
         throw new Error('Log proof not found!');
       }
@@ -880,7 +880,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         );
 
         return await zksync.isEthWithdrawalFinalized(
-          log.l1BatchNumber as BigNumberish,
+          log.l1BatchNumber!,
           proof.id
         );
       }
@@ -892,7 +892,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
 
       return await l1Bridge.isWithdrawalFinalized(
-        log.l1BatchNumber as BigNumberish,
+        log.l1BatchNumber!,
         proof.id
       );
     }
@@ -960,9 +960,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         calldata['_l1Sender'],
         calldata['_l1Token'],
         depositHash,
-        receipt.l1BatchNumber as BigNumberish,
+        receipt.l1BatchNumber!,
         proof.id,
-        receipt.l1BatchTxIndex as BigNumberish,
+        receipt.l1BatchTxIndex!,
         proof.proof,
         overrides ?? {}
       );
@@ -1098,7 +1098,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         overrides.maxFeePerGas || overrides.gasPrice;
 
       const baseCost = await this.getBaseCost({
-        gasPrice: gasPriceForEstimation as BigNumberish,
+        gasPrice: gasPriceForEstimation!,
         gasPerPubdataByte,
         gasLimit: l2GasLimit,
       });
@@ -1193,11 +1193,11 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
         erc20: IL2Bridge__factory.connect(
-          addresses.erc20L2 as string,
+          addresses.erc20L2!,
           this._signerL2()
         ),
         weth: IL2Bridge__factory.connect(
-          addresses.wethL2 as string,
+          addresses.wethL2!,
           this._signerL2()
         ),
       };
@@ -1303,8 +1303,8 @@ async function insertGasPrice(
 }
 
 function getBaseCostFromFeeData(feeData: ethers.FeeData): bigint {
-  const maxFeePerGas = feeData.maxFeePerGas as bigint;
-  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas as bigint;
+  const maxFeePerGas = feeData.maxFeePerGas!;
+  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas!;
 
   // Reverse the logic implemented in the abstract-provider.ts (line 917)
   return (maxFeePerGas - maxPriorityFeePerGas) / 2n;

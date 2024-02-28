@@ -421,7 +421,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
       const address = await this.getAddress();
       const from = !transaction.from
         ? address
-        : await ethers.resolveAddress(transaction.from as Address);
+        : await ethers.resolveAddress(transaction.from);
       if (from.toLowerCase() !== address.toLowerCase()) {
         throw new Error('Transaction `from` address mismatch!');
       }
@@ -436,7 +436,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
           (await this.provider.estimateGas(transaction)),
         chainId:
           transaction.chainId ?? (await this.provider.getNetwork()).chainId,
-        to: await ethers.resolveAddress(transaction.to as Address),
+        to: await ethers.resolveAddress(transaction.to!),
         customData: this._fillCustomData(transaction.customData ?? {}),
         from,
       };
