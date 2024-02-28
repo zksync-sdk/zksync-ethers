@@ -49,21 +49,40 @@ interface TxSender {
 
 export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
   return class Adapter extends Base {
+    /**
+     * Returns a provider instance for connecting to an L2 network.
+     */
     _providerL2(): Provider {
       throw new Error('Must be implemented by the derived class!');
     }
+
+    /**
+     * Returns a provider instance for connecting to a L1 network.
+     */
     _providerL1(): ethers.providers.Provider {
       throw new Error('Must be implemented by the derived class!');
     }
+
+    /**
+     * Returns a signer instance used for signing transactions sent to the L1 network.
+     */
     _signerL1(): ethers.Signer {
       throw new Error('Must be implemented by the derived class!');
     }
 
+    /**
+     * Returns `Contract` wrapper of the zkSync Era smart contract.
+     */
     async getMainContract(): Promise<IZkSync> {
       const address = await this._providerL2().getMainContractAddress();
       return IZkSyncFactory.connect(address, this._signerL1());
     }
 
+    /**
+     * Returns L1 bridge contracts.
+     *
+     * @remarks There is no separate Ether bridge contract, {@link getMainContract Main contract} is used instead.
+     */
     async getL1BridgeContracts(): Promise<{erc20: Il1Bridge; weth: Il1Bridge}> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
@@ -72,6 +91,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
+    /**
+     * Returns the amount of the token held by the account on the L1 network.
+     *
+     * @param [token] The address of the token. Defaults to ETH if not provided.
+     * @param [blockTag] The block in which the balance should be checked.
+     * Defaults to 'committed', i.e., the latest processed block.
+     */
     async getBalanceL1(
       token?: Address,
       blockTag?: ethers.providers.BlockTag
@@ -88,6 +114,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
     }
 
+    /**
+     * Returns the amount of approved tokens for a specific L1 bridge.
+     *
+     * @param token The Ethereum address of the token.
+     * @param [bridgeAddress] The address of the bridge contract to be used.
+     * Defaults to the default zkSync Era bridge, either `L1EthBridge` or `L1Erc20Bridge`.
+     * @param [blockTag] The block in which an allowance should be checked.
+     * Defaults to 'committed', i.e., the latest processed block.
+     */
     async getAllowanceL1(
       token: Address,
       bridgeAddress?: Address,
@@ -119,6 +154,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    /**
+     * Returns the L2 token address equivalent for a L1 token address as they are not necessarily equal.
+     * The ETH address is set to the zero address.
+     *
+     * @remarks Only works for tokens bridged on default zkSync Era bridges.
+     *
+     * @param token The address of the token on L1.
+     */
     async l2TokenAddress(token: Address): Promise<string> {
       if (token === ETH_ADDRESS) {
         return ETH_ADDRESS;
@@ -137,6 +180,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return await bridgeContracts.erc20.l2TokenAddress(token);
     }
 
+    /**
+     * Bridging ERC20 tokens from L1 requires approving the tokens to the zkSync Era smart contract.
+     *
+     * @param token The L1 address of the token.
+     * @param amount The amount of the token to be approved.
+     * @param [overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A promise that resolves to the response of the approval transaction.
+     * @throws {Error} If attempting to approve an ETH token.
+     */
     async approveERC20(
       token: Address,
       amount: BigNumberish,
@@ -173,6 +225,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return await erc20contract.approve(bridgeAddress, amount, overrides);
     }
 
+    /**
+     * Returns the base cost for an L2 transaction.
+     *
+     * @param params The parameters for calculating the base cost.
+     * @param params.gasLimit The gasLimit for the L2 contract call.
+     * @param [params.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [params.gasPrice] The L1 gas price of the L1 transaction that will send the request for an execute call.
+     */
     async getBaseCost(params: {
       gasLimit: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
@@ -192,6 +252,33 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    /**
+     * Transfers the specified token from the associated account on the L1 network to the target account on the L2 network.
+     * The token can be either ETH or any ERC20 token. For ERC20 tokens, enough approved tokens must be associated with
+     * the specified L1 bridge (default one or the one defined in `transaction.bridgeAddress`).
+     * In this case, `transaction.approveERC20` can be enabled to perform token approval. If there are already enough
+     * approved tokens for the L1 bridge, token approval will be skipped.
+     * To check the amount of approved tokens for a specific bridge, use the {@link getAllowanceL1} method.
+     *
+     * @param transaction The transaction object containing deposit details.
+     * @param transaction.token The address of the token to deposit. ETH by default.
+     * @param transaction.amount The amount of the token to withdraw.
+     * @param [transaction.to] The address that will receive the deposited tokens on L2.
+     * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
+     * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of
+     * the base cost of the transaction.
+     * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
+     * Defaults to the default zkSync Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+     * @param [transaction.approveERC20] Whether or not token approval should be performed under the hood.
+     * Set this flag to true if you bridge an ERC20 token and didn't call the {@link approveERC20}  function beforehand.
+     * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
+     * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [transaction.refundRecipient] The address on L2 that will receive the refund for the transaction.
+     * If the transaction fails, it will also be the address to receive `l2Value`.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     * @param [transaction.approveOverrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
+     */
     async deposit(transaction: {
       token: Address;
       amount: BigNumberish;
@@ -265,6 +352,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
     }
 
+    /**
+     * Estimates the amount of gas required for a deposit transaction on the L1 network.
+     * Gas for approving ERC20 tokens is not included in the estimation.
+     *
+     * @param transaction The transaction details.
+     * @param transaction.token The address of the token to deposit. ETH by default.
+     * @param transaction.amount The amount of the token to withdraw.
+     * @param [transaction.to] The address that will receive the deposited tokens on L2.
+     * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
+     * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
+     * base cost of the transaction.
+     * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
+     * Defaults to the default zkSync Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+     * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
+     * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
+     * @param [transaction.refundRecipient] The address on L2 that will receive the refund for the transaction.
+     * If the transaction fails, it will also be the address to receive `l2Value`.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     */
     async estimateGasDeposit(transaction: {
       token: Address;
       amount: BigNumberish;
@@ -289,6 +396,25 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return scaleGasLimit(baseGasLimit);
     }
 
+    /**
+     * Returns a populated deposit transaction.
+     *
+     * @param transaction The transaction details.
+     * @param transaction.token The address of the token to deposit. ETH by default.
+     * @param transaction.amount The amount of the token to withdraw.
+     * @param [transaction.to] The address that will receive the deposited tokens on L2.
+     * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
+     * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
+     * base cost of the transaction.
+     * @param [transaction.bridgeAddress] The address of the bridge contract to be used. Defaults to the default zkSync
+     * Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+     * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
+     * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
+     * @param [transaction.refundRecipient] The address on L2 that will receive the refund for the transaction.
+     * If the transaction fails, it will also be the address to receive `l2Value`.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     */
     async getDepositTx(transaction: {
       token: Address;
       amount: BigNumberish;
@@ -407,8 +533,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
     }
 
-    // Retrieves the full needed ETH fee for the deposit.
-    // Returns the L1 fee and the L2 fee.
+    /**
+     * Retrieves the full needed ETH fee for the deposit. Returns the L1 fee and the L2 fee {@link FullDepositFee}.
+     *
+     * @param transaction The transaction details.
+     * @param transaction.token The address of the token to deposit. ETH by default.
+     * @param [transaction.to] The address that will receive the deposited tokens on L2.
+     * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
+     * Defaults to the default zkSync Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+     * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
+     * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     * @throws {Error} If:
+     *  - There's not enough balance for the deposit under the provided gas price.
+     *  - There's not enough allowance to cover the deposit.
+     */
     async getFullRequiredDepositFee(transaction: {
       token: Address;
       to?: Address;
@@ -568,6 +707,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
+    /**
+     * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
+     * withdrawal transaction's log on the L1 network.
+     *
+     * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
+     * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
+     * withdrawal you want to finalize.
+     * @throws {Error} If log proof can not be found.
+     */
     async finalizeWithdrawalParams(
       withdrawalHash: BytesLike,
       index = 0
@@ -602,6 +750,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
+    /**
+     * Proves the inclusion of the `L2->L1` withdrawal message.
+     *
+     * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
+     * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
+     * withdrawal you want to finalize.
+     * @param [overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A promise that resolves to the proof of inclusion of the withdrawal message.
+     * @throws {Error} If log proof can not be found.
+     */
     async finalizeWithdrawal(
       withdrawalHash: BytesLike,
       index = 0,
@@ -664,6 +822,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    /**
+     * Returns whether the withdrawal transaction is finalized on the L1 network.
+     *
+     * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
+     * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
+     * withdrawal you want to finalize.
+     * @throws {Error} If log proof can not be found.
+     */
     async isWithdrawalFinalized(
       withdrawalHash: BytesLike,
       index = 0
@@ -708,6 +874,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return await l1Bridge.isWithdrawalFinalized(log.l1BatchNumber, proof.id);
     }
 
+    /**
+     * Withdraws funds from the initiated deposit, which failed when finalizing on L2.
+     * If the deposit L2 transaction has failed, it sends an L1 transaction calling `claimFailedDeposit` method of the
+     * L1 bridge, which results in returning L1 tokens back to the depositor.
+     *
+     * @param depositHash The L2 transaction hash of the failed deposit.
+     * @param [overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A promise that resolves to the response of the `claimFailedDeposit` transaction.
+     * @throws {Error} If attempting to claim successful deposit.
+     */
     async claimFailedDeposit(
       depositHash: BytesLike,
       overrides?: ethers.Overrides
@@ -767,6 +943,24 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    /**
+     * Requests execution of an L2 transaction from L1.
+     *
+     * @param transaction The transaction details.
+     * @param transaction.contractAddress The L2 contract to be called.
+     * @param transaction.calldata The input of the L2 transaction.
+     * @param [transaction.l2GasLimit] Maximum amount of L2 gas that transaction can consume during execution on L2.
+     * @param [transaction.l2Value] `msg.value` of L2 transaction.
+     * @param [transaction.factoryDeps] An array of L2 bytecodes that will be marked as known on L2.
+     * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
+     * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of
+     * the base cost of the transaction.
+     * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [transaction.refundRecipient] The address on L2 that will receive the refund for the transaction.
+     * If the transaction fails, it will also be the address to receive `l2Value`.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A promise that resolves to the response of the execution request.
+     */
     async requestExecute(transaction: {
       contractAddress: Address;
       calldata: BytesLike;
@@ -784,6 +978,23 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    /**
+     * Estimates the amount of gas required for a request execute transaction.
+     *
+     * @param transaction The transaction details.
+     * @param transaction.contractAddress The L2 contract to be called.
+     * @param transaction.calldata The input of the L2 transaction.
+     * @param [transaction.l2GasLimit] Maximum amount of L2 gas that transaction can consume during execution on L2.
+     * @param [transaction.l2Value] `msg.value` of L2 transaction.
+     * @param [transaction.factoryDeps] An array of L2 bytecodes that will be marked as known on L2.
+     * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
+     * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top
+     * of the base cost of the transaction.
+     * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [transaction.refundRecipient] The address on L2 that will receive the refund for the transaction.
+     * If the transaction fails, it will also be the address to receive `l2Value`.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     */
     async estimateGasRequestExecute(transaction: {
       contractAddress: Address;
       calldata: BytesLike;
@@ -804,6 +1015,23 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return this._providerL1().estimateGas(requestExecuteTx);
     }
 
+    /**
+     * Returns a populated request execute transaction.
+     *
+     * @param transaction The transaction details.
+     * @param transaction.contractAddress The L2 contract to be called.
+     * @param transaction.calldata The input of the L2 transaction.
+     * @param [transaction.l2GasLimit] Maximum amount of L2 gas that transaction can consume during execution on L2.
+     * @param [transaction.l2Value] `msg.value` of L2 transaction.
+     * @param [transaction.factoryDeps] An array of L2 bytecodes that will be marked as known on L2.
+     * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
+     * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
+     * base cost of the transaction.
+     * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
+     * @param [transaction.refundRecipient] The address on L2 that will receive the refund for the transaction.
+     * If the transaction fails, it will also be the address to receive `l2Value`.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L1 `gasLimit`, `gasPrice`, `value`, etc.
+     */
     async getRequestExecuteTx(transaction: {
       contractAddress: Address;
       calldata: BytesLike;
@@ -869,13 +1097,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
 export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
   return class Adapter extends Base {
+    /**
+     * Returns a provider instance for connecting to an L2 network.
+     */
     _providerL2(): Provider {
       throw new Error('Must be implemented by the derived class!');
     }
+
+    /**
+     * Returns a signer instance used for signing transactions sent to the L2 network.
+     */
     _signerL2(): ethers.Signer {
       throw new Error('Must be implemented by the derived class!');
     }
 
+    /**
+     * Returns the balance of the account.
+     *
+     * @param [token] The token address to query balance for. Defaults to the native token.
+     * @param [blockTag='committed'] The block tag to get the balance at.
+     */
     async getBalance(
       token?: Address,
       blockTag: BlockTag = 'committed'
@@ -887,12 +1128,18 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    /**
+     * Returns all token balances of the account.
+     */
     async getAllBalances(): Promise<BalancesMap> {
       return await this._providerL2().getAllAccountBalances(
         await this.getAddress()
       );
     }
 
+    /**
+     * Returns the deployment nonce of the account.
+     */
     async getDeploymentNonce(): Promise<BigNumber> {
       return await INonceHolderFactory.connect(
         NONCE_HOLDER_ADDRESS,
@@ -900,6 +1147,9 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       ).getDeploymentNonce(await this.getAddress());
     }
 
+    /**
+     * Returns L2 bridge contracts.
+     */
     async getL2BridgeContracts(): Promise<{erc20: Il2Bridge; weth: Il2Bridge}> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
@@ -915,6 +1165,19 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       return customData;
     }
 
+    /**
+     * Initiates the withdrawal process which withdraws ETH or any ERC20 token
+     * from the associated account on L2 network to the target account on L1 network.
+     *
+     * @param transaction Withdrawal transaction request.
+     * @param transaction.token The address of the token. Defaults to ETH.
+     * @param transaction.amount The amount of the token to withdraw.
+     * @param [transaction.to] The address of the recipient on L1.
+     * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
+     * @param [transaction.paymasterParams] Paymaster parameters.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A Promise resolving to a withdrawal transaction response.
+     */
     async withdraw(transaction: {
       token: Address;
       amount: BigNumberish;
@@ -931,6 +1194,17 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       return this._providerL2()._wrapTransaction(txResponse);
     }
 
+    /**
+     * Transfer ETH or any ERC20 token within the same interface.
+     *
+     * @param transaction Transfer transaction request.
+     * @param transaction.to The address of the recipient.
+     * @param transaction.amount The amount of the token to transfer.
+     * @param [transaction.token] The address of the token. Defaults to ETH.
+     * @param [transaction.paymasterParams] Paymaster parameters.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A Promise resolving to a transfer transaction response.
+     */
     async transfer(transaction: {
       to: Address;
       amount: BigNumberish;

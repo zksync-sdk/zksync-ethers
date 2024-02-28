@@ -14,10 +14,22 @@ import {AccountAbstractionVersion, DeploymentType} from './types';
 import {hexlify, isBytes, isHexString} from '@ethersproject/bytes';
 export {Contract} from 'ethers';
 
+/**
+ * A `ContractFactory` is used to deploy a `Contract` to the blockchain.
+ */
 export class ContractFactory extends ethers.ContractFactory {
   override readonly signer!: Wallet | Signer;
   readonly deploymentType: DeploymentType;
 
+  /**
+   * Create a new `ContractFactory` with `abi` and `bytecode`, connected to `signer`.
+   * The `bytecode` may be the bytecode property within the standard Solidity JSON output.
+   *
+   * @param abi The ABI (Application Binary Interface) of the contract.
+   * @param bytecode The bytecode of the contract.
+   * @param [signer] The signer capable of interacting with a `Contract`on the network.
+   * @param [deploymentType] The deployment type, defaults to 'create'.
+   */
   constructor(
     abi: ContractInterface,
     bytecode: ethers.BytesLike,
@@ -59,6 +71,15 @@ export class ContractFactory extends ethers.ContractFactory {
     }
   }
 
+  /**
+   * Checks if the provided overrides are appropriately configured for a specific deployment type.
+   * @param overrides The overrides to be checked.
+   *
+   * @throws {Error} If:
+   *   - `overrides.customData.salt` is not provided for `Create2` deployment type.
+   *   - Provided `overrides.customData.salt` is not 32 bytes in hex format.
+   *   - `overrides.customData.factoryDeps` is not array of bytecodes.
+   */
   protected checkOverrides(overrides: ethers.PayableOverrides) {
     if (
       this.deploymentType === 'create2' ||
@@ -146,30 +167,28 @@ export class ContractFactory extends ethers.ContractFactory {
   /**
    * Deploys a new contract or account instance on the Ethereum blockchain.
    *
-   * @async
    * @param {...Array<any>} args - Constructor arguments for the contract followed by optional
    * {@link ethers.PayableOverrides|overrides}. When deploying with CREATE2 method slat must be present in overrides.
    *
    *
-   * @example
-   * // Deploy with constructor arguments only using CREATE method
+   * @example Deploy with constructor arguments only using CREATE method
    * const deployedContract = await contractFactory.deploy(arg1, arg2, ...);
    *
-   * // Deploy with constructor arguments, and factory dependencies using CREATE method
+   * @example Deploy with constructor arguments, and factory dependencies using CREATE method
    * const deployedContractWithSaltAndDeps = await contractFactory.deploy(arg1, arg2, ..., {
    *   customData: {
    *     factoryDeps: ['0x...']
    *   }
    * });
    *
-   * // Deploy with constructor arguments and custom salt using CREATE2 method
+   * @example Deploy with constructor arguments and custom salt using CREATE2 method
    * const deployedContractWithSalt = await contractFactory.deploy(arg1, arg2, ..., {
    *   customData: {
    *     salt: '0x...'
    *   }
    * });
    *
-   * // Deploy with constructor arguments, custom salt, and factory dependencies using CREATE2 method
+   * @example Deploy with constructor arguments, custom salt, and factory dependencies using CREATE2 method
    * const deployedContractWithSaltAndDeps = await contractFactory.deploy(arg1, arg2, ..., {
    *   customData: {
    *     salt: '0x...',
