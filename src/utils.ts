@@ -718,3 +718,17 @@ export async function estimateCustomBridgeDepositL2Gas(
     l2Value,
   });
 }
+
+/**
+* Creates a JSON string from an object, including support for serializing bigint types.
+*
+* @param object The object to serialize to JSON.
+*/
+export function toJSON(object: any): string {
+  return JSON.stringify(object, (key, value) => {
+    if (typeof value === 'bigint') {
+      return value.toString(); // Convert BigInt to string
+    }
+    return value;
+  });
+}
