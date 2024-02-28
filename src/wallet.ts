@@ -123,22 +123,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async signTransaction(
     transaction: TransactionRequest
   ): Promise<string> {
-    if (!transaction.customData && transaction.type !== EIP712_TX_TYPE) {
-      if (transaction.type === 2 && !transaction.maxFeePerGas) {
-        transaction.maxFeePerGas = await this.provider.getGasPrice();
-      }
-      return await super.signTransaction(transaction);
-    } else {
-      transaction.from ??= this.address;
-      if (transaction.from.toLowerCase() !== this.address.toLowerCase()) {
-        throw new Error('Transaction `from` address mismatch!');
-      }
-      const populated = await this.populateTransaction(transaction);
-      populated.customData!.customSignature =
-        await this.eip712.sign(transaction);
-
-      return serialize(populated);
+    const populated = await this.populateTransaction(transaction);
+    if (populated.type !== EIP712_TX_TYPE) {
+      return await super.signTransaction(populated);
     }
+
+    populated.customData!.customSignature = await this.eip712.sign(populated);
+    return serialize(populated);
   }
 
   override async sendTransaction(
