@@ -1061,13 +1061,10 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async populateTransaction(
     tx: TransactionRequest
   ): Promise<TransactionLike> {
-    if (!tx.type && !tx.customData) {
-      // use legacy txs by default
-      tx.type = 0;
-    }
-    if (!tx.customData && tx.type !== EIP712_TX_TYPE) {
+    if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
       return (await super.populateTransaction(tx)) as TransactionLike;
     }
+
     tx.type = EIP712_TX_TYPE;
     const populated = (await super.populateTransaction(tx)) as TransactionLike;
 
