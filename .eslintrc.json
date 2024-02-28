@@ -1,0 +1,17 @@
+{
+  "extends": "./node_modules/gts/",
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "node/no-extraneous-import": ["error", {
+      "allowModules": [
+        "@ethersproject/bytes",
+        "@ethersproject/providers",
+        "@ethersproject/web",
+        "@ethersproject/abstract-signer",
+        "@ethersproject/abstract-provider",
+        "@ethersproject/hash",
+        "@ethersproject/json-wallets"
+      ] 
+    }]
+  }
+}

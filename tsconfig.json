@@ -1,17 +1,22 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2019",
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "build",
+    "module": "CommonJS",
+    "target": "ES2019",
 
-        "outDir": "./build",
-        "esModuleInterop": true,
-        "declaration": true,
+    "esModuleInterop": true,
+    "declaration": true,
 
-        "preserveSymlinks": true,
-        "preserveWatchOutput": true,
+    "preserveSymlinks": true,
+    "preserveWatchOutput": true,
 
-        "noImplicitOverride": true,
-        "strict": true
-    },
-    "include": ["./src/index.ts", "tests/**/*.ts"]
+    "noImplicitOverride": true,
+    "strict": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ]
 }
