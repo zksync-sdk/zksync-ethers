@@ -348,7 +348,7 @@ describe('Provider', () => {
   describe('#getWithdrawTx()', () => {
     it('should return an ETH withdraw transaction', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         value: 7_000_000_000n,
         to: '0x000000000000000000000000000000000000800a',
         data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
@@ -364,7 +364,7 @@ describe('Provider', () => {
 
     it('should return an ETH withdraw transaction with paymaster parameters', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         value: 7_000_000_000n,
         to: '0x000000000000000000000000000000000000800a',
         data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
@@ -393,7 +393,7 @@ describe('Provider', () => {
 
     it('should return a DAI withdraw transaction', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         to: (await provider.getDefaultBridgeAddresses()).erc20L2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
       };
@@ -408,7 +408,7 @@ describe('Provider', () => {
 
     it('should return a DAI withdraw transaction with paymaster parameters', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         to: (await provider.getDefaultBridgeAddresses()).erc20L2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
         customData: {
@@ -436,7 +436,7 @@ describe('Provider', () => {
 
     it('should return a withdraw transaction with `tx.from==tx.to` when `tx.to` is not provided', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         value: 7_000_000_000n,
         to: '0x000000000000000000000000000000000000800a',
         data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
@@ -480,7 +480,7 @@ describe('Provider', () => {
   describe('#getTransferTx()', () => {
     it('should return an ETH transfer transaction', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         to: RECEIVER,
         value: 7_000_000_000,
       };
@@ -496,7 +496,7 @@ describe('Provider', () => {
     it('should return an ETH transfer transaction with paymaster parameters', async () => {
       const tx = {
         type: utils.EIP712_TX_TYPE,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         to: RECEIVER,
         value: 7_000_000_000,
         customData: {
@@ -524,7 +524,7 @@ describe('Provider', () => {
 
     it('should return a DAI transfer transaction', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         to: await provider.l2TokenAddress(DAI_L1),
         data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005',
       };
@@ -539,7 +539,7 @@ describe('Provider', () => {
 
     it('should return a DAI transfer transaction with paymaster parameters', async () => {
       const tx = {
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         to: await provider.l2TokenAddress(DAI_L1),
         data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005',
         customData: {

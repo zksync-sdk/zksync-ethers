@@ -3,6 +3,9 @@ import {types, utils} from '../../src';
 import {ethers} from 'ethers';
 
 describe('utils', () => {
+  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
+  const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
+
   describe('#getHashedL2ToL1Msg()', () => {
     it('should return a hashed L2 to L1 message', async () => {
       const withdrawETHMessage =
@@ -10,7 +13,7 @@ describe('utils', () => {
       const withdrawETHMessageHash =
         '0x521bd25904766c83fe868d6a29cbffa011afd8a1754f6c9a52b053b693e42f18';
       const result = utils.getHashedL2ToL1Msg(
-        '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        ADDRESS,
         withdrawETHMessage,
         0
       );
@@ -33,7 +36,7 @@ describe('utils', () => {
   describe('#createAddress()', () => {
     it('should return a correct address', async () => {
       const address = utils.createAddress(
-        '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        ADDRESS,
         1
       );
       expect(address).to.be.equal('0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021');
@@ -43,7 +46,7 @@ describe('utils', () => {
   describe('#create2Address()', () => {
     it('should return a correct address', async () => {
       const address = utils.create2Address(
-        '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        ADDRESS,
         '0x010001cb6a6e8d5f6829522f19fa9568660e0a9cd53b2e8be4deb0a679452e41',
         '0x01',
         '0x01'
@@ -120,7 +123,7 @@ describe('utils', () => {
       try {
         utils.serializeEip712({
           chainId: 270,
-          from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+          from: ADDRESS,
           customData: {
             customSignature: '',
           },
@@ -137,7 +140,7 @@ describe('utils', () => {
         '0x71ea8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0';
       const result = utils.serializeEip712({
         chainId: 270,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
       });
       expect(result).to.be.equal(tx);
     });
@@ -151,8 +154,8 @@ describe('utils', () => {
       const result = utils.serializeEip712(
         {
           chainId: 270,
-          from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
-          to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+          from: ADDRESS,
+          to: RECEIVER,
           value: 1_000_000,
         },
         signature
@@ -224,11 +227,11 @@ describe('utils', () => {
         maxPriorityFeePerGas: 0n,
         maxFeePerGas: 0n,
         gasLimit: 0n,
-        to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+        to: RECEIVER,
         value: 1_000_000n,
         data: '0x',
         chainId: 270n,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         customData: {
           gasPerPubdata: 50_000n,
           factoryDeps: [],
@@ -251,11 +254,11 @@ describe('utils', () => {
         maxPriorityFeePerGas: 0n,
         maxFeePerGas: 0n,
         gasLimit: 0n,
-        to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+        to: RECEIVER,
         value: 0n,
         data: '0x',
         chainId: 270n,
-        from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+        from: ADDRESS,
         customData: {
           gasPerPubdata: 50_000n,
           factoryDeps: [],
