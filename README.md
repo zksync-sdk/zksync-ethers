@@ -1,5 +1,7 @@
 # 🚀 zksync-ethers JavaScript SDK 🚀
 
+[![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts)
+
 ![Era Logo](https://github.com/matter-labs/era-contracts/raw/main/eraLogo.svg)
 
 In order to provide easy access to all the features of zkSync Era, the `zksync-ethers` JavaScript SDK was created,
