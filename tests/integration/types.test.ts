@@ -106,7 +106,7 @@ describe('types', () => {
     describe('#prefetchedTransactions()', () => {
       it('should throw an error when requesting pre-fetched transactions', async () => {
         try {
-          await block.getPrefetchedTransaction(0);
+          block.getPrefetchedTransaction(0);
         } catch (e) {
           expect(
             (e as Error).message.startsWith(
@@ -208,7 +208,7 @@ describe('types', () => {
     describe('#serialized()', () => {
       it('should return the serialized EIP1559 transaction', async () => {
         const tx =
-          '0x02f863800180808094a61464658afeaf65cccaafd3a512b69a83b77618830f424080c080a0e15275d6af28bbafc770d1a919f9a01ace6720239888c403219793c31744b2d2a07dd1b1070cedb5795afb295bedd9b4404fecd31f66a0e8f09747aa261bfb317f';
+          '0x02f87082010e01843b9aca008459682f0083025de894a61464658afeaf65cccaafd3a512b69a83b77618830f424080c080a09b9cfb09599c0e632deb3954505234448edaef0bae4776a88473692343d0013da035c2825459b717aa827569a4dd4077dcf4e35cb24a12fbdfcfa46be24bd271ae';
         const result = eip1559Tx.serialized;
         expect(result).to.be.equal(tx);
       });
@@ -224,7 +224,7 @@ describe('types', () => {
     describe('#unsignedSerialized()', () => {
       it('should return the unsigned serialized EIP1559 transaction', async () => {
         const tx =
-          '0x02e0800180808094a61464658afeaf65cccaafd3a512b69a83b77618830f424080c0';
+          '0x02ed82010e01843b9aca008459682f0083025de894a61464658afeaf65cccaafd3a512b69a83b77618830f424080c0';
         const result = eip1559Tx.unsignedSerialized;
         expect(result).to.be.equal(tx);
       });
