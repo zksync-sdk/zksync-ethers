@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, EIP712Signer} from '../../src';
-import {ethers} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 
 const {expect} = chai;
 
@@ -50,7 +50,7 @@ describe('utils', () => {
         chainId: 270,
         from: ADDRESS,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        value: BigInt(7_000_000),
+        value: BigNumber.from(7_000_000),
       };
 
       const eip712Signer = new EIP712Signer(
@@ -81,7 +81,7 @@ describe('utils', () => {
         chainId: 270,
         from: ADDRESS,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
-        value: BigInt(1_000_000),
+        value: BigNumber.from(1_000_000),
       };
 
       const eip712Signer = new EIP712Signer(

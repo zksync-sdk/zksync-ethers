@@ -35,6 +35,7 @@ import {
   RawBlockTransaction,
   StorageProof,
   PaymasterParams,
+  Eip712Meta,
 } from './types';
 import {
   CONTRACT_DEPLOYER,
@@ -161,11 +162,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
               // this means they were rejected in state-keeper or replaced in mempool.
               // But we still check that they were actually rejected.
               if (
-                receipt.blockNumber == null &&
-                !(
-                  receipt.status != null &&
-                  BigNumber.from(receipt.status).isZero()
-                )
+                !receipt.blockNumber &&
+                !(receipt.status && BigNumber.from(receipt.status).isZero())
               ) {
                 return null;
               }
@@ -279,7 +277,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       async () => {
         const result = await this.perform('getTransactionReceipt', params);
 
-        if (result == null) {
+        if (!result) {
           if (this._emitted['t:' + transactionHash] === undefined) {
             return null;
           }
@@ -287,8 +285,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         if (
-          result.blockNumber == null &&
-          result.status != null &&
+          !result.blockNumber &&
+          result.status &&
           BigNumber.from(result.status).isZero()
         ) {
           // transaction is rejected in the state-keeper
@@ -306,14 +304,14 @@ export class Provider extends ethers.providers.JsonRpcProvider {
           };
         }
 
-        if (result.blockHash == null) {
+        if (!result.blockHash) {
           // receipt is not ready
           return undefined;
         } else {
           const receipt: any = this.formatter.receipt(result);
-          if (receipt.blockNumber == null) {
+          if (!receipt.blockNumber) {
             receipt.confirmations = 0;
-          } else if (receipt.confirmations == null) {
+          } else if (!receipt.confirmations) {
             const blockNumber = await this._getInternalBlockNumber(
               100 + 2 * this.pollingInterval
             );
@@ -347,7 +345,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   static override getFormatter(): Formatter {
-    if (defaultFormatter == null) {
+    if (!defaultFormatter) {
       defaultFormatter = new Formatter();
       const number = defaultFormatter.number.bind(defaultFormatter);
       const boolean = defaultFormatter.boolean.bind(defaultFormatter);
@@ -405,7 +403,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     tokenAddress?: Address
   ): Promise<BigNumber> {
     const tag = this.formatter.blockTag(blockTag);
-    if (tokenAddress == null || isETH(tokenAddress)) {
+    if (!tokenAddress || isETH(tokenAddress)) {
       // requesting ETH balance
       return await super.getBalance(address, tag);
     } else {
@@ -419,7 +417,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   async l2TokenAddress(token: Address): Promise<string> {
-    if (token == ETH_ADDRESS) {
+    if (token === ETH_ADDRESS) {
       return ETH_ADDRESS;
     }
 
@@ -431,10 +429,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     try {
       const l2WethToken = await l2WethBridge.l2TokenAddress(token);
       // If the token is Wrapped Ether, return its L2 token address
-      if (l2WethToken != ethers.constants.AddressZero) {
+      if (l2WethToken !== ethers.constants.AddressZero) {
         return l2WethToken;
       }
-    } catch (e) {}
+    } catch (e) {
+      // skip
+    }
     const l2Erc20Bridge = IL2BridgeFactory.connect(
       bridgeAddresses.erc20L2!,
       this
@@ -443,7 +443,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   async l1TokenAddress(token: Address): Promise<string> {
-    if (token == ETH_ADDRESS) {
+    if (token === ETH_ADDRESS) {
       return ETH_ADDRESS;
     }
 
@@ -455,10 +455,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     try {
       const l1WethToken = await l2WethBridge.l1TokenAddress(token);
       // If the token is Wrapped Ether, return its L1 token address
-      if (l1WethToken != ethers.constants.AddressZero) {
+      if (l1WethToken !== ethers.constants.AddressZero) {
         return l1WethToken;
       }
-    } catch (e) {}
+    } catch (e) {
+      // skip
+    }
     const erc20Bridge = IL2BridgeFactory.connect(
       bridgeAddresses.erc20L2!,
       this
@@ -481,16 +483,15 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         customData: true,
         from: true,
       }
-    );
-    if (transaction.customData == null) {
+    ) as any;
+    if (!transaction.customData) {
       return result;
     }
     result.eip712Meta = {
       gasPerPubdata: utils.hexValue(transaction.customData.gasPerPubdata ?? 0),
-    } as any;
+    } as Eip712Meta;
     transaction.type = EIP712_TX_TYPE;
     if (transaction.customData.factoryDeps) {
-      // @ts-ignore
       result.eip712Meta.factoryDeps = transaction.customData.factoryDeps.map(
         (dep: ethers.BytesLike) =>
           // TODO (SMA-1605): we arraify instead of hexlifying because server expects Vec<u8>.
@@ -499,7 +500,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       );
     }
     if (transaction.customData.paymasterParams) {
-      // @ts-ignore
       result.eip712Meta.paymasterParams = {
         paymaster: utils.hexlify(
           transaction.customData.paymasterParams.paymaster
@@ -519,7 +519,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     const params = (await utils.resolveProperties({
       transaction: this._getTransactionRequest(transaction),
     })) as {transaction: TransactionRequest};
-    if (transaction.customData != null) {
+    if (transaction.customData) {
       params.transaction.customData = transaction.customData;
     }
     const result = await this.perform('estimateGas', params);
@@ -535,10 +535,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   ): Promise<BigNumber> {
     await this.getNetwork();
     const params = await utils.resolveProperties({
-      transaction: this._getTransactionRequest(transaction),
+      transaction: this._getTransactionRequest(
+        transaction
+      ) as TransactionRequest,
     });
-    if (transaction.customData != null) {
-      // @ts-ignore
+    if (transaction.customData) {
       params.transaction.customData = transaction.customData;
     }
     const result = await this.send('zks_estimateGasL1ToL2', [
@@ -577,7 +578,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     const blockTag = this.formatter.blockTag.bind(this.formatter);
     this.formatter.blockTag = (tag: any) => {
-      if (tag == 'committed' || tag == 'finalized') {
+      if (tag === 'committed' || tag === 'finalized') {
         return tag;
       }
       return blockTag(tag);
@@ -614,7 +615,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     l1BatchNumber: number
   ): Promise<[number, number] | null> {
     const range = await this.send('zks_getL1BatchBlockRange', [l1BatchNumber]);
-    if (range == null) {
+    if (!range) {
       return null;
     }
     return [parseInt(range[0], 16), parseInt(range[1], 16)];
@@ -725,7 +726,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }): Promise<ethers.providers.TransactionRequest> {
     const {...tx} = transaction;
 
-    if (tx.to == null && tx.from == null) {
+    if (!tx.to && !tx.from) {
       throw new Error('Withdrawal target address is undefined!');
     }
 
@@ -762,7 +763,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       return populatedTx;
     }
 
-    if (tx.bridgeAddress == null) {
+    if (!tx.bridgeAddress) {
       const bridgeAddresses = await this.getDefaultBridgeAddresses();
       const l2WethBridge = IL2BridgeFactory.connect(
         bridgeAddresses.wethL2!,
@@ -771,9 +772,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       let l1WethToken = ethers.constants.AddressZero;
       try {
         l1WethToken = await l2WethBridge.l1TokenAddress(tx.token);
-      } catch (e) {}
+      } catch (e) {
+        // skip
+      }
       tx.bridgeAddress =
-        l1WethToken != ethers.constants.AddressZero
+        l1WethToken !== ethers.constants.AddressZero
           ? bridgeAddresses.wethL2
           : bridgeAddresses.erc20L2;
     }
@@ -821,7 +824,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     tx.overrides ??= {};
     tx.overrides.from ??= tx.from;
 
-    if (tx.token == null || tx.token == ETH_ADDRESS) {
+    if (!tx.token || tx.token === ETH_ADDRESS) {
       if (tx.paymasterParams) {
         return {
           ...(await ethers.utils.resolveProperties(tx.overrides)),
@@ -930,14 +933,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   protected _prepareFilter(filter: EventFilter) {
     return {
       ...filter,
-      fromBlock:
-        filter.fromBlock == null
-          ? null
-          : this.formatter.blockTag(filter.fromBlock),
-      toBlock:
-        filter.fromBlock == null
-          ? null
-          : this.formatter.blockTag(filter.toBlock),
+      fromBlock: filter.fromBlock
+        ? this.formatter.blockTag(filter.fromBlock)
+        : null,
+      toBlock: filter.fromBlock
+        ? this.formatter.blockTag(filter.toBlock)
+        : null,
     };
   }
 
@@ -949,6 +950,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     response.waitFinalize = async () => {
       const receipt = await response.wait();
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const block = await this.getBlock('finalized');
         if (receipt.blockNumber <= block.number) {
@@ -965,10 +967,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   // This is inefficient. Status should probably be indicated in the transaction receipt.
   async getTransactionStatus(txHash: string): Promise<TransactionStatus> {
     const tx = await this.getTransaction(txHash);
-    if (tx == null) {
+    if (!tx) {
       return TransactionStatus.NotFound;
     }
-    if (tx.blockNumber == null) {
+    if (!tx.blockNumber) {
       return TransactionStatus.Processing;
     }
     const verifiedBlock = await this.getBlock('finalized');
@@ -983,6 +985,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   ): Promise<TransactionResponse> {
     hash = await hash;
     const tx = await super.getTransaction(hash);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return tx ? this._wrapTransaction(tx, hash) : null;
   }
@@ -1006,7 +1009,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     do {
       status = await this.getTransactionStatus(l2Hash);
       await sleep(this.pollingInterval);
-    } while (status == TransactionStatus.NotFound);
+    } while (status === TransactionStatus.NotFound);
 
     return await this.getTransaction(l2Hash);
   }
@@ -1085,7 +1088,7 @@ export class Web3Provider extends Provider {
     provider: ExternalProvider,
     network?: ethers.providers.Networkish
   ) {
-    if (provider == null) {
+    if (!provider) {
       throw new Error('Missing provider!');
     }
     if (!provider.request) {
@@ -1104,7 +1107,7 @@ export class Web3Provider extends Provider {
     params ??= [];
     // Metamask complains about eth_sign (and on some versions hangs)
     if (
-      method == 'eth_sign' &&
+      method === 'eth_sign' &&
       (this.provider.isMetaMask || this.provider.isStatus)
     ) {
       // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
@@ -1124,7 +1127,7 @@ export class Web3Provider extends Provider {
     const gas: BigNumber = await super.estimateGas(transaction);
     const metamaskMinimum = BigNumber.from(21000);
     const isEIP712 =
-      transaction.customData != null || transaction.type == EIP712_TX_TYPE;
+      transaction.customData || transaction.type === EIP712_TX_TYPE;
     return gas.gt(metamaskMinimum) || isEIP712 ? gas : metamaskMinimum;
   }
 }

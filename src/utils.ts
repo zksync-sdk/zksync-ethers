@@ -86,8 +86,8 @@ export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
 
 export function isETH(token: Address) {
   return (
-    token.toLowerCase() == ETH_ADDRESS ||
-    token.toLowerCase() == L2_ETH_TOKEN_ADDRESS
+    token.toLowerCase() === ETH_ADDRESS ||
+    token.toLowerCase() === L2_ETH_TOKEN_ADDRESS
   );
 }
 
@@ -127,9 +127,9 @@ export function getDeployedContracts(
     receipt.logs
       .filter(
         log =>
-          log.topics[0] ==
+          log.topics[0] ===
             utils.id('ContractDeployed(address,bytes32,address)') &&
-          log.address == CONTRACT_DEPLOYER_ADDRESS
+          log.address === CONTRACT_DEPLOYER_ADDRESS
       )
       // Take the last topic (deployed contract address as U256) and extract address from it (U160).
       .map(log => {
@@ -206,7 +206,7 @@ export function serialize(
   transaction: ethers.providers.TransactionRequest,
   signature?: SignatureLike
 ) {
-  if (transaction.customData == null && transaction.type != EIP712_TX_TYPE) {
+  if (!transaction.customData && transaction.type !== EIP712_TX_TYPE) {
     return utils.serializeTransaction(
       transaction as ethers.PopulatedTransaction,
       signature
@@ -241,7 +241,7 @@ export function serialize(
     formatNumber(maxPriorityFeePerGas, 'maxPriorityFeePerGas'),
     formatNumber(maxFeePerGas, 'maxFeePerGas'),
     formatNumber(transaction.gasLimit || 0, 'gasLimit'),
-    transaction.to != null ? utils.getAddress(transaction.to) : '0x',
+    transaction.to ? utils.getAddress(transaction.to) : '0x',
     formatNumber(transaction.value || 0, 'value'),
     transaction.data || '0x',
   ];
@@ -270,7 +270,7 @@ export function serialize(
 
   if (
     meta.customSignature &&
-    ethers.utils.arrayify(meta.customSignature).length == 0
+    ethers.utils.arrayify(meta.customSignature).length === 0
   ) {
     throw new Error('Empty signatures are not supported!');
   }
@@ -292,7 +292,7 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
   // For getting the consistent length we first convert the bytecode to UInt8Array
   const bytecodeAsArray = ethers.utils.arrayify(bytecode);
 
-  if (bytecodeAsArray.length % 32 != 0) {
+  if (bytecodeAsArray.length % 32 !== 0) {
     throw new Error('The bytecode length in bytes must be divisible by 32!');
   }
 
@@ -308,7 +308,7 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
   // Note that the length of the bytecode
   // should be provided in 32-byte words.
   const bytecodeLengthInWords = bytecodeAsArray.length / 32;
-  if (bytecodeLengthInWords % 2 == 0) {
+  if (bytecodeLengthInWords % 2 === 0) {
     throw new Error('Bytecode length in 32-byte words must be odd!');
   }
 
@@ -343,10 +343,10 @@ export function parseTransaction(
   }
 
   function arrayToPaymasterParams(arr: string[]): PaymasterParams | undefined {
-    if (arr.length == 0) {
+    if (arr.length === 0) {
       return undefined;
     }
-    if (arr.length != 2) {
+    if (arr.length !== 2) {
       throw new Error(
         `Invalid paymaster parameters, expected to have length of 2, found ${arr.length}!`
       );
@@ -359,7 +359,7 @@ export function parseTransaction(
   }
 
   const bytes = utils.arrayify(payload);
-  if (bytes[0] != EIP712_TX_TYPE) {
+  if (bytes[0] !== EIP712_TX_TYPE) {
     return utils.parseTransaction(bytes);
   }
 
@@ -390,8 +390,8 @@ export function parseTransaction(
   };
 
   if (
-    (utils.hexlify(ethSignature.r) == '0x' ||
-      utils.hexlify(ethSignature.s) == '0x') &&
+    (utils.hexlify(ethSignature.r) === '0x' ||
+      utils.hexlify(ethSignature.s) === '0x') &&
     !transaction.customData.customSignature
   ) {
     return transaction;
@@ -455,16 +455,18 @@ export function getL2HashFromPriorityOp(
 ): string {
   let txHash: string | null = null;
   for (const log of txReceipt.logs) {
-    if (log.address.toLowerCase() != zkSyncAddress.toLowerCase()) {
+    if (log.address.toLowerCase() !== zkSyncAddress.toLowerCase()) {
       continue;
     }
 
     try {
       const priorityQueueLog = ZKSYNC_MAIN_ABI.parseLog(log);
-      if (priorityQueueLog && priorityQueueLog.args.txHash != null) {
+      if (priorityQueueLog && priorityQueueLog.args.txHash) {
         txHash = priorityQueueLog.args.txHash;
       }
-    } catch {}
+    } catch {
+      // skip
+    }
   }
   if (!txHash) {
     throw new Error('Failed to parse tx logs!');
@@ -545,7 +547,7 @@ function isECDSASignatureCorrect(
   signature: SignatureLike
 ): boolean {
   try {
-    return address == ethers.utils.recoverAddress(msgHash, signature);
+    return address === ethers.utils.recoverAddress(msgHash, signature);
   } catch {
     // In case ECDSA signature verification has thrown an error,
     // we simply consider the signature as incorrect.
@@ -566,7 +568,7 @@ async function isEIP1271SignatureCorrect(
   // It is the caller's responsibility to handle the exception.
   const result = await accountContract.isValidSignature(msgHash, signature);
 
-  return result == EIP1271_MAGIC_VALUE;
+  return result === EIP1271_MAGIC_VALUE;
 }
 
 async function isSignatureCorrect(
@@ -578,7 +580,7 @@ async function isSignatureCorrect(
   let isContractAccount = false;
 
   const code = await provider.getCode(address);
-  isContractAccount = ethers.utils.arrayify(code).length != 0;
+  isContractAccount = ethers.utils.arrayify(code).length !== 0;
 
   if (!isContractAccount) {
     return isECDSASignatureCorrect(address, msgHash, signature);
@@ -634,7 +636,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
   // and so estimation for the zero address may be smaller than for the sender.
   from ??= ethers.Wallet.createRandom().address;
 
-  if (token == ETH_ADDRESS) {
+  if (token === ETH_ADDRESS) {
     return await providerL2.estimateL1ToL2Execute({
       contractAddress: to,
       gasPerPubdataByte: gasPerPubdataByte,
@@ -652,9 +654,11 @@ export async function estimateDefaultBridgeDepositL2Gas(
     let l2WethToken = ethers.constants.AddressZero;
     try {
       l2WethToken = await l1WethBridge.l2TokenAddress(token);
-    } catch (e) {}
+    } catch (e) {
+      // skip
+    }
 
-    if (l2WethToken != ethers.constants.AddressZero) {
+    if (l2WethToken !== ethers.constants.AddressZero) {
       value = amount;
       l1BridgeAddress = bridgeAddresses.wethL1;
       l2BridgeAddress = bridgeAddresses.wethL2;

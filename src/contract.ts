@@ -78,7 +78,8 @@ export class ContractFactory extends ethers.ContractFactory {
 
     if (
       overrides.customData &&
-      overrides.customData.factoryDeps != null &&
+      overrides.customData.factoryDeps !== null &&
+      overrides.customData.factoryDeps !== undefined &&
       !Array.isArray(overrides.customData.factoryDeps)
     ) {
       throw new Error(
@@ -97,7 +98,7 @@ export class ContractFactory extends ethers.ContractFactory {
 
     // The overrides will be popped out in this call:
     const txRequest = super.getDeployTransaction(...args);
-    if (this.interface.deploy.inputs.length + 1 == args.length) {
+    if (this.interface.deploy.inputs.length + 1 === args.length) {
       constructorArgs = args.slice(0, args.length - 1);
       overrides = args[args.length - 1] as ethers.PayableOverrides;
       overrides.customData ??= {};
