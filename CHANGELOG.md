@@ -1,3 +1,16 @@
+# [6.4.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.3.0...v6.4.0) (2024-02-29)
+
+
+### Bug Fixes
+
+* **adapter:** make `l2GasLimit` optional parameter in `requestExecute` ([a5fb96c](https://github.com/zksync-sdk/zksync-ethers/commit/a5fb96ceeeb2145705841cdc616ce24d564363e4))
+* **wallet:** populate transaction before signing ([72a0585](https://github.com/zksync-sdk/zksync-ethers/commit/72a058531ec403f76e63d7c078f8c08d5a616a37))
+
+
+### Features
+
+* **utils:** add `toJSON` function for converting object to JSON string ([8ef0299](https://github.com/zksync-sdk/zksync-ethers/commit/8ef02993c17340a5cd9d613c50f3d8a77c9da0c8))
+
 # [6.3.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.2.0...v6.3.0) (2024-02-08)
 
 
