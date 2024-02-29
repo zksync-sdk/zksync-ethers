@@ -266,7 +266,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return;
   }
 
-
   /**
    * Resolves to the transaction receipt for `transactionHash`, if mined.
    *
@@ -387,7 +386,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       this._getBlock(blockHashOrBlockTag, true)
     );
   }
-
 
   /**  Retrieves the formatter used to format responses from the network. */
   static override getFormatter(): Formatter {
@@ -1895,7 +1893,9 @@ export class Web3Provider extends Provider {
    * const provider = new Web3Provider(window.ethereum);
    * console.log(`Block: ${utils.toJSON(await provider.getBlockWithTransactions("latest", true))}`);
    */
-  override async getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>): Promise<BlockWithTransactions> {
+  override async getBlockWithTransactions(
+    blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>
+  ): Promise<BlockWithTransactions> {
     return super.getBlockWithTransactions(blockHashOrBlockTag);
   }
 
@@ -2474,7 +2474,9 @@ export class Web3Provider extends Provider {
    * });
    * const result = await provider.getFilterChanges(filter);
    */
-  override async getFilterChanges(idx: BigNumber): Promise<Array<Log | string>> {
+  override async getFilterChanges(
+    idx: BigNumber
+  ): Promise<Array<Log | string>> {
     return super.getFilterChanges(idx);
   }
 

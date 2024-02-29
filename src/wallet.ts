@@ -1,7 +1,15 @@
 import {EIP712Signer} from './signer';
 import {Provider} from './provider';
 import {serialize, EIP712_TX_TYPE} from './utils';
-import {BigNumber, BigNumberish, Bytes, BytesLike, ethers, Overrides, utils} from 'ethers';
+import {
+  BigNumber,
+  BigNumberish,
+  Bytes,
+  BytesLike,
+  ethers,
+  Overrides,
+  utils,
+} from 'ethers';
 import {
   BlockTag,
   TransactionResponse,
@@ -9,13 +17,15 @@ import {
   Address,
   PriorityOpResponse,
   FullDepositFee,
-  FinalizeWithdrawalParams, BalancesMap, PaymasterParams
+  FinalizeWithdrawalParams,
+  BalancesMap,
+  PaymasterParams,
 } from './types';
 import {ProgressCallback} from '@ethersproject/json-wallets';
 import {AdapterL1, AdapterL2} from './adapters';
-import {IZkSync} from "../typechain/IZkSync";
-import {Il1Bridge} from "../typechain/Il1Bridge";
-import {Il2Bridge} from "../typechain/Il2Bridge";
+import {IZkSync} from '../typechain/IZkSync';
+import {Il1Bridge} from '../typechain/Il1Bridge';
+import {Il2Bridge} from '../typechain/Il2Bridge';
 
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
