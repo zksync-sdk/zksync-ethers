@@ -384,7 +384,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * import { ethers } from "ethers";
    *
    * const provider = new ethers.providers.Web3Provider(window.ethereum);
-   * const signer = Signer.from(provider.getSigner());
+   * const signer = Signer.from(provider.getSigner() as any);
    */
   static from(
     signer: ethers.providers.JsonRpcSigner & {provider: Provider}
