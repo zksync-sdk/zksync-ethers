@@ -3,7 +3,10 @@
 /* eslint-disable */
 
 import { Contract, Interface, type ContractRunner } from "ethers";
-import type { IL1Bridge, IL1BridgeInterface } from "../IL1Bridge";
+import type {
+  IL1ERC20Bridge,
+  IL1ERC20BridgeInterface,
+} from "../IL1ERC20Bridge";
 
 const _abi = [
   {
@@ -163,6 +166,45 @@ const _abi = [
         name: "_l2TxGasPerPubdataByte",
         type: "uint256",
       },
+    ],
+    name: "deposit",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "txHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasLimit",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasPerPubdataByte",
+        type: "uint256",
+      },
       {
         internalType: "address",
         name: "_refundRecipient",
@@ -178,6 +220,35 @@ const _abi = [
       },
     ],
     stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_account",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "_depositL2TxHash",
+        type: "bytes32",
+      },
+    ],
+    name: "depositAmount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -269,14 +340,61 @@ const _abi = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [],
+    name: "l2TokenBeacon",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "sharedBridge",
+    outputs: [
+      {
+        internalType: "contract IL1SharedBridge",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "transferTokenToSharedBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
-export class IL1Bridge__factory {
+export class IL1ERC20Bridge__factory {
   static readonly abi = _abi;
-  static createInterface(): IL1BridgeInterface {
-    return new Interface(_abi) as IL1BridgeInterface;
+  static createInterface(): IL1ERC20BridgeInterface {
+    return new Interface(_abi) as IL1ERC20BridgeInterface;
   }
-  static connect(address: string, runner?: ContractRunner | null): IL1Bridge {
-    return new Contract(address, _abi, runner) as unknown as IL1Bridge;
+  static connect(
+    address: string,
+    runner?: ContractRunner | null
+  ): IL1ERC20Bridge {
+    return new Contract(address, _abi, runner) as unknown as IL1ERC20Bridge;
   }
 }

@@ -3,7 +3,10 @@
 /* eslint-disable */
 
 import { Contract, Interface, type ContractRunner } from "ethers";
-import type { IZkSync, IZkSyncInterface } from "../IZkSync";
+import type {
+  IZkSyncStateTransition,
+  IZkSyncStateTransitionInterface,
+} from "../IZkSyncStateTransition";
 
 const _abi = [
   {
@@ -213,19 +216,114 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        indexed: true,
-        internalType: "address",
-        name: "oldGovernor",
-        type: "address",
+        indexed: false,
+        internalType: "uint128",
+        name: "oldNominator",
+        type: "uint128",
       },
       {
-        indexed: true,
-        internalType: "address",
-        name: "newGovernor",
-        type: "address",
+        indexed: false,
+        internalType: "uint128",
+        name: "oldDenominator",
+        type: "uint128",
+      },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "newNominator",
+        type: "uint128",
+      },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "newDenominator",
+        type: "uint128",
       },
     ],
-    name: "NewGovernor",
+    name: "NewBaseTokenMultiplier",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "enum PubdataPricingMode",
+            name: "pubdataPricingMode",
+            type: "uint8",
+          },
+          {
+            internalType: "uint32",
+            name: "batchOverheadL1Gas",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "maxPubdataPerBatch",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "maxL2GasPerBatch",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "priorityTxMaxPubdata",
+            type: "uint32",
+          },
+          {
+            internalType: "uint64",
+            name: "minimalL2GasPrice",
+            type: "uint64",
+          },
+        ],
+        indexed: false,
+        internalType: "struct FeeParams",
+        name: "oldFeeParams",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "enum PubdataPricingMode",
+            name: "pubdataPricingMode",
+            type: "uint8",
+          },
+          {
+            internalType: "uint32",
+            name: "batchOverheadL1Gas",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "maxPubdataPerBatch",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "maxL2GasPerBatch",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "priorityTxMaxPubdata",
+            type: "uint32",
+          },
+          {
+            internalType: "uint64",
+            name: "minimalL2GasPrice",
+            type: "uint64",
+          },
+        ],
+        indexed: false,
+        internalType: "struct FeeParams",
+        name: "newFeeParams",
+        type: "tuple",
+      },
+    ],
+    name: "NewFeeParams",
     type: "event",
   },
   {
@@ -245,25 +343,6 @@ const _abi = [
       },
     ],
     name: "NewPendingAdmin",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "oldPendingGovernor",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newPendingGovernor",
-        type: "address",
-      },
-    ],
-    name: "NewPendingGovernor",
     type: "event",
   },
   {
@@ -371,7 +450,7 @@ const _abi = [
           },
         ],
         indexed: false,
-        internalType: "struct IMailbox.L2CanonicalTransaction",
+        internalType: "struct L2CanonicalTransaction",
         name: "transaction",
         type: "tuple",
       },
@@ -406,6 +485,89 @@ const _abi = [
   },
   {
     anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldTransactionFilterer",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newTransactionFilterer",
+        type: "address",
+      },
+    ],
+    name: "NewTransactionFilterer",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            components: [
+              {
+                internalType: "address",
+                name: "facet",
+                type: "address",
+              },
+              {
+                internalType: "enum Diamond.Action",
+                name: "action",
+                type: "uint8",
+              },
+              {
+                internalType: "bool",
+                name: "isFreezable",
+                type: "bool",
+              },
+              {
+                internalType: "bytes4[]",
+                name: "selectors",
+                type: "bytes4[]",
+              },
+            ],
+            internalType: "struct Diamond.FacetCut[]",
+            name: "facetCuts",
+            type: "tuple[]",
+          },
+          {
+            internalType: "address",
+            name: "initAddress",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "initCalldata",
+            type: "bytes",
+          },
+        ],
+        indexed: false,
+        internalType: "struct Diamond.DiamondCutData",
+        name: "diamondCut",
+        type: "tuple",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "proposalId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "proposalSalt",
+        type: "bytes32",
+      },
+    ],
+    name: "ProposeTransparentUpgrade",
+    type: "event",
+  },
+  {
+    anonymous: false,
     inputs: [],
     name: "Unfreeze",
     type: "event",
@@ -430,6 +592,19 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "enum PubdataPricingMode",
+        name: "validiumMode",
+        type: "uint8",
+      },
+    ],
+    name: "ValidiumModeStatusUpdate",
+    type: "event",
+  },
+  {
     inputs: [],
     name: "acceptAdmin",
     outputs: [],
@@ -438,7 +613,137 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "acceptGovernor",
+    name: "baseTokenGasPriceMultiplierDenominator",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "",
+        type: "uint128",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "baseTokenGasPriceMultiplierNominator",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "",
+        type: "uint128",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "sender",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "contractL2",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "mintValue",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l2Value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "l2Calldata",
+            type: "bytes",
+          },
+          {
+            internalType: "uint256",
+            name: "l2GasLimit",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l2GasPerPubdataByteLimit",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes[]",
+            name: "factoryDeps",
+            type: "bytes[]",
+          },
+          {
+            internalType: "address",
+            name: "refundRecipient",
+            type: "address",
+          },
+        ],
+        internalType: "struct BridgehubL2TransactionRequest",
+        name: "_request",
+        type: "tuple",
+      },
+    ],
+    name: "bridgehubRequestL2Transaction",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "canonicalTxHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "enum PubdataPricingMode",
+            name: "pubdataPricingMode",
+            type: "uint8",
+          },
+          {
+            internalType: "uint32",
+            name: "batchOverheadL1Gas",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "maxPubdataPerBatch",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "maxL2GasPerBatch",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "priorityTxMaxPubdata",
+            type: "uint32",
+          },
+          {
+            internalType: "uint64",
+            name: "minimalL2GasPrice",
+            type: "uint64",
+          },
+        ],
+        internalType: "struct FeeParams",
+        name: "_newFeeParams",
+        type: "tuple",
+      },
+    ],
+    name: "changeFeeParams",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -541,7 +846,7 @@ const _abi = [
           },
           {
             internalType: "bytes",
-            name: "totalL2ToL1Pubdata",
+            name: "pubdataCommitments",
             type: "bytes",
           },
         ],
@@ -551,6 +856,123 @@ const _abi = [
       },
     ],
     name: "commitBatches",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "uint64",
+            name: "batchNumber",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "batchHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "indexRepeatedStorageChanges",
+            type: "uint64",
+          },
+          {
+            internalType: "uint256",
+            name: "numberOfLayer1Txs",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "priorityOperationsHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "l2LogsTreeRoot",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "commitment",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IExecutor.StoredBatchInfo",
+        name: "_lastCommittedBatchData",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint64",
+            name: "batchNumber",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "timestamp",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "indexRepeatedStorageChanges",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "newStateRoot",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "numberOfLayer1Txs",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "priorityOperationsHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "bootloaderHeapInitialContentsHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "eventsQueueStateHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes",
+            name: "systemLogs",
+            type: "bytes",
+          },
+          {
+            internalType: "bytes",
+            name: "pubdataCommitments",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct IExecutor.CommitBatchInfo[]",
+        name: "_newBatchesData",
+        type: "tuple[]",
+      },
+    ],
+    name: "commitBatchesSharedBridge",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -606,6 +1028,66 @@ const _abi = [
       },
     ],
     name: "executeBatches",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "uint64",
+            name: "batchNumber",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "batchHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "indexRepeatedStorageChanges",
+            type: "uint64",
+          },
+          {
+            internalType: "uint256",
+            name: "numberOfLayer1Txs",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "priorityOperationsHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "l2LogsTreeRoot",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "commitment",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IExecutor.StoredBatchInfo[]",
+        name: "_batchesData",
+        type: "tuple[]",
+      },
+    ],
+    name: "executeBatchesSharedBridge",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -780,12 +1262,12 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "getFirstUnprocessedPriorityTx",
+    name: "getAdmin",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "address",
         name: "",
-        type: "uint256",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -793,12 +1275,51 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "getGovernor",
+    name: "getBaseToken",
     outputs: [
       {
         internalType: "address",
         name: "",
         type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getBaseTokenBridge",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getBridgehub",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getFirstUnprocessedPriorityTx",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -871,7 +1392,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "getPendingGovernor",
+    name: "getPendingAdmin",
     outputs: [
       {
         internalType: "address",
@@ -916,6 +1437,32 @@ const _abi = [
         internalType: "uint256",
         name: "",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getPubdataPricingMode",
+    outputs: [
+      {
+        internalType: "enum PubdataPricingMode",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getStateTransitionManager",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -1122,7 +1669,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bytes32",
-        name: "hash",
+        name: "merkleRoot",
         type: "bytes32",
       },
     ],
@@ -1310,6 +1857,130 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "uint64",
+            name: "batchNumber",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "batchHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "indexRepeatedStorageChanges",
+            type: "uint64",
+          },
+          {
+            internalType: "uint256",
+            name: "numberOfLayer1Txs",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "priorityOperationsHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "l2LogsTreeRoot",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "commitment",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IExecutor.StoredBatchInfo",
+        name: "_prevBatch",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint64",
+            name: "batchNumber",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "batchHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "indexRepeatedStorageChanges",
+            type: "uint64",
+          },
+          {
+            internalType: "uint256",
+            name: "numberOfLayer1Txs",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "priorityOperationsHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "l2LogsTreeRoot",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "commitment",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IExecutor.StoredBatchInfo[]",
+        name: "_committedBatches",
+        type: "tuple[]",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256[]",
+            name: "recursiveAggregationInput",
+            type: "uint256[]",
+          },
+          {
+            internalType: "uint256[]",
+            name: "serializedProof",
+            type: "uint256[]",
+          },
+        ],
+        internalType: "struct IExecutor.ProofInput",
+        name: "_proof",
+        type: "tuple",
+      },
+    ],
+    name: "proveBatchesSharedBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "bytes32",
         name: "_l2TxHash",
         type: "bytes32",
@@ -1355,7 +2026,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_l2BatchNumber",
+        name: "_batchNumber",
         type: "uint256",
       },
       {
@@ -1421,7 +2092,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_l2BatchNumber",
+        name: "_batchNumber",
         type: "uint256",
       },
       {
@@ -1533,12 +2204,17 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_newPendingAdmin",
-        type: "address",
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_newLastBatch",
+        type: "uint256",
       },
     ],
-    name: "setPendingAdmin",
+    name: "revertBatchesSharedBridge",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1547,11 +2223,11 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "_newPendingGovernor",
+        name: "_newPendingAdmin",
         type: "address",
       },
     ],
-    name: "setPendingGovernor",
+    name: "setPendingAdmin",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1585,6 +2261,37 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "uint128",
+        name: "_nominator",
+        type: "uint128",
+      },
+      {
+        internalType: "uint128",
+        name: "_denominator",
+        type: "uint128",
+      },
+    ],
+    name: "setTokenMultiplier",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_transactionFilterer",
+        type: "address",
+      },
+    ],
+    name: "setTransactionFilterer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "_validator",
         type: "address",
@@ -1596,6 +2303,19 @@ const _abi = [
       },
     ],
     name: "setValidator",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "enum PubdataPricingMode",
+        name: "_validiumMode",
+        type: "uint8",
+      },
+    ],
+    name: "setValidiumMode",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1621,19 +2341,90 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "transferEthToSharedBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "unfreezeDiamond",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_protocolVersion",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            components: [
+              {
+                internalType: "address",
+                name: "facet",
+                type: "address",
+              },
+              {
+                internalType: "enum Diamond.Action",
+                name: "action",
+                type: "uint8",
+              },
+              {
+                internalType: "bool",
+                name: "isFreezable",
+                type: "bool",
+              },
+              {
+                internalType: "bytes4[]",
+                name: "selectors",
+                type: "bytes4[]",
+              },
+            ],
+            internalType: "struct Diamond.FacetCut[]",
+            name: "facetCuts",
+            type: "tuple[]",
+          },
+          {
+            internalType: "address",
+            name: "initAddress",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "initCalldata",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Diamond.DiamondCutData",
+        name: "_cutData",
+        type: "tuple",
+      },
+    ],
+    name: "upgradeChainFromVersion",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
 ] as const;
 
-export class IZkSync__factory {
+export class IZkSyncStateTransition__factory {
   static readonly abi = _abi;
-  static createInterface(): IZkSyncInterface {
-    return new Interface(_abi) as IZkSyncInterface;
+  static createInterface(): IZkSyncStateTransitionInterface {
+    return new Interface(_abi) as IZkSyncStateTransitionInterface;
   }
-  static connect(address: string, runner?: ContractRunner | null): IZkSync {
-    return new Contract(address, _abi, runner) as unknown as IZkSync;
+  static connect(
+    address: string,
+    runner?: ContractRunner | null
+  ): IZkSyncStateTransition {
+    return new Contract(
+      address,
+      _abi,
+      runner
+    ) as unknown as IZkSyncStateTransition;
   }
 }

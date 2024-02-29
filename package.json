@@ -30,7 +30,8 @@
   "files": [
     "build/",
     "abi/",
-    "src/"
+    "src/",
+    "typechain"
   ],
   "dependencies": {},
   "devDependencies": {
@@ -55,6 +56,7 @@
     "ethers": "^6.7.1"
   },
   "scripts": {
+    "tmp": "mocha -r ts-node/register --grep getFullRequiredDepositFee tests/integration/signer.test.ts",
     "test:build": "rm -rf tests/build && tsc -p tsconfig.test.json",
     "test:prepare-proxy": "cd scripts && ./update-diamond-proxy.sh && cd ../",
     "test:prepare": "ts-node tests/setup.ts",
@@ -66,7 +68,7 @@
     "lint:fix": "gts fix",
     "watch": "tsc --watch",
     "types:fetch": "cd scripts && ./update-abi.sh && cd ../",
-    "types": "typechain --target ethers-v6 --out-dir src/typechain src/abi/*.json",
+    "types": "typechain --target ethers-v6 --out-dir typechain abi/*.json",
     "clean": "gts clean",
     "docs": "typedoc --out docs --hideInPageTOC true --useCodeBlocks true --includeVersion true  src/index.ts && cd scripts && ./post-process-doc.sh && cd ../"
   },

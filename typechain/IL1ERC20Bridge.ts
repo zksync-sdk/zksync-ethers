@@ -23,15 +23,20 @@ import type {
   TypedContractMethod,
 } from "./common";
 
-export interface IL1BridgeInterface extends Interface {
+export interface IL1ERC20BridgeInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "claimFailedDeposit"
-      | "deposit"
+      | "deposit(address,address,uint256,uint256,uint256)"
+      | "deposit(address,address,uint256,uint256,uint256,address)"
+      | "depositAmount"
       | "finalizeWithdrawal"
       | "isWithdrawalFinalized"
       | "l2Bridge"
       | "l2TokenAddress"
+      | "l2TokenBeacon"
+      | "sharedBridge"
+      | "transferTokenToSharedBridge"
   ): FunctionFragment;
 
   getEvent(
@@ -54,7 +59,11 @@ export interface IL1BridgeInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "deposit",
+    functionFragment: "deposit(address,address,uint256,uint256,uint256)",
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deposit(address,address,uint256,uint256,uint256,address)",
     values: [
       AddressLike,
       AddressLike,
@@ -63,6 +72,10 @@ export interface IL1BridgeInterface extends Interface {
       BigNumberish,
       AddressLike
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositAmount",
+    values: [AddressLike, AddressLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "finalizeWithdrawal",
@@ -77,12 +90,35 @@ export interface IL1BridgeInterface extends Interface {
     functionFragment: "l2TokenAddress",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "l2TokenBeacon",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "sharedBridge",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferTokenToSharedBridge",
+    values: [AddressLike, BigNumberish]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "claimFailedDeposit",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "deposit(address,address,uint256,uint256,uint256)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "deposit(address,address,uint256,uint256,uint256,address)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositAmount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "finalizeWithdrawal",
     data: BytesLike
@@ -94,6 +130,18 @@ export interface IL1BridgeInterface extends Interface {
   decodeFunctionResult(functionFragment: "l2Bridge", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "l2TokenAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l2TokenBeacon",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "sharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferTokenToSharedBridge",
     data: BytesLike
   ): Result;
 }
@@ -162,11 +210,11 @@ export namespace WithdrawalFinalizedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface IL1Bridge extends BaseContract {
-  connect(runner?: ContractRunner | null): IL1Bridge;
+export interface IL1ERC20Bridge extends BaseContract {
+  connect(runner?: ContractRunner | null): IL1ERC20Bridge;
   waitForDeployment(): Promise<this>;
 
-  interface: IL1BridgeInterface;
+  interface: IL1ERC20BridgeInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -219,7 +267,19 @@ export interface IL1Bridge extends BaseContract {
     "nonpayable"
   >;
 
-  deposit: TypedContractMethod<
+  "deposit(address,address,uint256,uint256,uint256)": TypedContractMethod<
+    [
+      _l2Receiver: AddressLike,
+      _l1Token: AddressLike,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish
+    ],
+    [string],
+    "payable"
+  >;
+
+  "deposit(address,address,uint256,uint256,uint256,address)": TypedContractMethod<
     [
       _l2Receiver: AddressLike,
       _l1Token: AddressLike,
@@ -230,6 +290,12 @@ export interface IL1Bridge extends BaseContract {
     ],
     [string],
     "payable"
+  >;
+
+  depositAmount: TypedContractMethod<
+    [_account: AddressLike, _l1Token: AddressLike, _depositL2TxHash: BytesLike],
+    [bigint],
+    "nonpayable"
   >;
 
   finalizeWithdrawal: TypedContractMethod<
@@ -258,6 +324,16 @@ export interface IL1Bridge extends BaseContract {
     "view"
   >;
 
+  l2TokenBeacon: TypedContractMethod<[], [string], "view">;
+
+  sharedBridge: TypedContractMethod<[], [string], "view">;
+
+  transferTokenToSharedBridge: TypedContractMethod<
+    [_token: AddressLike, _amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -278,7 +354,20 @@ export interface IL1Bridge extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "deposit"
+    nameOrSignature: "deposit(address,address,uint256,uint256,uint256)"
+  ): TypedContractMethod<
+    [
+      _l2Receiver: AddressLike,
+      _l1Token: AddressLike,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish
+    ],
+    [string],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "deposit(address,address,uint256,uint256,uint256,address)"
   ): TypedContractMethod<
     [
       _l2Receiver: AddressLike,
@@ -290,6 +379,13 @@ export interface IL1Bridge extends BaseContract {
     ],
     [string],
     "payable"
+  >;
+  getFunction(
+    nameOrSignature: "depositAmount"
+  ): TypedContractMethod<
+    [_account: AddressLike, _l1Token: AddressLike, _depositL2TxHash: BytesLike],
+    [bigint],
+    "nonpayable"
   >;
   getFunction(
     nameOrSignature: "finalizeWithdrawal"
@@ -317,6 +413,19 @@ export interface IL1Bridge extends BaseContract {
   getFunction(
     nameOrSignature: "l2TokenAddress"
   ): TypedContractMethod<[_l1Token: AddressLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "l2TokenBeacon"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "sharedBridge"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "transferTokenToSharedBridge"
+  ): TypedContractMethod<
+    [_token: AddressLike, _amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
   getEvent(
     key: "ClaimedFailedDeposit"
