@@ -67,13 +67,13 @@ export type Eip712Meta = {
  * - Constants representing special blocks such as 'committed', 'finalized', 'latest', 'earliest', or 'pending'.
  */
 export type BlockTag =
-    | number
-    | string // hex number
-    | 'committed'
-    | 'finalized'
-    | 'latest'
-    | 'earliest'
-    | 'pending';
+  | number
+  | string // hex number
+  | 'committed'
+  | 'finalized'
+  | 'latest'
+  | 'earliest'
+  | 'pending';
 
 /** Pipe-delimited choice of deployment types. */
 export type DeploymentType =

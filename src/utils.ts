@@ -379,7 +379,10 @@ export function create2Address(
  * const address = utils.createAddress("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", 1);
  * // address = "0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021"
  */
-export function createAddress(sender: Address, senderNonce: BigNumberish): string {
+export function createAddress(
+  sender: Address,
+  senderNonce: BigNumberish
+): string {
   const prefix = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes('zksyncCreate')
   );
@@ -754,7 +757,10 @@ function getSignature(
  *
  *
  */
-function eip712TxHash(transaction: any, ethSignature?: EthereumSignature): string {
+function eip712TxHash(
+  transaction: any,
+  ethSignature?: EthereumSignature
+): string {
   const signedDigest = EIP712Signer.getSignedDigest(transaction);
   const hashedSignature = ethers.utils.keccak256(
     getSignature(transaction, ethSignature)
@@ -1250,10 +1256,10 @@ export async function estimateCustomBridgeDepositL2Gas(
 }
 
 /**
-* Creates a JSON string from an object, including support for serializing bigint types.
-*
-* @param object The object to serialize to JSON.
-*/
+ * Creates a JSON string from an object, including support for serializing bigint types.
+ *
+ * @param object The object to serialize to JSON.
+ */
 export function toJSON(object: any): string {
   return JSON.stringify(object, (key, value) => {
     if (typeof value === 'bigint') {

@@ -7,8 +7,13 @@ import {
   serialize,
 } from './utils';
 import {
-  Address, BalancesMap,
-  BlockTag, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse,
+  Address,
+  BalancesMap,
+  BlockTag,
+  FinalizeWithdrawalParams,
+  FullDepositFee,
+  PaymasterParams,
+  PriorityOpResponse,
   Signature,
   TransactionRequest,
   TransactionResponse,
@@ -16,9 +21,9 @@ import {
 import {TypedDataDomain, TypedDataSigner} from '@ethersproject/abstract-signer';
 import {_TypedDataEncoder as TypedDataEncoder} from '@ethersproject/hash';
 import {AdapterL1, AdapterL2} from './adapters';
-import {Il2Bridge} from "../typechain/Il2Bridge";
-import {IZkSync} from "../typechain/IZkSync";
-import {Il1Bridge} from "../typechain/Il1Bridge";
+import {Il2Bridge} from '../typechain/Il2Bridge';
+import {IZkSync} from '../typechain/IZkSync';
+import {Il1Bridge} from '../typechain/Il1Bridge';
 
 /**
  * All typed data conforming to the EIP712 standard within zkSync Era.
@@ -388,7 +393,6 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
     newSigner.eip712 = new EIP712Signer(newSigner, newSigner.getChainId());
     return newSigner;
   }
-
 
   /**
    * Get the number of transactions ever sent for account, which is used as the `nonce` when sending a transaction.
