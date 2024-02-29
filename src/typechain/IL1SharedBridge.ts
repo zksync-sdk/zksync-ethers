@@ -45,7 +45,7 @@ export type L2TransactionRequestTwoBridgesInnerStructOutput = [
   txDataHash: string;
 };
 
-export interface IL1BridgeInterface extends Interface {
+export interface IL1SharedBridgeInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "bridgehub"
@@ -53,19 +53,26 @@ export interface IL1BridgeInterface extends Interface {
       | "bridgehubDeposit"
       | "bridgehubDepositBaseToken"
       | "claimFailedDeposit"
-      | "deposit"
+      | "claimFailedDepositLegacyErc20Bridge"
       | "depositHappened"
+      | "depositLegacyErc20Bridge"
       | "finalizeWithdrawal"
-      | "isWithdrawalFinalizedShared"
+      | "finalizeWithdrawalLegacyErc20Bridge"
+      | "isWithdrawalFinalized"
+      | "l1WethAddress"
       | "l2BridgeAddress"
+      | "legacyBridge"
+      | "receiveEth"
+      | "setEraFirstPostUpgradeBatch"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "BridgehubDepositBaseTokenInitiated"
       | "BridgehubDepositFinalized"
-      | "BridgehubDepositInitiatedSharedBridge"
+      | "BridgehubDepositInitiated"
       | "ClaimedFailedDepositSharedBridge"
-      | "DepositInitiatedSharedBridge"
+      | "LegacyDepositInitiated"
       | "WithdrawalFinalizedSharedBridge"
   ): EventFragment;
 
@@ -76,7 +83,7 @@ export interface IL1BridgeInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "bridgehubDeposit",
-    values: [BigNumberish, AddressLike, BytesLike]
+    values: [BigNumberish, AddressLike, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "bridgehubDepositBaseToken",
@@ -97,21 +104,33 @@ export interface IL1BridgeInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "deposit",
+    functionFragment: "claimFailedDepositLegacyErc20Bridge",
     values: [
-      BigNumberish,
       AddressLike,
       AddressLike,
       BigNumberish,
+      BytesLike,
       BigNumberish,
       BigNumberish,
       BigNumberish,
-      AddressLike
+      BytesLike[]
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "depositHappened",
     values: [BigNumberish, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositLegacyErc20Bridge",
+    values: [
+      AddressLike,
+      AddressLike,
+      AddressLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      AddressLike
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "finalizeWithdrawal",
@@ -125,11 +144,31 @@ export interface IL1BridgeInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "isWithdrawalFinalizedShared",
+    functionFragment: "finalizeWithdrawalLegacyErc20Bridge",
+    values: [BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isWithdrawalFinalized",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "l1WethAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "l2BridgeAddress",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "legacyBridge",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "receiveEth",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setEraFirstPostUpgradeBatch",
     values: [BigNumberish]
   ): string;
 
@@ -150,9 +189,16 @@ export interface IL1BridgeInterface extends Interface {
     functionFragment: "claimFailedDeposit",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "claimFailedDepositLegacyErc20Bridge",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "depositHappened",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositLegacyErc20Bridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -160,13 +206,55 @@ export interface IL1BridgeInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isWithdrawalFinalizedShared",
+    functionFragment: "finalizeWithdrawalLegacyErc20Bridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isWithdrawalFinalized",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l1WethAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "l2BridgeAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "legacyBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "receiveEth", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setEraFirstPostUpgradeBatch",
+    data: BytesLike
+  ): Result;
+}
+
+export namespace BridgehubDepositBaseTokenInitiatedEvent {
+  export type InputTuple = [
+    chainId: BigNumberish,
+    from: AddressLike,
+    l1Token: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    chainId: bigint,
+    from: string,
+    l1Token: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    chainId: bigint;
+    from: string;
+    l1Token: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace BridgehubDepositFinalizedEvent {
@@ -191,7 +279,7 @@ export namespace BridgehubDepositFinalizedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace BridgehubDepositInitiatedSharedBridgeEvent {
+export namespace BridgehubDepositInitiatedEvent {
   export type InputTuple = [
     chainId: BigNumberish,
     txDataHash: BytesLike,
@@ -247,7 +335,7 @@ export namespace ClaimedFailedDepositSharedBridgeEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace DepositInitiatedSharedBridgeEvent {
+export namespace LegacyDepositInitiatedEvent {
   export type InputTuple = [
     chainId: BigNumberish,
     l2DepositTxHash: BytesLike,
@@ -303,11 +391,11 @@ export namespace WithdrawalFinalizedSharedBridgeEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface IL1Bridge extends BaseContract {
-  connect(runner?: ContractRunner | null): IL1Bridge;
+export interface IL1SharedBridge extends BaseContract {
+  connect(runner?: ContractRunner | null): IL1SharedBridge;
   waitForDeployment(): Promise<this>;
 
-  interface: IL1BridgeInterface;
+  interface: IL1SharedBridgeInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -355,7 +443,12 @@ export interface IL1Bridge extends BaseContract {
   >;
 
   bridgehubDeposit: TypedContractMethod<
-    [_chainId: BigNumberish, _prevMsgSender: AddressLike, _data: BytesLike],
+    [
+      _chainId: BigNumberish,
+      _prevMsgSender: AddressLike,
+      _l2Value: BigNumberish,
+      _data: BytesLike
+    ],
     [L2TransactionRequestTwoBridgesInnerStructOutput],
     "payable"
   >;
@@ -387,12 +480,32 @@ export interface IL1Bridge extends BaseContract {
     "nonpayable"
   >;
 
-  deposit: TypedContractMethod<
+  claimFailedDepositLegacyErc20Bridge: TypedContractMethod<
     [
-      _chainId: BigNumberish,
+      _depositSender: AddressLike,
+      _l1Token: AddressLike,
+      _amount: BigNumberish,
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  depositHappened: TypedContractMethod<
+    [_chainId: BigNumberish, _l2TxHash: BytesLike],
+    [string],
+    "view"
+  >;
+
+  depositLegacyErc20Bridge: TypedContractMethod<
+    [
+      _msgSender: AddressLike,
       _l2Receiver: AddressLike,
       _l1Token: AddressLike,
-      _mintValue: BigNumberish,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
@@ -400,12 +513,6 @@ export interface IL1Bridge extends BaseContract {
     ],
     [string],
     "payable"
-  >;
-
-  depositHappened: TypedContractMethod<
-    [_chainId: BigNumberish, _l2TxHash: BytesLike],
-    [string],
-    "view"
   >;
 
   finalizeWithdrawal: TypedContractMethod<
@@ -421,7 +528,25 @@ export interface IL1Bridge extends BaseContract {
     "nonpayable"
   >;
 
-  isWithdrawalFinalizedShared: TypedContractMethod<
+  finalizeWithdrawalLegacyErc20Bridge: TypedContractMethod<
+    [
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[]
+    ],
+    [
+      [string, string, bigint] & {
+        l1Receiver: string;
+        l1Token: string;
+        amount: bigint;
+      }
+    ],
+    "nonpayable"
+  >;
+
+  isWithdrawalFinalized: TypedContractMethod<
     [
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
@@ -431,10 +556,22 @@ export interface IL1Bridge extends BaseContract {
     "view"
   >;
 
+  l1WethAddress: TypedContractMethod<[], [string], "view">;
+
   l2BridgeAddress: TypedContractMethod<
     [_chainId: BigNumberish],
     [string],
     "view"
+  >;
+
+  legacyBridge: TypedContractMethod<[], [string], "view">;
+
+  receiveEth: TypedContractMethod<[_chainId: BigNumberish], [void], "payable">;
+
+  setEraFirstPostUpgradeBatch: TypedContractMethod<
+    [_eraFirstPostUpgradeBatch: BigNumberish],
+    [void],
+    "nonpayable"
   >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
@@ -454,7 +591,12 @@ export interface IL1Bridge extends BaseContract {
   getFunction(
     nameOrSignature: "bridgehubDeposit"
   ): TypedContractMethod<
-    [_chainId: BigNumberish, _prevMsgSender: AddressLike, _data: BytesLike],
+    [
+      _chainId: BigNumberish,
+      _prevMsgSender: AddressLike,
+      _l2Value: BigNumberish,
+      _data: BytesLike
+    ],
     [L2TransactionRequestTwoBridgesInnerStructOutput],
     "payable"
   >;
@@ -488,20 +630,20 @@ export interface IL1Bridge extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "deposit"
+    nameOrSignature: "claimFailedDepositLegacyErc20Bridge"
   ): TypedContractMethod<
     [
-      _chainId: BigNumberish,
-      _l2Receiver: AddressLike,
+      _depositSender: AddressLike,
       _l1Token: AddressLike,
-      _mintValue: BigNumberish,
       _amount: BigNumberish,
-      _l2TxGasLimit: BigNumberish,
-      _l2TxGasPerPubdataByte: BigNumberish,
-      _refundRecipient: AddressLike
+      _l2TxHash: BytesLike,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _merkleProof: BytesLike[]
     ],
-    [string],
-    "payable"
+    [void],
+    "nonpayable"
   >;
   getFunction(
     nameOrSignature: "depositHappened"
@@ -509,6 +651,21 @@ export interface IL1Bridge extends BaseContract {
     [_chainId: BigNumberish, _l2TxHash: BytesLike],
     [string],
     "view"
+  >;
+  getFunction(
+    nameOrSignature: "depositLegacyErc20Bridge"
+  ): TypedContractMethod<
+    [
+      _msgSender: AddressLike,
+      _l2Receiver: AddressLike,
+      _l1Token: AddressLike,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: AddressLike
+    ],
+    [string],
+    "payable"
   >;
   getFunction(
     nameOrSignature: "finalizeWithdrawal"
@@ -525,7 +682,26 @@ export interface IL1Bridge extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "isWithdrawalFinalizedShared"
+    nameOrSignature: "finalizeWithdrawalLegacyErc20Bridge"
+  ): TypedContractMethod<
+    [
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
+      _message: BytesLike,
+      _merkleProof: BytesLike[]
+    ],
+    [
+      [string, string, bigint] & {
+        l1Receiver: string;
+        l1Token: string;
+        amount: bigint;
+      }
+    ],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "isWithdrawalFinalized"
   ): TypedContractMethod<
     [
       _chainId: BigNumberish,
@@ -536,9 +712,32 @@ export interface IL1Bridge extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "l1WethAddress"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "l2BridgeAddress"
   ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "legacyBridge"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "receiveEth"
+  ): TypedContractMethod<[_chainId: BigNumberish], [void], "payable">;
+  getFunction(
+    nameOrSignature: "setEraFirstPostUpgradeBatch"
+  ): TypedContractMethod<
+    [_eraFirstPostUpgradeBatch: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
+  getEvent(
+    key: "BridgehubDepositBaseTokenInitiated"
+  ): TypedContractEvent<
+    BridgehubDepositBaseTokenInitiatedEvent.InputTuple,
+    BridgehubDepositBaseTokenInitiatedEvent.OutputTuple,
+    BridgehubDepositBaseTokenInitiatedEvent.OutputObject
+  >;
   getEvent(
     key: "BridgehubDepositFinalized"
   ): TypedContractEvent<
@@ -547,11 +746,11 @@ export interface IL1Bridge extends BaseContract {
     BridgehubDepositFinalizedEvent.OutputObject
   >;
   getEvent(
-    key: "BridgehubDepositInitiatedSharedBridge"
+    key: "BridgehubDepositInitiated"
   ): TypedContractEvent<
-    BridgehubDepositInitiatedSharedBridgeEvent.InputTuple,
-    BridgehubDepositInitiatedSharedBridgeEvent.OutputTuple,
-    BridgehubDepositInitiatedSharedBridgeEvent.OutputObject
+    BridgehubDepositInitiatedEvent.InputTuple,
+    BridgehubDepositInitiatedEvent.OutputTuple,
+    BridgehubDepositInitiatedEvent.OutputObject
   >;
   getEvent(
     key: "ClaimedFailedDepositSharedBridge"
@@ -561,11 +760,11 @@ export interface IL1Bridge extends BaseContract {
     ClaimedFailedDepositSharedBridgeEvent.OutputObject
   >;
   getEvent(
-    key: "DepositInitiatedSharedBridge"
+    key: "LegacyDepositInitiated"
   ): TypedContractEvent<
-    DepositInitiatedSharedBridgeEvent.InputTuple,
-    DepositInitiatedSharedBridgeEvent.OutputTuple,
-    DepositInitiatedSharedBridgeEvent.OutputObject
+    LegacyDepositInitiatedEvent.InputTuple,
+    LegacyDepositInitiatedEvent.OutputTuple,
+    LegacyDepositInitiatedEvent.OutputObject
   >;
   getEvent(
     key: "WithdrawalFinalizedSharedBridge"
@@ -576,6 +775,17 @@ export interface IL1Bridge extends BaseContract {
   >;
 
   filters: {
+    "BridgehubDepositBaseTokenInitiated(uint256,address,address,uint256)": TypedContractEvent<
+      BridgehubDepositBaseTokenInitiatedEvent.InputTuple,
+      BridgehubDepositBaseTokenInitiatedEvent.OutputTuple,
+      BridgehubDepositBaseTokenInitiatedEvent.OutputObject
+    >;
+    BridgehubDepositBaseTokenInitiated: TypedContractEvent<
+      BridgehubDepositBaseTokenInitiatedEvent.InputTuple,
+      BridgehubDepositBaseTokenInitiatedEvent.OutputTuple,
+      BridgehubDepositBaseTokenInitiatedEvent.OutputObject
+    >;
+
     "BridgehubDepositFinalized(uint256,bytes32,bytes32)": TypedContractEvent<
       BridgehubDepositFinalizedEvent.InputTuple,
       BridgehubDepositFinalizedEvent.OutputTuple,
@@ -587,15 +797,15 @@ export interface IL1Bridge extends BaseContract {
       BridgehubDepositFinalizedEvent.OutputObject
     >;
 
-    "BridgehubDepositInitiatedSharedBridge(uint256,bytes32,address,address,address,uint256)": TypedContractEvent<
-      BridgehubDepositInitiatedSharedBridgeEvent.InputTuple,
-      BridgehubDepositInitiatedSharedBridgeEvent.OutputTuple,
-      BridgehubDepositInitiatedSharedBridgeEvent.OutputObject
+    "BridgehubDepositInitiated(uint256,bytes32,address,address,address,uint256)": TypedContractEvent<
+      BridgehubDepositInitiatedEvent.InputTuple,
+      BridgehubDepositInitiatedEvent.OutputTuple,
+      BridgehubDepositInitiatedEvent.OutputObject
     >;
-    BridgehubDepositInitiatedSharedBridge: TypedContractEvent<
-      BridgehubDepositInitiatedSharedBridgeEvent.InputTuple,
-      BridgehubDepositInitiatedSharedBridgeEvent.OutputTuple,
-      BridgehubDepositInitiatedSharedBridgeEvent.OutputObject
+    BridgehubDepositInitiated: TypedContractEvent<
+      BridgehubDepositInitiatedEvent.InputTuple,
+      BridgehubDepositInitiatedEvent.OutputTuple,
+      BridgehubDepositInitiatedEvent.OutputObject
     >;
 
     "ClaimedFailedDepositSharedBridge(uint256,address,address,uint256)": TypedContractEvent<
@@ -609,15 +819,15 @@ export interface IL1Bridge extends BaseContract {
       ClaimedFailedDepositSharedBridgeEvent.OutputObject
     >;
 
-    "DepositInitiatedSharedBridge(uint256,bytes32,address,address,address,uint256)": TypedContractEvent<
-      DepositInitiatedSharedBridgeEvent.InputTuple,
-      DepositInitiatedSharedBridgeEvent.OutputTuple,
-      DepositInitiatedSharedBridgeEvent.OutputObject
+    "LegacyDepositInitiated(uint256,bytes32,address,address,address,uint256)": TypedContractEvent<
+      LegacyDepositInitiatedEvent.InputTuple,
+      LegacyDepositInitiatedEvent.OutputTuple,
+      LegacyDepositInitiatedEvent.OutputObject
     >;
-    DepositInitiatedSharedBridge: TypedContractEvent<
-      DepositInitiatedSharedBridgeEvent.InputTuple,
-      DepositInitiatedSharedBridgeEvent.OutputTuple,
-      DepositInitiatedSharedBridgeEvent.OutputObject
+    LegacyDepositInitiated: TypedContractEvent<
+      LegacyDepositInitiatedEvent.InputTuple,
+      LegacyDepositInitiatedEvent.OutputTuple,
+      LegacyDepositInitiatedEvent.OutputObject
     >;
 
     "WithdrawalFinalizedSharedBridge(uint256,address,address,uint256)": TypedContractEvent<

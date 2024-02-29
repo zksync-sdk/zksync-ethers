@@ -22,7 +22,13 @@ import {
   TransactionResponse,
 } from './types';
 import {AdapterL1, AdapterL2} from './adapters';
-import {IL1Bridge, IL2Bridge, IZkSync} from './typechain';
+import {
+  IBridgehub,
+  IL1ERC20Bridge,
+  IL1SharedBridge,
+  IL2Bridge,
+  IZkSyncStateTransition,
+} from './typechain';
 
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
@@ -36,7 +42,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
 
   override _providerL1(): ethers.Provider {
     if (!this.providerL1) {
-      throw new Error('L1 provider missing: use `connectToL1` to specify!');
+      throw new Error(
+        'L1 provider is missing! Specify an L1 provider using `Wallet.connectToL1()`.'
+      );
     }
     return this.providerL1;
   }
@@ -67,10 +75,30 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const ethProvider = ethers.getDefaultProvider("sepolia");
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
-   * console.log(`Main contract: ${await wallet.getMainContract()}`);
+   * const mainContract = await wallet.getMainContract();
    */
-  override async getMainContract(): Promise<IZkSync> {
+  override async getMainContract(): Promise<IZkSyncStateTransition> {
     return super.getMainContract();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const bridgehub = await wallet.getBridgehubContract();
+   */
+  override async getBridgehubContract(): Promise<IBridgehub> {
+    return super.getBridgehubContract();
   }
 
   /**
@@ -90,8 +118,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const l1BridgeContracts = await wallet.getL1BridgeContracts();
    */
   override async getL1BridgeContracts(): Promise<{
-    erc20: IL1Bridge;
-    weth: IL1Bridge;
+    erc20: IL1ERC20Bridge;
+    weth: IL1ERC20Bridge;
+    shared: IL1SharedBridge;
   }> {
     return super.getL1BridgeContracts();
   }
@@ -224,7 +253,135 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   /**
    * @inheritDoc
    *
-   * @example Deposit ETH.
+   * @example
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * console.log(`Base token: ${await wallet.getBaseToken()}`);
+   */
+  override async getBaseToken(): Promise<string> {
+    return super.getBaseToken();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * console.log(`Is ETH-based chain: ${await wallet.isETHBasedChain()}`);
+   */
+  override async isETHBasedChain(): Promise<boolean> {
+    return super.isETHBasedChain();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example Get allowance parameters for depositing ETH on non-ETH-based chain.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const token = utils.LEGACY_ETH_ADDRESS;
+   * const amount = 5;
+   * const approveParams = await wallet.getDepositAllowanceParams(token, amount);
+   *
+   * await (
+   *    await wallet.approveERC20(
+   *        approveParams[0].token,
+   *        approveParams[0].allowance
+   *    )
+   * ).wait();
+   *
+   * @example Get allowance parameters for depositing base token on non-ETH-based chain.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const token = await wallet.getBaseToken();
+   * const amount = 5;
+   * const approveParams = await wallet.getDepositAllowanceParams(token, amount);
+   *
+   * await (
+   *    await wallet.approveERC20(
+   *        approveParams[0].token,
+   *        approveParams[0].allowance
+   *    )
+   * ).wait();
+   *
+   * @example Get allowance parameters for depositing non-base token on non-ETH-based chain.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const token = "<L1_TOKEN>";
+   * const amount = 5;
+   * const approveParams = await wallet.getDepositAllowanceParams(token, amount);
+   *
+   * await (
+   *    await wallet.approveERC20(
+   *        approveParams[0].token,
+   *        approveParams[0].allowance
+   *    )
+   * ).wait();
+   *
+   * await (
+   *    await wallet.approveERC20(
+   *        approveParams[1].token,
+   *        approveParams[1].allowance
+   *    )
+   * ).wait();
+   */
+  override async getDepositAllowanceParams(
+    token: Address,
+    amount: BigNumberish
+  ): Promise<
+    {
+      token: Address;
+      allowance: BigNumberish;
+    }[]
+  > {
+    return super.getDepositAllowanceParams(token, amount);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example Deposit ETH on ETH-based chain.
    *
    * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -244,7 +401,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * // we can use `await depositTx.waitL1Commit()`
    * await depositTx.wait();
    *
-   * @example Deposit token.
+   * @example Deposit token on ETH-based chain.
    *
    * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -265,6 +422,71 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
    * // we can use `await depositTx.waitL1Commit()`
    * await depositTx.wait();
+   *
+   * @example Deposit ETH on non-ETH-based chain.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const depositTx = await wallet.deposit({
+   *   token: utils.ETH_ADDRESS,
+   *   amount: 10_000_000n,
+   *   approveBaseERC20: true,
+   * });
+   * // Note that we wait not only for the L1 transaction to complete but also for it to be
+   * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
+   * // we can use `await depositTx.waitL1Commit()`
+   * await depositTx.wait();
+   *
+   * @example Deposit base token on non-ETH-based chain.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const depositTx = await wallet.deposit({
+   *   token: await wallet.getBaseToken(),
+   *   amount: 10_000_000n,
+   *   approveERC20: true, // or approveBaseERC20: true
+   * });
+   * // Note that we wait not only for the L1 transaction to complete but also for it to be
+   * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
+   * // we can use `await depositTx.waitL1Commit()`
+   * await depositTx.wait();
+   *
+   * @example Deposit non-base token on non-ETH-based chain.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+   * const depositTx = await wallet.deposit({
+   *   token: tokenL1,
+   *   amount: 10_000_000n,
+   *   approveERC20: true,
+   *   approveBaseERC20: true,
+   * });
+   * // Note that we wait not only for the L1 transaction to complete but also for it to be
+   * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
+   * // we can use `await depositTx.waitL1Commit()`
+   * await depositTx.wait();
    */
   override async deposit(transaction: {
     token: Address;
@@ -273,11 +495,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     operatorTip?: BigNumberish;
     bridgeAddress?: Address;
     approveERC20?: boolean;
+    approveBaseERC20?: boolean;
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
     overrides?: Overrides;
     approveOverrides?: Overrides;
+    approveBaseOverrides?: Overrides;
     customBridgeData?: BytesLike;
   }): Promise<PriorityOpResponse> {
     return super.deposit(transaction);
@@ -488,6 +712,48 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
+   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const tx = {
+   *    contractAddress: await wallet.getAddress(),
+   *    calldata: '0x',
+   *    l2Value: 7_000_000_000,
+   * };
+   *
+   * const approveParams = await wallet.getRequestExecuteAllowanceParams(tx);
+   * await (
+   *    await wallet.approveERC20(
+   *        approveParams.token,
+   *        approveParams.allowance
+   *    )
+   * ).wait();
+   */
+  override async getRequestExecuteAllowanceParams(transaction: {
+    contractAddress: Address;
+    calldata: string;
+    l2GasLimit?: BigNumberish;
+    l2Value?: BigNumberish;
+    factoryDeps?: BytesLike[];
+    operatorTip?: BigNumberish;
+    gasPerPubdataByte?: BigNumberish;
+    refundRecipient?: Address;
+    overrides?: Overrides;
+  }): Promise<{token: Address; allowance: BigNumberish}> {
+    return super.getRequestExecuteAllowanceParams(transaction);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
    * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
@@ -508,7 +774,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async requestExecute(transaction: {
     contractAddress: Address;
     calldata: string;
-    l2GasLimit: BigNumberish;
+    l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
@@ -545,6 +812,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     contractAddress: Address;
     calldata: string;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
@@ -580,6 +848,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     contractAddress: Address;
     calldata: string;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
@@ -687,6 +956,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async getL2BridgeContracts(): Promise<{
     erc20: IL2Bridge;
     weth: IL2Bridge;
+    shared: IL2Bridge;
   }> {
     return super.getL2BridgeContracts();
   }
@@ -885,6 +1155,36 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     overrides?: Overrides;
   }): Promise<TransactionResponse> {
     return super.transfer(transaction);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const wallet = new Wallet(PRIVATE_KEY, provider);
+   *
+   * // Any L2 -> L1 transaction can be used.
+   * // In this case, withdrawal transaction is used.
+   * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
+   * console.log(`Confirmation data: ${utils.toJSON(await wallet.getPriorityOpConfirmation(tx, 0))}`);
+   */
+  override async getPriorityOpConfirmation(
+    txHash: string,
+    index = 0
+  ): Promise<{
+    l1BatchNumber: number;
+    l2MessageIndex: number;
+    l2TxNumberInBlock: number | null;
+    proof: string[];
+  }> {
+    return super.getPriorityOpConfirmation(txHash, index);
   }
 
   /**

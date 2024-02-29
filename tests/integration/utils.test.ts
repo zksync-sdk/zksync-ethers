@@ -2,26 +2,24 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, EIP712Signer} from '../../src';
 import {ethers} from 'ethers';
+import {PRIVATE_KEY1, ADDRESS1, IS_ETH_BASED, ADDRESS2, DAI_L1} from '../utils';
 
 const {expect} = chai;
 
 describe('utils', () => {
-  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
-  const PRIVATE_KEY =
-    '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
-
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
+  const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
 
   describe('#isMessageSignatureCorrect()', () => {
     it('should return true for a valid message signature', async () => {
       const message = 'Hello, world!';
-      const signature = await new ethers.Wallet(PRIVATE_KEY).signMessage(
+      const signature = await new ethers.Wallet(PRIVATE_KEY1).signMessage(
         message
       );
 
       const result = await utils.isMessageSignatureCorrect(
         provider,
-        ADDRESS,
+        ADDRESS1,
         message,
         signature
       );
@@ -35,7 +33,7 @@ describe('utils', () => {
 
       const result = await utils.isMessageSignatureCorrect(
         provider,
-        ADDRESS,
+        ADDRESS1,
         message,
         invalidSignature
       );
@@ -48,13 +46,13 @@ describe('utils', () => {
       const tx: types.TransactionRequest = {
         type: 113,
         chainId: 270,
-        from: ADDRESS,
+        from: ADDRESS1,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
         value: 7_000_000n,
       };
 
       const eip712Signer = new EIP712Signer(
-        new ethers.Wallet(PRIVATE_KEY),
+        new ethers.Wallet(PRIVATE_KEY1),
         Number((await provider.getNetwork()).chainId)
       );
 
@@ -62,7 +60,7 @@ describe('utils', () => {
 
       const result = await utils.isTypedDataSignatureCorrect(
         provider,
-        ADDRESS,
+        ADDRESS1,
         await eip712Signer.getDomain(),
         utils.EIP712_TYPES,
         EIP712Signer.getSignInput(tx),
@@ -79,19 +77,19 @@ describe('utils', () => {
       const tx: types.TransactionRequest = {
         type: 113,
         chainId: 270,
-        from: ADDRESS,
+        from: ADDRESS1,
         to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
         value: 1_000_000n,
       };
 
       const eip712Signer = new EIP712Signer(
-        new ethers.Wallet(PRIVATE_KEY),
+        new ethers.Wallet(PRIVATE_KEY1),
         Number((await provider.getNetwork()).chainId)
       );
 
       const result = await utils.isTypedDataSignatureCorrect(
         provider,
-        ADDRESS,
+        ADDRESS1,
         await eip712Signer.getDomain(),
         utils.EIP712_TYPES,
         EIP712Signer.getSignInput(tx),
@@ -99,5 +97,69 @@ describe('utils', () => {
       );
       expect(result).to.be.false;
     });
+  });
+
+  describe('#estimateDefaultBridgeDepositL2Gas()', () => {
+    if (IS_ETH_BASED) {
+      it('should return estimation for ETH token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          utils.LEGACY_ETH_ADDRESS,
+          ethers.parseEther('1'),
+          ADDRESS2,
+          ADDRESS1
+        );
+        expect(result > 0n).to.be.true;
+      });
+
+      it('should return estimation for DAI token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          DAI_L1,
+          5,
+          ADDRESS2,
+          ADDRESS1
+        );
+        expect(result > 0n).to.be.true;
+      });
+    } else {
+      it('should return estimation for ETH token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          utils.LEGACY_ETH_ADDRESS,
+          ethers.parseEther('1'),
+          ADDRESS2,
+          ADDRESS1
+        );
+        expect(result > 0n).to.be.true;
+      });
+
+      it('should return estimation for base token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          await provider.getBaseTokenContractAddress(),
+          ethers.parseEther('1'),
+          ADDRESS2,
+          ADDRESS1
+        );
+        expect(result > 0n).to.be.true;
+      });
+
+      it('should return estimation for DAI token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          DAI_L1,
+          5,
+          ADDRESS2,
+          ADDRESS1
+        );
+        expect(result > 0n).to.be.true;
+      });
+    }
   });
 });

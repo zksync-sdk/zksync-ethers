@@ -94,7 +94,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "newAddress",
+        name: "",
         type: "address",
       },
     ],
@@ -123,7 +123,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "newAddress",
+        name: "",
         type: "address",
       },
     ],
@@ -157,7 +157,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "newAddress",
+        name: "",
         type: "address",
       },
     ],
@@ -168,7 +168,7 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "_salt",
+        name: "",
         type: "bytes32",
       },
       {
@@ -191,10 +191,114 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "newAddress",
+        name: "",
         type: "address",
       },
     ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_address",
+        type: "address",
+      },
+    ],
+    name: "extendedAccountVersion",
+    outputs: [
+      {
+        internalType: "enum IContractDeployer.AccountAbstractionVersion",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "bytes32",
+            name: "bytecodeHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "newAddress",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "callConstructor",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "input",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct ContractDeployer.ForceDeployment",
+        name: "_deployment",
+        type: "tuple",
+      },
+      {
+        internalType: "address",
+        name: "_sender",
+        type: "address",
+      },
+    ],
+    name: "forceDeployOnAddress",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "bytes32",
+            name: "bytecodeHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "newAddress",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "callConstructor",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "input",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct ContractDeployer.ForceDeployment[]",
+        name: "_deployments",
+        type: "tuple[]",
+      },
+    ],
+    name: "forceDeployOnAddresses",
+    outputs: [],
     stateMutability: "payable",
     type: "function",
   },
