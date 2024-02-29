@@ -1,3 +1,24 @@
+# [5.4.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.3.0...v5.4.0) (2024-02-29)
+
+
+### Bug Fixes
+
+* **wallet:** make `populateTransaction` compatible with `ethers` validation ([e048e59](https://github.com/zksync-sdk/zksync-ethers/commit/e048e5983f4b2c3c54b35f8da3dce4c4ed24f5fe))
+* **wallet:** populate transaction before signing ([17deca3](https://github.com/zksync-sdk/zksync-ethers/commit/17deca379572b8d3e331bae17d34fb586469c516))
+
+
+### Features
+
+* **provider:** remove `getMessageProof()` method ([4dabbda](https://github.com/zksync-sdk/zksync-ethers/commit/4dabbdaf0736fbbf347efb1a95369480a6d5058f))
+* **provider:** remove `getTokenPrice()` method ([69e3536](https://github.com/zksync-sdk/zksync-ethers/commit/69e3536afa0bd6e03643112b718d234bc757f1ff))
+* **utils:** add `toJSON` function for printing objects ([1d13933](https://github.com/zksync-sdk/zksync-ethers/commit/1d139336e7712866b9c2ee00b6d5728381de087e))
+
+
+### BREAKING CHANGES
+
+* **provider:** Remove deprecated `Provider.getMessageProof()` method.
+* **provider:** Remove deprecated `Provider.getTokenPrice()` method.
+
 # [5.3.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.2.0...v5.3.0) (2024-02-08)
 
 
