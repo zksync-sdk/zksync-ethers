@@ -743,20 +743,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     this.formatter.transaction = parseTransaction;
   }
 
-  async getMessageProof(
-    blockNumber: ethers.BigNumberish,
-    sender: Address,
-    messageHash: BytesLike,
-    logIndex?: number
-  ): Promise<MessageProof | null> {
-    return await this.send('zks_getL2ToL1MsgProof', [
-      BigNumber.from(blockNumber).toNumber(),
-      sender,
-      ethers.utils.hexlify(messageHash),
-      logIndex,
-    ]);
-  }
-
   /**
    * Returns the proof for a transaction's L2 to L1 log sent via the `L1Messenger` system contract.
    *
