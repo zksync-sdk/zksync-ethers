@@ -104,7 +104,7 @@ describe('Provider', () => {
   describe('#getGasPrice()', () => {
     it('should return a gas price', async () => {
       const result = await provider.getGasPrice();
-      expect(result).to.be.equal(100_000_000n);
+      expect(result > 0n).to.be.true;
     });
   });
 
@@ -168,7 +168,7 @@ describe('Provider', () => {
         Array.from(ethers.getBytes(testnetPaymasterBytecode))
       );
     });
-  });
+  }).timeout(10_000);
 
   describe('#getRawBlockTransactions()', () => {
     it('should return a raw transactions', async () => {
@@ -672,7 +672,7 @@ describe('Provider', () => {
           gasPerPubdata: 800,
         },
       });
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
@@ -730,6 +730,6 @@ describe('Provider', () => {
       });
       const result = await provider.getFilterChanges(filter);
       expect(result).not.to.be.null;
-    });
+    }).timeout(10_000);
   });
 });

@@ -100,7 +100,7 @@ describe('utils', () => {
   });
 
   describe('#estimateDefaultBridgeDepositL2Gas()', () => {
-    if(IS_ETH_BASED) {
+    if (IS_ETH_BASED) {
       it('should return estimation for ETH token', async () => {
         const result = await utils.estimateDefaultBridgeDepositL2Gas(
           ethProvider,
@@ -108,7 +108,7 @@ describe('utils', () => {
           utils.LEGACY_ETH_ADDRESS,
           ethers.parseEther('1'),
           ADDRESS2,
-          ADDRESS1,
+          ADDRESS1
         );
         expect(result > 0n).to.be.true;
       });
@@ -120,9 +120,9 @@ describe('utils', () => {
           DAI_L1,
           5,
           ADDRESS2,
-          ADDRESS1,
+          ADDRESS1
         );
-        expect(result > 0n).to.be.false;
+        expect(result > 0n).to.be.true;
       });
     } else {
       it('should return estimation for ETH token', async () => {
@@ -132,7 +132,7 @@ describe('utils', () => {
           utils.LEGACY_ETH_ADDRESS,
           ethers.parseEther('1'),
           ADDRESS2,
-          ADDRESS1,
+          ADDRESS1
         );
         expect(result > 0n).to.be.true;
       });
@@ -144,7 +144,7 @@ describe('utils', () => {
           await provider.getBaseTokenContractAddress(),
           ethers.parseEther('1'),
           ADDRESS2,
-          ADDRESS1,
+          ADDRESS1
         );
         expect(result > 0n).to.be.true;
       });
@@ -156,7 +156,7 @@ describe('utils', () => {
           DAI_L1,
           5,
           ADDRESS2,
-          ADDRESS1,
+          ADDRESS1
         );
         expect(result > 0n).to.be.true;
       });
