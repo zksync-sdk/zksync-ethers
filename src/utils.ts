@@ -27,8 +27,7 @@ export const ZKSYNC_MAIN_ABI = new ethers.Interface(
 );
 
 /**
- * The ABI for the `IContractDeployer` interface, which is utilized
- * for deploying smart contracts.
+ * The ABI for the `IContractDeployer` interface, which is utilized for deploying smart contracts.
  * @constant
  */
 export const CONTRACT_DEPLOYER = new ethers.Interface(
@@ -36,8 +35,7 @@ export const CONTRACT_DEPLOYER = new ethers.Interface(
 );
 
 /**
- * The ABI for the `IL1Messenger` interface, which is utilized
- * for sending messages from the L2 to L1.
+ * The ABI for the `IL1Messenger` interface, which is utilized for sending messages from the L2 to L1.
  * @constant
  */
 export const L1_MESSENGER = new ethers.Interface(
@@ -45,22 +43,19 @@ export const L1_MESSENGER = new ethers.Interface(
 );
 
 /**
- * The ABI for the `IERC20` interface, which is utilized
- * for interacting with ERC20 tokens.
+ * The ABI for the `IERC20` interface, which is utilized for interacting with ERC20 tokens.
  * @constant
  */
 export const IERC20 = new ethers.Interface(require('../abi/IERC20.json'));
 
 /**
- * The ABI for the `IERC1271` interface, which is utilized
- * for signature validation by contracts.
+ * The ABI for the `IERC1271` interface, which is utilized for signature validation by contracts.
  * @constant
  */
 export const IERC1271 = new ethers.Interface(require('../abi/IERC1271.json'));
 
 /**
- * The ABI for the `IL1Bridge` interface, which is utilized
- * for transferring ERC20 tokens from L1 to L2.
+ * The ABI for the `IL1Bridge` interface, which is utilized for transferring ERC20 tokens from L1 to L2.
  * @constant
  */
 export const L1_BRIDGE_ABI = new ethers.Interface(
@@ -68,8 +63,7 @@ export const L1_BRIDGE_ABI = new ethers.Interface(
 );
 
 /**
- * The ABI for the `IL2Bridge` interface, which is utilized
- * for transferring ERC20 tokens from L2 to L1.
+ * The ABI for the `IL2Bridge` interface, which is utilized for transferring ERC20 tokens from L2 to L1.
  * @constant
  */
 export const L2_BRIDGE_ABI = new ethers.Interface(
@@ -77,8 +71,7 @@ export const L2_BRIDGE_ABI = new ethers.Interface(
 );
 
 /**
- * The ABI for the `INonceHolder` interface, which is utilized
- * for managing deployment nonces.
+ * The ABI for the `INonceHolder` interface, which is utilized for managing deployment nonces.
  * @constant
  */
 export const NONCE_HOLDER_ABI = new ethers.Interface(

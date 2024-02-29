@@ -386,11 +386,13 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example
    *
-   * import { BrowserProvider } from "zksync-ethers";
+   * import { Provider, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const ethProvider = new ethers.BrowserProvider(window.ethereum);
+   * const ethSigner = provider.getSigner("<ADDRESS>");
+   * const chainId = Number((await Provider.getDefaultProvider(types.Network.Sepolia).getNetwork()).chainId)
+   * const signer = Signer.from(ethSigner as any, chainId)
    */
   static from(
     signer: ethers.JsonRpcSigner & {provider: Provider},
