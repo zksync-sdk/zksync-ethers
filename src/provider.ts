@@ -888,10 +888,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     };
   }
 
-  async getTokenPrice(token: Address): Promise<string | null> {
-    return await this.send('zks_getTokenPrice', [token]);
-  }
-
   /**
    * Returns all balances for confirmed tokens given by an account address.
    *
