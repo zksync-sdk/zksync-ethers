@@ -388,7 +388,7 @@ describe('Wallet', () => {
       expect(result.type).to.be.equal(2);
     }).timeout(10_000);
 
-    it('should return already populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas`', async () => {
+    it('should send already populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas`', async () => {
       const populatedTx = await wallet.populateTransaction({
         to: RECEIVER,
         value: 7_000_000,
