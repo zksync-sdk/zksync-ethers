@@ -41,6 +41,8 @@
     "prettier": "3.0.3",
     "ts-node": "^10.0.0",
     "typechain": "^3.0.0",
+    "typedoc": "^0.25.8",
+    "typedoc-plugin-markdown": "4.0.0-next.53",
     "typescript": "^4.3.5",
     "gts": "^5.2.0"
   },
@@ -59,7 +61,8 @@
     "types:fetch": "cd scripts && ./update-abi.sh && cd ../",
     "types": "rm typechain/*.ts && find ./abi -name \"*.json\" -print0 | xargs -0 -I {} npx typechain --target ethers-v5 --outDir typechain {}",
     "clean": "gts clean",
-    "compile": "tsc"
+    "compile": "tsc",
+    "docs": "typedoc --out docs --hideInPageTOC true --useCodeBlocks true --includeVersion true  src/index.ts && cd scripts && ./post-process-doc.sh && cd ../"
   },
   "publishConfig": {
     "access": "public"

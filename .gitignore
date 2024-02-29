@@ -2,6 +2,7 @@ build
 node_modules
 tests/token.json
 coverage
+docs
 
 .idea
 .vscode
