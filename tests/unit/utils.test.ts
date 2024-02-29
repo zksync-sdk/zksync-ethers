@@ -1,37 +1,40 @@
 import {expect} from 'chai';
 import {types, utils} from '../../src';
 import {ethers} from 'ethers';
+import {ADDRESS1, ADDRESS2} from '../utils';
 
 describe('utils', () => {
-  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
-  const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
-
   describe('#getHashedL2ToL1Msg()', () => {
     it('should return a hashed L2 to L1 message', async () => {
       const withdrawETHMessage =
         '0x6c0960f936615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000000000000000000000000000000000001a13b8600';
       const withdrawETHMessageHash =
         '0x521bd25904766c83fe868d6a29cbffa011afd8a1754f6c9a52b053b693e42f18';
-      const result = utils.getHashedL2ToL1Msg(ADDRESS, withdrawETHMessage, 0);
+      const result = utils.getHashedL2ToL1Msg(ADDRESS1, withdrawETHMessage, 0);
       expect(result).to.be.equal(withdrawETHMessageHash);
     });
   });
 
   describe('#isETH()', () => {
+    it('should return true for legacy L1 ETH address', async () => {
+      const result = utils.isETH(utils.LEGACY_ETH_ADDRESS);
+      expect(result).to.be.true;
+    });
+
     it('should return true for L1 ETH address', async () => {
-      const result = utils.isETH(utils.ETH_ADDRESS);
+      const result = utils.isETH(utils.ETH_ADDRESS_IN_CONTRACTS);
       expect(result).to.be.true;
     });
 
     it('should return true for L2 ETH address', async () => {
-      const result = utils.isETH(utils.L2_ETH_TOKEN_ADDRESS);
+      const result = utils.isETH(utils.L2_BASE_TOKEN_ADDRESS);
       expect(result).to.be.true;
     });
   });
 
   describe('#createAddress()', () => {
     it('should return a correct address', async () => {
-      const address = utils.createAddress(ADDRESS, 1);
+      const address = utils.createAddress(ADDRESS1, 1);
       expect(address).to.be.equal('0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021');
     });
   });
@@ -39,7 +42,7 @@ describe('utils', () => {
   describe('#create2Address()', () => {
     it('should return a correct address', async () => {
       const address = utils.create2Address(
-        ADDRESS,
+        ADDRESS1,
         '0x010001cb6a6e8d5f6829522f19fa9568660e0a9cd53b2e8be4deb0a679452e41',
         '0x01',
         '0x01'
@@ -132,7 +135,7 @@ describe('utils', () => {
       try {
         utils.serializeEip712({
           chainId: 270,
-          from: ADDRESS,
+          from: ADDRESS1,
           customData: {
             customSignature: '',
           },
@@ -149,7 +152,7 @@ describe('utils', () => {
         '0x71ea8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0';
       const result = utils.serializeEip712({
         chainId: 270,
-        from: ADDRESS,
+        from: ADDRESS1,
       });
       expect(result).to.be.equal(tx);
     });
@@ -163,8 +166,8 @@ describe('utils', () => {
       const result = utils.serializeEip712(
         {
           chainId: 270,
-          from: ADDRESS,
-          to: RECEIVER,
+          from: ADDRESS1,
+          to: ADDRESS2,
           value: 1_000_000,
         },
         signature
@@ -236,11 +239,11 @@ describe('utils', () => {
         maxPriorityFeePerGas: 0n,
         maxFeePerGas: 0n,
         gasLimit: 0n,
-        to: RECEIVER,
+        to: ADDRESS2,
         value: 1_000_000n,
         data: '0x',
         chainId: 270n,
-        from: ADDRESS,
+        from: ADDRESS1,
         customData: {
           gasPerPubdata: 50_000n,
           factoryDeps: [],
@@ -263,11 +266,11 @@ describe('utils', () => {
         maxPriorityFeePerGas: 0n,
         maxFeePerGas: 0n,
         gasLimit: 0n,
-        to: RECEIVER,
+        to: ADDRESS2,
         value: 0n,
         data: '0x',
         chainId: 270n,
-        from: ADDRESS,
+        from: ADDRESS1,
         customData: {
           gasPerPubdata: 50_000n,
           factoryDeps: [],

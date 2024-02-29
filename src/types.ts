@@ -12,6 +12,7 @@ import {
   serializeEip712,
   sleep,
   eip712TxHash,
+  isAddressEq,
 } from './utils';
 import {Provider} from './provider';
 
@@ -401,7 +402,7 @@ export class Transaction extends ethers.Transaction {
           tx
         );
         assertArgument(
-          result.from.toLowerCase() === tx.from.toLowerCase(),
+          isAddressEq(result.from, tx.from),
           'from mismatch',
           'tx',
           tx

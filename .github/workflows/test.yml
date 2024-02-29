@@ -1,10 +1,10 @@
 name: Run tests
 on:
   push:
-    branches: [ main ]
+    branches: [ main, beta ]
   workflow_dispatch:
   pull_request:
-    branches:  [ main ]
+    branches:  [ main, beta ]
     types: [ opened, reopened, synchronize ]
 
 permissions:
@@ -33,10 +33,8 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
-          ./start.sh v22-before-shared-bridge
+          ./start.sh
           popd
-      - name: Wait for local-setup to be ready
-        run: yarn test:wait
       - name: Prepare environment
         run: yarn test:prepare
       - name: Run tests
