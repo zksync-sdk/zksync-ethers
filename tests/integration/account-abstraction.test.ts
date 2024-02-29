@@ -3,6 +3,7 @@ import '../custom-matchers';
 import {Provider, types, utils, Wallet, ContractFactory} from '../../src';
 import {Contract, ethers, Typed} from 'ethers';
 import {ECDSASmartAccount, MultisigECDSASmartAccount} from '../../src';
+import {ADDRESS1, PRIVATE_KEY1, APPROVAL_TOKEN, PAYMASTER} from '../utils';
 
 const {expect} = chai;
 
@@ -12,15 +13,8 @@ import Storage from '../files/Storage.json';
 import MultisigAccount from '../files/TwoUserMultisig.json';
 
 describe('Account Abstraction', () => {
-  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
-  const PRIVATE_KEY =
-    '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
-
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
-  const wallet = new Wallet(PRIVATE_KEY, provider);
-
-  const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4';
-  const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174';
+  const wallet = new Wallet(PRIVATE_KEY1, provider);
 
   it('use the ERC20 token for paying transaction fee', async () => {
     const InitMintAmount = 10n;
@@ -112,7 +106,7 @@ describe('Account Abstraction', () => {
   it('use multisig account', async () => {
     const storageValue = 500n;
 
-    const account = ECDSASmartAccount.create(ADDRESS, PRIVATE_KEY, provider);
+    const account = ECDSASmartAccount.create(ADDRESS1, PRIVATE_KEY1, provider);
 
     const multisigAccountAbi = MultisigAccount.abi;
     const multisigAccountBytecode: string = MultisigAccount.bytecode;
@@ -140,11 +134,11 @@ describe('Account Abstraction', () => {
 
     // send paymaster approval token to multisig account
     const sendApprovalTokenTx = await new Wallet(
-      PRIVATE_KEY,
+      PRIVATE_KEY1,
       provider
     ).transfer({
       to: multisigAddress,
-      token: TOKEN,
+      token: APPROVAL_TOKEN,
       amount: 5,
     });
     await sendApprovalTokenTx.wait();
@@ -182,7 +176,7 @@ describe('Account Abstraction', () => {
     const minimalAllowance = 1n;
     const storageValue = 700n;
 
-    const account = ECDSASmartAccount.create(ADDRESS, PRIVATE_KEY, provider);
+    const account = ECDSASmartAccount.create(ADDRESS1, PRIVATE_KEY1, provider);
 
     const storageAbi = Storage.contracts['Storage.sol:Storage'].abi;
     const storageBytecode: string =
@@ -195,13 +189,14 @@ describe('Account Abstraction', () => {
     const storage = (await storageFactory.deploy()) as Contract;
 
     const accountBalanceBeforeTx = await account.getBalance();
-    const accountApprovalTokenBalanceBeforeTx = await account.getBalance(TOKEN);
+    const accountApprovalTokenBalanceBeforeTx =
+      await account.getBalance(APPROVAL_TOKEN);
 
     const paymasterSetTx = await storage.set(storageValue, {
       customData: {
         paymasterParams: utils.getPaymasterParams(PAYMASTER, {
           type: 'ApprovalBased',
-          token: TOKEN,
+          token: APPROVAL_TOKEN,
           minimalAllowance: minimalAllowance,
           innerInput: new Uint8Array(),
         }),
@@ -210,7 +205,8 @@ describe('Account Abstraction', () => {
     await paymasterSetTx.wait();
 
     const accountBalanceAfterTx = await account.getBalance();
-    const accountApprovalTokenBalanceAfterTx = await account.getBalance(TOKEN);
+    const accountApprovalTokenBalanceAfterTx =
+      await account.getBalance(APPROVAL_TOKEN);
 
     expect(accountBalanceBeforeTx === accountBalanceAfterTx).to.be.true;
     expect(

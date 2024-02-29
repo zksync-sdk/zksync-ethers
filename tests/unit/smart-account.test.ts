@@ -9,26 +9,22 @@ import {
   signPayloadWithMultipleECDSA,
 } from '../../src/smart-account-utils';
 import {TypedDataEncoder, hashMessage} from 'ethers';
+import {ADDRESS1, PRIVATE_KEY1, ADDRESS2} from '../utils';
 
 const {expect} = chai;
 
 describe('signPayloadWithECDSA()', () => {
-  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
-  const PRIVATE_KEY =
-    '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
-  const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
-
   it('should return signature by signing EIP712 transaction hash', async () => {
     const tx: TransactionRequest = {
       chainId: 270,
-      from: ADDRESS,
-      to: RECEIVER,
+      from: ADDRESS1,
+      to: ADDRESS2,
       value: 7_000_000_000,
     };
 
     const txHash = EIP712Signer.getSignedDigest(tx);
 
-    const result = await signPayloadWithECDSA(txHash, PRIVATE_KEY);
+    const result = await signPayloadWithECDSA(txHash, PRIVATE_KEY1);
     expect(result).to.be.equal(
       '0x89905d36a3cdde117445d6c58627061a53f09cf0535d73719d82d4d96fe332541167e2e3d38ce3cb2751a0203eff2a71f55ad45dc91623587f5480ec1883281b1b'
     );
@@ -38,7 +34,7 @@ describe('signPayloadWithECDSA()', () => {
     const message = 'Hello World!';
     const messageHash = hashMessage(message);
 
-    const result = await signPayloadWithECDSA(messageHash, PRIVATE_KEY);
+    const result = await signPayloadWithECDSA(messageHash, PRIVATE_KEY1);
     expect(result).to.be.equal(
       '0x7c15eb760c394b0ca49496e71d841378d8bfd4f9fb67e930eb5531485329ab7c67068d1f8ef4b480ec327214ee6ed203687e3fbe74b92367b259281e340d16fd1c'
     );
@@ -55,7 +51,7 @@ describe('signPayloadWithECDSA()', () => {
       },
       {name: 'John', age: 30}
     );
-    const result = await signPayloadWithECDSA(typedDataHash, PRIVATE_KEY);
+    const result = await signPayloadWithECDSA(typedDataHash, PRIVATE_KEY1);
     expect(result).to.be.equal(
       '0xbcaf0673c0c2b0e120165d207d42281d0c6e85f0a7f6b8044b0578a91cf5bda66b4aeb62aca4ae17012a38d71c9943e27285792fa7d788d848f849e3ea2e614b1b'
     );
@@ -124,11 +120,6 @@ describe('signPayloadWithMultipleECDSA()', () => {
 });
 
 describe('populateTransaction()', () => {
-  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
-  const PRIVATE_KEY =
-    '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
-  const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
-
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
 
   it('should populate `tx.from` to address derived from private key if it not set', async () => {
@@ -139,7 +130,7 @@ describe('populateTransaction()', () => {
       type: 113,
       data: '0x',
       gasPrice: 100_000_000n,
-      gasLimit: 157_459n,
+      gasLimit: 156_726n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -150,10 +141,10 @@ describe('populateTransaction()', () => {
     const result = await populateTransactionECDSA(
       {
         chainId: 270,
-        to: RECEIVER,
+        to: ADDRESS2,
         value: 7_000_000_000,
       },
-      PRIVATE_KEY,
+      PRIVATE_KEY1,
       provider
     );
     expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
@@ -162,13 +153,13 @@ describe('populateTransaction()', () => {
   it('should throw an error when provider is not set', async () => {
     const tx: TransactionRequest = {
       chainId: 270,
-      from: ADDRESS,
-      to: RECEIVER,
+      from: ADDRESS1,
+      to: ADDRESS2,
       value: 7_000_000_000,
     };
 
     try {
-      await populateTransactionECDSA(tx, PRIVATE_KEY);
+      await populateTransactionECDSA(tx, PRIVATE_KEY1);
     } catch (error) {
       expect((error as Error).message).to.be.equal(
         'Provider is required but is not provided!'
@@ -178,21 +169,16 @@ describe('populateTransaction()', () => {
 });
 
 describe('populateTransactionMultisig()', () => {
-  const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
-  const PRIVATE_KEY =
-    '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
-  const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
-
   it('should throw an error when multiple keys are not provided', async () => {
     const tx: TransactionRequest = {
       chainId: 270,
-      from: ADDRESS,
-      to: RECEIVER,
+      from: ADDRESS1,
+      to: ADDRESS2,
       value: 7_000_000_000,
     };
 
     try {
-      await populateTransactionMultisigECDSA(tx, PRIVATE_KEY);
+      await populateTransactionMultisigECDSA(tx, PRIVATE_KEY1);
     } catch (error) {
       expect((error as Error).message).to.be.equal(
         'Multiple keys are required to build the transaction!'
