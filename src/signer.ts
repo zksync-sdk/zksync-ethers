@@ -185,8 +185,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   }
 
   override _providerL2() {
-    // Make it compatible when singer is created with Web3Provider.getSigner()
-    return this.providerL2 ? this.providerL2 : this.provider;
+    return this.providerL2!;
   }
 
   /**
@@ -283,7 +282,11 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * const l2BridgeContracts = await signer.getL2BridgeContracts();
    */
-  override async getL2BridgeContracts(): Promise<{shared: IL2Bridge}> {
+  override async getL2BridgeContracts(): Promise<{
+    erc20: IL2Bridge;
+    weth: IL2Bridge;
+    shared: IL2Bridge;
+  }> {
     return super.getL2BridgeContracts();
   }
 
@@ -360,7 +363,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = await signer.transfer({
+   * const tx = signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
@@ -378,7 +381,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
    *
    * const browserProvider = new BrowserProvider(window.ethereum);
-   * const signer = await Signer.from(
+   * const signer = Signer.from(
    *     await browserProvider.getSigner(),
    *     Number((await browserProvider.getNetwork()).chainId),
    *     Provider.getDefaultProvider(types.Network.Sepolia)
@@ -601,6 +604,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    */
   override async getL1BridgeContracts(): Promise<{
     erc20: IL1ERC20Bridge;
+    weth: IL1ERC20Bridge;
     shared: IL1SharedBridge;
   }> {
     return super.getL1BridgeContracts();
@@ -972,7 +976,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     overrides?: Overrides;
     approveOverrides?: Overrides;
     approveBaseOverrides?: Overrides;
-    customBridgeData?: BytesLike
+    customBridgeData?: BytesLike;
   }): Promise<PriorityOpResponse> {
     return super.deposit(transaction);
   }
@@ -1008,7 +1012,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<bigint> {
     return super.estimateGasDeposit(transaction);
   }
@@ -1043,7 +1047,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     gasPerPubdataByte?: BigNumberish;
     customBridgeData?: BytesLike;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<any> {
     return super.getDepositTx(transaction);
   }
@@ -1249,7 +1253,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<PriorityOpResponse> {
     return super.requestExecute(transaction);
   }
@@ -1285,7 +1289,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<bigint> {
     return super.estimateGasRequestExecute(transaction);
   }
@@ -1320,7 +1324,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<TransactionRequest> {
     return super.getRequestExecuteTx(transaction);
   }

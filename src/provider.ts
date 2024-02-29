@@ -92,6 +92,9 @@ export function JsonRpcApiProvider<
       bridgehubContract?: Address;
       mainContract?: Address;
       erc20BridgeL1?: Address;
+      erc20BridgeL2?: Address;
+      wethBridgeL1?: Address;
+      wethBridgeL2?: Address;
       sharedBridgeL1?: Address;
       sharedBridgeL2?: Address;
       baseToken?: Address;
@@ -407,17 +410,26 @@ export function JsonRpcApiProvider<
      */
     async getDefaultBridgeAddresses(): Promise<{
       erc20L1: string;
+      erc20L2: string;
+      wethL1: string;
+      wethL2: string;
       sharedL1: string;
       sharedL2: string;
     }> {
       if (!this.contractAddresses().erc20BridgeL1) {
         const addresses: {
           l1Erc20DefaultBridge: string;
+          l2Erc20DefaultBridge: string;
+          l1WethBridge: string;
+          l2WethBridge: string;
           l1SharedDefaultBridge: string;
           l2SharedDefaultBridge: string;
         } = await this.send('zks_getBridgeContracts', []);
 
         this.contractAddresses().erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
+        this.contractAddresses().erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
+        this.contractAddresses().wethBridgeL1 = addresses.l1WethBridge;
+        this.contractAddresses().wethBridgeL2 = addresses.l2WethBridge;
         this.contractAddresses().sharedBridgeL1 =
           addresses.l1SharedDefaultBridge;
         this.contractAddresses().sharedBridgeL2 =
@@ -425,6 +437,9 @@ export function JsonRpcApiProvider<
       }
       return {
         erc20L1: this.contractAddresses().erc20BridgeL1!,
+        erc20L2: this.contractAddresses().erc20BridgeL2!,
+        wethL1: this.contractAddresses().wethBridgeL1!,
+        wethL2: this.contractAddresses().wethBridgeL2!,
         sharedL1: this.contractAddresses().sharedBridgeL1!,
         sharedL2: this.contractAddresses().sharedBridgeL2!,
       };
@@ -871,7 +886,9 @@ export function JsonRpcApiProvider<
     ): Promise<PriorityOpResponse> {
       const l2Response = {...l1TxResponse} as PriorityOpResponse;
 
-      l2Response.waitL1Commit = l2Response.wait;
+      l2Response.waitL1Commit = l1TxResponse.wait.bind(
+        l1TxResponse
+      ) as PriorityOpResponse['wait'];
       l2Response.wait = async () => {
         const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
         return await l2Tx.wait();
@@ -1341,6 +1358,9 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getDefaultBridgeAddresses(): Promise<{
     erc20L1: string;
+    erc20L2: string;
+    wethL1: string;
+    wethL2: string;
     sharedL1: string;
     sharedL2: string;
   }> {

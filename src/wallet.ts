@@ -119,6 +119,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async getL1BridgeContracts(): Promise<{
     erc20: IL1ERC20Bridge;
+    weth: IL1ERC20Bridge;
     shared: IL1SharedBridge;
   }> {
     return super.getL1BridgeContracts();
@@ -501,7 +502,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     overrides?: Overrides;
     approveOverrides?: Overrides;
     approveBaseOverrides?: Overrides;
-    customBridgeData?: BytesLike
+    customBridgeData?: BytesLike;
   }): Promise<PriorityOpResponse> {
     return super.deposit(transaction);
   }
@@ -537,7 +538,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<bigint> {
     return super.estimateGasDeposit(transaction);
   }
@@ -572,7 +573,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     gasPerPubdataByte?: BigNumberish;
     customBridgeData?: BytesLike;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<any> {
     return super.getDepositTx(transaction);
   }
@@ -780,7 +781,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<PriorityOpResponse> {
     return super.requestExecute(transaction);
   }
@@ -817,7 +818,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<bigint> {
     return super.estimateGasRequestExecute(transaction);
   }
@@ -853,7 +854,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides
+    overrides?: Overrides;
   }): Promise<TransactionRequest> {
     return super.getRequestExecuteTx(transaction);
   }
@@ -953,6 +954,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const l2BridgeContracts = await wallet.getL2BridgeContracts();
    */
   override async getL2BridgeContracts(): Promise<{
+    erc20: IL2Bridge;
+    weth: IL2Bridge;
     shared: IL2Bridge;
   }> {
     return super.getL2BridgeContracts();
