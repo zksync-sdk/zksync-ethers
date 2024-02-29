@@ -23,6 +23,120 @@ import type {
   TypedContractMethod,
 } from "./common";
 
+export type FeeParamsStruct = {
+  pubdataPricingMode: BigNumberish;
+  batchOverheadL1Gas: BigNumberish;
+  maxPubdataPerBatch: BigNumberish;
+  maxL2GasPerBatch: BigNumberish;
+  priorityTxMaxPubdata: BigNumberish;
+  minimalL2GasPrice: BigNumberish;
+};
+
+export type FeeParamsStructOutput = [
+  pubdataPricingMode: bigint,
+  batchOverheadL1Gas: bigint,
+  maxPubdataPerBatch: bigint,
+  maxL2GasPerBatch: bigint,
+  priorityTxMaxPubdata: bigint,
+  minimalL2GasPrice: bigint
+] & {
+  pubdataPricingMode: bigint;
+  batchOverheadL1Gas: bigint;
+  maxPubdataPerBatch: bigint;
+  maxL2GasPerBatch: bigint;
+  priorityTxMaxPubdata: bigint;
+  minimalL2GasPrice: bigint;
+};
+
+export type L2CanonicalTransactionStruct = {
+  txType: BigNumberish;
+  from: BigNumberish;
+  to: BigNumberish;
+  gasLimit: BigNumberish;
+  gasPerPubdataByteLimit: BigNumberish;
+  maxFeePerGas: BigNumberish;
+  maxPriorityFeePerGas: BigNumberish;
+  paymaster: BigNumberish;
+  nonce: BigNumberish;
+  value: BigNumberish;
+  reserved: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  data: BytesLike;
+  signature: BytesLike;
+  factoryDeps: BigNumberish[];
+  paymasterInput: BytesLike;
+  reservedDynamic: BytesLike;
+};
+
+export type L2CanonicalTransactionStructOutput = [
+  txType: bigint,
+  from: bigint,
+  to: bigint,
+  gasLimit: bigint,
+  gasPerPubdataByteLimit: bigint,
+  maxFeePerGas: bigint,
+  maxPriorityFeePerGas: bigint,
+  paymaster: bigint,
+  nonce: bigint,
+  value: bigint,
+  reserved: [bigint, bigint, bigint, bigint],
+  data: string,
+  signature: string,
+  factoryDeps: bigint[],
+  paymasterInput: string,
+  reservedDynamic: string
+] & {
+  txType: bigint;
+  from: bigint;
+  to: bigint;
+  gasLimit: bigint;
+  gasPerPubdataByteLimit: bigint;
+  maxFeePerGas: bigint;
+  maxPriorityFeePerGas: bigint;
+  paymaster: bigint;
+  nonce: bigint;
+  value: bigint;
+  reserved: [bigint, bigint, bigint, bigint];
+  data: string;
+  signature: string;
+  factoryDeps: bigint[];
+  paymasterInput: string;
+  reservedDynamic: string;
+};
+
+export type BridgehubL2TransactionRequestStruct = {
+  sender: AddressLike;
+  contractL2: AddressLike;
+  mintValue: BigNumberish;
+  l2Value: BigNumberish;
+  l2Calldata: BytesLike;
+  l2GasLimit: BigNumberish;
+  l2GasPerPubdataByteLimit: BigNumberish;
+  factoryDeps: BytesLike[];
+  refundRecipient: AddressLike;
+};
+
+export type BridgehubL2TransactionRequestStructOutput = [
+  sender: string,
+  contractL2: string,
+  mintValue: bigint,
+  l2Value: bigint,
+  l2Calldata: string,
+  l2GasLimit: bigint,
+  l2GasPerPubdataByteLimit: bigint,
+  factoryDeps: string[],
+  refundRecipient: string
+] & {
+  sender: string;
+  contractL2: string;
+  mintValue: bigint;
+  l2Value: bigint;
+  l2Calldata: string;
+  l2GasLimit: bigint;
+  l2GasPerPubdataByteLimit: bigint;
+  factoryDeps: string[];
+  refundRecipient: string;
+};
+
 export type VerifierParamsStruct = {
   recursionNodeLevelVkHash: BytesLike;
   recursionLeafLevelVkHash: BytesLike;
@@ -125,63 +239,6 @@ export declare namespace Diamond {
   };
 }
 
-export declare namespace IMailbox {
-  export type L2CanonicalTransactionStruct = {
-    txType: BigNumberish;
-    from: BigNumberish;
-    to: BigNumberish;
-    gasLimit: BigNumberish;
-    gasPerPubdataByteLimit: BigNumberish;
-    maxFeePerGas: BigNumberish;
-    maxPriorityFeePerGas: BigNumberish;
-    paymaster: BigNumberish;
-    nonce: BigNumberish;
-    value: BigNumberish;
-    reserved: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-    data: BytesLike;
-    signature: BytesLike;
-    factoryDeps: BigNumberish[];
-    paymasterInput: BytesLike;
-    reservedDynamic: BytesLike;
-  };
-
-  export type L2CanonicalTransactionStructOutput = [
-    txType: bigint,
-    from: bigint,
-    to: bigint,
-    gasLimit: bigint,
-    gasPerPubdataByteLimit: bigint,
-    maxFeePerGas: bigint,
-    maxPriorityFeePerGas: bigint,
-    paymaster: bigint,
-    nonce: bigint,
-    value: bigint,
-    reserved: [bigint, bigint, bigint, bigint],
-    data: string,
-    signature: string,
-    factoryDeps: bigint[],
-    paymasterInput: string,
-    reservedDynamic: string
-  ] & {
-    txType: bigint;
-    from: bigint;
-    to: bigint;
-    gasLimit: bigint;
-    gasPerPubdataByteLimit: bigint;
-    maxFeePerGas: bigint;
-    maxPriorityFeePerGas: bigint;
-    paymaster: bigint;
-    nonce: bigint;
-    value: bigint;
-    reserved: [bigint, bigint, bigint, bigint];
-    data: string;
-    signature: string;
-    factoryDeps: bigint[];
-    paymasterInput: string;
-    reservedDynamic: string;
-  };
-}
-
 export declare namespace IExecutor {
   export type StoredBatchInfoStruct = {
     batchNumber: BigNumberish;
@@ -224,7 +281,7 @@ export declare namespace IExecutor {
     bootloaderHeapInitialContentsHash: BytesLike;
     eventsQueueStateHash: BytesLike;
     systemLogs: BytesLike;
-    totalL2ToL1Pubdata: BytesLike;
+    pubdataCommitments: BytesLike;
   };
 
   export type CommitBatchInfoStructOutput = [
@@ -237,7 +294,7 @@ export declare namespace IExecutor {
     bootloaderHeapInitialContentsHash: string,
     eventsQueueStateHash: string,
     systemLogs: string,
-    totalL2ToL1Pubdata: string
+    pubdataCommitments: string
   ] & {
     batchNumber: bigint;
     timestamp: bigint;
@@ -248,7 +305,7 @@ export declare namespace IExecutor {
     bootloaderHeapInitialContentsHash: string;
     eventsQueueStateHash: string;
     systemLogs: string;
-    totalL2ToL1Pubdata: string;
+    pubdataCommitments: string;
   };
 
   export type ProofInputStruct = {
@@ -271,13 +328,18 @@ export declare namespace IGetters {
   };
 }
 
-export interface IZkSyncInterface extends Interface {
+export interface IZkSyncStateTransitionInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "acceptAdmin"
-      | "acceptGovernor"
+      | "baseTokenGasPriceMultiplierDenominator"
+      | "baseTokenGasPriceMultiplierNominator"
+      | "bridgehubRequestL2Transaction"
+      | "changeFeeParams"
       | "commitBatches"
+      | "commitBatchesSharedBridge"
       | "executeBatches"
+      | "executeBatchesSharedBridge"
       | "executeUpgrade"
       | "facetAddress"
       | "facetAddresses"
@@ -285,17 +347,22 @@ export interface IZkSyncInterface extends Interface {
       | "facets"
       | "finalizeEthWithdrawal"
       | "freezeDiamond"
+      | "getAdmin"
+      | "getBaseToken"
+      | "getBaseTokenBridge"
+      | "getBridgehub"
       | "getFirstUnprocessedPriorityTx"
-      | "getGovernor"
       | "getL2BootloaderBytecodeHash"
       | "getL2DefaultAccountBytecodeHash"
       | "getL2SystemContractsUpgradeBatchNumber"
       | "getL2SystemContractsUpgradeTxHash"
       | "getName"
-      | "getPendingGovernor"
+      | "getPendingAdmin"
       | "getPriorityQueueSize"
       | "getPriorityTxMaxGasLimit"
       | "getProtocolVersion"
+      | "getPubdataPricingMode"
+      | "getStateTransitionManager"
       | "getTotalBatchesCommitted"
       | "getTotalBatchesExecuted"
       | "getTotalBatchesVerified"
@@ -311,18 +378,24 @@ export interface IZkSyncInterface extends Interface {
       | "l2TransactionBaseCost"
       | "priorityQueueFrontOperation"
       | "proveBatches"
+      | "proveBatchesSharedBridge"
       | "proveL1ToL2TransactionStatus"
       | "proveL2LogInclusion"
       | "proveL2MessageInclusion"
       | "requestL2Transaction"
       | "revertBatches"
+      | "revertBatchesSharedBridge"
       | "setPendingAdmin"
-      | "setPendingGovernor"
       | "setPorterAvailability"
       | "setPriorityTxMaxGasLimit"
+      | "setTokenMultiplier"
+      | "setTransactionFilterer"
       | "setValidator"
+      | "setValidiumMode"
       | "storedBatchHash"
+      | "transferEthToSharedBridge"
       | "unfreezeDiamond"
+      | "upgradeChainFromVersion"
   ): FunctionFragment;
 
   getEvent(
@@ -336,13 +409,16 @@ export interface IZkSyncInterface extends Interface {
       | "Freeze"
       | "IsPorterAvailableStatusUpdate"
       | "NewAdmin"
-      | "NewGovernor"
+      | "NewBaseTokenMultiplier"
+      | "NewFeeParams"
       | "NewPendingAdmin"
-      | "NewPendingGovernor"
       | "NewPriorityRequest"
       | "NewPriorityTxMaxGasLimit"
+      | "NewTransactionFilterer"
+      | "ProposeTransparentUpgrade"
       | "Unfreeze"
       | "ValidatorStatusUpdate"
+      | "ValidiumModeStatusUpdate"
   ): EventFragment;
 
   encodeFunctionData(
@@ -350,16 +426,40 @@ export interface IZkSyncInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "acceptGovernor",
+    functionFragment: "baseTokenGasPriceMultiplierDenominator",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "baseTokenGasPriceMultiplierNominator",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgehubRequestL2Transaction",
+    values: [BridgehubL2TransactionRequestStruct]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeFeeParams",
+    values: [FeeParamsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "commitBatches",
     values: [IExecutor.StoredBatchInfoStruct, IExecutor.CommitBatchInfoStruct[]]
   ): string;
   encodeFunctionData(
+    functionFragment: "commitBatchesSharedBridge",
+    values: [
+      BigNumberish,
+      IExecutor.StoredBatchInfoStruct,
+      IExecutor.CommitBatchInfoStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "executeBatches",
     values: [IExecutor.StoredBatchInfoStruct[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "executeBatchesSharedBridge",
+    values: [BigNumberish, IExecutor.StoredBatchInfoStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "executeUpgrade",
@@ -386,12 +486,21 @@ export interface IZkSyncInterface extends Interface {
     functionFragment: "freezeDiamond",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "getAdmin", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getFirstUnprocessedPriorityTx",
+    functionFragment: "getBaseToken",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getGovernor",
+    functionFragment: "getBaseTokenBridge",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBridgehub",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getFirstUnprocessedPriorityTx",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -412,7 +521,7 @@ export interface IZkSyncInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "getName", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getPendingGovernor",
+    functionFragment: "getPendingAdmin",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -425,6 +534,14 @@ export interface IZkSyncInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getProtocolVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPubdataPricingMode",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getStateTransitionManager",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -492,6 +609,15 @@ export interface IZkSyncInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "proveBatchesSharedBridge",
+    values: [
+      BigNumberish,
+      IExecutor.StoredBatchInfoStruct,
+      IExecutor.StoredBatchInfoStruct[],
+      IExecutor.ProofInputStruct
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "proveL1ToL2TransactionStatus",
     values: [
       BytesLike,
@@ -527,11 +653,11 @@ export interface IZkSyncInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setPendingAdmin",
-    values: [AddressLike]
+    functionFragment: "revertBatchesSharedBridge",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setPendingGovernor",
+    functionFragment: "setPendingAdmin",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
@@ -543,16 +669,36 @@ export interface IZkSyncInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setTokenMultiplier",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setTransactionFilterer",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setValidator",
     values: [AddressLike, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setValidiumMode",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "storedBatchHash",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "transferEthToSharedBridge",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "unfreezeDiamond",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "upgradeChainFromVersion",
+    values: [BigNumberish, Diamond.DiamondCutDataStruct]
   ): string;
 
   decodeFunctionResult(
@@ -560,7 +706,19 @@ export interface IZkSyncInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "acceptGovernor",
+    functionFragment: "baseTokenGasPriceMultiplierDenominator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "baseTokenGasPriceMultiplierNominator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "bridgehubRequestL2Transaction",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeFeeParams",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -568,7 +726,15 @@ export interface IZkSyncInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "commitBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "executeBatches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "executeBatchesSharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -596,12 +762,21 @@ export interface IZkSyncInterface extends Interface {
     functionFragment: "freezeDiamond",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getAdmin", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getFirstUnprocessedPriorityTx",
+    functionFragment: "getBaseToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getGovernor",
+    functionFragment: "getBaseTokenBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getBridgehub",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getFirstUnprocessedPriorityTx",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -622,7 +797,7 @@ export interface IZkSyncInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "getName", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getPendingGovernor",
+    functionFragment: "getPendingAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -635,6 +810,14 @@ export interface IZkSyncInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getProtocolVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getPubdataPricingMode",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getStateTransitionManager",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -698,6 +881,10 @@ export interface IZkSyncInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "proveBatchesSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "proveL1ToL2TransactionStatus",
     data: BytesLike
   ): Result;
@@ -718,11 +905,11 @@ export interface IZkSyncInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setPendingAdmin",
+    functionFragment: "revertBatchesSharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setPendingGovernor",
+    functionFragment: "setPendingAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -734,7 +921,19 @@ export interface IZkSyncInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setTokenMultiplier",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setTransactionFilterer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setValidator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setValidiumMode",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -742,7 +941,15 @@ export interface IZkSyncInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "transferEthToSharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "unfreezeDiamond",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "upgradeChainFromVersion",
     data: BytesLike
   ): Result;
 }
@@ -892,12 +1099,43 @@ export namespace NewAdminEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace NewGovernorEvent {
-  export type InputTuple = [oldGovernor: AddressLike, newGovernor: AddressLike];
-  export type OutputTuple = [oldGovernor: string, newGovernor: string];
+export namespace NewBaseTokenMultiplierEvent {
+  export type InputTuple = [
+    oldNominator: BigNumberish,
+    oldDenominator: BigNumberish,
+    newNominator: BigNumberish,
+    newDenominator: BigNumberish
+  ];
+  export type OutputTuple = [
+    oldNominator: bigint,
+    oldDenominator: bigint,
+    newNominator: bigint,
+    newDenominator: bigint
+  ];
   export interface OutputObject {
-    oldGovernor: string;
-    newGovernor: string;
+    oldNominator: bigint;
+    oldDenominator: bigint;
+    newNominator: bigint;
+    newDenominator: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace NewFeeParamsEvent {
+  export type InputTuple = [
+    oldFeeParams: FeeParamsStruct,
+    newFeeParams: FeeParamsStruct
+  ];
+  export type OutputTuple = [
+    oldFeeParams: FeeParamsStructOutput,
+    newFeeParams: FeeParamsStructOutput
+  ];
+  export interface OutputObject {
+    oldFeeParams: FeeParamsStructOutput;
+    newFeeParams: FeeParamsStructOutput;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -921,45 +1159,26 @@ export namespace NewPendingAdminEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace NewPendingGovernorEvent {
-  export type InputTuple = [
-    oldPendingGovernor: AddressLike,
-    newPendingGovernor: AddressLike
-  ];
-  export type OutputTuple = [
-    oldPendingGovernor: string,
-    newPendingGovernor: string
-  ];
-  export interface OutputObject {
-    oldPendingGovernor: string;
-    newPendingGovernor: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
 export namespace NewPriorityRequestEvent {
   export type InputTuple = [
     txId: BigNumberish,
     txHash: BytesLike,
     expirationTimestamp: BigNumberish,
-    transaction: IMailbox.L2CanonicalTransactionStruct,
+    transaction: L2CanonicalTransactionStruct,
     factoryDeps: BytesLike[]
   ];
   export type OutputTuple = [
     txId: bigint,
     txHash: string,
     expirationTimestamp: bigint,
-    transaction: IMailbox.L2CanonicalTransactionStructOutput,
+    transaction: L2CanonicalTransactionStructOutput,
     factoryDeps: string[]
   ];
   export interface OutputObject {
     txId: bigint;
     txHash: string;
     expirationTimestamp: bigint;
-    transaction: IMailbox.L2CanonicalTransactionStructOutput;
+    transaction: L2CanonicalTransactionStructOutput;
     factoryDeps: string[];
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -980,6 +1199,47 @@ export namespace NewPriorityTxMaxGasLimitEvent {
   export interface OutputObject {
     oldPriorityTxMaxGasLimit: bigint;
     newPriorityTxMaxGasLimit: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace NewTransactionFiltererEvent {
+  export type InputTuple = [
+    oldTransactionFilterer: AddressLike,
+    newTransactionFilterer: AddressLike
+  ];
+  export type OutputTuple = [
+    oldTransactionFilterer: string,
+    newTransactionFilterer: string
+  ];
+  export interface OutputObject {
+    oldTransactionFilterer: string;
+    newTransactionFilterer: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace ProposeTransparentUpgradeEvent {
+  export type InputTuple = [
+    diamondCut: Diamond.DiamondCutDataStruct,
+    proposalId: BigNumberish,
+    proposalSalt: BytesLike
+  ];
+  export type OutputTuple = [
+    diamondCut: Diamond.DiamondCutDataStructOutput,
+    proposalId: bigint,
+    proposalSalt: string
+  ];
+  export interface OutputObject {
+    diamondCut: Diamond.DiamondCutDataStructOutput;
+    proposalId: bigint;
+    proposalSalt: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -1010,11 +1270,23 @@ export namespace ValidatorStatusUpdateEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface IZkSync extends BaseContract {
-  connect(runner?: ContractRunner | null): IZkSync;
+export namespace ValidiumModeStatusUpdateEvent {
+  export type InputTuple = [validiumMode: BigNumberish];
+  export type OutputTuple = [validiumMode: bigint];
+  export interface OutputObject {
+    validiumMode: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export interface IZkSyncStateTransition extends BaseContract {
+  connect(runner?: ContractRunner | null): IZkSyncStateTransition;
   waitForDeployment(): Promise<this>;
 
-  interface: IZkSyncInterface;
+  interface: IZkSyncStateTransitionInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -1055,7 +1327,29 @@ export interface IZkSync extends BaseContract {
 
   acceptAdmin: TypedContractMethod<[], [void], "nonpayable">;
 
-  acceptGovernor: TypedContractMethod<[], [void], "nonpayable">;
+  baseTokenGasPriceMultiplierDenominator: TypedContractMethod<
+    [],
+    [bigint],
+    "view"
+  >;
+
+  baseTokenGasPriceMultiplierNominator: TypedContractMethod<
+    [],
+    [bigint],
+    "view"
+  >;
+
+  bridgehubRequestL2Transaction: TypedContractMethod<
+    [_request: BridgehubL2TransactionRequestStruct],
+    [string],
+    "payable"
+  >;
+
+  changeFeeParams: TypedContractMethod<
+    [_newFeeParams: FeeParamsStruct],
+    [void],
+    "nonpayable"
+  >;
 
   commitBatches: TypedContractMethod<
     [
@@ -1066,8 +1360,24 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
 
+  commitBatchesSharedBridge: TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: IExecutor.StoredBatchInfoStruct,
+      _newBatchesData: IExecutor.CommitBatchInfoStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   executeBatches: TypedContractMethod<
     [_batchesData: IExecutor.StoredBatchInfoStruct[]],
+    [void],
+    "nonpayable"
+  >;
+
+  executeBatchesSharedBridge: TypedContractMethod<
+    [_chainId: BigNumberish, _batchesData: IExecutor.StoredBatchInfoStruct[]],
     [void],
     "nonpayable"
   >;
@@ -1104,9 +1414,15 @@ export interface IZkSync extends BaseContract {
 
   freezeDiamond: TypedContractMethod<[], [void], "nonpayable">;
 
-  getFirstUnprocessedPriorityTx: TypedContractMethod<[], [bigint], "view">;
+  getAdmin: TypedContractMethod<[], [string], "view">;
 
-  getGovernor: TypedContractMethod<[], [string], "view">;
+  getBaseToken: TypedContractMethod<[], [string], "view">;
+
+  getBaseTokenBridge: TypedContractMethod<[], [string], "view">;
+
+  getBridgehub: TypedContractMethod<[], [string], "view">;
+
+  getFirstUnprocessedPriorityTx: TypedContractMethod<[], [bigint], "view">;
 
   getL2BootloaderBytecodeHash: TypedContractMethod<[], [string], "view">;
 
@@ -1122,13 +1438,17 @@ export interface IZkSync extends BaseContract {
 
   getName: TypedContractMethod<[], [string], "view">;
 
-  getPendingGovernor: TypedContractMethod<[], [string], "view">;
+  getPendingAdmin: TypedContractMethod<[], [string], "view">;
 
   getPriorityQueueSize: TypedContractMethod<[], [bigint], "view">;
 
   getPriorityTxMaxGasLimit: TypedContractMethod<[], [bigint], "view">;
 
   getProtocolVersion: TypedContractMethod<[], [bigint], "view">;
+
+  getPubdataPricingMode: TypedContractMethod<[], [bigint], "view">;
+
+  getStateTransitionManager: TypedContractMethod<[], [string], "view">;
 
   getTotalBatchesCommitted: TypedContractMethod<[], [bigint], "view">;
 
@@ -1200,6 +1520,17 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
 
+  proveBatchesSharedBridge: TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _prevBatch: IExecutor.StoredBatchInfoStruct,
+      _committedBatches: IExecutor.StoredBatchInfoStruct[],
+      _proof: IExecutor.ProofInputStruct
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   proveL1ToL2TransactionStatus: TypedContractMethod<
     [
       _l2TxHash: BytesLike,
@@ -1215,7 +1546,7 @@ export interface IZkSync extends BaseContract {
 
   proveL2LogInclusion: TypedContractMethod<
     [
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: L2LogStruct,
       _proof: BytesLike[]
@@ -1226,7 +1557,7 @@ export interface IZkSync extends BaseContract {
 
   proveL2MessageInclusion: TypedContractMethod<
     [
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: L2MessageStruct,
       _proof: BytesLike[]
@@ -1255,14 +1586,14 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
 
-  setPendingAdmin: TypedContractMethod<
-    [_newPendingAdmin: AddressLike],
+  revertBatchesSharedBridge: TypedContractMethod<
+    [_chainId: BigNumberish, _newLastBatch: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  setPendingGovernor: TypedContractMethod<
-    [_newPendingGovernor: AddressLike],
+  setPendingAdmin: TypedContractMethod<
+    [_newPendingAdmin: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -1279,8 +1610,26 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
 
+  setTokenMultiplier: TypedContractMethod<
+    [_nominator: BigNumberish, _denominator: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  setTransactionFilterer: TypedContractMethod<
+    [_transactionFilterer: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   setValidator: TypedContractMethod<
     [_validator: AddressLike, _active: boolean],
+    [void],
+    "nonpayable"
+  >;
+
+  setValidiumMode: TypedContractMethod<
+    [_validiumMode: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -1291,7 +1640,15 @@ export interface IZkSync extends BaseContract {
     "view"
   >;
 
+  transferEthToSharedBridge: TypedContractMethod<[], [void], "nonpayable">;
+
   unfreezeDiamond: TypedContractMethod<[], [void], "nonpayable">;
+
+  upgradeChainFromVersion: TypedContractMethod<
+    [_protocolVersion: BigNumberish, _cutData: Diamond.DiamondCutDataStruct],
+    [void],
+    "nonpayable"
+  >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -1301,8 +1658,25 @@ export interface IZkSync extends BaseContract {
     nameOrSignature: "acceptAdmin"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "acceptGovernor"
-  ): TypedContractMethod<[], [void], "nonpayable">;
+    nameOrSignature: "baseTokenGasPriceMultiplierDenominator"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "baseTokenGasPriceMultiplierNominator"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "bridgehubRequestL2Transaction"
+  ): TypedContractMethod<
+    [_request: BridgehubL2TransactionRequestStruct],
+    [string],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "changeFeeParams"
+  ): TypedContractMethod<
+    [_newFeeParams: FeeParamsStruct],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "commitBatches"
   ): TypedContractMethod<
@@ -1314,9 +1688,27 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "commitBatchesSharedBridge"
+  ): TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _lastCommittedBatchData: IExecutor.StoredBatchInfoStruct,
+      _newBatchesData: IExecutor.CommitBatchInfoStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "executeBatches"
   ): TypedContractMethod<
     [_batchesData: IExecutor.StoredBatchInfoStruct[]],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "executeBatchesSharedBridge"
+  ): TypedContractMethod<
+    [_chainId: BigNumberish, _batchesData: IExecutor.StoredBatchInfoStruct[]],
     [void],
     "nonpayable"
   >;
@@ -1356,11 +1748,20 @@ export interface IZkSync extends BaseContract {
     nameOrSignature: "freezeDiamond"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "getAdmin"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getBaseToken"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getBaseTokenBridge"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getBridgehub"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "getFirstUnprocessedPriorityTx"
   ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "getGovernor"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getL2BootloaderBytecodeHash"
   ): TypedContractMethod<[], [string], "view">;
@@ -1377,7 +1778,7 @@ export interface IZkSync extends BaseContract {
     nameOrSignature: "getName"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "getPendingGovernor"
+    nameOrSignature: "getPendingAdmin"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getPriorityQueueSize"
@@ -1388,6 +1789,12 @@ export interface IZkSync extends BaseContract {
   getFunction(
     nameOrSignature: "getProtocolVersion"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getPubdataPricingMode"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getStateTransitionManager"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getTotalBatchesCommitted"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -1454,6 +1861,18 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "proveBatchesSharedBridge"
+  ): TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _prevBatch: IExecutor.StoredBatchInfoStruct,
+      _committedBatches: IExecutor.StoredBatchInfoStruct[],
+      _proof: IExecutor.ProofInputStruct
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "proveL1ToL2TransactionStatus"
   ): TypedContractMethod<
     [
@@ -1471,7 +1890,7 @@ export interface IZkSync extends BaseContract {
     nameOrSignature: "proveL2LogInclusion"
   ): TypedContractMethod<
     [
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _log: L2LogStruct,
       _proof: BytesLike[]
@@ -1483,7 +1902,7 @@ export interface IZkSync extends BaseContract {
     nameOrSignature: "proveL2MessageInclusion"
   ): TypedContractMethod<
     [
-      _l2BatchNumber: BigNumberish,
+      _batchNumber: BigNumberish,
       _index: BigNumberish,
       _message: L2MessageStruct,
       _proof: BytesLike[]
@@ -1510,15 +1929,15 @@ export interface IZkSync extends BaseContract {
     nameOrSignature: "revertBatches"
   ): TypedContractMethod<[_newLastBatch: BigNumberish], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "setPendingAdmin"
-  ): TypedContractMethod<[_newPendingAdmin: AddressLike], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "setPendingGovernor"
+    nameOrSignature: "revertBatchesSharedBridge"
   ): TypedContractMethod<
-    [_newPendingGovernor: AddressLike],
+    [_chainId: BigNumberish, _newLastBatch: BigNumberish],
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "setPendingAdmin"
+  ): TypedContractMethod<[_newPendingAdmin: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "setPorterAvailability"
   ): TypedContractMethod<[_zkPorterIsAvailable: boolean], [void], "nonpayable">;
@@ -1530,6 +1949,20 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "setTokenMultiplier"
+  ): TypedContractMethod<
+    [_nominator: BigNumberish, _denominator: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setTransactionFilterer"
+  ): TypedContractMethod<
+    [_transactionFilterer: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "setValidator"
   ): TypedContractMethod<
     [_validator: AddressLike, _active: boolean],
@@ -1537,11 +1970,24 @@ export interface IZkSync extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "setValidiumMode"
+  ): TypedContractMethod<[_validiumMode: BigNumberish], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "storedBatchHash"
   ): TypedContractMethod<[_batchNumber: BigNumberish], [string], "view">;
   getFunction(
+    nameOrSignature: "transferEthToSharedBridge"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "unfreezeDiamond"
   ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "upgradeChainFromVersion"
+  ): TypedContractMethod<
+    [_protocolVersion: BigNumberish, _cutData: Diamond.DiamondCutDataStruct],
+    [void],
+    "nonpayable"
+  >;
 
   getEvent(
     key: "BlockCommit"
@@ -1607,11 +2053,18 @@ export interface IZkSync extends BaseContract {
     NewAdminEvent.OutputObject
   >;
   getEvent(
-    key: "NewGovernor"
+    key: "NewBaseTokenMultiplier"
   ): TypedContractEvent<
-    NewGovernorEvent.InputTuple,
-    NewGovernorEvent.OutputTuple,
-    NewGovernorEvent.OutputObject
+    NewBaseTokenMultiplierEvent.InputTuple,
+    NewBaseTokenMultiplierEvent.OutputTuple,
+    NewBaseTokenMultiplierEvent.OutputObject
+  >;
+  getEvent(
+    key: "NewFeeParams"
+  ): TypedContractEvent<
+    NewFeeParamsEvent.InputTuple,
+    NewFeeParamsEvent.OutputTuple,
+    NewFeeParamsEvent.OutputObject
   >;
   getEvent(
     key: "NewPendingAdmin"
@@ -1619,13 +2072,6 @@ export interface IZkSync extends BaseContract {
     NewPendingAdminEvent.InputTuple,
     NewPendingAdminEvent.OutputTuple,
     NewPendingAdminEvent.OutputObject
-  >;
-  getEvent(
-    key: "NewPendingGovernor"
-  ): TypedContractEvent<
-    NewPendingGovernorEvent.InputTuple,
-    NewPendingGovernorEvent.OutputTuple,
-    NewPendingGovernorEvent.OutputObject
   >;
   getEvent(
     key: "NewPriorityRequest"
@@ -1642,6 +2088,20 @@ export interface IZkSync extends BaseContract {
     NewPriorityTxMaxGasLimitEvent.OutputObject
   >;
   getEvent(
+    key: "NewTransactionFilterer"
+  ): TypedContractEvent<
+    NewTransactionFiltererEvent.InputTuple,
+    NewTransactionFiltererEvent.OutputTuple,
+    NewTransactionFiltererEvent.OutputObject
+  >;
+  getEvent(
+    key: "ProposeTransparentUpgrade"
+  ): TypedContractEvent<
+    ProposeTransparentUpgradeEvent.InputTuple,
+    ProposeTransparentUpgradeEvent.OutputTuple,
+    ProposeTransparentUpgradeEvent.OutputObject
+  >;
+  getEvent(
     key: "Unfreeze"
   ): TypedContractEvent<
     UnfreezeEvent.InputTuple,
@@ -1654,6 +2114,13 @@ export interface IZkSync extends BaseContract {
     ValidatorStatusUpdateEvent.InputTuple,
     ValidatorStatusUpdateEvent.OutputTuple,
     ValidatorStatusUpdateEvent.OutputObject
+  >;
+  getEvent(
+    key: "ValidiumModeStatusUpdate"
+  ): TypedContractEvent<
+    ValidiumModeStatusUpdateEvent.InputTuple,
+    ValidiumModeStatusUpdateEvent.OutputTuple,
+    ValidiumModeStatusUpdateEvent.OutputObject
   >;
 
   filters: {
@@ -1756,15 +2223,26 @@ export interface IZkSync extends BaseContract {
       NewAdminEvent.OutputObject
     >;
 
-    "NewGovernor(address,address)": TypedContractEvent<
-      NewGovernorEvent.InputTuple,
-      NewGovernorEvent.OutputTuple,
-      NewGovernorEvent.OutputObject
+    "NewBaseTokenMultiplier(uint128,uint128,uint128,uint128)": TypedContractEvent<
+      NewBaseTokenMultiplierEvent.InputTuple,
+      NewBaseTokenMultiplierEvent.OutputTuple,
+      NewBaseTokenMultiplierEvent.OutputObject
     >;
-    NewGovernor: TypedContractEvent<
-      NewGovernorEvent.InputTuple,
-      NewGovernorEvent.OutputTuple,
-      NewGovernorEvent.OutputObject
+    NewBaseTokenMultiplier: TypedContractEvent<
+      NewBaseTokenMultiplierEvent.InputTuple,
+      NewBaseTokenMultiplierEvent.OutputTuple,
+      NewBaseTokenMultiplierEvent.OutputObject
+    >;
+
+    "NewFeeParams(tuple,tuple)": TypedContractEvent<
+      NewFeeParamsEvent.InputTuple,
+      NewFeeParamsEvent.OutputTuple,
+      NewFeeParamsEvent.OutputObject
+    >;
+    NewFeeParams: TypedContractEvent<
+      NewFeeParamsEvent.InputTuple,
+      NewFeeParamsEvent.OutputTuple,
+      NewFeeParamsEvent.OutputObject
     >;
 
     "NewPendingAdmin(address,address)": TypedContractEvent<
@@ -1776,17 +2254,6 @@ export interface IZkSync extends BaseContract {
       NewPendingAdminEvent.InputTuple,
       NewPendingAdminEvent.OutputTuple,
       NewPendingAdminEvent.OutputObject
-    >;
-
-    "NewPendingGovernor(address,address)": TypedContractEvent<
-      NewPendingGovernorEvent.InputTuple,
-      NewPendingGovernorEvent.OutputTuple,
-      NewPendingGovernorEvent.OutputObject
-    >;
-    NewPendingGovernor: TypedContractEvent<
-      NewPendingGovernorEvent.InputTuple,
-      NewPendingGovernorEvent.OutputTuple,
-      NewPendingGovernorEvent.OutputObject
     >;
 
     "NewPriorityRequest(uint256,bytes32,uint64,tuple,bytes[])": TypedContractEvent<
@@ -1811,6 +2278,28 @@ export interface IZkSync extends BaseContract {
       NewPriorityTxMaxGasLimitEvent.OutputObject
     >;
 
+    "NewTransactionFilterer(address,address)": TypedContractEvent<
+      NewTransactionFiltererEvent.InputTuple,
+      NewTransactionFiltererEvent.OutputTuple,
+      NewTransactionFiltererEvent.OutputObject
+    >;
+    NewTransactionFilterer: TypedContractEvent<
+      NewTransactionFiltererEvent.InputTuple,
+      NewTransactionFiltererEvent.OutputTuple,
+      NewTransactionFiltererEvent.OutputObject
+    >;
+
+    "ProposeTransparentUpgrade(tuple,uint256,bytes32)": TypedContractEvent<
+      ProposeTransparentUpgradeEvent.InputTuple,
+      ProposeTransparentUpgradeEvent.OutputTuple,
+      ProposeTransparentUpgradeEvent.OutputObject
+    >;
+    ProposeTransparentUpgrade: TypedContractEvent<
+      ProposeTransparentUpgradeEvent.InputTuple,
+      ProposeTransparentUpgradeEvent.OutputTuple,
+      ProposeTransparentUpgradeEvent.OutputObject
+    >;
+
     "Unfreeze()": TypedContractEvent<
       UnfreezeEvent.InputTuple,
       UnfreezeEvent.OutputTuple,
@@ -1831,6 +2320,17 @@ export interface IZkSync extends BaseContract {
       ValidatorStatusUpdateEvent.InputTuple,
       ValidatorStatusUpdateEvent.OutputTuple,
       ValidatorStatusUpdateEvent.OutputObject
+    >;
+
+    "ValidiumModeStatusUpdate(uint8)": TypedContractEvent<
+      ValidiumModeStatusUpdateEvent.InputTuple,
+      ValidiumModeStatusUpdateEvent.OutputTuple,
+      ValidiumModeStatusUpdateEvent.OutputObject
+    >;
+    ValidiumModeStatusUpdate: TypedContractEvent<
+      ValidiumModeStatusUpdateEvent.InputTuple,
+      ValidiumModeStatusUpdateEvent.OutputTuple,
+      ValidiumModeStatusUpdateEvent.OutputObject
     >;
   };
 }
