@@ -373,6 +373,7 @@ export function JsonRpcApiProvider<
       // on the fly by the server and should not be relied on to be constant
       return await this.send('zks_getTestnetPaymaster', []);
     }
+
     /**
      * Returns the addresses of the default zkSync Era bridge contracts on both L1 and L2.
      *
@@ -502,7 +503,7 @@ export function JsonRpcApiProvider<
      * Returns Merkle proofs for one or more storage values at the specified account along with a Merkle proof
      * of their authenticity.
      *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getproof zks_getProof} zks_getProof JSON-RPC method.
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getproof zks_getProof} JSON-RPC method.
      *
      * @param address The account to fetch storage values and proofs for.
      * @param keys The vector of storage keys in the account.
@@ -1369,7 +1370,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * @example
    *
-   * import { Provider, types } from "zksync-ethers";
+   * import { Provider, types, utils } from "zksync-ethers";
    *
    * // Bytecode hash can be computed by following these steps:
    * // const testnetPaymasterBytecode = await provider.getCode(await provider.getTestnetPaymasterAddress());
@@ -1652,6 +1653,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const filter = await provider.newFilter({
@@ -1850,7 +1852,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * Connects to the `ethereum` provider, optionally forcing the `network`.
    *
    * @param ethereum The provider injected from the browser. For instance, Metamask is `window.ethereum`.
-   * @param network The network name, chain ID, or object with network details.
+   * @param [network] The network name, chain ID, or object with network details.
    *
    * @example
    *
@@ -2219,7 +2221,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    *
    * @example
    *
-   * import { BrowserProvider } from "zksync-ethers";
+   * import { BrowserProvider, utils } from "zksync-ethers";
    *
    * // Bytecode hash can be computed by following these steps:
    * // const testnetPaymasterBytecode = await provider.getCode(await provider.getTestnetPaymasterAddress());
@@ -2473,7 +2475,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    *
    * @example
    *
-   * import { BrowserProvider, utils } from "zksync-ethers";
+   * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
    * console.log(`New block filter: ${await provider.newBlockFilter()}`);
@@ -2487,7 +2489,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    *
    * @example
    *
-   * import { BrowserProvider, utils } from "zksync-ethers";
+   * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
    * console.log(`New pending transaction filter: ${await provider.newPendingTransactionsFilter()}`);
@@ -2502,6 +2504,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * @example
    *
    * import { BrowserProvider, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
    * const filter = await provider.newFilter({
@@ -2689,7 +2692,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
   /**
    * Resolves to the `Signer` account for `address` managed by the client.
    * If the `address` is a number, it is used as an index in the accounts from `listAccounts`.
-   * This can only be used on clients which manage accounts (such as Geth with imported account or MetaMask).
+   * This can only be used on clients which manage accounts (e.g. MetaMask).
    *
    * @param address The address or index of the account to retrieve the signer for.
    *
@@ -2717,7 +2720,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
 
   override async estimateGas(transaction: TransactionRequest): Promise<bigint> {
     const gas = await super.estimateGas(transaction);
-    const metamaskMinimum = 21000n;
+    const metamaskMinimum = 21_000n;
     const isEIP712 =
       transaction.customData || transaction.type === EIP712_TX_TYPE;
     return gas > metamaskMinimum || isEIP712 ? gas : metamaskMinimum;

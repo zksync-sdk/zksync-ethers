@@ -1175,19 +1175,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     /**
      * Returns L2 bridge contracts.
-     *
-     * @example
-     *
-     * import { Wallet, Provider, utils } from "zksync-ethers";
-     * import { ethers } from "ethers";
-     *
-     * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-     *
-     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-     * const ethProvider = ethers.getDefaultProvider("sepolia");
-     * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-     *
-     * const l2BridgeContracts = await wallet.getL2BridgeContracts();
      */
     async getL2BridgeContracts(): Promise<{erc20: IL2Bridge; weth: IL2Bridge}> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
