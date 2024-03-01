@@ -46,16 +46,14 @@ async function mintTokensOnL1(alternativeToken: string) {
 
     console.log(`Minting tokens on L1`);
 
-
     if (baseTokenAddress != ETH_ADDRESS) {
         const baseToken = ITestnetErc20TokenFactory.connect(baseTokenAddress, wallet._signerL1());
         const baseTokenMintTx = await baseToken.mint(
             await wallet.getAddress(),
-            ethers.utils.parseEther("100"),
+            ethers.utils.parseEther("200"),
         );
         await baseTokenMintTx.wait();
     }
-    
 
     const altToken = ITestnetErc20TokenFactory.connect(alternativeToken, wallet._signerL1());
     const altTokenMintTx = await altToken.mint(
@@ -63,23 +61,12 @@ async function mintTokensOnL1(alternativeToken: string) {
         ethers.utils.parseEther("100"),
     );
     await altTokenMintTx.wait();
-
-    // const wethBridgeAbi = ["function l1WethAddress() view returns (address)"];
-    // const wethAbi = ["function deposit() public payable"];
-    // const wethBridge = new ethers.Contract(
-    //     (await wallet.provider.getDefaultBridgeAddresses()).wethL1!,
-    //     wethBridgeAbi,
-    //     wallet._signerL1(),
-    // );
-    // const weth = new ethers.Contract(await wethBridge.l1WethAddress(), wethAbi, wallet._signerL1());
-    // const wethDepositTx = await weth.deposit({ value: ethers.utils.parseEther("100") });
-    // await wethDepositTx.wait();
 }
 
 /*
-Send tokens to L2 in case L2 in non-ETH base chain.
+Send base token to L2 in case L2 in non-ETH base chain.
 */
-async function sendFundsOnL2() {
+async function sendBaseTokenToL2() {
     const bridgehub = await wallet.getBridgehubContract();
     const chainId = (await provider.getNetwork()).chainId;
     let baseTokenAddress = await bridgehub.baseToken(chainId);
@@ -97,21 +84,23 @@ async function sendFundsOnL2() {
 }
 
 async function main() {
-    console.log(`Balance: ${await wallet.getBalance()}`)
-    console.log(`Balance: ${await wallet.getBalanceL1()}`)
+    console.log(`L2 balance: ${await wallet.getBalance()}`);
+    console.log(`L1 balance: ${await wallet.getBalanceL1()}`);
     
     await mintTokensOnL1(DAI_L1);
-    console.log(`Balance: ${await wallet.getBalance()}`)
-    console.log(`Balance: ${await wallet.getBalanceL1()}`)
+    console.log(`L2 balance: ${await wallet.getBalance()}`);
+    console.log(`L1 balance: ${await wallet.getBalanceL1()}`);
 
     const l2TokenAddress = await createTokenL2(DAI_L1);
     console.log(`L2 DAI address: ${l2TokenAddress}`);
-    console.log(`Balance: ${await wallet.getBalance()}`)
-    console.log(`Balance: ${await wallet.getBalanceL1()}`)
+    console.log(`L2 balance: ${await wallet.getBalance()}`);
+    console.log(`L1 balance: ${await wallet.getBalanceL1()}`);
+    console.log(`L2 DAI balance: ${await wallet.getBalance(l2TokenAddress)}`);
+    console.log(`L1 DAI balance: ${await wallet.getBalanceL1(DAI_L1)}`);
 
-    await sendFundsOnL2();
-    console.log(`Balance: ${await wallet.getBalance()}`)
-    console.log(`Balance: ${await wallet.getBalanceL1()}`)
+    await sendBaseTokenToL2();
+    console.log(`L2 balance: ${await wallet.getBalance()}`);
+    console.log(`L1 balance: ${await wallet.getBalanceL1()}`);
 }
 
 main()
