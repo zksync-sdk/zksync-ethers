@@ -576,8 +576,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
 
       let l2GasLimit: bigint;
+      const bridgeContracts = await this.getL1BridgeContracts();
       if (tx.bridgeAddress) {
-        const bridgeContracts = await this.getL1BridgeContracts();
         const customBridgeData =
           tx.customBridgeData ??
           (await bridgeContracts.weth.getAddress()) === tx.bridgeAddress
@@ -617,7 +617,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         tx.gasPerPubdataByte
       );
 
-      const selfBalanceETH = await this.getBalanceL1();
+      const selfBalanceETH = tx.overrides.from
+        ? await this._providerL1().getBalance(tx.overrides.from)
+        : await this.getBalanceL1();
 
       // We could zero in, because the final fee will anyway be bigger than
       if (baseCost >= selfBalanceETH + dummyAmount) {
@@ -644,8 +646,20 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         amountForEstimate = dummyAmount;
       } else {
         amountForEstimate = dummyAmount;
-
-        if ((await this.getAllowanceL1(tx.token)) < amountForEstimate) {
+        let allowance: bigint;
+        if (tx.overrides.from) {
+          const erc20contract = IERC20__factory.connect(
+            tx.token,
+            this._providerL1()
+          );
+          allowance = await erc20contract.allowance(
+            tx.overrides.from,
+            await bridgeContracts.erc20.getAddress()
+          );
+        } else {
+          allowance = await this.getAllowanceL1(tx.token);
+        }
+        if (allowance < amountForEstimate) {
           throw new Error('Not enough allowance to cover the deposit!');
         }
       }

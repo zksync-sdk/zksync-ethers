@@ -722,6 +722,54 @@ describe('Wallet', () => {
         );
       }
     }).timeout(10_000);
+
+    it('should estimate a fee for ETH when `from` is used in overrides', async () => {
+      const feeData = {
+        baseCost: 311_192_000_000_000n,
+        l1GasLimit: 135_759n,
+        l2GasLimit: '0x97f30',
+        maxFeePerGas: 1_500_000_010n,
+        maxPriorityFeePerGas: 1_500_000_000n,
+      };
+
+      const randomWallet = new Wallet(
+        ethers.Wallet.createRandom().privateKey,
+        provider,
+        ethProvider
+      );
+      const result = await randomWallet.getFullRequiredDepositFee({
+        token: utils.ETH_ADDRESS,
+        to: await wallet.getAddress(),
+        overrides: {from: ADDRESS},
+      });
+      expect(result).to.be.deepEqualExcluding(feeData, ['l1GasLimit']);
+    }).timeout(10_000);
+
+    it('should estimate a fee for DAI when `from` is used in overrides', async () => {
+      const feeData = {
+        baseCost: 288_992_000_000_000n,
+        l1GasLimit: 253_177n,
+        l2GasLimit: '0x8d1c0',
+        maxFeePerGas: 1_500_000_010n,
+        maxPriorityFeePerGas: 1_500_000_000n,
+      };
+
+      const randomWallet = new Wallet(
+        ethers.Wallet.createRandom().privateKey,
+        provider,
+        ethProvider
+      );
+
+      const tx = await wallet.approveERC20(DAI_L1, 5);
+      await tx.wait();
+
+      const result = await randomWallet.getFullRequiredDepositFee({
+        token: DAI_L1,
+        to: await wallet.getAddress(),
+        overrides: {from: ADDRESS},
+      });
+      expect(result).to.be.deep.equal(feeData);
+    }).timeout(10_000);
   });
 
   describe('#withdraw()', () => {
