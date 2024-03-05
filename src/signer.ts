@@ -324,10 +324,8 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const provider = new Web3Provider(window.ethereum);
    * const signer = provider.getSigner();
    *
-   * const recipient = Wallet.createRandom();
-   *
    * const transferHandle = signer.transfer({
-   *   to: recipient.address,
+   *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
@@ -346,10 +344,8 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const provider = new Web3Provider(window.ethereum);
    * const signer = provider.getSigner();
    *
-   * const recipient = Wallet.createRandom();
-   *
    * const transferHandle = signer.transfer({
-   *   to: recipient.address,
+   *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
    *     type: "ApprovalBased",
@@ -1190,7 +1186,7 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
    * const signer = new L2VoidSigner("<ADDRESS>", provider);
    *
    * const populatedTx = await signer.populateTransaction({
-   *   to: RECEIVER,
+   *   to: Wallet.createRandom().address,
    *   value: 7_000_000,
    *   maxFeePerGas: BigNumber.from(3_500_000_000),
    *   maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
