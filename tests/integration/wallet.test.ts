@@ -114,7 +114,7 @@ describe('Wallet', () => {
   });
 
   describe('#getAllBalances()', () => {
-    it('should return all balance', async () => {
+    it('should return all balances', async () => {
       const result = await wallet.getAllBalances();
       expect(Object.keys(result)).to.have.lengthOf(2);
     });
