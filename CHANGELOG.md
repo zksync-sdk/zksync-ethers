@@ -1,3 +1,10 @@
+# [5.5.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.4.0...v5.5.0) (2024-03-05)
+
+
+### Features
+
+* **signer:** add `L2VoidSigner` and `L1VoidSigner` ([53d9270](https://github.com/zksync-sdk/zksync-ethers/commit/53d92700ad68ffaf75aa8996d85f00073cb0e569))
+
 # [5.4.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.3.0...v5.4.0) (2024-02-29)
 
 
