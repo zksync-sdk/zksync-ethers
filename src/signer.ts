@@ -1131,3 +1131,188 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
   }
 }
 /* c8 ignore stop */
+
+/**
+ * A `L2VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations
+ *
+ * @see {@link L1VoidSigner} for L1 operations.
+ */
+export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
+  public override provider!: Provider;
+
+  override _signerL2() {
+    return this;
+  }
+
+  override _providerL2(): Provider {
+    return this.provider;
+  }
+
+  /**
+   * Connects to the L2 network using the `provider`.
+   *
+   * @param provider The provider instance for connecting to a L2 network.
+   *
+   * @example
+   *
+   * import { Provider, L2VoidSigner, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   *
+   * let signer = new L2VoidSigner("<ADDRESS>");
+   * signer = signer.connect(provider);
+   */
+  override connect(provider: Provider): L2VoidSigner {
+    return new L2VoidSigner(this.address, provider);
+  }
+
+  /**
+   * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
+   * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
+   * Any other fields that are not set will be prepared by this method.
+   *
+   * @param tx The transaction request that needs to be populated.
+   *
+   * @example
+   *
+   * import { Provider, L2VoidSigner, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const signer = new L2VoidSigner("<ADDRESS>", provider);
+   *
+   * const populatedTx = await signer.populateTransaction({
+   *   to: Wallet.createRandom().address,
+   *   value: 7_000_000n,
+   *   maxFeePerGas: 3_500_000_000n,
+   *   maxPriorityFeePerGas: 2_000_000_000n,
+   *   customData: {
+   *     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+   *     factoryDeps: [],
+   *   },
+   * });
+   */
+  override async populateTransaction(
+    tx: TransactionRequest
+  ): Promise<TransactionLike> {
+    if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
+      return (await super.populateTransaction(tx)) as TransactionLike;
+    }
+
+    tx.type = EIP712_TX_TYPE;
+    const populated = (await super.populateTransaction(tx)) as TransactionLike;
+
+    populated.type = EIP712_TX_TYPE;
+    populated.value ??= 0;
+    populated.data ??= '0x';
+    populated.customData = this._fillCustomData(tx.customData ?? {});
+    if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
+      populated.gasPrice = await this.provider.getGasPrice();
+    }
+    return populated;
+  }
+}
+
+/**
+ * A `L1VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L1 operations
+ *
+ * @see {@link L2VoidSigner} for L2 operations.
+ */
+export class L1VoidSigner extends AdapterL1(ethers.VoidSigner) {
+  public providerL2?: Provider;
+
+  override _providerL2(): Provider {
+    if (!this.providerL2) {
+      throw new Error('L2 provider missing: use `connectToL2` to specify!');
+    }
+    return this.providerL2;
+  }
+
+  override _providerL1(): ethers.Provider {
+    return this.provider as ethers.Provider;
+  }
+
+  override _signerL1() {
+    return this;
+  }
+
+  /**
+   * @param address The address of the account.
+   * @param providerL1 The provider instance for connecting to a L1 network.
+   * @param providerL2 The provider instance for connecting to a L2 network.
+   *
+   * @example
+   *
+   * import { Provider, L1VoidSigner, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const signer = new L1VoidSigner("<ADDRESS>", ethProvider, provider);
+   */
+  constructor(
+    address: string,
+    providerL1?: ethers.Provider,
+    providerL2?: Provider
+  ) {
+    super(address, providerL1);
+    this.providerL2 = providerL2;
+  }
+
+  /**
+   * Connects to the L1 network using the `provider`.
+   *
+   * @param provider The provider instance for connecting to a L1 network.
+   *
+   * @example
+   *
+   * import { L1VoidSigner } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   *
+   * let singer = new L1VoidSigner("<ADDRESS>);
+   * singer = singer.connect(ethProvider);
+   */
+  override connect(provider: ethers.Provider): L1VoidSigner {
+    return new L1VoidSigner(this.address, provider);
+  }
+
+  /**
+   * Returns the balance of the account.
+   *
+   * @param [token] The token address to query balance for. Defaults to the native token.
+   * @param [blockTag='committed'] The block tag to get the balance at.
+   *
+   * @example
+   *
+   *
+   */
+  async getBalance(
+    token?: Address,
+    blockTag: BlockTag = 'committed'
+  ): Promise<bigint> {
+    return await this._providerL2().getBalance(
+      await this.getAddress(),
+      blockTag,
+      token
+    );
+  }
+
+  /**
+   * Connects to the L2 network using the `provider`.
+   *
+   * @param provider The provider instance for connecting to a L2 network.
+   *
+   * @example
+   *
+   * import { Provider, L1VoidSigner, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * let signer = new L1VoidSigner("<ADDRESS>");
+   * signer = signer.connectToL2(provider);
+   */
+  connectToL2(provider: Provider): this {
+    this.providerL2 = provider;
+    return this;
+  }
+}
