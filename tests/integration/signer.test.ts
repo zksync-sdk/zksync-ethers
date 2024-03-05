@@ -401,7 +401,7 @@ describe('L1VoidSigner', () => {
   });
 
   describe('#getAddress()', () => {
-    it('should return a `Wallet` address', async () => {
+    it('should return a `L1VoidSigner` address', async () => {
       const result = await signer.getAddress();
       expect(result).to.be.equal(ADDRESS);
     });
@@ -547,7 +547,7 @@ describe('L1VoidSigner', () => {
       expect(result).to.be.deep.equal(tx);
     });
 
-    it('should return a deposit transaction with `tx.to == Wallet.getAddress()` when `tx.to` is not specified', async () => {
+    it('should return a deposit transaction with `tx.to == L1VoidSigner.getAddress()` when `tx.to` is not specified', async () => {
       const tx = {
         contractAddress: ADDRESS,
         calldata: '0x',
@@ -696,14 +696,6 @@ describe('L1VoidSigner', () => {
         maxFeePerGas: BigNumber.from(1_500_000_010),
         maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
       };
-
-      // const wallet = new Wallet(
-      //   "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110",
-      //   provider,
-      //   ethProvider
-      // );
-      // const tx = await wallet.approveERC20(DAI_L1, 5);
-      // await tx.wait();
 
       const result = await signer.getFullRequiredDepositFee({
         token: DAI_L1,
