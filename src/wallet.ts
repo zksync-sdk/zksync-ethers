@@ -1184,7 +1184,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
    * const tx = await wallet.sendTransaction({
-   *   to: RECEIVER,
+   *   to: Wallet.createRandom().address,
    *   value: 7_000_000,
    *   maxFeePerGas: BigNumber.from(3_500_000_000),
    *   maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
