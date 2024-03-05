@@ -329,10 +329,8 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * const provider = new BrowserProvider(window.ethereum);
    * const signer = provider.getSigner();
    *
-   * const recipient = Wallet.createRandom();
-   *
    * const transferHandle = signer.transfer({
-   *   to: recipient.address,
+   *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
@@ -351,10 +349,8 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * const provider = new BrowserProvider(window.ethereum);
    * const signer = provider.getSigner();
    *
-   * const recipient = Wallet.createRandom();
-   *
    * const transferHandle = signer.transfer({
-   *   to: recipient.address,
+   *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
    *     type: "ApprovalBased",
