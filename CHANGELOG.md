@@ -1,3 +1,11 @@
+# [6.5.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.4.0...v6.5.0) (2024-03-05)
+
+
+### Features
+
+* **adapters:** make `AdapterL1.getFullRequiredDepositFee` work with overrides ([9feb1e1](https://github.com/zksync-sdk/zksync-ethers/commit/9feb1e136335f31b7eda3b2e9ef664b1e29ad366))
+* **signer:** add `L2VoidSigner` and `L1VoidSigner` ([84008bb](https://github.com/zksync-sdk/zksync-ethers/commit/84008bbe955e21562df38dd2d254d5cd5ed3713d))
+
 # [6.4.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.3.0...v6.4.0) (2024-02-29)
 
 
