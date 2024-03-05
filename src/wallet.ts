@@ -835,10 +835,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const recipient = Wallet.createRandom();
-   *
    * const transferHandle = await wallet.transfer({
-   *   to: recipient.address,
+   *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
@@ -857,10 +855,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const recipient = Wallet.createRandom();
-   *
    * const transferHandle = await wallet.transfer({
-   *   to: recipient.address,
+   *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
    *     type: "ApprovalBased",
@@ -1057,6 +1053,23 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * Any other fields that are not set will be prepared by this method.
    *
    * @param tx The transaction request that needs to be populated.
+   *
+   * @example
+   *
+   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const populatedTx = await wallet.populateTransaction({
+   *   type: utils.EIP712_TX_TYPE,
+   *   to: RECEIVER,
+   *   value: 7_000_000_000,
+   * });
    */
   override async populateTransaction(
     tx: TransactionRequest
@@ -1084,6 +1097,23 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * @param tx The transaction request that needs to be signed.
    *
    * @throws {Error} If `transaction.from` is mismatched from the private key.
+   *
+   * @example
+   *
+   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const tx = await wallet.signTransaction({
+   *   type: utils.EIP712_TX_TYPE,
+   *   to: Wallet.createRandom().address,
+   *   value: ethers.parseEther('1'),
+   * });
    */
   override async signTransaction(tx: TransactionRequest): Promise<string> {
     const populated = await this.populateTransaction(tx);
@@ -1101,6 +1131,28 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * @param tx The transaction request that needs to be broadcast to the network.
    *
    * @throws {Error} If `transaction.from` is mismatched from the private key.
+   *
+   * @example
+   *
+   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const tx = await wallet.sendTransaction({
+   *   to: Wallet.createRandom().address,
+   *   value: 7_000_000,
+   *   maxFeePerGas: 3_500_000_000n,
+   *   maxPriorityFeePerGas: 2_000_000_000n,
+   *   customData: {
+   *     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+   *   },
+   * });
+   * await tx.wait();
    */
   override async sendTransaction(
     tx: TransactionRequest
