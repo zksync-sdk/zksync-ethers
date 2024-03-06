@@ -30,7 +30,7 @@ To begin, it is useful to have a basic understanding of the types of objects ava
 
 ## 🛠 Prerequisites
 
--   `node: >= 18` ([installation guide](https://nodejs.org/en/download/package-manager))
+-   `node: >= 16` ([installation guide](https://nodejs.org/en/download/package-manager))
 -   `ethers: ^5.7.0`
 
 ## 📥 Installation & Setup
