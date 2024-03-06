@@ -1,15 +1,12 @@
 {
   "name": "zksync-ethers",
   "version": "5.5.0",
-  "main": "build/src/index.js",
-  "types": "build/src/index.d.ts",
   "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
-  "files": [
-    "build/",
-    "abi/",
-    "src/",
-    "typechain/"
-  ],
+  "author": {
+    "name": "Matter Labs",
+    "url": "https://matter-labs.io/",
+    "email": "hello@matterlabs.io"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,6 +21,17 @@
     "web3",
     "ethereum",
     "layer2"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "files": [
+    "build/",
+    "abi/",
+    "src/",
+    "typechain/"
   ],
   "dependencies": {
     "ethers": "~5.7.0"
