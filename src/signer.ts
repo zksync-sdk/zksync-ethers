@@ -21,9 +21,9 @@ import {
 import {TypedDataDomain, TypedDataSigner} from '@ethersproject/abstract-signer';
 import {_TypedDataEncoder as TypedDataEncoder} from '@ethersproject/hash';
 import {AdapterL1, AdapterL2} from './adapters';
-import {Il2Bridge} from '../typechain/Il2Bridge';
-import {IZkSync} from '../typechain/IZkSync';
-import {Il1Bridge} from '../typechain/Il1Bridge';
+import {Il2Bridge} from './typechain/Il2Bridge';
+import {IZkSync} from './typechain/IZkSync';
+import {Il1Bridge} from './typechain/Il1Bridge';
 
 /**
  * All typed data conforming to the EIP712 standard within zkSync Era.
