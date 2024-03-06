@@ -19,65 +19,62 @@ import {AbiCoder} from 'ethers/lib/utils';
 export * from './paymaster-utils';
 export {EIP712_TYPES} from './signer';
 
+import IZkSyncABI from '../abi/IZkSync.json';
+import IContractDeployerABI from '../abi/IContractDeployer.json';
+import IL1MessengerABI from '../abi/IL1Messenger.json';
+import IERC20ABI from '../abi/IERC20.json';
+import IERC1271ABI from '../abi/IERC1271.json';
+import IL1BridgeABI from '../abi/IL1Bridge.json';
+import IL2BridgeABI from '../abi/IL2Bridge.json';
+import INonceHolderABI from '../abi/INonceHolder.json';
+
 /**
  * The ABI for the `ZkSync` interface.
  * @constant
  */
-export const ZKSYNC_MAIN_ABI = new utils.Interface(
-  require('../abi/IZkSync.json')
-);
+export const ZKSYNC_MAIN_ABI = new utils.Interface(IZkSyncABI);
 
 /**
  * The ABI for the `IContractDeployer` interface, which is utilized for deploying smart contracts.
  * @constant
  */
-export const CONTRACT_DEPLOYER = new utils.Interface(
-  require('../abi/IContractDeployer.json')
-);
+export const CONTRACT_DEPLOYER = new utils.Interface(IContractDeployerABI);
 
 /**
  * The ABI for the `IL1Messenger` interface, which is utilized for sending messages from the L2 to L1.
  * @constant
  */
-export const L1_MESSENGER = new utils.Interface(
-  require('../abi/IL1Messenger.json')
-);
+export const L1_MESSENGER = new utils.Interface(IL1MessengerABI);
 
 /**
  * The ABI for the `IERC20` interface, which is utilized for interacting with ERC20 tokens.
  * @constant
  */
-export const IERC20 = new utils.Interface(require('../abi/IERC20.json'));
+export const IERC20 = new utils.Interface(IERC20ABI);
 
 /**
  * The ABI for the `IERC1271` interface, which is utilized for signature validation by contracts.
  * @constant
  */
-export const IERC1271 = new utils.Interface(require('../abi/IERC1271.json'));
+export const IERC1271 = new utils.Interface(IERC1271ABI);
 
 /**
  * The ABI for the `IL1Bridge` interface, which is utilized for transferring ERC20 tokens from L1 to L2.
  * @constant
  */
-export const L1_BRIDGE_ABI = new utils.Interface(
-  require('../abi/IL1Bridge.json')
-);
+export const L1_BRIDGE_ABI = new utils.Interface(IL1BridgeABI);
 
 /**
  * The ABI for the `IL2Bridge` interface, which is utilized for transferring ERC20 tokens from L2 to L1.
  * @constant
  */
-export const L2_BRIDGE_ABI = new utils.Interface(
-  require('../abi/IL2Bridge.json')
-);
+export const L2_BRIDGE_ABI = new utils.Interface(IL2BridgeABI);
 
 /**
  * The ABI for the `INonceHolder` interface, which is utilized for managing deployment nonces.
  * @constant
  */
-export const NONCE_HOLDER_ABI = new utils.Interface(
-  require('../abi/INonceHolder.json')
-);
+export const NONCE_HOLDER_ABI = new utils.Interface(INonceHolderABI);
 
 /**
  * The address of the L1 `ETH` token.
