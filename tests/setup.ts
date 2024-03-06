@@ -8,6 +8,10 @@ import {
 } from '../src';
 import {ethers} from 'ethers';
 
+import TokensL1 from './tokens.json';
+import Token from './files/Token.json';
+import Paymaster from './files/Paymaster.json';
+
 const PRIVATE_KEY =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
 
@@ -15,8 +19,6 @@ const provider = Provider.getDefaultProvider(types.Network.Localhost);
 const ethProvider = ethers.getDefaultProvider('http://127.0.0.1:8545');
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-
-const TOKENS_L1 = require('./tokens.json');
 
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
@@ -29,11 +31,8 @@ async function deployPaymasterAndToken(): Promise<{
   token: string;
   paymaster: string;
 }> {
-  const tokenPath = './files/Token.json';
-  const paymasterPath = './files/Paymaster.json';
-
-  const abi = require(tokenPath).abi;
-  const bytecode: string = require(tokenPath).bytecode;
+  const abi = Token.abi;
+  const bytecode: string = Token.bytecode;
   const factory = new ContractFactory(abi, bytecode, wallet, 'create2');
   const tokenContract = (await factory.deploy('Crown', 'Crown', 18, {
     customData: {salt: SALT},
@@ -44,8 +43,8 @@ async function deployPaymasterAndToken(): Promise<{
   const mintTx = await tokenContract.mint(wallet.address, 50);
   await mintTx.wait();
 
-  const paymasterAbi = require(paymasterPath).abi;
-  const paymasterBytecode = require(paymasterPath).bytecode;
+  const paymasterAbi = Paymaster.abi;
+  const paymasterBytecode = Paymaster.bytecode;
 
   const accountFactory = new ContractFactory(
     paymasterAbi,
@@ -100,7 +99,7 @@ Deploy token to the L2 network through deposit transaction.
  */
 async function main() {
   console.log('===== Depositing DAI to L2 =====');
-  const l2TokenAddress = await createTokenL2(TOKENS_L1[0].address);
+  const l2TokenAddress = await createTokenL2(TokensL1[0].address);
   console.log(`L2 DAI address: ${l2TokenAddress}`);
 
   console.log('===== Deploying token and paymaster =====');

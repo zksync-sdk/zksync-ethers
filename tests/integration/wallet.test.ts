@@ -4,6 +4,8 @@ import {Provider, utils, Wallet} from '../../src';
 import {ethers, BigNumber} from 'ethers';
 import * as fs from 'fs';
 
+import TokensL1 from '../tokens.json';
+
 const {expect} = chai;
 
 describe('Wallet', () => {
@@ -18,8 +20,7 @@ describe('Wallet', () => {
   const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
   const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
-  const TOKENS_L1 = require('../tokens.json');
-  const DAI_L1 = TOKENS_L1[0].address;
+  const DAI_L1 = TokensL1[0].address;
 
   const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4';
   const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174';

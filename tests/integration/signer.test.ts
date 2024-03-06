@@ -3,6 +3,8 @@ import '../custom-matchers';
 import {Provider, utils, Wallet, L2VoidSigner, L1VoidSigner} from '../../src';
 import {ethers, BigNumber} from 'ethers';
 
+import TokensL1 from '../tokens.json';
+
 const {expect} = chai;
 
 describe('L2VoidSigner', () => {
@@ -305,8 +307,7 @@ describe('L1VoidSigner', () => {
   const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
   const signer = new L1VoidSigner(ADDRESS, ethProvider, provider);
 
-  const TOKENS_L1 = require('../tokens.json');
-  const DAI_L1 = TOKENS_L1[0].address;
+  const DAI_L1 = TokensL1[0].address;
 
   describe('#constructor()', () => {
     it('`L1VoidSigner(privateKey, providerL1, providerL2)` should return a `L1VoidSigner` with L1 and L2 provider', async () => {
