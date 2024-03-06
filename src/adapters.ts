@@ -1,9 +1,12 @@
 import {BigNumber, BigNumberish, BytesLike, ethers} from 'ethers';
-import {Ierc20Factory as IERC20Factory} from '../typechain/Ierc20Factory';
-import {Il1BridgeFactory as IL1BridgeFactory} from '../typechain/Il1BridgeFactory';
-import {Il2BridgeFactory as IL2BridgeFactory} from '../typechain/Il2BridgeFactory';
-import {IZkSyncFactory} from '../typechain/IZkSyncFactory';
-import {INonceHolderFactory} from '../typechain/INonceHolderFactory';
+import {Ierc20Factory as IERC20Factory} from './typechain/Ierc20Factory';
+import {Il1BridgeFactory as IL1BridgeFactory} from './typechain/Il1BridgeFactory';
+import {Il2BridgeFactory as IL2BridgeFactory} from './typechain/Il2BridgeFactory';
+import {IZkSyncFactory} from './typechain/IZkSyncFactory';
+import {INonceHolderFactory} from './typechain/INonceHolderFactory';
+import {Il2Bridge} from './typechain/Il2Bridge';
+import {IZkSync} from './typechain/IZkSync';
+import {Il1Bridge} from './typechain/Il1Bridge';
 import {Provider} from './provider';
 import {
   Address,
@@ -34,9 +37,6 @@ import {
   undoL1ToL2Alias,
   NONCE_HOLDER_ADDRESS,
 } from './utils';
-import {Il2Bridge} from '../typechain/Il2Bridge';
-import {IZkSync} from '../typechain/IZkSync';
-import {Il1Bridge} from '../typechain/Il1Bridge';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
