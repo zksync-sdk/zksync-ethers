@@ -1,8 +1,8 @@
 {
   "name": "zksync-ethers",
   "version": "6.5.0",
-  "main": "build/src/index.js",
-  "types": "build/src/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
   "author": {
     "name": "Matter Labs",
@@ -10,10 +10,7 @@
     "email": "hello@matterlabs.io"
   },
   "files": [
-    "build/",
-    "src/abi/",
-    "src/",
-    "typechain/"
+    "build/"
   ],
   "license": "MIT",
   "repository": {
