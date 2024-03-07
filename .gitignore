@@ -2,6 +2,7 @@ build
 node_modules
 coverage
 docs
+tests/build
 
 .idea
 .vscode
