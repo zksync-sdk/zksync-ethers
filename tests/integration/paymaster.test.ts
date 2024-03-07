@@ -5,6 +5,9 @@ import {Contract, ethers, Typed} from 'ethers';
 
 const {expect} = chai;
 
+import Token from '../files/Token.json';
+import Paymaster from '../files/Paymaster.json';
+
 describe('Paymaster', () => {
   const PRIVATE_KEY =
     '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
@@ -12,17 +15,14 @@ describe('Paymaster', () => {
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
   const wallet = new Wallet(PRIVATE_KEY, provider);
 
-  const tokenPath = '../files/Token.json';
-  const paymasterPath = '../files/Paymaster.json';
-
   describe('#ApprovalBased', () => {
     it('use the ERC20 token to pay transaction fee', async () => {
       const INIT_MINT_AMOUNT = 10n;
       const MINT_AMOUNT = 3n;
       const MINIMAL_ALLOWANCE = 1n;
 
-      const abi = require(tokenPath).abi;
-      const bytecode: string = require(tokenPath).bytecode;
+      const abi = Token.abi;
+      const bytecode: string = Token.bytecode;
       const factory = new ContractFactory(abi, bytecode, wallet);
       const tokenContract = (await factory.deploy(
         'Ducat',
@@ -38,8 +38,8 @@ describe('Paymaster', () => {
       )) as ethers.ContractTransactionResponse;
       await mintTx.wait();
 
-      const paymasterAbi = require(paymasterPath).abi;
-      const paymasterBytecode = require(paymasterPath).bytecode;
+      const paymasterAbi = Paymaster.abi;
+      const paymasterBytecode = Paymaster.bytecode;
       const accountFactory = new ContractFactory(
         paymasterAbi,
         paymasterBytecode,
@@ -68,7 +68,7 @@ describe('Paymaster', () => {
       const walletTokenBalanceBeforeTx = await wallet.getBalance(tokenAddress);
 
       // perform tx using paymaster
-      const tokenAbi = new ethers.Interface(require(tokenPath).abi);
+      const tokenAbi = new ethers.Interface(Token.abi);
       const tx = await wallet.sendTransaction({
         to: tokenAddress,
         data: tokenAbi.encodeFunctionData('mint', [

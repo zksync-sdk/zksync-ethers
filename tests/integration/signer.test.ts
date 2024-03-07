@@ -5,6 +5,8 @@ import {ethers} from 'ethers';
 
 const {expect} = chai;
 
+import TokensL1 from '../tokens.json';
+
 describe('L2VoidSigner', () => {
   const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
   const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
@@ -305,8 +307,7 @@ describe('L1VoidSigner', () => {
   const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
   const signer = new L1VoidSigner(ADDRESS, ethProvider, provider);
 
-  const TOKENS_L1 = require('../tokens.json');
-  const DAI_L1 = TOKENS_L1[0].address;
+  const DAI_L1 = TokensL1[0].address;
 
   describe('#constructor()', () => {
     it('`L1VoidSigner(privateKey, providerL1, providerL2)` should return a `L1VoidSigner` with L1 and L2 provider', async () => {
