@@ -3,9 +3,9 @@ contact_links:
     - name: zksync-developers Discussion
       url: https://github.com/zkSync-Community-Hub/zkync-developers/discussions
       about: Please provide feedback, and ask questions here.
-    - name: zksync-web3 SDK documentation page
-      url: https://era.zksync.io/docs/api/js/
+    - name: zksync-ethers v5 SDK documentation page
+      url: https://docs.zksync.io/build/sdks/js/getting-started.html
       about: Please refer to the documentation for immediate answers.
-    - name: zksync2-js SDK documentation page
-      url: https://era.zksync.io/docs/api/js/zksync2-js
+    - name: zksync-ethers v6 SDK documentation page
+      url: https://docs.zksync.io/build/sdks/js/zksync-ethers/getting-started.html
       about: Please refer to the documentation for immediate answers.

@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-### 🐛 Bug Report for zksync2-js JavaScript SDK
+### 🐛 Bug Report for zksync-ethers JavaScript SDK
 
 #### 📝 Description
 
