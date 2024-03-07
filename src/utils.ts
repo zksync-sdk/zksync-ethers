@@ -13,19 +13,19 @@ import {
 } from './types';
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
-import {IERC20__factory, IL1Bridge__factory} from '../typechain';
+import {IERC20__factory, IL1Bridge__factory} from './typechain';
 
 export * from './paymaster-utils';
 export {EIP712_TYPES} from './signer';
 
-import IZkSyncABI from '../abi/IZkSync.json';
-import IContractDeployerABI from '../abi/IContractDeployer.json';
-import IL1MessengerABI from '../abi/IL1Messenger.json';
-import IERC20ABI from '../abi/IERC20.json';
-import IERC1271ABI from '../abi/IERC1271.json';
-import IL1BridgeABI from '../abi/IL1Bridge.json';
-import IL2BridgeABI from '../abi/IL2Bridge.json';
-import INonceHolderABI from '../abi/INonceHolder.json';
+import IZkSyncABI from './abi/IZkSync.json';
+import IContractDeployerABI from './abi/IContractDeployer.json';
+import IL1MessengerABI from './abi/IL1Messenger.json';
+import IERC20ABI from './abi/IERC20.json';
+import IERC1271ABI from './abi/IERC1271.json';
+import IL1BridgeABI from './abi/IL1Bridge.json';
+import IL2BridgeABI from './abi/IL2Bridge.json';
+import INonceHolderABI from './abi/INonceHolder.json';
 
 /**
  * The ABI for the `ZkSync` interface.

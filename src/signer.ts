@@ -26,7 +26,7 @@ import {
   TransactionResponse,
 } from './types';
 import {AdapterL1, AdapterL2} from './adapters';
-import {IL1Bridge, IL2Bridge, IZkSync} from '../typechain';
+import {IL1Bridge, IL2Bridge, IZkSync} from './typechain';
 
 /**
  * All typed data conforming to the EIP712 standard within zkSync Era.

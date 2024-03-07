@@ -35,7 +35,7 @@ import {
   INonceHolder__factory,
   IZkSync,
   IZkSync__factory,
-} from '../typechain';
+} from './typechain';
 import {
   Address,
   BalancesMap,
