@@ -6,7 +6,8 @@
   "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
   "author": {
     "name": "Matter Labs",
-    "url": "https://matter-labs.io/"
+    "url": "https://matter-labs.io/",
+    "email": "hello@matterlabs.io"
   },
   "files": [
     "build/",
