@@ -1,0 +1,22 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "tests/build",
+    "module": "CommonJS",
+    "target": "ES2020",
+
+    "esModuleInterop": true,
+    "declaration": true,
+    "resolveJsonModule": true,
+
+    "preserveSymlinks": true,
+    "preserveWatchOutput": true,
+
+    "noImplicitOverride": true,
+    "strict": true
+  },
+  "include": [
+    "tests/**/*.ts"
+  ]
+}
