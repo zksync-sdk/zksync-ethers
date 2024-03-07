@@ -20,7 +20,7 @@ import {
   IERC20__factory,
   IEthToken__factory,
   IL2Bridge__factory,
-} from '../typechain';
+} from './typechain';
 import {
   Address,
   TransactionResponse,

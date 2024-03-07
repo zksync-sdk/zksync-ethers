@@ -8,7 +8,7 @@ import {
   PaymasterParams,
 } from './types';
 
-import IPaymasterFlowABI from '../abi/IPaymasterFlow.json';
+import IPaymasterFlowABI from './abi/IPaymasterFlow.json';
 
 /**
  * The ABI for the `IPaymasterFlow` interface, which is utilized

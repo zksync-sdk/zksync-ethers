@@ -22,7 +22,7 @@ import {
   TransactionResponse,
 } from './types';
 import {AdapterL1, AdapterL2} from './adapters';
-import {IL1Bridge, IL2Bridge, IZkSync} from '../typechain';
+import {IL1Bridge, IL2Bridge, IZkSync} from './typechain';
 
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
