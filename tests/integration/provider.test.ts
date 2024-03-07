@@ -3,6 +3,8 @@ import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
 import {ethers} from 'ethers';
 
+import TokensL1 from '../tokens.json';
+
 describe('Provider', () => {
   const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
   const PRIVATE_KEY =
@@ -12,8 +14,7 @@ describe('Provider', () => {
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
   const wallet = new Wallet(PRIVATE_KEY, provider);
 
-  const TOKENS_L1 = require('../tokens.json');
-  const DAI_L1 = TOKENS_L1[0].address;
+  const DAI_L1 = TokensL1[0].address;
 
   const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4';
   const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174';
