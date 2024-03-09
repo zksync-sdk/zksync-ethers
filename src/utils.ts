@@ -24,6 +24,7 @@ import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
 
 export * from './paymaster-utils';
+export * from './smart-account-utils';
 export {EIP712_TYPES} from './signer';
 
 /**
