@@ -25,13 +25,10 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "main": "build/src/index.js",
-  "types": "build/src/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
-    "build/",
-    "src/abi/",
-    "src/",
-    "typechain/"
+    "build/"
   ],
   "dependencies": {
     "ethers": "~5.7.0"
