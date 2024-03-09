@@ -92,7 +92,7 @@ export class EIP712Signer {
     const gasPerPubdataByteLimit =
       transaction.customData?.gasPerPubdata || DEFAULT_GAS_PER_PUBDATA_LIMIT;
     return {
-      txType: transaction.type,
+      txType: transaction.type || EIP712_TX_TYPE,
       from: transaction.from,
       to: transaction.to,
       gasLimit: transaction.gasLimit || 0n,
