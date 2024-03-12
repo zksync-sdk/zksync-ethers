@@ -1,5 +1,6 @@
 import {BytesLike, BigNumberish, providers, BigNumber} from 'ethers';
 import {BlockWithTransactions as EthersBlockWithTransactions} from '@ethersproject/abstract-provider';
+import {Provider} from './provider';
 
 /** 0x-prefixed, hex encoded, ethereum account address. */
 export type Address = string;
@@ -459,4 +460,46 @@ export interface StorageProof {
     index: number;
     proof: string[];
   }[];
+}
+
+/**
+ *  Signs various types of payloads, optionally using a some kind of secret.
+ *
+ *  @param payload  The payload that needs to be sign already populated transaction to sign.
+ *  @param [secret] The Secret used for signing the `payload`.
+ *  @param [provider] The provider is used to fetch data from the network if it is required for signing.
+ *  @returns A promise that resolves to the serialized signature in hexadecimal format.
+ */
+export type PayloadSigner = (
+  payload: BytesLike,
+  secret?: any,
+  provider?: null | Provider
+) => Promise<string>;
+
+/**
+ * Populates missing fields in a transaction with default values.
+ *
+ * @param transaction The transaction that needs to be populated.
+ * @param [secret] The secret used for populating the transaction.
+ * @param [provider] The provider is used to fetch data from the network if it is required for signing.
+ * @returns A promise that resolves to the populated transaction.
+ */
+export type TransactionBuilder = (
+  transaction: TransactionRequest,
+  secret?: any,
+  provider?: null | Provider
+) => Promise<providers.TransactionRequest>;
+
+/**
+ * Encapsulates the required input parameters for creating a signer for `SmartAccount`.
+ */
+export interface SmartAccountSigner {
+  /** Address to which the `SmartAccount` is bound. */
+  address: string;
+  /** Secret in any form that can be used for signing different payloads. */
+  secret: any;
+  /** Custom method for signing different payloads. */
+  payloadSigner?: PayloadSigner;
+  /** Custom method for populating transaction requests. */
+  transactionBuilder?: TransactionBuilder;
 }
