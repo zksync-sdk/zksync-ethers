@@ -8,5 +8,10 @@ export {
   L1VoidSigner,
 } from './signer';
 export {Wallet} from './wallet';
+export {
+  SmartAccount,
+  ECDSASmartAccount,
+  MultisigECDSASmartAccount,
+} from './smart-account';
 export {Web3Provider, Provider} from './provider';
 export {ContractFactory, Contract} from './contract';

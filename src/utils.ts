@@ -17,6 +17,7 @@ import {Il1BridgeFactory as IL1BridgeFactory} from './typechain/Il1BridgeFactory
 import {AbiCoder} from 'ethers/lib/utils';
 
 export * from './paymaster-utils';
+export * from './smart-account-utils';
 export {EIP712_TYPES} from './signer';
 
 import IZkSyncABI from '../abi/IZkSync.json';
