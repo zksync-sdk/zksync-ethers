@@ -14,10 +14,6 @@ import {
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
 import {IERC20__factory, IL1Bridge__factory} from './typechain';
-
-export * from './paymaster-utils';
-export {EIP712_TYPES} from './signer';
-
 import IZkSyncABI from './abi/IZkSync.json';
 import IContractDeployerABI from './abi/IContractDeployer.json';
 import IL1MessengerABI from './abi/IL1Messenger.json';
@@ -26,6 +22,9 @@ import IERC1271ABI from './abi/IERC1271.json';
 import IL1BridgeABI from './abi/IL1Bridge.json';
 import IL2BridgeABI from './abi/IL2Bridge.json';
 import INonceHolderABI from './abi/INonceHolder.json';
+
+export * from './paymaster-utils';
+export {EIP712_TYPES} from './signer';
 
 /**
  * The ABI for the `ZkSync` interface.
@@ -797,10 +796,11 @@ const ADDRESS_MODULO = 2n ** 160n;
  *
  */
 export function applyL1ToL2Alias(address: string): string {
-  return ethers.hexlify(
+  return ethers.zeroPadValue(
     ethers.toBeHex(
       (BigInt(address) + BigInt(L1_TO_L2_ALIAS_OFFSET)) % ADDRESS_MODULO
-    )
+    ),
+    20
   );
 }
 
@@ -823,7 +823,7 @@ export function undoL1ToL2Alias(address: string): string {
   if (result < 0n) {
     result += ADDRESS_MODULO;
   }
-  return ethers.hexlify(ethers.toBeHex(result));
+  return ethers.zeroPadValue(ethers.toBeHex(result), 20);
 }
 
 /**
