@@ -827,10 +827,12 @@ const ADDRESS_MODULO = BigNumber.from(2).pow(160);
  *
  */
 export function applyL1ToL2Alias(address: string): string {
-  return ethers.utils.hexlify(
+  return ethers.utils.hexZeroPad(
     ethers.BigNumber.from(address)
       .add(L1_TO_L2_ALIAS_OFFSET)
       .mod(ADDRESS_MODULO)
+      .toHexString(),
+    20
   );
 }
 
@@ -854,7 +856,7 @@ export function undoL1ToL2Alias(address: string): string {
     result = result.add(ADDRESS_MODULO);
   }
 
-  return ethers.utils.hexlify(result);
+  return ethers.utils.hexZeroPad(result.toHexString(), 20);
 }
 
 /**
