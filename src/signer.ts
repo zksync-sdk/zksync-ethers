@@ -115,7 +115,7 @@ export class EIP712Signer {
   }
 
   /**
-   * Signs a transaction request using EIP712
+   * Signs a transaction request using EIP712.
    *
    * @param transaction The transaction request that needs to be signed.
    * @returns A promise that resolves to the signature of the transaction.

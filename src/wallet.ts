@@ -785,7 +785,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
    * const tokenWithdrawHandle = await wallet.withdraw({
-   *   token: tokenL2,
+   *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000,
    * });
    *
@@ -800,9 +800,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
    * const tokenWithdrawHandle = await wallet.withdraw({
-   *   token: tokenL2,
+   *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
    *     type: "ApprovalBased",
@@ -828,7 +827,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example Transfer ETH
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types } from "zksync-ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
    *
@@ -846,7 +845,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types } from "zksync-ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
    * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
@@ -1022,7 +1021,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
