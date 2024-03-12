@@ -56,6 +56,14 @@ describe('utils', () => {
         '0x813A42B8205E5DedCd3374e5f4419843ADa77FFC'.toLowerCase()
       );
     });
+
+    it('should return the L2 contract address by padding zero to left', async () => {
+      const l1ContractAddress = '0xeeeeffffffffffffffffffffffffffffffffeeef';
+      const l2ContractAddress = utils.applyL1ToL2Alias(l1ContractAddress);
+      expect(l2ContractAddress.toLowerCase()).to.be.equal(
+        '0x0000000000000000000000000000000000000000'.toLowerCase()
+      );
+    });
   });
 
   describe('#undoL1ToL2Alias()', () => {
@@ -64,6 +72,14 @@ describe('utils', () => {
       const l1ContractAddress = utils.undoL1ToL2Alias(l2ContractAddress);
       expect(l1ContractAddress.toLowerCase()).to.be.equal(
         '0x702942B8205E5dEdCD3374E5f4419843adA76Eeb'.toLowerCase()
+      );
+    });
+
+    it('should return the L1 contract address by padding zero to left', async () => {
+      const l2ContractAddress = '0x1111000000000000000000000000000000001111';
+      const l1ContractAddress = utils.undoL1ToL2Alias(l2ContractAddress);
+      expect(l1ContractAddress.toLowerCase()).to.be.equal(
+        '0x0000000000000000000000000000000000000000'.toLowerCase()
       );
     });
 
