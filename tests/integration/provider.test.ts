@@ -304,9 +304,19 @@ describe('Provider', () => {
   });
 
   describe('#getBlock()', () => {
-    it('should return a block with transactions', async () => {
-      const result = await provider.getBlock('latest', true);
+    it('should return a block', async () => {
+      const blockNumber = (await provider.getBlockNumber()) - 1;
+      const result = await provider.getBlock(blockNumber, false);
       expect(result).not.to.be.null;
+      expect(result.transactions).not.to.be.empty;
+    });
+
+    it('should return a block with prefetch transactions', async () => {
+      const blockNumber = (await provider.getBlockNumber()) - 1;
+      const result = await provider.getBlock(blockNumber, true);
+      expect(result).not.to.be.null;
+      expect(result.transactions).not.to.be.empty;
+      expect(result.prefetchedTransactions).not.to.be.empty;
     });
   });
 

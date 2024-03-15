@@ -22,10 +22,7 @@ describe('format', () => {
         nonce: 0n,
         data: '0x',
       };
-      const result = provider._wrapTransactionResponse(
-        value,
-        await provider.getNetwork()
-      );
+      const result = provider._wrapTransactionResponse(value);
       expect(result.to).to.be.equal(ethers.ZeroAddress);
     });
 
@@ -40,10 +37,7 @@ describe('format', () => {
         data: '0x',
         creates: null,
       };
-      const result = provider._wrapTransactionResponse(
-        value,
-        await provider.getNetwork()
-      );
+      const result = provider._wrapTransactionResponse(value);
       expect(result.to).to.be.null;
     });
 
@@ -59,10 +53,7 @@ describe('format', () => {
         data: '0x',
         accessList: null,
       };
-      const result = provider._wrapTransactionResponse(
-        value,
-        await provider.getNetwork()
-      );
+      const result = provider._wrapTransactionResponse(value);
       expect(result.accessList).to.has.lengthOf(0);
     });
 
@@ -77,16 +68,13 @@ describe('format', () => {
         nonce: 0n,
         data: '0x',
       };
-      const result = provider._wrapTransactionResponse(
-        value,
-        await provider.getNetwork()
-      );
+      const result = provider._wrapTransactionResponse(value);
       expect(result.blockHash).to.be.null;
     });
 
     it('should thrown an error when hash is not provided', async () => {
       try {
-        provider._wrapTransactionResponse({}, await provider.getNetwork());
+        provider._wrapTransactionResponse({});
       } catch (e) {
         expect((e as Error).message).to.include('invalid value for value.hash');
       }

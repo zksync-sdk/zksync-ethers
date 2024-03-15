@@ -106,20 +106,13 @@ export function JsonRpcApiProvider<
       return new Log(formatLog(value), this);
     }
 
-    override _wrapBlock(value: any, network: ethers.Network): Block {
-      const block: any = formatBlock(value);
-      return new Block(super._wrapBlock(block, network), this);
+    override _wrapBlock(value: any): Block {
+      return new Block(formatBlock(value), this);
     }
 
-    override _wrapTransactionResponse(
-      value: any,
-      network: ethers.Network
-    ): TransactionResponse {
+    override _wrapTransactionResponse(value: any): TransactionResponse {
       const tx: any = formatTransactionResponse(value);
-      return new TransactionResponse(
-        super._wrapTransactionResponse(tx, network),
-        this
-      );
+      return new TransactionResponse(tx, this);
     }
 
     override _wrapTransactionReceipt(value: any): TransactionReceipt {
@@ -800,7 +793,7 @@ export function JsonRpcApiProvider<
     override async broadcastTransaction(
       signedTx: string
     ): Promise<TransactionResponse> {
-      const {blockNumber, hash, network} = await resolveProperties({
+      const {blockNumber, hash} = await resolveProperties({
         blockNumber: this.getBlockNumber(),
         hash: this._perform({
           method: 'broadcastTransaction',
@@ -814,10 +807,9 @@ export function JsonRpcApiProvider<
         throw new Error('@TODO: the returned hash did not match!');
       }
 
-      return this._wrapTransactionResponse(
-        <any>tx,
-        network
-      ).replaceableTransaction(blockNumber);
+      return this._wrapTransactionResponse(<any>tx).replaceableTransaction(
+        blockNumber
+      );
     }
 
     /**
