@@ -30,8 +30,11 @@ export function allowNull(format: FormatFunc, nullValue?: any): FormatFunc {
   };
 }
 
-export function arrayOf(format: FormatFunc): FormatFunc {
+export function arrayOf(format: FormatFunc, allowNull?: boolean): FormatFunc {
   return (array: any) => {
+    if (allowNull && !array) {
+      return null;
+    }
     if (!Array.isArray(array)) {
       throw new Error('Not an array!');
     }
@@ -70,9 +73,7 @@ export function object(
           false,
           `invalid value for value.${key} (${message})`,
           'BAD_DATA',
-          {
-            value,
-          }
+          {value}
         );
       }
     }
@@ -140,10 +141,16 @@ const _formatBlock = object({
   hash: allowNull(formatHash),
   parentHash: formatHash,
   number: getNumber,
+  sha3Uncles: formatHash,
+
+  stateRoot: formatHash,
+  transactionsRoot: formatHash,
+  receiptsRoot: formatHash,
 
   timestamp: getNumber,
   nonce: allowNull(formatData),
   difficulty: getBigInt,
+  totalDifficulty: getBigInt,
 
   gasLimit: getBigInt,
   gasUsed: getBigInt,
@@ -152,6 +159,12 @@ const _formatBlock = object({
   extraData: formatData,
 
   baseFeePerGas: allowNull(getBigInt),
+
+  logsBloom: formatData,
+  sealFields: arrayOf(formatData),
+  uncles: arrayOf(formatHash),
+  size: getBigInt,
+  mixHash: formatHash,
 
   l1BatchNumber: allowNull(getNumber),
   l1BatchTimestamp: allowNull(getNumber),
@@ -252,6 +265,9 @@ export function formatTransactionResponse(
     {
       hash: formatHash,
 
+      // Some nodes do not return this, usually test nodes (like Ganache)
+      index: allowNull(getNumber, undefined),
+
       type: (value: any) => {
         if (value === '0x' || value === null || value === undefined) {
           return 0;
@@ -289,6 +305,7 @@ export function formatTransactionResponse(
     {
       data: ['input'],
       gasLimit: ['gas'],
+      index: ['transactionIndex'],
     }
   )(value);
 
