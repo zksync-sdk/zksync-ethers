@@ -395,6 +395,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       const boolean = defaultFormatter.boolean.bind(defaultFormatter);
       const hash = defaultFormatter.hash.bind(defaultFormatter);
       const address = defaultFormatter.address.bind(defaultFormatter);
+      const data = defaultFormatter.data.bind(defaultFormatter);
 
       defaultFormatter.formats.receiptLog.l1BatchNumber =
         Formatter.allowNull(number);
@@ -422,14 +423,38 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         Formatter.check((defaultFormatter!.formats as any).l2Tol1Log, value)
       );
 
+      defaultFormatter.formats.block.sha3Uncles = hash;
+      defaultFormatter.formats.block.stateRoot = hash;
+      defaultFormatter.formats.block.transactionsRoot = hash;
+      defaultFormatter.formats.block.receiptsRoot = hash;
+      defaultFormatter.formats.block.totalDifficulty = number;
+      defaultFormatter.formats.block.logsBloom = data;
+      defaultFormatter.formats.block.sealFields = Formatter.arrayOf(data);
+      defaultFormatter.formats.block.uncles = Formatter.arrayOf(hash);
+      defaultFormatter.formats.block.size = number;
+      defaultFormatter.formats.block.mixHash = hash;
       defaultFormatter.formats.block.l1BatchNumber =
         Formatter.allowNull(number);
       defaultFormatter.formats.block.l1BatchTimestamp =
         Formatter.allowNull(number);
+
+      defaultFormatter.formats.blockWithTransactions.sha3Uncles = hash;
+      defaultFormatter.formats.blockWithTransactions.stateRoot = hash;
+      defaultFormatter.formats.blockWithTransactions.transactionsRoot = hash;
+      defaultFormatter.formats.blockWithTransactions.receiptsRoot = hash;
+      defaultFormatter.formats.blockWithTransactions.totalDifficulty = number;
+      defaultFormatter.formats.blockWithTransactions.logsBloom = data;
+      defaultFormatter.formats.blockWithTransactions.sealFields =
+        Formatter.arrayOf(data);
+      defaultFormatter.formats.blockWithTransactions.uncles =
+        Formatter.arrayOf(hash);
+      defaultFormatter.formats.blockWithTransactions.size = number;
+      defaultFormatter.formats.blockWithTransactions.mixHash = hash;
       defaultFormatter.formats.blockWithTransactions.l1BatchNumber =
         Formatter.allowNull(number);
       defaultFormatter.formats.blockWithTransactions.l1BatchTimestamp =
         Formatter.allowNull(number);
+
       defaultFormatter.formats.transaction.l1BatchNumber =
         Formatter.allowNull(number);
       defaultFormatter.formats.transaction.l1BatchTxIndex =
