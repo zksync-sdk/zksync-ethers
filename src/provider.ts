@@ -987,6 +987,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
   /**
    * Creates a new `Provider` instance for connecting to an L2 network.
+   * Caching is disabled for local networks.
    * @param [url] The network RPC URL. Defaults to the local network.
    * @param [network] The network name, chain ID, or object with network details.
    * @param [options] Additional options for the provider.
@@ -999,7 +1000,17 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     if (!url) {
       url = 'http://localhost:3050';
     }
-    super(url, network, options);
+
+    const isLocalNetwork =
+      typeof url === 'string'
+        ? url.includes('localhost') || url.includes('127.0.0.1')
+        : url.url.includes('localhost') || url.url.includes('127.0.0.1');
+
+    const optionsWithDisabledCache = isLocalNetwork
+      ? {...options, cacheTimeout: -1}
+      : options;
+
+    super(url, network, optionsWithDisabledCache);
     typeof url === 'string'
       ? (this.#connect = new FetchRequest(url))
       : (this.#connect = url.clone());
