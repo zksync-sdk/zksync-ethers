@@ -1794,6 +1794,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
   /**
    * Creates a new `Provider` from provided URL or network name.
+   *
    * @param zksyncNetwork The type of zkSync network.
    */
   static getDefaultProvider(
