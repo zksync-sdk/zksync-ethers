@@ -1794,15 +1794,11 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
   /**
    * Creates a new `Provider` from provided URL or network name.
-   * The URL can be configured using `ZKSYNC_WEB3_API_URL` environment variable.
    * @param zksyncNetwork The type of zkSync network.
    */
   static getDefaultProvider(
     zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost
   ): Provider {
-    if (process.env.ZKSYNC_WEB3_API_URL) {
-      return new Provider(process.env.ZKSYNC_WEB3_API_URL);
-    }
     switch (zksyncNetwork) {
       case ZkSyncNetwork.Localhost:
         return new Provider('http://localhost:3050');
