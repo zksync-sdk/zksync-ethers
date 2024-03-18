@@ -132,11 +132,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 return ETH_ADDRESS;
             }
 
-            const bridge = Il1Erc20BridgeFactory.connect(
-                (await this._providerL2().getDefaultBridgeAddresses()).erc20L1, // TODO CHANGE THIS TO SHARED WHEN IT'S FIXED
-                this._signerL1(),
-            );
-            return await bridge.l2TokenAddress(token);
+            const bridgeAddresses = await this._providerL2().getDefaultBridgeAddresses();
+            const l2SharedBridge = Il2BridgeFactory.connect(bridgeAddresses.sharedL2, this._providerL2());
+            return await l2SharedBridge.l2TokenAddress(token);
         }
 
         async approveERC20(
