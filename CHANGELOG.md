@@ -1,3 +1,42 @@
+# [6.6.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.5.0...v6.6.0) (2024-03-18)
+
+
+### Bug Fixes
+
+* **provider:** create prefetched txs correctly in `Block` object ([8ef06f2](https://github.com/zksync-sdk/zksync-ethers/commit/8ef06f2292b6ca888cc43b0963e82e8b8f513a99)), closes [#75](https://github.com/zksync-sdk/zksync-ethers/issues/75)
+* **provider:** disable caching for local networks ([26d6f63](https://github.com/zksync-sdk/zksync-ethers/commit/26d6f6302831c2a4cd0265705601a7b11d1ed576))
+* **utils:** add padding in apply and undo alias in order to return 20 bytes long address ([a5a83b6](https://github.com/zksync-sdk/zksync-ethers/commit/a5a83b64c1756f5ec014381adfd1cfaab10f5816))
+
+
+### Features
+
+* extract all files from the `src` folder into the `build` folder ([e5f2209](https://github.com/zksync-sdk/zksync-ethers/commit/e5f22090498b5b8dbca33a1bef600df9c8c3add4))
+* **provider:** add support for era test node ([7be6040](https://github.com/zksync-sdk/zksync-ethers/commit/7be604099c2b7489ceecb359296985cfdb5ec827))
+* **provider:** remove support for the `ZKSYNC_WEB3_API_URL` environment variable ([f5b8529](https://github.com/zksync-sdk/zksync-ethers/commit/f5b85293122a6dcc8aea5ac88acc38384549bda0))
+
+
+### Reverts
+
+* **adapters:** make `AdapterL1.getFullRequiredDepositFee` work with overrides ([0ed9389](https://github.com/zksync-sdk/zksync-ethers/commit/0ed93893d5d0b0b785aa99d3f87711cc41b5da56))
+
+
+### BREAKING CHANGES
+
+* **provider:** Remove support for the `ZKSYNC_WEB3_API_URL` environment
+variable from the `Provider.getDefaultProvider()` to make it compatible
+with browser integration.
+* Previously, the build folder contained the src folder along
+with all the `js` and `d.ts` files. This setup resulted in a poor developer
+experience, as developers were required to use the src prefix in their imports
+(e.g., `'zksync-ethers/src/types'`). Now, all files from the src folder are
+extracted, eliminating the need to specify the `src` prefix in the path.
+* **adapters:** Remove support from `AdapterL1.getFullRequiredDepositFee` for
+considering `overrides.from` as the initiator of the operation. This functionality
+was previously used to calculate the full deposit fee for accounts whose private
+key is unknown. However, this feature is no longer necessary because
+`L1VoidSigner.getFullRequiredDepositFee` is specifically designed to handle such
+cases.
+
 # [6.5.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.4.0...v6.5.0) (2024-03-05)
 
 
