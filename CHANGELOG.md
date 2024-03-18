@@ -1,3 +1,30 @@
+# [5.6.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.5.0...v5.6.0) (2024-03-18)
+
+
+### Bug Fixes
+
+* **utils:** add padding in apply and undo alias in order to return 20 bytes long address ([3acaa8f](https://github.com/zksync-sdk/zksync-ethers/commit/3acaa8f5ed73fed12884111bd8e5fa7cf340bb73))
+
+
+### Features
+
+* extract all files from the `src` folder into the `build` folder ([c678612](https://github.com/zksync-sdk/zksync-ethers/commit/c6786123ccbe49f0dff53779815374bb0ad2f3ab))
+* **provider:** add support for era test node ([6c744fa](https://github.com/zksync-sdk/zksync-ethers/commit/6c744fa53273871472467dd22f2dbe3378256d7b))
+* **provider:** parse all block fields from RPC endpoints ([d58fb83](https://github.com/zksync-sdk/zksync-ethers/commit/d58fb836c23baed8d3413582e6d594f7b9ed115b))
+* **provider:** remove support for the `ZKSYNC_WEB3_API_URL` environment variable ([0592ae4](https://github.com/zksync-sdk/zksync-ethers/commit/0592ae4a2ec877f3872ecbea5a3f940b76dc1670))
+
+
+### BREAKING CHANGES
+
+* **provider:** Remove support for the `ZKSYNC_WEB3_API_URL` environment
+variable from the `Provider.getDefaultProvider()` to make it compatible
+with browser integration.
+* Previously, the build folder contained the src folder along
+with all the `js` and `d.ts` files. This setup resulted in a poor developer
+experience, as developers were required to use the src prefix in their imports
+(e.g., `'zksync-ethers/src/types'`). Now, all files from the src folder are
+extracted, eliminating the need to specify the `src` prefix in the path.
+
 # [5.5.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.4.0...v5.5.0) (2024-03-05)
 
 
