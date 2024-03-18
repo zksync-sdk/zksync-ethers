@@ -15,6 +15,7 @@ export enum Network {
   Goerli = 5,
   Sepolia = 6,
   Localhost = 9,
+  EraTestNode = 10,
 }
 
 /** Enumerated list of priority queue types. */
