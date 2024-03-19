@@ -139,9 +139,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         overrides?: ethers.Overrides;
     }): Promise<TransactionResponse> {
         const baseToken = await this.getBaseToken();
-        const isETHBsedChain = await this.isETHBasedChain();
+        const isETHBasedChain = await this.isETHBasedChain();
 
-        if (!isETHBsedChain && transaction.token == baseToken) {
+        if (!isETHBasedChain && transaction.token == baseToken) {
             const tx = {
                 ...(await ethers.utils.resolveProperties((transaction.overrides ??= {}))),
                 from: await this.getAddress(),
