@@ -249,10 +249,7 @@ declare const Wallet_base: {
             customBridgeData?: ethers.utils.BytesLike;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }): Promise<{
-            tx: ethers.PopulatedTransaction;
-            mintValue: ethers.BigNumber;
-        }>;
+        }): Promise<ethers.PopulatedTransaction>;
         _getDepositETHOnETHBasedChainTx(transaction: {
             token: string;
             amount: ethers.BigNumberish;
