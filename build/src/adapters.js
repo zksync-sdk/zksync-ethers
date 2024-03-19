@@ -5,7 +5,6 @@ const ethers_1 = require("ethers");
 const Ierc20Factory_1 = require("../typechain/Ierc20Factory");
 const Il1BridgeFactory_1 = require("../typechain/Il1BridgeFactory");
 const Il2BridgeFactory_1 = require("../typechain/Il2BridgeFactory");
-const Il1Erc20BridgeFactory_1 = require("../typechain/Il1Erc20BridgeFactory");
 const IBridgehubFactory_1 = require("../typechain/IBridgehubFactory");
 const Il1SharedBridgeFactory_1 = require("../typechain/Il1SharedBridgeFactory");
 const INonceHolderFactory_1 = require("../typechain/INonceHolderFactory");
@@ -70,9 +69,9 @@ function AdapterL1(Base) {
             if (token == utils_1.ETH_ADDRESS) {
                 return utils_1.ETH_ADDRESS;
             }
-            const bridge = Il1Erc20BridgeFactory_1.Il1Erc20BridgeFactory.connect((await this._providerL2().getDefaultBridgeAddresses()).erc20L1, // TODO CHANGE THIS TO SHARED WHEN IT'S FIEXED
-            this._signerL1());
-            return await bridge.l2TokenAddress(token);
+            const bridgeAddresses = await this._providerL2().getDefaultBridgeAddresses();
+            const l2SharedBridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(bridgeAddresses.sharedL2, this._providerL2());
+            return await l2SharedBridge.l2TokenAddress(token);
         }
         async approveERC20(token, amount, overrides) {
             if ((0, utils_1.isETH)(token)) {
@@ -84,7 +83,6 @@ function AdapterL1(Base) {
             const isETHBasedChain = await this.isETHBasedChain();
             if (bridgeAddress == null) {
                 if (!isETHBasedChain && token == baseToken) {
-                    const chainId = (await this._providerL2().getNetwork()).chainId;
                     bridgeAddress = await (await this.getBridgehubContract()).sharedBridge();
                 }
                 else {
@@ -240,7 +238,6 @@ function AdapterL1(Base) {
             var _a;
             // Depositing ETH into a non-ETH-based chain.
             // Use requestL2TransactionTwoBridges, secondBridge is the wETH bridge.
-            // Give approval for the base token, and transfer ether value to the wethBridge (and not weth).
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
@@ -265,7 +262,7 @@ function AdapterL1(Base) {
         async _depositTokenToETHBasedChain(transaction) {
             var _a;
             const bridgeContracts = await this.getL1BridgeContracts();
-            const { tx, } = await this._getDepositTokenOnETHBasedChainTx(transaction);
+            const tx = await this._getDepositTokenOnETHBasedChainTx(transaction);
             if (transaction.approveERC20) {
                 const proposedBridge = bridgeContracts.shared.address;
                 const bridgeAddress = transaction.bridgeAddress
@@ -344,7 +341,6 @@ function AdapterL1(Base) {
             const mintValue = baseCost.add(operatorTip);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = 0);
-            const secondBridgeCalldata = ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to]);
             return {
                 tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
                     chainId: (await this._providerL2().getNetwork()).chainId,
@@ -355,7 +351,7 @@ function AdapterL1(Base) {
                     refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
                     secondBridgeAddress: bridgeContracts.shared.address,
                     secondBridgeValue: 0,
-                    secondBridgeCalldata,
+                    secondBridgeCalldata: ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to])
                 }, overrides),
                 mintValue: mintValue,
             };
@@ -387,6 +383,7 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const sharedBridge = (await this.getL1BridgeContracts()).shared;
+            // const l1WethAddress = await sharedBridge.l1WethAddress();
             const tx = await this._getDepositTxWithDefaults(transaction);
             const { operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
             const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
@@ -394,7 +391,6 @@ function AdapterL1(Base) {
             (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = amount);
             const mintValue = baseCost.add(operatorTip); // of the base token, not eth
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
-            const secondBridgeCalldata = ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [utils_1.ETH_ADDRESS_IN_CONTRACTS, 0, to]);
             return {
                 tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
                     chainId,
@@ -405,7 +401,7 @@ function AdapterL1(Base) {
                     refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
                     secondBridgeAddress: sharedBridge.address,
                     secondBridgeValue: amount,
-                    secondBridgeCalldata,
+                    secondBridgeCalldata: ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [utils_1.ETH_ADDRESS_IN_CONTRACTS, 0, to])
                 }, overrides),
                 mintValue: mintValue,
             };
@@ -427,20 +423,34 @@ function AdapterL1(Base) {
             (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = mintValue);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             const secondBridgeCalldata = ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to]);
-            return {
-                tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
-                    chainId,
-                    mintValue,
-                    l2Value: 0,
-                    l2GasLimit: l2GasLimit,
-                    l2GasPerPubdataByteLimit: gasPerPubdataByte,
-                    refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
-                    secondBridgeAddress: bridgeContracts.shared.address,
-                    secondBridgeValue: 0,
-                    secondBridgeCalldata,
-                }, overrides),
-                mintValue: mintValue,
-            };
+            return await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
+                chainId,
+                mintValue,
+                l2Value: 0,
+                l2GasLimit: l2GasLimit,
+                l2GasPerPubdataByteLimit: gasPerPubdataByte,
+                refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
+                secondBridgeAddress: bridgeContracts.shared.address,
+                secondBridgeValue: 0,
+                secondBridgeCalldata,
+            }, overrides);
+            // return {
+            //     tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges(
+            //         {
+            //             chainId,
+            //             mintValue,
+            //             l2Value: 0,
+            //             l2GasLimit: l2GasLimit,
+            //             l2GasPerPubdataByteLimit: gasPerPubdataByte,
+            //             refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
+            //             secondBridgeAddress: bridgeContracts.shared.address, // TODO use legacy contracts if customBridge is provided
+            //             secondBridgeValue: 0,
+            //             secondBridgeCalldata,
+            //         },
+            //         overrides,
+            //     ),
+            //     mintValue: mintValue,
+            // };
         }
         async _getDepositETHOnETHBasedChainTx(transaction) {
             var _a;
@@ -527,7 +537,7 @@ function AdapterL1(Base) {
                 throw new Error(`Not enough balance for deposit. Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`);
             }
             // For ETH token the value that the user passes to the estimation is the one which has the
-            // value for the L2 commission substracted.
+            // value for the L2 commission subtracted.
             let amountForEstimate;
             if ((0, utils_1.isETH)(tx.token)) {
                 amountForEstimate = ethers_1.BigNumber.from(dummyAmount);
@@ -581,7 +591,7 @@ function AdapterL1(Base) {
         async _getWithdrawalL2ToL1Log(withdrawalHash, index = 0) {
             const hash = ethers_1.ethers.utils.hexlify(withdrawalHash);
             const receipt = await this._providerL2().getTransactionReceipt(hash);
-            const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(([_, log]) => log.sender == utils_1.L1_MESSENGER_ADDRESS);
+            const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(([, log]) => log.sender == utils_1.L1_MESSENGER_ADDRESS);
             const [l2ToL1LogIndex, l2ToL1Log] = messages[index];
             return {
                 l2ToL1LogIndex,
@@ -605,30 +615,9 @@ function AdapterL1(Base) {
         }
         async finalizeWithdrawal(withdrawalHash, index = 0, overrides) {
             const { l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, sender, proof } = await this.finalizeWithdrawalParams(withdrawalHash, index);
-            if ((0, utils_1.isETH)(sender)) {
-                const withdrawTo = ethers_1.ethers.utils.hexDataSlice(message, 4, 24);
-                const l1Bridges = await this.getL1BridgeContracts();
-                // If the destination address matches the address of the L1 WETH contract,
-                // the withdrawal request is processed through the WETH bridge.
-                // if (withdrawTo.toLowerCase() == l1Bridges.weth.address.toLowerCase()) {
-                //     return await l1Bridges.weth.finalizeWithdrawal(
-                //         (await this._providerL2().getNetwork()).chainId,
-                //         l1BatchNumber,
-                //         l2MessageIndex,
-                //         l2TxNumberInBlock,
-                //         message,
-                //         proof,
-                //         overrides ?? {},
-                //     );
-                // }
-                const contractAddress = await this._providerL2().getBridgehubContractAddress();
-                const bridgehub = IBridgehubFactory_1.IBridgehubFactory.connect(contractAddress, this._signerL1());
-                const wethBridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(await bridgehub.wethBridge(), this._signerL1());
-                return await wethBridge.finalizeWithdrawal((await this._providerL2().getNetwork()).chainId, l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, proof, overrides !== null && overrides !== void 0 ? overrides : {});
-            }
-            const l2Bridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(sender, this._providerL2());
-            const l1Bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(await l2Bridge.l1Bridge(), this._signerL1());
-            return await l1Bridge.finalizeWithdrawal((await this._providerL2().getNetwork()).chainId, l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, proof, overrides !== null && overrides !== void 0 ? overrides : {});
+            const bridgehub = await this.getBridgehubContract();
+            const l1SharedBridge = Il1SharedBridgeFactory_1.Il1SharedBridgeFactory.connect(await bridgehub.sharedBridge(), this._signerL1());
+            return await l1SharedBridge.finalizeWithdrawal((await this._providerL2().getNetwork()).chainId, l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, proof, overrides !== null && overrides !== void 0 ? overrides : {});
         }
         async isWithdrawalFinalized(withdrawalHash, index = 0) {
             const { log } = await this._getWithdrawalLog(withdrawalHash, index);

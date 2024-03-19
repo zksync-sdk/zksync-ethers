@@ -1,10 +1,11 @@
-import { BigNumber, BigNumberish, BytesLike, PopulatedTransaction, ethers } from "ethers";
+import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
 import { IBridgehub } from "../typechain/IBridgehub";
 import { Il1Bridge } from "../typechain/Il1Bridge";
 import { Il1SharedBridge } from "../typechain/Il1SharedBridge";
 import { IZkSyncStateTransition } from "../typechain/IZkSyncStateTransition";
 import { Provider } from "./provider";
 import { Address, BalancesMap, BlockTag, Eip712Meta, FinalizeWithdrawalParams, FullDepositFee, PriorityOpResponse, TransactionResponse } from "./types";
+import { Il2Bridge } from "../typechain/Il2Bridge";
 type Constructor<T = {}> = new (...args: any[]) => T;
 interface TxSender {
     sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;
@@ -170,7 +171,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
         }): Promise<{
-            tx: PopulatedTransaction;
+            tx: ethers.PopulatedTransaction;
             mintValue: BigNumber;
         }>;
         _getDepositBaseTokenOnNonETHBasedChainTx(transaction: {
@@ -215,7 +216,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
         }): Promise<{
-            tx: PopulatedTransaction;
+            tx: ethers.PopulatedTransaction;
             mintValue: BigNumber;
         }>;
         _getDepositTokenOnETHBasedChainTx(transaction: {
@@ -229,10 +230,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             customBridgeData?: BytesLike;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<{
-            tx: PopulatedTransaction;
-            mintValue: BigNumber;
-        }>;
+        }): Promise<ethers.PopulatedTransaction>;
         _getDepositETHOnETHBasedChainTx(transaction: {
             token: Address;
             amount: BigNumberish;
@@ -381,7 +379,7 @@ export declare function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBa
         getAllBalances(): Promise<BalancesMap>;
         getDeploymentNonce(): Promise<BigNumber>;
         getL2BridgeContracts(): Promise<{
-            shared: import("../typechain/Il2Bridge").Il2Bridge;
+            shared: Il2Bridge;
         }>;
         _fillCustomData(data: Eip712Meta): Eip712Meta;
         withdraw(transaction: {
