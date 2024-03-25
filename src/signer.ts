@@ -1129,7 +1129,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
 /* c8 ignore stop */
 
 /**
- * A `L2VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations
+ * A `L2VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
  *
  * @see {@link L1VoidSigner} for L1 operations.
  */
@@ -1209,7 +1209,7 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
 }
 
 /**
- * A `L1VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L1 operations
+ * A `L1VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L1 operations.
  *
  * @see {@link L2VoidSigner} for L2 operations.
  */
