@@ -84,7 +84,7 @@ async function createTokenL2(l1TokenAddress: string): Promise<string> {
   const priorityOpResponse = await wallet.deposit({
     token: l1TokenAddress,
     to: await wallet.getAddress(),
-    amount: 30,
+    amount: 100,
     approveERC20: true,
     refundRecipient: await wallet.getAddress(),
   });
