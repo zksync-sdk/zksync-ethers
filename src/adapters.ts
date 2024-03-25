@@ -268,7 +268,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      *
      * @param transaction The transaction object containing deposit details.
      * @param transaction.token The address of the token to deposit. ETH by default.
-     * @param transaction.amount The amount of the token to withdraw.
+     * @param transaction.amount The amount of the token to deposit.
      * @param [transaction.to] The address that will receive the deposited tokens on L2.
      * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
      * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of
@@ -361,7 +361,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      *
      * @param transaction The transaction details.
      * @param transaction.token The address of the token to deposit. ETH by default.
-     * @param transaction.amount The amount of the token to withdraw.
+     * @param transaction.amount The amount of the token to deposit.
      * @param [transaction.to] The address that will receive the deposited tokens on L2.
      * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
      * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
@@ -404,7 +404,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      *
      * @param transaction The transaction details.
      * @param transaction.token The address of the token to deposit. ETH by default.
-     * @param transaction.amount The amount of the token to withdraw.
+     * @param transaction.amount The amount of the token to deposit.
      * @param [transaction.to] The address that will receive the deposited tokens on L2.
      * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
      * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
