@@ -12,6 +12,7 @@ import {
 } from './utils';
 import {AccountAbstractionVersion, DeploymentType} from './types';
 import {hexlify, isBytes, isHexString} from '@ethersproject/bytes';
+import {SmartAccount} from './smart-account';
 export {Contract} from 'ethers';
 
 /**
@@ -33,7 +34,7 @@ export class ContractFactory extends ethers.ContractFactory {
   constructor(
     abi: ContractInterface,
     bytecode: ethers.BytesLike,
-    signer: Wallet | Signer,
+    signer: Wallet | Signer | SmartAccount,
     deploymentType?: DeploymentType
   ) {
     super(abi, bytecode, signer);
