@@ -1,11 +1,11 @@
 import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
+import { Il2Bridge } from "../typechain/Il2Bridge";
 import { IBridgehub } from "../typechain/IBridgehub";
 import { Il1Bridge } from "../typechain/Il1Bridge";
 import { Il1SharedBridge } from "../typechain/Il1SharedBridge";
 import { IZkSyncStateTransition } from "../typechain/IZkSyncStateTransition";
 import { Provider } from "./provider";
 import { Address, BalancesMap, BlockTag, Eip712Meta, FinalizeWithdrawalParams, FullDepositFee, PriorityOpResponse, TransactionResponse } from "./types";
-import { Il2Bridge } from "../typechain/Il2Bridge";
 type Constructor<T = {}> = new (...args: any[]) => T;
 interface TxSender {
     sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;

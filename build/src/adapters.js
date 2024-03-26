@@ -411,10 +411,6 @@ function AdapterL1(Base) {
             // Depositing token to an ETH-based chain. Use the ERC20 bridge as done before.
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            const bridgeContracts = await this.getL1BridgeContracts();
-            if (transaction.bridgeAddress != null) {
-                bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
-            }
             const tx = await this._getDepositTxWithDefaults(transaction);
             const { token, operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
             const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
@@ -422,35 +418,27 @@ function AdapterL1(Base) {
             const mintValue = baseCost.add(operatorTip);
             (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = mintValue);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
-            const secondBridgeCalldata = ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to]);
+            let secondBridgeAddress;
+            let secondBridgeCalldata;
+            if (tx.bridgeAddress) {
+                secondBridgeAddress = tx.bridgeAddress;
+                secondBridgeCalldata = await (0, utils_1.getERC20DefaultBridgeData)(transaction.token, this._providerL1());
+            }
+            else {
+                secondBridgeAddress = (await this.getL1BridgeContracts()).shared.address;
+                secondBridgeCalldata = ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to]);
+            }
             return await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
                 chainId,
                 mintValue,
                 l2Value: 0,
-                l2GasLimit: l2GasLimit,
+                l2GasLimit,
                 l2GasPerPubdataByteLimit: gasPerPubdataByte,
                 refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
-                secondBridgeAddress: bridgeContracts.shared.address,
+                secondBridgeAddress,
                 secondBridgeValue: 0,
                 secondBridgeCalldata,
             }, overrides);
-            // return {
-            //     tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges(
-            //         {
-            //             chainId,
-            //             mintValue,
-            //             l2Value: 0,
-            //             l2GasLimit: l2GasLimit,
-            //             l2GasPerPubdataByteLimit: gasPerPubdataByte,
-            //             refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
-            //             secondBridgeAddress: bridgeContracts.shared.address, // TODO use legacy contracts if customBridge is provided
-            //             secondBridgeValue: 0,
-            //             secondBridgeCalldata,
-            //         },
-            //         overrides,
-            //     ),
-            //     mintValue: mintValue,
-            // };
         }
         async _getDepositETHOnETHBasedChainTx(transaction) {
             var _a;
@@ -495,7 +483,6 @@ function AdapterL1(Base) {
         // Calculates the l2GasLimit of deposit transaction using custom bridge.
         async _getL2GasLimitFromCustomBridge(transaction) {
             var _a;
-            const bridgeContracts = await this.getL1BridgeContracts();
             const customBridgeData = (_a = transaction.customBridgeData) !== null && _a !== void 0 ? _a : await (0, utils_1.getERC20DefaultBridgeData)(transaction.token, this._providerL1());
             const bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(transaction.bridgeAddress, this._signerL1());
             const l2Address = await bridge.l2Bridge();
@@ -651,7 +638,7 @@ function AdapterL1(Base) {
             const l2Bridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(l2BridgeAddress, this._providerL2());
             const calldata = l2Bridge.interface.decodeFunctionData("finalizeDeposit", tx.data);
             const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
-            return await l1Bridge.claimFailedDeposit((await this._providerL2().getNetwork()).chainId, calldata["_l1Sender"], calldata["_l1Token"], depositHash, calldata["_amount"], receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides !== null && overrides !== void 0 ? overrides : {});
+            return await l1Bridge.claimFailedDeposit((await this._providerL2().getNetwork()).chainId, calldata["_l1Sender"], calldata["_l1Token"], calldata["_amount"], depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides !== null && overrides !== void 0 ? overrides : {});
         }
         async requestExecute(transaction) {
             const requestExecuteTx = await this.getRequestExecuteTx(transaction);

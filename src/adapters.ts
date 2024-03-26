@@ -2,7 +2,7 @@ import {BigNumber, BigNumberish, BytesLike, ethers} from "ethers";
 import {Ierc20Factory} from "../typechain/Ierc20Factory";
 import {Il1BridgeFactory} from "../typechain/Il1BridgeFactory";
 import {Il2BridgeFactory} from "../typechain/Il2BridgeFactory";
-import {Il1Erc20BridgeFactory} from "../typechain/Il1Erc20BridgeFactory";
+import {Il2Bridge} from "../typechain/Il2Bridge";
 import {IBridgehubFactory} from "../typechain/IBridgehubFactory";
 import {IBridgehub} from "../typechain/IBridgehub";
 import {Il1Bridge} from "../typechain/Il1Bridge";
@@ -41,7 +41,7 @@ import {
     scaleGasLimit,
     undoL1ToL2Alias,
 } from "./utils";
-import {Il2Bridge} from "../typechain/Il2Bridge";
+
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -734,15 +734,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             customBridgeData?: BytesLike;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }) {
+        }): Promise<ethers.PopulatedTransaction> {
             // Depositing token to an ETH-based chain. Use the ERC20 bridge as done before.
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            const bridgeContracts = await this.getL1BridgeContracts();
-
-            if (transaction.bridgeAddress != null) {
-                bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
-            }
 
             const tx = await this._getDepositTxWithDefaults(transaction);
             const {
@@ -767,43 +762,34 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const mintValue = baseCost.add(operatorTip);
             overrides.value ??= mintValue;
             await checkBaseCost(baseCost, mintValue);
-            const secondBridgeCalldata = ethers.utils.defaultAbiCoder.encode(
-                ["address", "uint256", "address"],
-                [token, amount, to],
-            );
+
+            let secondBridgeAddress: string;
+            let secondBridgeCalldata: BytesLike;
+            if (tx.bridgeAddress) {
+                secondBridgeAddress = tx.bridgeAddress;
+                secondBridgeCalldata = await getERC20DefaultBridgeData(transaction.token, this._providerL1());
+            } else {
+                secondBridgeAddress = (await this.getL1BridgeContracts()).shared.address;
+                secondBridgeCalldata = ethers.utils.defaultAbiCoder.encode(
+                    ["address", "uint256", "address"],
+                    [token, amount, to],
+                );
+            }
 
             return await bridgehub.populateTransaction.requestL2TransactionTwoBridges(
                 {
                     chainId,
                     mintValue,
                     l2Value: 0,
-                    l2GasLimit: l2GasLimit,
+                    l2GasLimit,
                     l2GasPerPubdataByteLimit: gasPerPubdataByte,
                     refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
-                    secondBridgeAddress: bridgeContracts.shared.address, // TODO use legacy contracts if customBridge is provided
+                    secondBridgeAddress,
                     secondBridgeValue: 0,
                     secondBridgeCalldata,
                 },
                 overrides,
             );
-
-            // return {
-            //     tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges(
-            //         {
-            //             chainId,
-            //             mintValue,
-            //             l2Value: 0,
-            //             l2GasLimit: l2GasLimit,
-            //             l2GasPerPubdataByteLimit: gasPerPubdataByte,
-            //             refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
-            //             secondBridgeAddress: bridgeContracts.shared.address, // TODO use legacy contracts if customBridge is provided
-            //             secondBridgeValue: 0,
-            //             secondBridgeCalldata,
-            //         },
-            //         overrides,
-            //     ),
-            //     mintValue: mintValue,
-            // };
         }
 
         async _getDepositETHOnETHBasedChainTx(transaction: {
@@ -932,7 +918,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
         }): Promise<BigNumberish> {
-            const bridgeContracts = await this.getL1BridgeContracts();
             const customBridgeData =
                 transaction.customBridgeData ?? await getERC20DefaultBridgeData(transaction.token, this._providerL1());
             const bridge = Il1BridgeFactory.connect(transaction.bridgeAddress, this._signerL1());
@@ -1198,8 +1183,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 (await this._providerL2().getNetwork()).chainId,
                 calldata["_l1Sender"],
                 calldata["_l1Token"],
-                depositHash,
                 calldata["_amount"],
+                depositHash,
                 receipt.l1BatchNumber,
                 proof.id,
                 receipt.l1BatchTxIndex,
