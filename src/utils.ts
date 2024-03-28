@@ -567,7 +567,6 @@ export async function estimateDefaultBridgeDepositL2Gas(
         l1BridgeAddress = bridgeAddresses.sharedL1;
         l2BridgeAddress = bridgeAddresses.sharedL2;
         bridgeData = await getERC20DefaultBridgeData(token, providerL1);
-        
 
         return await estimateCustomBridgeDepositL2Gas(
             providerL2,

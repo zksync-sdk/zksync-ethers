@@ -307,7 +307,7 @@ describe("Wallet", async () => {
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                     value: BigNumber.from(210_121_243_750_000),
                     from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                    to: await provider.getBridgehubContractAddress()
+                    to: await provider.getBridgehubContractAddress(),
                 };
                 const tx = await wallet.getDepositTx({
                     token: DAI_L1,
@@ -616,7 +616,7 @@ describe("Wallet", async () => {
                     amount: 7_000_000_000,
                     refundRecipient: await wallet.getAddress(),
                 });
-                await utils.sleep(10000)
+                await utils.sleep(10000);
                 // const tx = await response.waitFinalize();
                 try {
                     await wallet.claimFailedDeposit(response.hash);
