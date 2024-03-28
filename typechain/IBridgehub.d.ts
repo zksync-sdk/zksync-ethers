@@ -23,6 +23,7 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface IBridgehubInterface extends ethers.utils.Interface {
   functions: {
+    "acceptAdmin()": FunctionFragment;
     "addStateTransitionManager(address)": FunctionFragment;
     "addToken(address)": FunctionFragment;
     "baseToken(uint256)": FunctionFragment;
@@ -35,6 +36,7 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     "removeStateTransitionManager(address)": FunctionFragment;
     "requestL2TransactionDirect(tuple)": FunctionFragment;
     "requestL2TransactionTwoBridges(tuple)": FunctionFragment;
+    "setPendingAdmin(address)": FunctionFragment;
     "setSharedBridge(address)": FunctionFragment;
     "sharedBridge()": FunctionFragment;
     "stateTransitionManager(uint256)": FunctionFragment;
@@ -42,6 +44,10 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     "tokenIsRegistered(address)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "acceptAdmin",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "addStateTransitionManager",
     values: [string]
@@ -139,6 +145,10 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "setPendingAdmin",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setSharedBridge",
     values: [string]
   ): string;
@@ -159,6 +169,10 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "acceptAdmin",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "addStateTransitionManager",
     data: BytesLike
@@ -202,6 +216,10 @@ interface IBridgehubInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setPendingAdmin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setSharedBridge",
     data: BytesLike
   ): Result;
@@ -223,10 +241,14 @@ interface IBridgehubInterface extends ethers.utils.Interface {
   ): Result;
 
   events: {
+    "NewAdmin(address,address)": EventFragment;
     "NewChain(uint256,address,address)": EventFragment;
+    "NewPendingAdmin(address,address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "NewAdmin"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewChain"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewPendingAdmin"): EventFragment;
 }
 
 export class IBridgehub extends Contract {
@@ -243,6 +265,10 @@ export class IBridgehub extends Contract {
   interface: IBridgehubInterface;
 
   functions: {
+    acceptAdmin(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "acceptAdmin()"(overrides?: Overrides): Promise<ContractTransaction>;
+
     addStateTransitionManager(
       _stateTransitionManager: string,
       overrides?: Overrides
@@ -493,6 +519,16 @@ export class IBridgehub extends Contract {
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
+    setPendingAdmin(
+      _newPendingAdmin: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     setSharedBridge(
       _sharedBridge: string,
       overrides?: Overrides
@@ -553,6 +589,10 @@ export class IBridgehub extends Contract {
       0: boolean;
     }>;
   };
+
+  acceptAdmin(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "acceptAdmin()"(overrides?: Overrides): Promise<ContractTransaction>;
 
   addStateTransitionManager(
     _stateTransitionManager: string,
@@ -774,6 +814,16 @@ export class IBridgehub extends Contract {
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
+  setPendingAdmin(
+    _newPendingAdmin: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setPendingAdmin(address)"(
+    _newPendingAdmin: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   setSharedBridge(
     _sharedBridge: string,
     overrides?: Overrides
@@ -819,6 +869,10 @@ export class IBridgehub extends Contract {
   ): Promise<boolean>;
 
   callStatic: {
+    acceptAdmin(overrides?: CallOverrides): Promise<void>;
+
+    "acceptAdmin()"(overrides?: CallOverrides): Promise<void>;
+
     addStateTransitionManager(
       _stateTransitionManager: string,
       overrides?: CallOverrides
@@ -1042,6 +1096,16 @@ export class IBridgehub extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
+    setPendingAdmin(
+      _newPendingAdmin: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setSharedBridge(
       _sharedBridge: string,
       overrides?: CallOverrides
@@ -1088,14 +1152,25 @@ export class IBridgehub extends Contract {
   };
 
   filters: {
+    NewAdmin(oldAdmin: string | null, newAdmin: string | null): EventFilter;
+
     NewChain(
       chainId: BigNumberish | null,
       stateTransitionManager: null,
       chainGovernance: string | null
     ): EventFilter;
+
+    NewPendingAdmin(
+      oldPendingAdmin: string | null,
+      newPendingAdmin: string | null
+    ): EventFilter;
   };
 
   estimateGas: {
+    acceptAdmin(overrides?: Overrides): Promise<BigNumber>;
+
+    "acceptAdmin()"(overrides?: Overrides): Promise<BigNumber>;
+
     addStateTransitionManager(
       _stateTransitionManager: string,
       overrides?: Overrides
@@ -1319,6 +1394,16 @@ export class IBridgehub extends Contract {
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
+    setPendingAdmin(
+      _newPendingAdmin: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     setSharedBridge(
       _sharedBridge: string,
       overrides?: Overrides
@@ -1365,6 +1450,10 @@ export class IBridgehub extends Contract {
   };
 
   populateTransaction: {
+    acceptAdmin(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    "acceptAdmin()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
     addStateTransitionManager(
       _stateTransitionManager: string,
       overrides?: Overrides
@@ -1589,6 +1678,16 @@ export class IBridgehub extends Contract {
         secondBridgeCalldata: BytesLike;
       },
       overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    setPendingAdmin(
+      _newPendingAdmin: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     setSharedBridge(
