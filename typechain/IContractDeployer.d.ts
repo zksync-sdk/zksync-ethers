@@ -27,6 +27,9 @@ interface IContractDeployerInterface extends ethers.utils.Interface {
     "create2(bytes32,bytes32,bytes)": FunctionFragment;
     "create2Account(bytes32,bytes32,bytes,uint8)": FunctionFragment;
     "createAccount(bytes32,bytes32,bytes,uint8)": FunctionFragment;
+    "extendedAccountVersion(address)": FunctionFragment;
+    "forceDeployOnAddress(tuple,address)": FunctionFragment;
+    "forceDeployOnAddresses(tuple[])": FunctionFragment;
     "getAccountInfo(address)": FunctionFragment;
     "getNewAddressCreate(address,uint256)": FunctionFragment;
     "getNewAddressCreate2(address,bytes32,bytes32,bytes)": FunctionFragment;
@@ -49,6 +52,35 @@ interface IContractDeployerInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "createAccount",
     values: [BytesLike, BytesLike, BytesLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "extendedAccountVersion",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "forceDeployOnAddress",
+    values: [
+      {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      string
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "forceDeployOnAddresses",
+    values: [
+      {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "getAccountInfo",
@@ -79,6 +111,18 @@ interface IContractDeployerInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createAccount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "extendedAccountVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "forceDeployOnAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "forceDeployOnAddresses",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -174,7 +218,7 @@ export class IContractDeployer extends Contract {
     ): Promise<ContractTransaction>;
 
     createAccount(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -182,10 +226,70 @@ export class IContractDeployer extends Contract {
     ): Promise<ContractTransaction>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    extendedAccountVersion(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: number;
+    }>;
+
+    "extendedAccountVersion(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: number;
+    }>;
+
+    forceDeployOnAddress(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    "forceDeployOnAddress(tuple,address)"(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    forceDeployOnAddresses(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    "forceDeployOnAddresses(tuple[])"(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
@@ -331,7 +435,7 @@ export class IContractDeployer extends Contract {
   ): Promise<ContractTransaction>;
 
   createAccount(
-    _salt: BytesLike,
+    arg0: BytesLike,
     _bytecodeHash: BytesLike,
     _input: BytesLike,
     _aaVersion: BigNumberish,
@@ -339,10 +443,66 @@ export class IContractDeployer extends Contract {
   ): Promise<ContractTransaction>;
 
   "createAccount(bytes32,bytes32,bytes,uint8)"(
-    _salt: BytesLike,
+    arg0: BytesLike,
     _bytecodeHash: BytesLike,
     _input: BytesLike,
     _aaVersion: BigNumberish,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  extendedAccountVersion(
+    _address: string,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
+  "extendedAccountVersion(address)"(
+    _address: string,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
+  forceDeployOnAddress(
+    _deployment: {
+      bytecodeHash: BytesLike;
+      newAddress: string;
+      callConstructor: boolean;
+      value: BigNumberish;
+      input: BytesLike;
+    },
+    _sender: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  "forceDeployOnAddress(tuple,address)"(
+    _deployment: {
+      bytecodeHash: BytesLike;
+      newAddress: string;
+      callConstructor: boolean;
+      value: BigNumberish;
+      input: BytesLike;
+    },
+    _sender: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  forceDeployOnAddresses(
+    _deployments: {
+      bytecodeHash: BytesLike;
+      newAddress: string;
+      callConstructor: boolean;
+      value: BigNumberish;
+      input: BytesLike;
+    }[],
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  "forceDeployOnAddresses(tuple[])"(
+    _deployments: {
+      bytecodeHash: BytesLike;
+      newAddress: string;
+      callConstructor: boolean;
+      value: BigNumberish;
+      input: BytesLike;
+    }[],
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
@@ -460,7 +620,7 @@ export class IContractDeployer extends Contract {
     ): Promise<string>;
 
     createAccount(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -468,12 +628,68 @@ export class IContractDeployer extends Contract {
     ): Promise<string>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    extendedAccountVersion(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
+    "extendedAccountVersion(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
+    forceDeployOnAddress(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "forceDeployOnAddress(tuple,address)"(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    forceDeployOnAddresses(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "forceDeployOnAddresses(tuple[])"(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     getAccountInfo(
       _address: string,
@@ -608,7 +824,7 @@ export class IContractDeployer extends Contract {
     ): Promise<BigNumber>;
 
     createAccount(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -616,10 +832,66 @@ export class IContractDeployer extends Contract {
     ): Promise<BigNumber>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    extendedAccountVersion(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "extendedAccountVersion(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    forceDeployOnAddress(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    "forceDeployOnAddress(tuple,address)"(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    forceDeployOnAddresses(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    "forceDeployOnAddresses(tuple[])"(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
@@ -728,7 +1000,7 @@ export class IContractDeployer extends Contract {
     ): Promise<PopulatedTransaction>;
 
     createAccount(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
@@ -736,10 +1008,66 @@ export class IContractDeployer extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "createAccount(bytes32,bytes32,bytes,uint8)"(
-      _salt: BytesLike,
+      arg0: BytesLike,
       _bytecodeHash: BytesLike,
       _input: BytesLike,
       _aaVersion: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    extendedAccountVersion(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "extendedAccountVersion(address)"(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    forceDeployOnAddress(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "forceDeployOnAddress(tuple,address)"(
+      _deployment: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      },
+      _sender: string,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    forceDeployOnAddresses(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "forceDeployOnAddresses(tuple[])"(
+      _deployments: {
+        bytecodeHash: BytesLike;
+        newAddress: string;
+        callConstructor: boolean;
+        value: BigNumberish;
+        input: BytesLike;
+      }[],
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
