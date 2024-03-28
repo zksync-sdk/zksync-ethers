@@ -86,7 +86,7 @@ async function sendBaseTokenToL2() {
 async function main() {
     console.log(`L2 balance: ${await wallet.getBalance()}`);
     console.log(`L1 balance: ${await wallet.getBalanceL1()}`);
-    
+
     await mintTokensOnL1(DAI_L1);
     console.log(`L2 balance: ${await wallet.getBalance()}`);
     console.log(`L1 balance: ${await wallet.getBalanceL1()}`);
