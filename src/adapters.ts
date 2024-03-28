@@ -1280,8 +1280,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 gasLimit: l2GasLimit,
             });
 
-            overrides.value ??= baseCost.add(operatorTip).add(l2Value);
-
+            overrides.value ??= isETHBaseToken ? baseCost.add(operatorTip).add(l2Value) : 0;
+            
             await checkBaseCost(baseCost, isETHBaseToken ? overrides.value : mintValue);
 
             return await bridgehub.populateTransaction.requestL2TransactionDirect(
