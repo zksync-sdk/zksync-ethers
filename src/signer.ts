@@ -477,7 +477,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const mainContract = await signer.getMainContract();
    * console.log(mainContract.address);
@@ -496,7 +496,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const l1BridgeContracts = await signer.getL1BridgeContracts();
    */
@@ -517,7 +517,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    *
@@ -544,7 +544,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
    * console.log(`Token allowance: ${await signer.getAllowanceL1(tokenL1)}`);
@@ -567,7 +567,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
    *
@@ -587,7 +587,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * console.log(`Base cost: ${await signer.getBaseCost({ gasLimit: 100_000 })}`);
    */
@@ -611,7 +611,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * console.log(`Base cost: ${await signer.getBaseCost({ gasLimit: 100_000 })}`);
    */
@@ -633,7 +633,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    * const tokenDepositHandle = await signer.deposit({
@@ -682,7 +682,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
    * const gas = await signer.estimateGasDeposit({
@@ -716,7 +716,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    * const tx = await signer.getDepositTx({
@@ -749,7 +749,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    * const fee = await signer.getFullRequiredDepositFee({
@@ -781,7 +781,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const gasPrice = await signer.providerL1.getGasPrice();
    *
@@ -838,7 +838,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
    * const finalizeWithdrawHandle = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
@@ -861,7 +861,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
    * const isFinalized = await signer.isWithdrawalFinalized(WITHDRAWAL_HASH);
@@ -883,7 +883,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
    * const claimFailedDepositHandle = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
@@ -907,7 +907,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const gasPrice = await signer.providerL1.getGasPrice();
    *
@@ -973,7 +973,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    *
    * const gasPrice = await signer.providerL1.getGasPrice();
    *
@@ -1102,7 +1102,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const provider = new ethers.BrowserProvider(window.ethereum);
    * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
    */
   static from(
     signer: ethers.JsonRpcSigner,

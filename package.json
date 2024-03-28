@@ -9,9 +9,6 @@
     "url": "https://matter-labs.io/",
     "email": "hello@matterlabs.io"
   },
-  "files": [
-    "build/"
-  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,6 +27,11 @@
   "engines": {
     "node": ">=18.9.0"
   },
+  "files": [
+    "build/",
+    "abi/",
+    "src/"
+  ],
   "dependencies": {},
   "devDependencies": {
     "@typechain/ethers-v6": "^0.5.0",
