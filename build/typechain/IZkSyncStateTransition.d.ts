@@ -23,8 +23,11 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   functions: {
-    "acceptGovernor()": FunctionFragment;
+    "acceptAdmin()": FunctionFragment;
+    "baseTokenGasPriceMultiplierDenominator()": FunctionFragment;
+    "baseTokenGasPriceMultiplierNominator()": FunctionFragment;
     "bridgehubRequestL2Transaction(tuple)": FunctionFragment;
+    "changeFeeParams(tuple)": FunctionFragment;
     "commitBatches(tuple,tuple[])": FunctionFragment;
     "commitBatchesSharedBridge(uint256,tuple,tuple[])": FunctionFragment;
     "executeBatches(tuple[])": FunctionFragment;
@@ -36,20 +39,21 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     "facets()": FunctionFragment;
     "finalizeEthWithdrawal(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "freezeDiamond()": FunctionFragment;
+    "getAdmin()": FunctionFragment;
     "getBaseToken()": FunctionFragment;
     "getBaseTokenBridge()": FunctionFragment;
     "getBridgehub()": FunctionFragment;
     "getFirstUnprocessedPriorityTx()": FunctionFragment;
-    "getGovernor()": FunctionFragment;
     "getL2BootloaderBytecodeHash()": FunctionFragment;
     "getL2DefaultAccountBytecodeHash()": FunctionFragment;
     "getL2SystemContractsUpgradeBatchNumber()": FunctionFragment;
     "getL2SystemContractsUpgradeTxHash()": FunctionFragment;
     "getName()": FunctionFragment;
-    "getPendingGovernor()": FunctionFragment;
+    "getPendingAdmin()": FunctionFragment;
     "getPriorityQueueSize()": FunctionFragment;
     "getPriorityTxMaxGasLimit()": FunctionFragment;
     "getProtocolVersion()": FunctionFragment;
+    "getPubdataPricingMode()": FunctionFragment;
     "getStateTransitionManager()": FunctionFragment;
     "getTotalBatchesCommitted()": FunctionFragment;
     "getTotalBatchesExecuted()": FunctionFragment;
@@ -73,17 +77,29 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)": FunctionFragment;
     "revertBatches(uint256)": FunctionFragment;
     "revertBatchesSharedBridge(uint256,uint256)": FunctionFragment;
-    "setPendingGovernor(address)": FunctionFragment;
+    "setPendingAdmin(address)": FunctionFragment;
     "setPorterAvailability(bool)": FunctionFragment;
     "setPriorityTxMaxGasLimit(uint256)": FunctionFragment;
+    "setTokenMultiplier(uint128,uint128)": FunctionFragment;
+    "setTransactionFilterer(address)": FunctionFragment;
     "setValidator(address,bool)": FunctionFragment;
+    "setValidiumMode(uint8)": FunctionFragment;
     "storedBatchHash(uint256)": FunctionFragment;
+    "transferEthToSharedBridge()": FunctionFragment;
     "unfreezeDiamond()": FunctionFragment;
     "upgradeChainFromVersion(uint256,tuple)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "acceptGovernor",
+    functionFragment: "acceptAdmin",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "baseTokenGasPriceMultiplierDenominator",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "baseTokenGasPriceMultiplierNominator",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -97,9 +113,21 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
+      }
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeFeeParams",
+    values: [
+      {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
       }
     ]
   ): string;
@@ -126,7 +154,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[]
     ]
   ): string;
@@ -154,7 +182,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[]
     ]
   ): string;
@@ -225,6 +253,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     functionFragment: "freezeDiamond",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "getAdmin", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getBaseToken",
     values?: undefined
@@ -239,10 +268,6 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getFirstUnprocessedPriorityTx",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getGovernor",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -263,7 +288,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "getName", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getPendingGovernor",
+    functionFragment: "getPendingAdmin",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -276,6 +301,10 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getProtocolVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPubdataPricingMode",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -451,7 +480,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setPendingGovernor",
+    functionFragment: "setPendingAdmin",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -463,12 +492,28 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setTokenMultiplier",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setTransactionFilterer",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setValidator",
     values: [string, boolean]
   ): string;
   encodeFunctionData(
+    functionFragment: "setValidiumMode",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "storedBatchHash",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferEthToSharedBridge",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "unfreezeDiamond",
@@ -492,11 +537,23 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "acceptGovernor",
+    functionFragment: "acceptAdmin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "baseTokenGasPriceMultiplierDenominator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "baseTokenGasPriceMultiplierNominator",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "bridgehubRequestL2Transaction",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeFeeParams",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -540,6 +597,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     functionFragment: "freezeDiamond",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getAdmin", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getBaseToken",
     data: BytesLike
@@ -554,10 +612,6 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getFirstUnprocessedPriorityTx",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getGovernor",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -578,7 +632,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "getName", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getPendingGovernor",
+    functionFragment: "getPendingAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -591,6 +645,10 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getProtocolVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getPubdataPricingMode",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -686,7 +744,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setPendingGovernor",
+    functionFragment: "setPendingAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -698,11 +756,27 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setTokenMultiplier",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setTransactionFilterer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setValidator",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setValidiumMode",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "storedBatchHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferEthToSharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -723,14 +797,17 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     "ExecuteUpgrade(tuple)": EventFragment;
     "Freeze()": EventFragment;
     "IsPorterAvailableStatusUpdate(bool)": EventFragment;
+    "NewAdmin(address,address)": EventFragment;
+    "NewBaseTokenMultiplier(uint128,uint128,uint128,uint128)": EventFragment;
     "NewFeeParams(tuple,tuple)": EventFragment;
-    "NewGovernor(address,address)": EventFragment;
-    "NewPendingGovernor(address,address)": EventFragment;
+    "NewPendingAdmin(address,address)": EventFragment;
     "NewPriorityRequest(uint256,bytes32,uint64,tuple,bytes[])": EventFragment;
     "NewPriorityTxMaxGasLimit(uint256,uint256)": EventFragment;
+    "NewTransactionFilterer(address,address)": EventFragment;
     "ProposeTransparentUpgrade(tuple,uint256,bytes32)": EventFragment;
     "Unfreeze()": EventFragment;
     "ValidatorStatusUpdate(address,bool)": EventFragment;
+    "ValidiumModeStatusUpdate(uint8)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "BlockCommit"): EventFragment;
@@ -743,14 +820,17 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   getEvent(
     nameOrSignatureOrTopic: "IsPorterAvailableStatusUpdate"
   ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewAdmin"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewBaseTokenMultiplier"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewFeeParams"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewGovernor"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewPendingGovernor"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewPendingAdmin"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewPriorityRequest"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewPriorityTxMaxGasLimit"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewTransactionFilterer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ProposeTransparentUpgrade"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unfreeze"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ValidatorStatusUpdate"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ValidiumModeStatusUpdate"): EventFragment;
 }
 
 export class IZkSyncStateTransition extends Contract {
@@ -767,9 +847,29 @@ export class IZkSyncStateTransition extends Contract {
   interface: IZkSyncStateTransitionInterface;
 
   functions: {
-    acceptGovernor(overrides?: Overrides): Promise<ContractTransaction>;
+    acceptAdmin(overrides?: Overrides): Promise<ContractTransaction>;
 
-    "acceptGovernor()"(overrides?: Overrides): Promise<ContractTransaction>;
+    "acceptAdmin()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+    baseTokenGasPriceMultiplierDenominator(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber;
+    }>;
+
+    baseTokenGasPriceMultiplierNominator(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber;
+    }>;
 
     bridgehubRequestL2Transaction(
       _request: {
@@ -780,7 +880,6 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -796,11 +895,34 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     commitBatches(
@@ -824,7 +946,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -850,7 +972,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -877,7 +999,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -904,7 +1026,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -1065,6 +1187,14 @@ export class IZkSyncStateTransition extends Contract {
 
     "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
 
+    getAdmin(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
     getBaseToken(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
@@ -1095,14 +1225,6 @@ export class IZkSyncStateTransition extends Contract {
 
     "getFirstUnprocessedPriorityTx()"(overrides?: CallOverrides): Promise<{
       0: BigNumber;
-    }>;
-
-    getGovernor(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<{
-      0: string;
     }>;
 
     getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<{
@@ -1147,11 +1269,11 @@ export class IZkSyncStateTransition extends Contract {
       0: string;
     }>;
 
-    getPendingGovernor(overrides?: CallOverrides): Promise<{
+    getPendingAdmin(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
-    "getPendingGovernor()"(overrides?: CallOverrides): Promise<{
+    "getPendingAdmin()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
@@ -1177,6 +1299,14 @@ export class IZkSyncStateTransition extends Contract {
 
     "getProtocolVersion()"(overrides?: CallOverrides): Promise<{
       0: BigNumber;
+    }>;
+
+    getPubdataPricingMode(overrides?: CallOverrides): Promise<{
+      0: number;
+    }>;
+
+    "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<{
+      0: number;
     }>;
 
     getStateTransitionManager(overrides?: CallOverrides): Promise<{
@@ -1617,13 +1747,13 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    setPendingGovernor(
-      _newPendingGovernor: string,
+    setPendingAdmin(
+      _newPendingAdmin: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -1647,6 +1777,28 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -1656,6 +1808,16 @@ export class IZkSyncStateTransition extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -1672,6 +1834,14 @@ export class IZkSyncStateTransition extends Contract {
     ): Promise<{
       0: string;
     }>;
+
+    transferEthToSharedBridge(
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "transferEthToSharedBridge()"(
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
 
     unfreezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
 
@@ -1708,9 +1878,25 @@ export class IZkSyncStateTransition extends Contract {
     ): Promise<ContractTransaction>;
   };
 
-  acceptGovernor(overrides?: Overrides): Promise<ContractTransaction>;
+  acceptAdmin(overrides?: Overrides): Promise<ContractTransaction>;
 
-  "acceptGovernor()"(overrides?: Overrides): Promise<ContractTransaction>;
+  "acceptAdmin()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+  baseTokenGasPriceMultiplierDenominator(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  "baseTokenGasPriceMultiplierDenominator()"(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  baseTokenGasPriceMultiplierNominator(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  "baseTokenGasPriceMultiplierNominator()"(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   bridgehubRequestL2Transaction(
     _request: {
@@ -1721,7 +1907,6 @@ export class IZkSyncStateTransition extends Contract {
       l2Calldata: BytesLike;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
-      l1GasPriceConverted: BigNumberish;
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
@@ -1737,11 +1922,34 @@ export class IZkSyncStateTransition extends Contract {
       l2Calldata: BytesLike;
       l2GasLimit: BigNumberish;
       l2GasPerPubdataByteLimit: BigNumberish;
-      l1GasPriceConverted: BigNumberish;
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
     overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  changeFeeParams(
+    _newFeeParams: {
+      pubdataPricingMode: BigNumberish;
+      batchOverheadL1Gas: BigNumberish;
+      maxPubdataPerBatch: BigNumberish;
+      maxL2GasPerBatch: BigNumberish;
+      priorityTxMaxPubdata: BigNumberish;
+      minimalL2GasPrice: BigNumberish;
+    },
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "changeFeeParams(tuple)"(
+    _newFeeParams: {
+      pubdataPricingMode: BigNumberish;
+      batchOverheadL1Gas: BigNumberish;
+      maxPubdataPerBatch: BigNumberish;
+      maxL2GasPerBatch: BigNumberish;
+      priorityTxMaxPubdata: BigNumberish;
+      minimalL2GasPrice: BigNumberish;
+    },
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   commitBatches(
@@ -1765,7 +1973,7 @@ export class IZkSyncStateTransition extends Contract {
       bootloaderHeapInitialContentsHash: BytesLike;
       eventsQueueStateHash: BytesLike;
       systemLogs: BytesLike;
-      totalL2ToL1Pubdata: BytesLike;
+      pubdataCommitments: BytesLike;
     }[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -1791,7 +1999,7 @@ export class IZkSyncStateTransition extends Contract {
       bootloaderHeapInitialContentsHash: BytesLike;
       eventsQueueStateHash: BytesLike;
       systemLogs: BytesLike;
-      totalL2ToL1Pubdata: BytesLike;
+      pubdataCommitments: BytesLike;
     }[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -1818,7 +2026,7 @@ export class IZkSyncStateTransition extends Contract {
       bootloaderHeapInitialContentsHash: BytesLike;
       eventsQueueStateHash: BytesLike;
       systemLogs: BytesLike;
-      totalL2ToL1Pubdata: BytesLike;
+      pubdataCommitments: BytesLike;
     }[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -1845,7 +2053,7 @@ export class IZkSyncStateTransition extends Contract {
       bootloaderHeapInitialContentsHash: BytesLike;
       eventsQueueStateHash: BytesLike;
       systemLogs: BytesLike;
-      totalL2ToL1Pubdata: BytesLike;
+      pubdataCommitments: BytesLike;
     }[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -1990,6 +2198,10 @@ export class IZkSyncStateTransition extends Contract {
 
   "freezeDiamond()"(overrides?: Overrides): Promise<ContractTransaction>;
 
+  getAdmin(overrides?: CallOverrides): Promise<string>;
+
+  "getAdmin()"(overrides?: CallOverrides): Promise<string>;
+
   getBaseToken(overrides?: CallOverrides): Promise<string>;
 
   "getBaseToken()"(overrides?: CallOverrides): Promise<string>;
@@ -2007,10 +2219,6 @@ export class IZkSyncStateTransition extends Contract {
   "getFirstUnprocessedPriorityTx()"(
     overrides?: CallOverrides
   ): Promise<BigNumber>;
-
-  getGovernor(overrides?: CallOverrides): Promise<string>;
-
-  "getGovernor()"(overrides?: CallOverrides): Promise<string>;
 
   getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<string>;
 
@@ -2040,9 +2248,9 @@ export class IZkSyncStateTransition extends Contract {
 
   "getName()"(overrides?: CallOverrides): Promise<string>;
 
-  getPendingGovernor(overrides?: CallOverrides): Promise<string>;
+  getPendingAdmin(overrides?: CallOverrides): Promise<string>;
 
-  "getPendingGovernor()"(overrides?: CallOverrides): Promise<string>;
+  "getPendingAdmin()"(overrides?: CallOverrides): Promise<string>;
 
   getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2055,6 +2263,10 @@ export class IZkSyncStateTransition extends Contract {
   getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
   "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getPubdataPricingMode(overrides?: CallOverrides): Promise<number>;
+
+  "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<number>;
 
   getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
 
@@ -2420,13 +2632,13 @@ export class IZkSyncStateTransition extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  setPendingGovernor(
-    _newPendingGovernor: string,
+  setPendingAdmin(
+    _newPendingAdmin: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "setPendingGovernor(address)"(
-    _newPendingGovernor: string,
+  "setPendingAdmin(address)"(
+    _newPendingAdmin: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -2450,6 +2662,28 @@ export class IZkSyncStateTransition extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  setTokenMultiplier(
+    _nominator: BigNumberish,
+    _denominator: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setTokenMultiplier(uint128,uint128)"(
+    _nominator: BigNumberish,
+    _denominator: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setTransactionFilterer(
+    _transactionFilterer: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setTransactionFilterer(address)"(
+    _transactionFilterer: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   setValidator(
     _validator: string,
     _active: boolean,
@@ -2462,6 +2696,16 @@ export class IZkSyncStateTransition extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  setValidiumMode(
+    _validiumMode: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setValidiumMode(uint8)"(
+    _validiumMode: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   storedBatchHash(
     _batchNumber: BigNumberish,
     overrides?: CallOverrides
@@ -2471,6 +2715,14 @@ export class IZkSyncStateTransition extends Contract {
     _batchNumber: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
+
+  transferEthToSharedBridge(
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "transferEthToSharedBridge()"(
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   unfreezeDiamond(overrides?: Overrides): Promise<ContractTransaction>;
 
@@ -2507,9 +2759,25 @@ export class IZkSyncStateTransition extends Contract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    acceptGovernor(overrides?: CallOverrides): Promise<void>;
+    acceptAdmin(overrides?: CallOverrides): Promise<void>;
 
-    "acceptGovernor()"(overrides?: CallOverrides): Promise<void>;
+    "acceptAdmin()"(overrides?: CallOverrides): Promise<void>;
+
+    baseTokenGasPriceMultiplierDenominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    baseTokenGasPriceMultiplierNominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     bridgehubRequestL2Transaction(
       _request: {
@@ -2520,7 +2788,6 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -2536,12 +2803,35 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: CallOverrides
     ): Promise<string>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     commitBatches(
       _lastCommittedBatchData: {
@@ -2564,7 +2854,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -2590,7 +2880,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -2617,7 +2907,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -2644,7 +2934,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -2789,6 +3079,10 @@ export class IZkSyncStateTransition extends Contract {
 
     "freezeDiamond()"(overrides?: CallOverrides): Promise<void>;
 
+    getAdmin(overrides?: CallOverrides): Promise<string>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<string>;
+
     getBaseToken(overrides?: CallOverrides): Promise<string>;
 
     "getBaseToken()"(overrides?: CallOverrides): Promise<string>;
@@ -2808,10 +3102,6 @@ export class IZkSyncStateTransition extends Contract {
     "getFirstUnprocessedPriorityTx()"(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    getGovernor(overrides?: CallOverrides): Promise<string>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<string>;
 
     getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<string>;
 
@@ -2843,9 +3133,9 @@ export class IZkSyncStateTransition extends Contract {
 
     "getName()"(overrides?: CallOverrides): Promise<string>;
 
-    getPendingGovernor(overrides?: CallOverrides): Promise<string>;
+    getPendingAdmin(overrides?: CallOverrides): Promise<string>;
 
-    "getPendingGovernor()"(overrides?: CallOverrides): Promise<string>;
+    "getPendingAdmin()"(overrides?: CallOverrides): Promise<string>;
 
     getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2858,6 +3148,10 @@ export class IZkSyncStateTransition extends Contract {
     getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPubdataPricingMode(overrides?: CallOverrides): Promise<number>;
+
+    "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<number>;
 
     getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
 
@@ -3226,13 +3520,13 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setPendingGovernor(
-      _newPendingGovernor: string,
+    setPendingAdmin(
+      _newPendingAdmin: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -3256,6 +3550,28 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -3268,6 +3584,16 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     storedBatchHash(
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
@@ -3277,6 +3603,10 @@ export class IZkSyncStateTransition extends Contract {
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    transferEthToSharedBridge(overrides?: CallOverrides): Promise<void>;
+
+    "transferEthToSharedBridge()"(overrides?: CallOverrides): Promise<void>;
 
     unfreezeDiamond(overrides?: CallOverrides): Promise<void>;
 
@@ -3345,16 +3675,20 @@ export class IZkSyncStateTransition extends Contract {
 
     IsPorterAvailableStatusUpdate(isPorterAvailable: null): EventFilter;
 
-    NewFeeParams(oldFeeParams: null, newFeeParams: null): EventFilter;
+    NewAdmin(oldAdmin: string | null, newAdmin: string | null): EventFilter;
 
-    NewGovernor(
-      oldGovernor: string | null,
-      newGovernor: string | null
+    NewBaseTokenMultiplier(
+      oldNominator: null,
+      oldDenominator: null,
+      newNominator: null,
+      newDenominator: null
     ): EventFilter;
 
-    NewPendingGovernor(
-      oldPendingGovernor: string | null,
-      newPendingGovernor: string | null
+    NewFeeParams(oldFeeParams: null, newFeeParams: null): EventFilter;
+
+    NewPendingAdmin(
+      oldPendingAdmin: string | null,
+      newPendingAdmin: string | null
     ): EventFilter;
 
     NewPriorityRequest(
@@ -3370,6 +3704,11 @@ export class IZkSyncStateTransition extends Contract {
       newPriorityTxMaxGasLimit: null
     ): EventFilter;
 
+    NewTransactionFilterer(
+      oldTransactionFilterer: null,
+      newTransactionFilterer: null
+    ): EventFilter;
+
     ProposeTransparentUpgrade(
       diamondCut: null,
       proposalId: BigNumberish | null,
@@ -3382,12 +3721,30 @@ export class IZkSyncStateTransition extends Contract {
       validatorAddress: string | null,
       isActive: null
     ): EventFilter;
+
+    ValidiumModeStatusUpdate(validiumMode: null): EventFilter;
   };
 
   estimateGas: {
-    acceptGovernor(overrides?: Overrides): Promise<BigNumber>;
+    acceptAdmin(overrides?: Overrides): Promise<BigNumber>;
 
-    "acceptGovernor()"(overrides?: Overrides): Promise<BigNumber>;
+    "acceptAdmin()"(overrides?: Overrides): Promise<BigNumber>;
+
+    baseTokenGasPriceMultiplierDenominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    baseTokenGasPriceMultiplierNominator(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     bridgehubRequestL2Transaction(
       _request: {
@@ -3398,7 +3755,6 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -3414,11 +3770,34 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     commitBatches(
@@ -3442,7 +3821,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -3468,7 +3847,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -3495,7 +3874,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -3522,7 +3901,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -3663,6 +4042,10 @@ export class IZkSyncStateTransition extends Contract {
 
     "freezeDiamond()"(overrides?: Overrides): Promise<BigNumber>;
 
+    getAdmin(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     getBaseToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getBaseToken()"(overrides?: CallOverrides): Promise<BigNumber>;
@@ -3682,10 +4065,6 @@ export class IZkSyncStateTransition extends Contract {
     "getFirstUnprocessedPriorityTx()"(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    getGovernor(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getL2BootloaderBytecodeHash(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -3721,9 +4100,9 @@ export class IZkSyncStateTransition extends Contract {
 
     "getName()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getPendingGovernor(overrides?: CallOverrides): Promise<BigNumber>;
+    getPendingAdmin(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getPendingGovernor()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "getPendingAdmin()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getPriorityQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -3736,6 +4115,10 @@ export class IZkSyncStateTransition extends Contract {
     getProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPubdataPricingMode(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getStateTransitionManager(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -4075,13 +4458,13 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    setPendingGovernor(
-      _newPendingGovernor: string,
+    setPendingAdmin(
+      _newPendingAdmin: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -4105,6 +4488,28 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -4117,6 +4522,16 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     storedBatchHash(
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
@@ -4126,6 +4541,10 @@ export class IZkSyncStateTransition extends Contract {
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    transferEthToSharedBridge(overrides?: Overrides): Promise<BigNumber>;
+
+    "transferEthToSharedBridge()"(overrides?: Overrides): Promise<BigNumber>;
 
     unfreezeDiamond(overrides?: Overrides): Promise<BigNumber>;
 
@@ -4163,9 +4582,25 @@ export class IZkSyncStateTransition extends Contract {
   };
 
   populateTransaction: {
-    acceptGovernor(overrides?: Overrides): Promise<PopulatedTransaction>;
+    acceptAdmin(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    "acceptGovernor()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+    "acceptAdmin()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    baseTokenGasPriceMultiplierDenominator(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "baseTokenGasPriceMultiplierDenominator()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    baseTokenGasPriceMultiplierNominator(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "baseTokenGasPriceMultiplierNominator()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     bridgehubRequestL2Transaction(
       _request: {
@@ -4176,7 +4611,6 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
@@ -4192,11 +4626,34 @@ export class IZkSyncStateTransition extends Contract {
         l2Calldata: BytesLike;
         l2GasLimit: BigNumberish;
         l2GasPerPubdataByteLimit: BigNumberish;
-        l1GasPriceConverted: BigNumberish;
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
       overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    changeFeeParams(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "changeFeeParams(tuple)"(
+      _newFeeParams: {
+        pubdataPricingMode: BigNumberish;
+        batchOverheadL1Gas: BigNumberish;
+        maxPubdataPerBatch: BigNumberish;
+        maxL2GasPerBatch: BigNumberish;
+        priorityTxMaxPubdata: BigNumberish;
+        minimalL2GasPrice: BigNumberish;
+      },
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     commitBatches(
@@ -4220,7 +4677,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -4246,7 +4703,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -4273,7 +4730,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -4300,7 +4757,7 @@ export class IZkSyncStateTransition extends Contract {
         bootloaderHeapInitialContentsHash: BytesLike;
         eventsQueueStateHash: BytesLike;
         systemLogs: BytesLike;
-        totalL2ToL1Pubdata: BytesLike;
+        pubdataCommitments: BytesLike;
       }[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -4443,6 +4900,10 @@ export class IZkSyncStateTransition extends Contract {
 
     "freezeDiamond()"(overrides?: Overrides): Promise<PopulatedTransaction>;
 
+    getAdmin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getAdmin()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getBaseToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "getBaseToken()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -4466,10 +4927,6 @@ export class IZkSyncStateTransition extends Contract {
     "getFirstUnprocessedPriorityTx()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    getGovernor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "getGovernor()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getL2BootloaderBytecodeHash(
       overrides?: CallOverrides
@@ -4507,11 +4964,9 @@ export class IZkSyncStateTransition extends Contract {
 
     "getName()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getPendingGovernor(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getPendingAdmin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "getPendingGovernor()"(
+    "getPendingAdmin()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -4536,6 +4991,14 @@ export class IZkSyncStateTransition extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "getProtocolVersion()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPubdataPricingMode(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getPubdataPricingMode()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -4903,13 +5366,13 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    setPendingGovernor(
-      _newPendingGovernor: string,
+    setPendingAdmin(
+      _newPendingAdmin: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "setPendingGovernor(address)"(
-      _newPendingGovernor: string,
+    "setPendingAdmin(address)"(
+      _newPendingAdmin: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
@@ -4933,6 +5396,28 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    setTokenMultiplier(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setTokenMultiplier(uint128,uint128)"(
+      _nominator: BigNumberish,
+      _denominator: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setTransactionFilterer(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setTransactionFilterer(address)"(
+      _transactionFilterer: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     setValidator(
       _validator: string,
       _active: boolean,
@@ -4945,6 +5430,16 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    setValidiumMode(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setValidiumMode(uint8)"(
+      _validiumMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     storedBatchHash(
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
@@ -4953,6 +5448,14 @@ export class IZkSyncStateTransition extends Contract {
     "storedBatchHash(uint256)"(
       _batchNumber: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    transferEthToSharedBridge(
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "transferEthToSharedBridge()"(
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     unfreezeDiamond(overrides?: Overrides): Promise<PopulatedTransaction>;
