@@ -58,11 +58,11 @@ export const L1_FEE_ESTIMATION_COEF_DENOMINATOR = BigNumber.from(10);
 export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 400000;
 export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200000;
 
-// The large L2 gas per pubdata to sign. This gas is enough to ensure that
-// any reasonable limit will be accepted. Note, that the operator is NOT required to
+// The default L2 gas per pubdata to sign. This is equal to 2^32 - 1, which allows 
+// virtually any gas per pubdata possible.  Note, that the operator is NOT required to
 // use the honest value of gas per pubdata, and it can use any value up to the one signed by the user.
 // In the future releases, we will provide a way to estimate the current gasPerPubdata.
-export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50000;
+export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 4294967295;
 
 // It is possible to provide practically any gasPerPubdataByte for L1->L2 transactions, since
 // the cost per gas will be adjusted respectively. We will use 800 as a relatively optimal value for now.
