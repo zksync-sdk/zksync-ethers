@@ -17,6 +17,25 @@ const _abi = [
         inputs: [
             {
                 indexed: true,
+                internalType: "address",
+                name: "oldAdmin",
+                type: "address",
+            },
+            {
+                indexed: true,
+                internalType: "address",
+                name: "newAdmin",
+                type: "address",
+            },
+        ],
+        name: "NewAdmin",
+        type: "event",
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
                 internalType: "uint256",
                 name: "chainId",
                 type: "uint256",
@@ -36,6 +55,32 @@ const _abi = [
         ],
         name: "NewChain",
         type: "event",
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: "address",
+                name: "oldPendingAdmin",
+                type: "address",
+            },
+            {
+                indexed: true,
+                internalType: "address",
+                name: "newPendingAdmin",
+                type: "address",
+            },
+        ],
+        name: "NewPendingAdmin",
+        type: "event",
+    },
+    {
+        inputs: [],
+        name: "acceptAdmin",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
     },
     {
         inputs: [
@@ -498,6 +543,19 @@ const _abi = [
             },
         ],
         stateMutability: "payable",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
+                internalType: "address",
+                name: "_newPendingAdmin",
+                type: "address",
+            },
+        ],
+        name: "setPendingAdmin",
+        outputs: [],
+        stateMutability: "nonpayable",
         type: "function",
     },
     {

@@ -200,6 +200,56 @@ const _abi = [
         anonymous: false,
         inputs: [
             {
+                indexed: true,
+                internalType: "address",
+                name: "oldAdmin",
+                type: "address",
+            },
+            {
+                indexed: true,
+                internalType: "address",
+                name: "newAdmin",
+                type: "address",
+            },
+        ],
+        name: "NewAdmin",
+        type: "event",
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: "uint128",
+                name: "oldNominator",
+                type: "uint128",
+            },
+            {
+                indexed: false,
+                internalType: "uint128",
+                name: "oldDenominator",
+                type: "uint128",
+            },
+            {
+                indexed: false,
+                internalType: "uint128",
+                name: "newNominator",
+                type: "uint128",
+            },
+            {
+                indexed: false,
+                internalType: "uint128",
+                name: "newDenominator",
+                type: "uint128",
+            },
+        ],
+        name: "NewBaseTokenMultiplier",
+        type: "event",
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
                 components: [
                     {
                         internalType: "enum PubdataPricingMode",
@@ -285,36 +335,17 @@ const _abi = [
             {
                 indexed: true,
                 internalType: "address",
-                name: "oldGovernor",
+                name: "oldPendingAdmin",
                 type: "address",
             },
             {
                 indexed: true,
                 internalType: "address",
-                name: "newGovernor",
+                name: "newPendingAdmin",
                 type: "address",
             },
         ],
-        name: "NewGovernor",
-        type: "event",
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: "address",
-                name: "oldPendingGovernor",
-                type: "address",
-            },
-            {
-                indexed: true,
-                internalType: "address",
-                name: "newPendingGovernor",
-                type: "address",
-            },
-        ],
-        name: "NewPendingGovernor",
+        name: "NewPendingAdmin",
         type: "event",
     },
     {
@@ -459,6 +490,25 @@ const _abi = [
         anonymous: false,
         inputs: [
             {
+                indexed: false,
+                internalType: "address",
+                name: "oldTransactionFilterer",
+                type: "address",
+            },
+            {
+                indexed: false,
+                internalType: "address",
+                name: "newTransactionFilterer",
+                type: "address",
+            },
+        ],
+        name: "NewTransactionFilterer",
+        type: "event",
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
                 components: [
                     {
                         components: [
@@ -545,10 +595,49 @@ const _abi = [
         type: "event",
     },
     {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: "enum PubdataPricingMode",
+                name: "validiumMode",
+                type: "uint8",
+            },
+        ],
+        name: "ValidiumModeStatusUpdate",
+        type: "event",
+    },
+    {
         inputs: [],
-        name: "acceptGovernor",
+        name: "acceptAdmin",
         outputs: [],
         stateMutability: "nonpayable",
+        type: "function",
+    },
+    {
+        inputs: [],
+        name: "baseTokenGasPriceMultiplierDenominator",
+        outputs: [
+            {
+                internalType: "uint128",
+                name: "",
+                type: "uint128",
+            },
+        ],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [],
+        name: "baseTokenGasPriceMultiplierNominator",
+        outputs: [
+            {
+                internalType: "uint128",
+                name: "",
+                type: "uint128",
+            },
+        ],
+        stateMutability: "view",
         type: "function",
     },
     {
@@ -591,11 +680,6 @@ const _abi = [
                         type: "uint256",
                     },
                     {
-                        internalType: "uint256",
-                        name: "l1GasPriceConverted",
-                        type: "uint256",
-                    },
-                    {
                         internalType: "bytes[]",
                         name: "factoryDeps",
                         type: "bytes[]",
@@ -620,6 +704,51 @@ const _abi = [
             },
         ],
         stateMutability: "payable",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: "enum PubdataPricingMode",
+                        name: "pubdataPricingMode",
+                        type: "uint8",
+                    },
+                    {
+                        internalType: "uint32",
+                        name: "batchOverheadL1Gas",
+                        type: "uint32",
+                    },
+                    {
+                        internalType: "uint32",
+                        name: "maxPubdataPerBatch",
+                        type: "uint32",
+                    },
+                    {
+                        internalType: "uint32",
+                        name: "maxL2GasPerBatch",
+                        type: "uint32",
+                    },
+                    {
+                        internalType: "uint32",
+                        name: "priorityTxMaxPubdata",
+                        type: "uint32",
+                    },
+                    {
+                        internalType: "uint64",
+                        name: "minimalL2GasPrice",
+                        type: "uint64",
+                    },
+                ],
+                internalType: "struct FeeParams",
+                name: "_newFeeParams",
+                type: "tuple",
+            },
+        ],
+        name: "changeFeeParams",
+        outputs: [],
+        stateMutability: "nonpayable",
         type: "function",
     },
     {
@@ -720,7 +849,7 @@ const _abi = [
                     },
                     {
                         internalType: "bytes",
-                        name: "totalL2ToL1Pubdata",
+                        name: "pubdataCommitments",
                         type: "bytes",
                     },
                 ],
@@ -837,7 +966,7 @@ const _abi = [
                     },
                     {
                         internalType: "bytes",
-                        name: "totalL2ToL1Pubdata",
+                        name: "pubdataCommitments",
                         type: "bytes",
                     },
                 ],
@@ -1136,6 +1265,19 @@ const _abi = [
     },
     {
         inputs: [],
+        name: "getAdmin",
+        outputs: [
+            {
+                internalType: "address",
+                name: "",
+                type: "address",
+            },
+        ],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [],
         name: "getBaseToken",
         outputs: [
             {
@@ -1181,19 +1323,6 @@ const _abi = [
                 internalType: "uint256",
                 name: "",
                 type: "uint256",
-            },
-        ],
-        stateMutability: "view",
-        type: "function",
-    },
-    {
-        inputs: [],
-        name: "getGovernor",
-        outputs: [
-            {
-                internalType: "address",
-                name: "",
-                type: "address",
             },
         ],
         stateMutability: "view",
@@ -1266,7 +1395,7 @@ const _abi = [
     },
     {
         inputs: [],
-        name: "getPendingGovernor",
+        name: "getPendingAdmin",
         outputs: [
             {
                 internalType: "address",
@@ -1311,6 +1440,19 @@ const _abi = [
                 internalType: "uint256",
                 name: "",
                 type: "uint256",
+            },
+        ],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [],
+        name: "getPubdataPricingMode",
+        outputs: [
+            {
+                internalType: "enum PubdataPricingMode",
+                name: "",
+                type: "uint8",
             },
         ],
         stateMutability: "view",
@@ -2084,11 +2226,11 @@ const _abi = [
         inputs: [
             {
                 internalType: "address",
-                name: "_newPendingGovernor",
+                name: "_newPendingAdmin",
                 type: "address",
             },
         ],
-        name: "setPendingGovernor",
+        name: "setPendingAdmin",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",
@@ -2122,6 +2264,37 @@ const _abi = [
     {
         inputs: [
             {
+                internalType: "uint128",
+                name: "_nominator",
+                type: "uint128",
+            },
+            {
+                internalType: "uint128",
+                name: "_denominator",
+                type: "uint128",
+            },
+        ],
+        name: "setTokenMultiplier",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
+                internalType: "address",
+                name: "_transactionFilterer",
+                type: "address",
+            },
+        ],
+        name: "setTransactionFilterer",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
                 internalType: "address",
                 name: "_validator",
                 type: "address",
@@ -2133,6 +2306,19 @@ const _abi = [
             },
         ],
         name: "setValidator",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
+                internalType: "enum PubdataPricingMode",
+                name: "_validiumMode",
+                type: "uint8",
+            },
+        ],
+        name: "setValidiumMode",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",
@@ -2154,6 +2340,13 @@ const _abi = [
             },
         ],
         stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [],
+        name: "transferEthToSharedBridge",
+        outputs: [],
+        stateMutability: "nonpayable",
         type: "function",
     },
     {
