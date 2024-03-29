@@ -1534,12 +1534,14 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   protected _prepareFilter(filter: EventFilter) {
     return {
       ...filter,
-      fromBlock: filter.fromBlock
-        ? this.formatter.blockTag(filter.fromBlock)
-        : null,
-      toBlock: filter.fromBlock
-        ? this.formatter.blockTag(filter.toBlock)
-        : null,
+      fromBlock:
+        filter.fromBlock === null || filter.fromBlock === undefined
+          ? null
+          : this.formatter.blockTag(filter.fromBlock),
+      toBlock:
+        filter.fromBlock === null || filter.fromBlock === undefined
+          ? null
+          : this.formatter.blockTag(filter.toBlock),
     };
   }
 
