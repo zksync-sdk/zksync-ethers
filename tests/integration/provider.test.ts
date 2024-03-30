@@ -19,16 +19,16 @@ describe('Provider', () => {
   const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4';
   const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174';
 
-  let tx: types.TransactionResponse;
+  let receipt: types.TransactionReceipt;
 
   before('setup', async function () {
     this.timeout(25_000);
-    tx = await wallet.transfer({
+    const tx = await wallet.transfer({
       token: utils.ETH_ADDRESS,
       to: RECEIVER,
       amount: 1_000_000,
     });
-    await tx.wait();
+    receipt = await tx.wait();
   });
 
   describe('#constructor()', () => {
@@ -148,7 +148,7 @@ describe('Provider', () => {
 
   describe('#getTransactionDetails()', () => {
     it('should return a transaction details', async () => {
-      const result = await provider.getTransactionDetails(tx.hash);
+      const result = await provider.getTransactionDetails(receipt.hash);
       expect(result).not.to.be.null;
     });
   });
@@ -211,7 +211,7 @@ describe('Provider', () => {
 
   describe('#getTransactionStatus()', () => {
     it('should return the `Committed` status for a mined transaction', async () => {
-      const result = await provider.getTransactionStatus(tx.hash);
+      const result = await provider.getTransactionStatus(receipt.hash);
       expect(result).not.to.be.null;
     });
 
@@ -225,14 +225,14 @@ describe('Provider', () => {
 
   describe('#getTransaction()', () => {
     it('should return a transaction', async () => {
-      const result = await provider.getTransaction(tx.hash);
+      const result = await provider.getTransaction(receipt.hash);
       expect(result).not.to.be.null;
     });
   });
 
   describe('#getTransactionReceipt()', () => {
     it('should return a transaction receipt', async () => {
-      const result = await provider.getTransaction(tx.hash);
+      const result = await provider.getTransaction(receipt.hash);
       expect(result).not.to.be.null;
     });
   });
@@ -305,18 +305,36 @@ describe('Provider', () => {
 
   describe('#getBlock()', () => {
     it('should return a block', async () => {
-      const blockNumber = (await provider.getBlockNumber()) - 1;
-      const result = await provider.getBlock(blockNumber, false);
+      const result = await provider.getBlock(receipt.blockNumber!, false);
       expect(result).not.to.be.null;
       expect(result.transactions).not.to.be.empty;
     });
 
     it('should return a block with prefetch transactions', async () => {
-      const blockNumber = (await provider.getBlockNumber()) - 1;
-      const result = await provider.getBlock(blockNumber, true);
+      const result = await provider.getBlock(receipt.blockNumber!, true);
       expect(result).not.to.be.null;
       expect(result.transactions).not.to.be.empty;
       expect(result.prefetchedTransactions).not.to.be.empty;
+    });
+
+    it('should return a latest block', async () => {
+      const result = await provider.getBlock('latest');
+      expect(result).not.to.be.null;
+    });
+
+    it('should return the earliest block', async () => {
+      const result = await provider.getBlock('earliest');
+      expect(result).not.to.be.null;
+    });
+
+    it('should return a committed block', async () => {
+      const result = await provider.getBlock('committed');
+      expect(result).not.to.be.null;
+    });
+
+    it('should return a finalized block', async () => {
+      const result = await provider.getBlock('finalized');
+      expect(result).not.to.be.null;
     });
   });
 
