@@ -92,6 +92,16 @@ async function createTokenL2(l1TokenAddress: string): Promise<string> {
   return await wallet.l2TokenAddress(l1TokenAddress);
 }
 
+async function sendETHL2() {
+  const priorityOpResponse = await wallet.deposit({
+    token: utils.ETH_ADDRESS,
+    to: await wallet.getAddress(),
+    amount: ethers.parseEther('500'),
+    refundRecipient: await wallet.getAddress(),
+  });
+  await priorityOpResponse.waitFinalize();
+}
+
 /*
 Deploy token to the L2 network through deposit transaction.
  */
@@ -99,6 +109,9 @@ async function main() {
   console.log('===== Depositing DAI to L2 =====');
   const l2TokenAddress = await createTokenL2(TokensL1[0].address);
   console.log(`L2 DAI address: ${l2TokenAddress}`);
+
+  console.log('===== Depositing ETH to L2 =====');
+  await sendETHL2();
 
   console.log('===== Deploying token and paymaster =====');
   const {token, paymaster} = await deployPaymasterAndToken();

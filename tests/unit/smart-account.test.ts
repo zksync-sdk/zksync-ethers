@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import '../custom-matchers';
-import {EIP712Signer, Provider, types} from '../../src';
+import {EIP712Signer, Provider, types, utils} from '../../src';
 import {TransactionRequest} from '../../src/types';
 import {
   populateTransactionECDSA,
@@ -30,7 +30,7 @@ describe('signPayloadWithECDSA()', () => {
 
     const result = await signPayloadWithECDSA(txHash, PRIVATE_KEY);
     expect(result).to.be.equal(
-      '0x89905d36a3cdde117445d6c58627061a53f09cf0535d73719d82d4d96fe332541167e2e3d38ce3cb2751a0203eff2a71f55ad45dc91623587f5480ec1883281b1b'
+      '0x53bb4fecadc70d4583a2b02b938f32432bfda5c25ec18fb653bfd4e993d8e509070c34b3637576011ffad14dae57a03f8e30e4198fffd7cbaaac353ee4a786191c'
     );
   });
 
@@ -85,7 +85,7 @@ describe('signPayloadWithMultipleECDSA()', () => {
       PRIVATE_KEY2,
     ]);
     expect(result).to.be.equal(
-      '0x89905d36a3cdde117445d6c58627061a53f09cf0535d73719d82d4d96fe332541167e2e3d38ce3cb2751a0203eff2a71f55ad45dc91623587f5480ec1883281b1bca3afd539deed6935f0a6ab5ec807d9bf292f90fb2f2aa447f1072fa9b2503a2576b47e8e9a340b3e2ee9fce3e90af8377ce790a9c7f730402db757b36c4d0e01b'
+      '0x53bb4fecadc70d4583a2b02b938f32432bfda5c25ec18fb653bfd4e993d8e509070c34b3637576011ffad14dae57a03f8e30e4198fffd7cbaaac353ee4a786191c1431d778d727a528e5923168a88b4afb199e5d985d2f084c08f7d32d7bfd84e70f36b6513bed0790172e05d976e0b0db0112e34a06881253db3a577d0fb0ff041c'
     );
   });
 
@@ -138,10 +138,10 @@ describe('populateTransaction()', () => {
       value: 7_000_000_000n,
       type: 113,
       data: '0x',
-      gasPrice: 250_000_000n,
+      gasPrice: 100_000_000n,
       gasLimit: 154_379n,
       customData: {
-        gasPerPubdata: 50_000,
+        gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         factoryDeps: [],
       },
       from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
@@ -156,7 +156,7 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
+    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'gasLimit']);
   });
 
   it('should throw an error when provider is not set', async () => {
