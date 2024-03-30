@@ -146,7 +146,7 @@ describe('utils', () => {
 
     it('should return a serialized transaction with populated default values', async () => {
       const tx =
-        '0x71ea8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0';
+        '0x71ec8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04984ffffffffc080c0';
       const result = utils.serialize({
         type: 113,
         chainId: 270,
@@ -157,7 +157,7 @@ describe('utils', () => {
 
     it('should return a serialized transaction with provided signature', async () => {
       const tx =
-        '0x71f87f8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0';
+        '0x71f8818080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04984ffffffffc080c0';
       const signature = ethers.utils.splitSignature(
         '0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a'
       );

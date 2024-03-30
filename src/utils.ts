@@ -203,8 +203,8 @@ export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200_000;
  *
  * @constant
  */
-// It is a realistic value, but it is large enough to fill into any batch regardless of the pubdata price.
-export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50_000;
+// It is a large value to fill into any batch regardless of the pubdata price.
+export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 4_294_967_295;
 
 /**
  * The `L1->L2` transactions are required to have the following gas per pubdata byte.
