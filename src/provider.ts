@@ -429,7 +429,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       defaultFormatter.formats.block.receiptsRoot = hash;
       defaultFormatter.formats.block.totalDifficulty = number;
       defaultFormatter.formats.block.logsBloom = data;
-      defaultFormatter.formats.block.sealFields = Formatter.arrayOf(data);
+      defaultFormatter.formats.block.sealFields = Formatter.allowNull(
+        Formatter.arrayOf(data)
+      );
       defaultFormatter.formats.block.uncles = Formatter.arrayOf(hash);
       defaultFormatter.formats.block.size = number;
       defaultFormatter.formats.block.mixHash = hash;
@@ -445,7 +447,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       defaultFormatter.formats.blockWithTransactions.totalDifficulty = number;
       defaultFormatter.formats.blockWithTransactions.logsBloom = data;
       defaultFormatter.formats.blockWithTransactions.sealFields =
-        Formatter.arrayOf(data);
+        Formatter.allowNull(Formatter.arrayOf(data));
       defaultFormatter.formats.blockWithTransactions.uncles =
         Formatter.arrayOf(hash);
       defaultFormatter.formats.blockWithTransactions.size = number;
