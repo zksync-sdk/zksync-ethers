@@ -161,7 +161,7 @@ const _formatBlock = object({
   baseFeePerGas: allowNull(getBigInt),
 
   logsBloom: formatData,
-  sealFields: arrayOf(formatData),
+  sealFields: allowNull(arrayOf(formatData)),
   uncles: arrayOf(formatHash),
   size: getBigInt,
   mixHash: formatHash,
