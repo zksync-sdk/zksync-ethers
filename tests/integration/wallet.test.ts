@@ -191,7 +191,7 @@ describe('Wallet', () => {
         gasLimit: 154_379n,
         chainId: 270n,
         data: '0x',
-        customData: {gasPerPubdata: 50_000, factoryDeps: []},
+        customData: {gasPerPubdata: 4_294_967_295, factoryDeps: []},
         gasPrice: 250_000_000n,
       };
 
