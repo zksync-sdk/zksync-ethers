@@ -57,7 +57,6 @@ function AdapterL1(Base) {
         async getAllowanceL1(token, bridgeAddress, blockTag) {
             if (!bridgeAddress) {
                 const bridgeContracts = await this.getL1BridgeContracts();
-                // If the token is Wrapped Ether, return allowance to its own bridge, otherwise to the default ERC20 bridge.
                 bridgeAddress = bridgeContracts.shared.address;
             }
             const erc20contract = Ierc20Factory_1.Ierc20Factory.connect(token, this._providerL1());
@@ -331,19 +330,16 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const bridgeContracts = await this.getL1BridgeContracts();
-            if (transaction.bridgeAddress != null) {
-                bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
-            }
             const tx = await this._getDepositTxWithDefaults(transaction);
             const { token, operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
             const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
-            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
+            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, l2GasLimit, gasPerPubdataByte);
             const mintValue = baseCost.add(operatorTip);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = 0);
             return {
                 tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
-                    chainId: (await this._providerL2().getNetwork()).chainId,
+                    chainId: chainId,
                     mintValue,
                     l2Value: 0,
                     l2GasLimit: l2GasLimit,
@@ -351,7 +347,7 @@ function AdapterL1(Base) {
                     refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
                     secondBridgeAddress: bridgeContracts.shared.address,
                     secondBridgeValue: 0,
-                    secondBridgeCalldata: ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to])
+                    secondBridgeCalldata: ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [token, amount, to]),
                 }, overrides),
                 mintValue: mintValue,
             };
@@ -363,9 +359,9 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const tx = await this._getDepositTxWithDefaults(transaction);
-            const { operatorTip, amount, to, overrides } = tx;
-            const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
-            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, await gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
+            const { operatorTip, amount, to, overrides, l2GasLimit, gasPerPubdataByte } = tx;
+            const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
+            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, l2GasLimit, gasPerPubdataByte);
             tx.overrides.value = 0;
             return {
                 tx: {
@@ -383,13 +379,12 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const sharedBridge = (await this.getL1BridgeContracts()).shared;
-            // const l1WethAddress = await sharedBridge.l1WethAddress();
             const tx = await this._getDepositTxWithDefaults(transaction);
             const { operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
             const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
-            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
+            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, l2GasLimit, gasPerPubdataByte);
             (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = amount);
-            const mintValue = baseCost.add(operatorTip); // of the base token, not eth
+            const mintValue = baseCost.add(operatorTip);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             return {
                 tx: await bridgehub.populateTransaction.requestL2TransactionTwoBridges({
@@ -401,7 +396,7 @@ function AdapterL1(Base) {
                     refundRecipient: refundRecipient !== null && refundRecipient !== void 0 ? refundRecipient : ethers_1.ethers.constants.AddressZero,
                     secondBridgeAddress: sharedBridge.address,
                     secondBridgeValue: amount,
-                    secondBridgeCalldata: ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [utils_1.ETH_ADDRESS_IN_CONTRACTS, 0, to])
+                    secondBridgeCalldata: ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "uint256", "address"], [utils_1.ETH_ADDRESS_IN_CONTRACTS, 0, to]),
                 }, overrides),
                 mintValue: mintValue,
             };
@@ -446,9 +441,9 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const tx = await this._getDepositTxWithDefaults(transaction);
-            const { operatorTip, amount, overrides, l2GasLimit, to } = tx;
-            const gasPriceForEstimation = await overrides.maxFeePerGas || await overrides.gasPrice;
-            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
+            const { operatorTip, amount, overrides, l2GasLimit, gasPerPubdataByte, to } = tx;
+            const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
+            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, l2GasLimit, gasPerPubdataByte);
             (_a = overrides.value) !== null && _a !== void 0 ? _a : (overrides.value = baseCost.add(operatorTip).add(amount));
             return {
                 contractAddress: to,
@@ -483,7 +478,7 @@ function AdapterL1(Base) {
         // Calculates the l2GasLimit of deposit transaction using custom bridge.
         async _getL2GasLimitFromCustomBridge(transaction) {
             var _a;
-            const customBridgeData = (_a = transaction.customBridgeData) !== null && _a !== void 0 ? _a : await (0, utils_1.getERC20DefaultBridgeData)(transaction.token, this._providerL1());
+            const customBridgeData = (_a = transaction.customBridgeData) !== null && _a !== void 0 ? _a : (await (0, utils_1.getERC20DefaultBridgeData)(transaction.token, this._providerL1()));
             const bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(transaction.bridgeAddress, this._signerL1());
             const l2Address = await bridge.l2Bridge();
             return await (0, utils_1.estimateCustomBridgeDepositL2Gas)(this._providerL2(), transaction.bridgeAddress, l2Address, transaction.token, transaction.amount, transaction.to, customBridgeData, await this.getAddress(), transaction.gasPerPubdataByte);
@@ -491,48 +486,49 @@ function AdapterL1(Base) {
         // Retrieves the full needed ETH fee for the deposit.
         // Returns the L1 fee and the L2 fee.
         async getFullRequiredDepositFee(transaction) {
-            var _a, _b, _c, _d;
+            var _a, _b;
+            var _c, _d;
             // It is assumed that the L2 fee for the transaction does not depend on its value.
-            const dummyAmount = "1";
-            const { ...tx } = transaction;
+            const dummyAmount = ethers_1.BigNumber.from(1);
             const bridgehub = await this.getBridgehubContract();
-            (_a = tx.overrides) !== null && _a !== void 0 ? _a : (tx.overrides = {});
-            await insertGasPrice(this._providerL1(), tx.overrides);
-            const gasPriceForMessages = (await tx.overrides.maxFeePerGas) || (await tx.overrides.gasPrice);
-            (_b = tx.to) !== null && _b !== void 0 ? _b : (tx.to = await this.getAddress());
-            (_c = tx.gasPerPubdataByte) !== null && _c !== void 0 ? _c : (tx.gasPerPubdataByte = utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT);
-            let l2GasLimit = null;
-            if (tx.bridgeAddress != null) {
-                const bridgeContracts = await this.getL1BridgeContracts();
-                const customBridgeData = (_d = tx.customBridgeData) !== null && _d !== void 0 ? _d : (tx.customBridgeData = await (0, utils_1.getERC20DefaultBridgeData)(tx.token, this._providerL1()));
-                let bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(tx.bridgeAddress, this._signerL1());
-                let l2Address = await bridge.l2Bridge();
-                l2GasLimit !== null && l2GasLimit !== void 0 ? l2GasLimit : (l2GasLimit = await (0, utils_1.estimateCustomBridgeDepositL2Gas)(this._providerL2(), tx.bridgeAddress, l2Address, tx.token, dummyAmount, tx.to, customBridgeData, await this.getAddress(), tx.gasPerPubdataByte));
+            const chainId = (await this._providerL2().getNetwork()).chainId;
+            const baseTokenAddress = await bridgehub.baseToken(chainId);
+            const isETHBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            const tx = await this._getDepositTxWithDefaults({
+                ...transaction,
+                amount: dummyAmount
+            });
+            const gasPriceForEstimation = (await tx.overrides.maxFeePerGas) || (await tx.overrides.gasPrice);
+            const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
+            if (isETHBasedChain) {
+                // To ensure that L1 gas estimation succeeds when using estimateGasDeposit,
+                // the account needs to have a sufficient ETH balance.
+                const selfBalanceETH = await this.getBalanceL1();
+                if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
+                    const recommendedETHBalance = ethers_1.BigNumber.from(utils_1.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT)
+                        .mul(gasPriceForEstimation)
+                        .add(baseCost);
+                    const formattedRecommendedBalance = ethers_1.ethers.utils.formatEther(recommendedETHBalance);
+                    throw new Error(`Not enough balance for deposit! Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`);
+                }
+                // In case of token deposit, a sufficient token allowance is also required.
+                if (tx.token !== utils_1.ETH_ADDRESS && (await this.getAllowanceL1(tx.token)) < dummyAmount) {
+                    throw new Error("Not enough allowance to cover the deposit!");
+                }
             }
             else {
-                l2GasLimit !== null && l2GasLimit !== void 0 ? l2GasLimit : (l2GasLimit = await (0, utils_1.estimateDefaultBridgeDepositL2Gas)(this._providerL1(), this._providerL2(), tx.token, dummyAmount, tx.to, await this.getAddress(), tx.gasPerPubdataByte));
-            }
-            const baseCost = await bridgehub.l2TransactionBaseCost((await this._providerL2().getNetwork()).chainId, gasPriceForMessages, l2GasLimit, tx.gasPerPubdataByte);
-            const selfBalanceETH = await this.getBalanceL1();
-            if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
-                const recommendedETHBalance = ethers_1.BigNumber.from(tx.token == utils_1.ETH_ADDRESS
-                    ? utils_1.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT
-                    : utils_1.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT)
-                    .mul(gasPriceForMessages)
-                    .add(baseCost);
-                const formattedRecommendedBalance = ethers_1.ethers.utils.formatEther(recommendedETHBalance);
-                throw new Error(`Not enough balance for deposit. Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`);
-            }
-            // For ETH token the value that the user passes to the estimation is the one which has the
-            // value for the L2 commission subtracted.
-            let amountForEstimate;
-            if ((0, utils_1.isETH)(tx.token)) {
-                amountForEstimate = ethers_1.BigNumber.from(dummyAmount);
-            }
-            else {
-                amountForEstimate = ethers_1.BigNumber.from(dummyAmount);
-                if ((await this.getAllowanceL1(tx.token)) < amountForEstimate) {
-                    throw new Error("Not enough allowance to cover the deposit");
+                const mintValue = baseCost.add(tx.operatorTip);
+                if ((await this.getAllowanceL1(baseTokenAddress)) < mintValue) {
+                    throw new Error("Not enough base token allowance to cover the deposit!");
+                }
+                if (tx.token === utils_1.ETH_ADDRESS || tx.token === baseTokenAddress) {
+                    (_a = (_c = tx.overrides).value) !== null && _a !== void 0 ? _a : (_c.value = tx.amount);
+                }
+                else {
+                    (_b = (_d = tx.overrides).value) !== null && _b !== void 0 ? _b : (_d.value = 0);
+                    if ((await this.getAllowanceL1(tx.token)) < dummyAmount) {
+                        throw new Error("Not enough token allowance to cover the deposit!");
+                    }
                 }
             }
             // Deleting the explicit gas limits in the fee estimation
@@ -544,14 +540,14 @@ function AdapterL1(Base) {
             delete estimationOverrides.maxPriorityFeePerGas;
             const l1GasLimit = await this.estimateGasDeposit({
                 ...tx,
-                amount: amountForEstimate,
+                amount: dummyAmount,
                 overrides: estimationOverrides,
-                l2GasLimit,
+                l2GasLimit: tx.l2GasLimit,
             });
             const fullCost = {
                 baseCost,
                 l1GasLimit,
-                l2GasLimit,
+                l2GasLimit: ethers_1.BigNumber.from(tx.l2GasLimit),
             };
             if (tx.overrides.gasPrice) {
                 fullCost.gasPrice = ethers_1.BigNumber.from(await tx.overrides.gasPrice);
@@ -673,7 +669,7 @@ function AdapterL1(Base) {
                 gasPerPubdataByte,
                 gasLimit: l2GasLimit,
             });
-            (_j = overrides.value) !== null && _j !== void 0 ? _j : (overrides.value = baseCost.add(operatorTip).add(l2Value));
+            (_j = overrides.value) !== null && _j !== void 0 ? _j : (overrides.value = isETHBaseToken ? baseCost.add(operatorTip).add(l2Value) : 0);
             await (0, utils_1.checkBaseCost)(baseCost, isETHBaseToken ? overrides.value : mintValue);
             return await bridgehub.populateTransaction.requestL2TransactionDirect({
                 chainId,
