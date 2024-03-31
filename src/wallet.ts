@@ -141,7 +141,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         const baseToken = await this.getBaseToken();
         const isETHBasedChain = await this.isETHBasedChain();
 
-        if (!isETHBasedChain && transaction.token == baseToken) {
+        if (!isETHBasedChain && (!transaction.token || transaction.token === baseToken)) {
             const tx = {
                 ...(await ethers.utils.resolveProperties((transaction.overrides ??= {}))),
                 from: await this.getAddress(),

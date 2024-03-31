@@ -3,6 +3,7 @@ import "../custom-matchers";
 import { Provider, types, utils, Wallet } from "../../src";
 import { ethers, BigNumber } from "ethers";
 import * as fs from "fs";
+import { ITestnetErc20TokenFactory } from "../../typechain/ITestnetErc20TokenFactory";
 
 const { expect } = chai;
 
@@ -252,16 +253,16 @@ describe("Wallet", async () => {
                     calldata: "0x",
                     l2Value: 7_000_000,
                     l2GasLimit: BigNumber.from(405_053),
-                    mintValue: BigNumber.from(210_121_250_750_000),
+                    mintValue: BigNumber.from(108_858_000_750_000),
                     token: "0x0000000000000000000000000000000000000000",
                     to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     amount: 7_000_000,
                     refundRecipient: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     operatorTip: BigNumber.from(0),
                     overrides: {
-                        maxFeePerGas: BigNumber.from(1_500_000_010),
+                        maxFeePerGas: BigNumber.from(1_500_000_001),
                         maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                        value: BigNumber.from(210_121_250_750_000),
+                        value: BigNumber.from(108_858_000_750_000),
                     },
                     gasPerPubdataByte: 800,
                 };
@@ -280,16 +281,16 @@ describe("Wallet", async () => {
                     calldata: "0x",
                     l2Value: 7_000_000,
                     l2GasLimit: BigNumber.from(405_053),
-                    mintValue: BigNumber.from(210_121_250_750_000),
+                    mintValue: BigNumber.from(108_858_000_750_000),
                     token: "0x0000000000000000000000000000000000000000",
                     to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     amount: 7_000_000,
                     refundRecipient: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     operatorTip: BigNumber.from(0),
                     overrides: {
-                        maxFeePerGas: BigNumber.from(1_500_000_010),
+                        maxFeePerGas: BigNumber.from(1_500_000_001),
                         maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                        value: BigNumber.from(210_121_250_750_000),
+                        value: BigNumber.from(108_858_000_750_000),
                     },
                     gasPerPubdataByte: 800,
                 };
@@ -303,9 +304,9 @@ describe("Wallet", async () => {
 
             it("should return DAI deposit transaction", async () => {
                 const transaction = {
-                    maxFeePerGas: BigNumber.from(1_500_000_010),
+                    maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                    value: BigNumber.from(210_121_243_750_000),
+                    value: BigNumber.from(108_857_993_750_000),
                     from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     to: await provider.getBridgehubContractAddress(),
                 };
@@ -384,7 +385,7 @@ describe("Wallet", async () => {
                     amount: 5,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(220_046))).to.be.true;
+                expect(result.eq(BigNumber.from(222_613))).to.be.true;
             });
 
             it("should return gas estimation for DAI deposit transaction", async () => {
@@ -394,7 +395,7 @@ describe("Wallet", async () => {
                     amount: 5,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(333_426))).to.be.true;
+                expect(result.eq(BigNumber.from(335_965))).to.be.true;
             });
         } else {
             it("should throw an error for insufficient allowance when estimating gas for ETH deposit transaction", async () => {
@@ -420,7 +421,7 @@ describe("Wallet", async () => {
                 ).wait();
 
                 const result = await wallet.estimateGasDeposit({
-                    token: utils.ETH_ADDRESS,
+                    token: token,
                     to: await wallet.getAddress(),
                     amount: amount,
                     refundRecipient: await wallet.getAddress(),
@@ -616,11 +617,9 @@ describe("Wallet", async () => {
                     amount: 7_000_000_000,
                     refundRecipient: await wallet.getAddress(),
                 });
-                await utils.sleep(10000);
-                // const tx = await response.waitFinalize();
+                const tx = await response.waitFinalize();
                 try {
-                    await wallet.claimFailedDeposit(response.hash);
-                    // await wallet.claimFailedDeposit(tx.transactionHash);
+                    await wallet.claimFailedDeposit(tx.transactionHash);
                 } catch (e) {
                     expect(e.message).to.be.equal("Cannot claim successful deposit");
                 }
@@ -641,7 +640,6 @@ describe("Wallet", async () => {
                     approveERC20: true,
                     refundRecipient: await wallet.getAddress(),
                 });
-                // await utils.sleep(10000);
                 const tx = await response.waitFinalize();
                 try {
                     await wallet.claimFailedDeposit(tx.transactionHash);
@@ -656,10 +654,10 @@ describe("Wallet", async () => {
         if (isETHBasedChain) {
             it("should return fee for ETH token deposit", async () => {
                 const FEE_DATA = {
-                    baseCost: BigNumber.from(207_964_281_250_000),
-                    l1GasLimit: BigNumber.from(220_046),
+                    baseCost: BigNumber.from(107_740_531_250_000),
+                    l1GasLimit: BigNumber.from(222_613),
                     l2GasLimit: BigNumber.from(400_895),
-                    maxFeePerGas: BigNumber.from(1_500_000_010),
+                    maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
                 const result = await wallet.getFullRequiredDepositFee({
@@ -682,10 +680,10 @@ describe("Wallet", async () => {
 
             it("should return fee for DAI token deposit", async () => {
                 const FEE_DATA = {
-                    baseCost: BigNumber.from(210_121_243_750_000),
-                    l1GasLimit: BigNumber.from(0x0514ce),
+                    baseCost: BigNumber.from(108_857_993_750_000),
+                    l1GasLimit: BigNumber.from(335_545),
                     l2GasLimit: BigNumber.from(405_053),
-                    maxFeePerGas: BigNumber.from(1_500_000_010),
+                    maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
 
@@ -715,6 +713,125 @@ describe("Wallet", async () => {
                 }
             }).timeout(10_000);
         } else {
+            it("should throw an error when there is not enough base token allowance to cover the deposit", async () => {
+                try {
+                    await Wallet.createRandom()
+                        .connectToL1(ethProvider)
+                        .connect(provider)
+                        .getFullRequiredDepositFee({
+                            token: utils.ETH_ADDRESS,
+                            to: await wallet.getAddress(),
+                    });
+                } catch (e) {
+                    expect(e.message).to.be.equal("Not enough base token allowance to cover the deposit!");
+                }
+            }).timeout(10_000);
+
+            it("should return fee for ETH token deposit", async () => {
+                const fee = {
+                    baseCost: BigNumber.from(107_740_531_250_000),
+                    l1GasLimit: BigNumber.from(318_786),
+                    l2GasLimit: BigNumber.from(400_895),
+                    maxFeePerGas: BigNumber.from(1_500_000_001),
+                    maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
+                };
+                const token = utils.ETH_ADDRESS
+                const approveParams = await wallet.getDepositAllowanceParams(token, 1);
+
+                await (
+                    await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)
+                ).wait();
+
+                const result = await wallet.getFullRequiredDepositFee({
+                    token: token,
+                    to: await wallet.getAddress(),
+                });
+                expect(result).to.be.deep.equal(fee);
+            }).timeout(10_000);
+
+            it("should return fee for base token deposit", async () => {
+                const fee = {
+                    baseCost: BigNumber.from(354_738_443_750_000),
+                    l1GasLimit: BigNumber.from(25_200),
+                    l2GasLimit: BigNumber.from(1_319_957),
+                    maxFeePerGas: BigNumber.from(1_500_000_001),
+                    maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
+                };
+                const token = await wallet.getBaseToken()
+                const approveParams = await wallet.getDepositAllowanceParams(token, 1);
+
+                await (
+                    await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)
+                ).wait();
+
+                const result = await wallet.getFullRequiredDepositFee({
+                    token: token,
+                    to: await wallet.getAddress(),
+                });
+                expect(result).to.be.deep.equal(fee);
+            }).timeout(10_000);
+
+            it("should return fee for DAI token deposit", async () => {
+                const fee = {
+                    baseCost: BigNumber.from(108_857_993_750_000),
+                    l1GasLimit: BigNumber.from(358_888),
+                    l2GasLimit: BigNumber.from(405_053),
+                    maxFeePerGas: BigNumber.from(1_500_000_001),
+                    maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
+                };
+                const token = DAI_L1;
+                const approveParams = await wallet.getDepositAllowanceParams(token, 1);
+
+                await (
+                    await wallet.approveERC20(approveParams[0].token, approveParams[0].allowance)
+                ).wait();
+                await (
+                    await wallet.approveERC20(approveParams[1].token, approveParams[1].allowance)
+                ).wait();
+
+                const result = await wallet.getFullRequiredDepositFee({
+                    token: token,
+                    to: await wallet.getAddress(),
+                });
+                expect(result).to.be.deep.equal(fee);
+            }).timeout(10_000);
+
+            it("should throw an error when there is not enough token allowance to cover the deposit", async () => {
+                const token = DAI_L1;
+                const randomWallet = Wallet.createRandom()
+                    .connectToL1(ethProvider)
+                    .connect(provider);
+
+                // mint base token to random wallet
+                const baseToken = ITestnetErc20TokenFactory.connect(await wallet.getBaseToken(), wallet._signerL1());
+                const baseTokenMintTx = await baseToken.mint(
+                        await randomWallet.getAddress(),
+                        ethers.utils.parseEther("0.5"),
+                );
+                await baseTokenMintTx.wait();
+
+                // transfer ETH to random wallet so that base token approval tx can be performed
+                const transferTx = await new ethers.Wallet(PRIVATE_KEY, ethProvider).sendTransaction({
+                    to: await randomWallet.getAddress(),
+                    value: ethers.utils.parseEther("0.1"),
+                });
+                await transferTx.wait();
+
+                const approveParams = await randomWallet.getDepositAllowanceParams(token, 1);
+                // only approve base token
+                await (
+                    await randomWallet.approveERC20(approveParams[0].token, approveParams[0].allowance)
+                ).wait();
+
+                try {
+                    await randomWallet.getFullRequiredDepositFee({
+                            token: token,
+                            to: await wallet.getAddress(),
+                    });
+                } catch (e) {
+                    expect(e.message).to.be.equal("Not enough token allowance to cover the deposit!");
+                }
+            }).timeout(20_000);
         }
     });
 
