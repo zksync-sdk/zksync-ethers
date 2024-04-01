@@ -1202,7 +1202,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * await tx.wait();
    */
   override async sendTransaction(
-    transaction: ethers.providers.TransactionRequest
+    transaction: TransactionRequest
   ): Promise<TransactionResponse> {
     return (await super.sendTransaction(transaction)) as TransactionResponse;
   }
