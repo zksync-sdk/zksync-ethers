@@ -505,7 +505,8 @@ function AdapterL1(Base) {
                 // the account needs to have a sufficient ETH balance.
                 const selfBalanceETH = await this.getBalanceL1();
                 if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
-                    const recommendedETHBalance = ethers_1.BigNumber.from(utils_1.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT)
+                    const recommendedL1GasLimit = tx.token === utils_1.ETH_ADDRESS ? utils_1.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT : utils_1.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT;
+                    const recommendedETHBalance = ethers_1.BigNumber.from(recommendedL1GasLimit)
                         .mul(gasPriceForEstimation)
                         .add(baseCost);
                     const formattedRecommendedBalance = ethers_1.ethers.utils.formatEther(recommendedETHBalance);

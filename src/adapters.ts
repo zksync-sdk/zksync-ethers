@@ -971,7 +971,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 // the account needs to have a sufficient ETH balance.
                 const selfBalanceETH = await this.getBalanceL1();
                 if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
-                    const recommendedETHBalance = BigNumber.from(L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT)
+                    const recommendedL1GasLimit = tx.token === ETH_ADDRESS ? L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT : L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT
+                    const recommendedETHBalance = BigNumber.from(recommendedL1GasLimit)
                         .mul(gasPriceForEstimation)
                         .add(baseCost);
                     const formattedRecommendedBalance = ethers.utils.formatEther(recommendedETHBalance);
