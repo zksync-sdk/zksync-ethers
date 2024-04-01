@@ -160,7 +160,7 @@ export interface TransactionResponse extends providers.TransactionResponse {
   /** The transaction index within the batch on the L1 network. */
   l1BatchTxIndex: number;
   /** Waits for transaction to be mined. */
-  wait(confirmations?: number): Promise<TransactionReceipt>
+  wait(confirmations?: number): Promise<TransactionReceipt>;
   /** Waits for transaction to be finalized. */
   waitFinalize(): Promise<TransactionReceipt>;
 }
