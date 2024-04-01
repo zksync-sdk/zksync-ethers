@@ -1033,7 +1033,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    *
    * const testnetPaymasterBytecodeHash = "0x010000f16d2b10ddeb1c32f2c9d222eb1aea0f638ec94a81d4e916c627720e30";
    *
-   * const provider = Provider.getDefaultProvider(types.Network.Goerli);
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * console.log(`Bytecode: ${await provider.getBytecodeByHash(testnetPaymasterBytecodeHash)}`);
    */
   async getBytecodeByHash(bytecodeHash: BytesLike): Promise<Uint8Array> {
@@ -1051,7 +1051,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    *
    * import { Provider, types, utils } from "zksync-ethers";
    *
-   * const provider = Provider.getDefaultProvider(types.Network.Goerli);
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * console.log(`Raw block transactions: ${utils.toJSON(await provider.getRawBlockTransactions(90_000))}`);
    */
   async getRawBlockTransactions(
@@ -1416,8 +1416,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     switch (zksyncNetwork) {
       case ZkSyncNetwork.Localhost:
         return new Provider('http://localhost:3050');
-      case ZkSyncNetwork.Goerli:
-        return new Provider('https://zksync2-testnet.zksync.dev');
       case ZkSyncNetwork.Sepolia:
         return new Provider('https://sepolia.era.zksync.dev');
       case ZkSyncNetwork.Mainnet:

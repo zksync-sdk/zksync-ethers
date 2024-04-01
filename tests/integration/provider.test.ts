@@ -52,12 +52,6 @@ describe('Provider', () => {
       expect(network.chainId).to.be.equal(270);
     });
 
-    it('should return a provider connected to Goerli network', async () => {
-      const provider = Provider.getDefaultProvider(types.Network.Goerli);
-      const network = await provider.getNetwork();
-      expect(network.chainId).to.be.equal(280);
-    });
-
     it('should return a provider connected to Sepolia network', async () => {
       const provider = Provider.getDefaultProvider(types.Network.Sepolia);
       const network = await provider.getNetwork();
