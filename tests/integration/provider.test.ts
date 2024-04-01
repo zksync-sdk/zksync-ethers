@@ -134,7 +134,9 @@ describe('Provider', () => {
 
   describe('#getTransactionDetails()', () => {
     it('should return transaction details', async () => {
-      const result = await provider.getTransactionDetails(receipt.transactionHash);
+      const result = await provider.getTransactionDetails(
+        receipt.transactionHash
+      );
       expect(result).not.to.be.null;
     });
   });
@@ -195,7 +197,9 @@ describe('Provider', () => {
 
   describe('#getTransactionStatus()', () => {
     it('should return transaction status', async () => {
-      const result = await provider.getTransactionStatus(receipt.transactionHash);
+      const result = await provider.getTransactionStatus(
+        receipt.transactionHash
+      );
       expect(result).not.to.be.null;
     });
 
@@ -496,7 +500,9 @@ describe('Provider', () => {
           amount: 5,
         });
       } catch (e) {
-        expect((e as Error).message).to.be.equal('Withdrawal target address is undefined!');
+        expect((e as Error).message).to.be.equal(
+          'Withdrawal target address is undefined!'
+        );
       }
     });
 
