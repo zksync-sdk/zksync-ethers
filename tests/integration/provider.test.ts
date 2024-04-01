@@ -19,16 +19,16 @@ describe('Provider', () => {
   const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4';
   const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174';
 
-  let tx: types.TransactionResponse;
+  let receipt: types.TransactionReceipt;
 
   before('setup', async function () {
     this.timeout(25_000);
-    tx = await wallet.transfer({
+    const tx = await wallet.transfer({
       token: utils.ETH_ADDRESS,
       to: RECEIVER,
       amount: 1_000_000,
     });
-    await tx.wait();
+    receipt = await tx.wait();
   });
 
   describe('#constructor()', () => {
@@ -140,7 +140,7 @@ describe('Provider', () => {
 
   describe('#getTransactionDetails()', () => {
     it('should return transaction details', async () => {
-      const result = await provider.getTransactionDetails(tx.hash);
+      const result = await provider.getTransactionDetails(receipt.transactionHash);
       expect(result).not.to.be.null;
     });
   });
@@ -201,7 +201,7 @@ describe('Provider', () => {
 
   describe('#getTransactionStatus()', () => {
     it('should return transaction status', async () => {
-      const result = await provider.getTransactionStatus(tx.hash);
+      const result = await provider.getTransactionStatus(receipt.transactionHash);
       expect(result).not.to.be.null;
     });
 
@@ -215,14 +215,14 @@ describe('Provider', () => {
 
   describe('#getTransaction()', () => {
     it('should return transaction', async () => {
-      const result = await provider.getTransaction(tx.hash);
+      const result = await provider.getTransaction(receipt.transactionHash);
       expect(result).not.to.be.null;
     });
   });
 
   describe('#getTransactionReceipt()', () => {
     it('should return transaction receipt', async () => {
-      const result = await provider.getTransaction(tx.hash);
+      const result = await provider.getTransaction(receipt.transactionHash);
       expect(result).not.to.be.null;
     });
   });
@@ -502,7 +502,7 @@ describe('Provider', () => {
           amount: 5,
         });
       } catch (e) {
-        expect(e).not.to.be.equal('withdrawal target address is undefined');
+        expect((e as Error).message).to.be.equal('Withdrawal target address is undefined!');
       }
     });
 
@@ -516,8 +516,8 @@ describe('Provider', () => {
           overrides: {value: 7},
         });
       } catch (e) {
-        expect(e).not.to.be.equal(
-          'The tx.value is not equal to the value withdrawn'
+        expect((e as Error).message).to.be.equal(
+          'The tx.value is not equal to the value withdrawn!'
         );
       }
     });
