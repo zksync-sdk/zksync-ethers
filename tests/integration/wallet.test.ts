@@ -709,7 +709,7 @@ describe("Wallet", async () => {
                         to: await wallet.getAddress(),
                     });
                 } catch (e) {
-                    expect(e.message).to.include("Not enough balance for deposit.");
+                    expect(e.message).to.include("Not enough balance for deposit!");
                 }
             }).timeout(10_000);
         } else {
