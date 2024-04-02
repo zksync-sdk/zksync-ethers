@@ -714,8 +714,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         switch (zksyncNetwork) {
             case ZkSyncNetwork.Localhost:
                 return new Provider("http://localhost:3050");
-            case ZkSyncNetwork.Goerli:
-                return new Provider("https://zksync2-testnet.zksync.dev");
             case ZkSyncNetwork.Sepolia:
                 return new Provider("https://sepolia.era.zksync.dev");
             case ZkSyncNetwork.Mainnet:
