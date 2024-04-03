@@ -171,13 +171,14 @@ export class EIP712Signer {
 export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   public override provider!: Provider;
   public eip712!: EIP712Signer;
+  protected providerL2?: Provider;
 
   override _signerL2() {
     return this;
   }
 
   override _providerL2() {
-    return this.provider;
+    return this.providerL2!;
   }
 
   /**
@@ -379,6 +380,8 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @param signer  The signer from browser wallet.
    * @param chainId The chain ID of the network.
+   * @param [zksyncProvider] The provider instance for connecting to a L2 network. If not provided,
+   * the methods from the `zks` namespace are not supported, and interaction with them will result in an error.
    *
    * @example
    *
@@ -392,10 +395,12 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    */
   static from(
     signer: ethers.JsonRpcSigner & {provider: Provider},
-    chainId: number
+    chainId: number,
+    zksyncProvider?: Provider
   ): Signer {
     const newSigner: Signer = Object.setPrototypeOf(signer, Signer.prototype);
     newSigner.eip712 = new EIP712Signer(newSigner, chainId);
+    newSigner.providerL2 = zksyncProvider;
     return newSigner;
   }
 
