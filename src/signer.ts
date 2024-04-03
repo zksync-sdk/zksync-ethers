@@ -186,26 +186,31 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example Get ETH balance
    *
-   * import { BrowserProvider } from "zksync-ethers";
-   * import { ethers } from "ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider((window as any).ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * console.log(`ETH balance: ${await signer.getBalance()}`);
    *
    * @example Get token balance
    *
-   * import { BrowserProvider } from "zksync-ethers";
-   * import { ethers } from "ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider((window as any).ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const token = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
    *
    * console.log(`Token balance: ${await signer.getBalance(token)}`);
-   *
    */
   override async getBalance(
     token?: Address,
@@ -219,11 +224,14 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example
    *
-   * import { BrowserProvider } from "zksync-ethers";
-   * import { ethers } from "ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider((window as any).ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const allBalances = await signer.getAllBalances();
    */
@@ -236,11 +244,14 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example
    *
-   * import { BrowserProvider } from "zksync-ethers";
-   * import { ethers } from "ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * console.log(`Nonce: ${await signer.getDeploymentNonce()}`);
    */
@@ -253,11 +264,14 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example
    *
-   * import { BrowserProvider } from "zksync-ethers";
-   * import { ethers } from "ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const l2BridgeContracts = await signer.getL2BridgeContracts();
    */
@@ -273,33 +287,40 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example Withdraw ETH
    *
-   * import { BrowserProvider } from "zksync-ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tokenWithdrawHandle = await signer.withdraw({
+   * const tx = await signer.withdraw({
    *   token: tokenL2,
    *   amount: 10_000_000,
    * });
    *
    * @example Withdraw ETH using paymaster to facilitate fee payment with an ERC20 token.
    *
-   * import { BrowserProvider } from "zksync-ethers";
-   * import { ethers } from "ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    *
    * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
    * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tokenWithdrawHandle = await wallet.withdraw({
+   * const tx = await wallet.withdraw({
    *   token: tokenL2,
-   *   amount: 10_000_000,
+   *   amount: 10_000_000n,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
    *     type: "ApprovalBased",
    *     token: token,
@@ -324,33 +345,41 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example Transfer ETH
    *
-   * import { BrowserProvider } from "zksync-ethers";
+   * import { BrowserProvider, Provider, Wallet, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
-   * const transferHandle = signer.transfer({
+   * const tx = signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
-   * const tx = await transferHandle.wait();
+   * const receipt = await tx.wait();
    *
-   * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
+   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
    * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token
    *
-   * import { BrowserProvider } from "zksync-ethers";
+   * import { BrowserProvider, Provider, Wallet, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
    * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
    *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = provider.getSigner();
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
-   * const transferHandle = signer.transfer({
+   * const tx = signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -361,9 +390,9 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *   }),
    * });
    *
-   * const tx = await transferHandle.wait();
+   * const receipt = await tx.wait();
    *
-   * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
+   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    */
   override async transfer(transaction: {
     to: Address;
@@ -385,13 +414,14 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * @example
    *
-   * import { Provider, types } from "zksync-ethers";
-   * import { ethers } from "ethers";
+   * import { BrowserProvider, Provider, types } from "zksync-ethers";
    *
-   * const ethProvider = new ethers.BrowserProvider(window.ethereum);
-   * const ethSigner = provider.getSigner("<ADDRESS>");
-   * const chainId = Number((await Provider.getDefaultProvider(types.Network.Sepolia).getNetwork()).chainId);
-   * const signer = Signer.from(ethSigner as any, chainId);
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    */
   static from(
     signer: ethers.JsonRpcSigner & {provider: Provider},
@@ -410,6 +440,22 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * @param transaction The transaction request that needs to be broadcast to the network.
    *
    * @throws {Error} If `transaction.from` is mismatched from the private key.
+   *
+   * @example
+   *
+   * import { BrowserProvider, Provider, Wallet, types } from "zksync-ethers";
+   *
+   * const browserProvider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Number((await browserProvider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * signer.sendTransaction({
+   *     to: Wallet.createRandom().address,
+   *     value: 10_000_000n
+   * });
    */
   override async sendTransaction(
     transaction: TransactionRequest
@@ -480,9 +526,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const mainContract = await signer.getMainContract();
    * console.log(mainContract.address);
@@ -499,9 +547,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const l1BridgeContracts = await signer.getL1BridgeContracts();
    */
@@ -520,9 +570,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    *
@@ -547,9 +599,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
    * console.log(`Token allowance: ${await signer.getAllowanceL1(tokenL1)}`);
@@ -570,9 +624,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
    *
@@ -590,9 +646,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * console.log(`Base cost: ${await signer.getBaseCost({ gasLimit: 100_000 })}`);
    */
@@ -614,9 +672,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * console.log(`Base cost: ${await signer.getBaseCost({ gasLimit: 100_000 })}`);
    */
@@ -631,34 +691,39 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
   /**
    * @inheritDoc
    *
-   * @example
+   * @example Deposit ETH
    *
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * await signer.deposit({
+   *   token: utils.ETH_ADDRESS,
+   *   amount: 10_000_000n,
+   * });
+   *
+   * @example Deposit token
+   *
+   * import { Provider, L1Signer, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-   * const tokenDepositHandle = await signer.deposit({
+   * await signer.deposit({
    *   token: tokenL1,
-   *   amount: "10000000",
+   *   amount: 10_000_000n,
    *   approveERC20: true,
    * });
-   * // Note that we wait not only for the L1 transaction to complete but also for it to be
-   * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
-   * // we can use `await tokenDepositHandle.waitL1Commit()`
-   * await tokenDepositHandle.wait();
-   *
-   * const ethDepositHandle = await signer.deposit({
-   *   token: utils.ETH_ADDRESS,
-   *   amount: "10000000",
-   * });
-   * // Note that we wait not only for the L1 transaction to complete but also for it to be
-   * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
-   * // we can use `await ethDepositHandle.waitL1Commit()`
-   * await ethDepositHandle.wait();
    */
   override async deposit(transaction: {
     token: Address;
@@ -685,14 +750,16 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
    * const gas = await signer.estimateGasDeposit({
    *   token: tokenL1,
-   *   amount: "10000000",
+   *   amount: 10_000_000n,
    * });
    * console.log(`Gas: ${gas}`);
    */
@@ -719,14 +786,16 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    * const tx = await signer.getDepositTx({
    *   token: tokenL1,
-   *   amount: "10000000",
+   *   amount: 10_000_000n,
    * });
    */
   override async getDepositTx(transaction: {
@@ -749,17 +818,19 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * @example
    *
-   * import { Provider, L1Signer, types } from "zksync-ethers";
+   * import { Provider, L1Signer, Wallet, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    * const fee = await signer.getFullRequiredDepositFee({
    *   token: tokenL1,
-   *   to: await wallet.getAddress(),
+   *   to: Wallet.createRandom().address,
    * });
    * console.log(`Fee: ${fee}`);
    */
@@ -782,49 +853,14 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const CONTRACT_ADDRESS = "<CONTRACT_ADDRESS>";
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
-   *
-   * const gasPrice = await signer.providerL1.getGasPrice();
-   *
-   * // The calldata can be encoded the same way as for Ethereum.
-   * // Here is an example of how to get the calldata from an ABI:
-   * const abi = [
-   *   {
-   *     inputs: [],
-   *     name: "increment",
-   *     outputs: [],
-   *     stateMutability: "nonpayable",
-   *     type: "function",
-   *   },
-   * ];
-   * const contractInterface = new ethers.utils.Interface(abi);
-   * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
-   *
-   * const txCostPrice = await signer.getBaseCost({
-   *   gasPrice,
-   *   calldataLength: ethers.utils.arrayify(calldata).length,
-   *   l2GasLimit,
-   * });
-   *
-   * console.log(`Executing the transaction will cost ${ethers.utils.formatEther(txCostPrice)} ETH`);
-   *
-   * const executeTx = await signer.requestExecute({
-   *   contractAddress: CONTRACT_ADDRESS,
-   *   calldata,
-   *   l2Value: 1,
-   *   l2GasLimit,
-   *   overrides: {
-   *     gasPrice,
-   *     value: txCostPrice,
-   *   },
-   * });
-   *
-   * await executeTx.wait();
+   * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+   * const params = await signer.finalizeWithdrawalParams(WITHDRAWAL_HASH);
    */
   override async finalizeWithdrawalParams(
     withdrawalHash: BytesLike,
@@ -841,9 +877,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
    * const finalizeWithdrawHandle = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
@@ -864,9 +902,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
    * const isFinalized = await signer.isWithdrawalFinalized(WITHDRAWAL_HASH);
@@ -886,9 +926,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
    * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
    * const claimFailedDepositHandle = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
@@ -910,47 +952,17 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const CONTRACT_ADDRESS = "<CONTRACT_ADDRESS>";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
-   * const gasPrice = await signer.providerL1.getGasPrice();
-   *
-   * // The calldata can be encoded the same way as for Ethereum.
-   * // Here is an example of how to get the calldata from an ABI:
-   * const abi = [
-   *   {
-   *     inputs: [],
-   *     name: "increment",
-   *     outputs: [],
-   *     stateMutability: "nonpayable",
-   *     type: "function",
-   *   },
-   * ];
-   * const contractInterface = new ethers.utils.Interface(abi);
-   * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
-   *
-   * const txCostPrice = await signer.getBaseCost({
-   *   gasPrice,
-   *   calldataLength: ethers.utils.arrayify(calldata).length,
-   *   l2GasLimit,
+   * await signer.requestExecute({
+   *     contractAddress: await signer.providerL2.getMainContractAddress(),
+   *     calldata: "0x",
+   *     l2Value: 7_000_000_000,
    * });
-   *
-   * console.log(`Executing the transaction will cost ${ethers.utils.formatEther(txCostPrice)} ETH`);
-   *
-   * const executeTx = await signer.requestExecute({
-   *   contractAddress: CONTRACT_ADDRESS,
-   *   calldata,
-   *   l2Value: 1,
-   *   l2GasLimit,
-   *   overrides: {
-   *     gasPrice,
-   *     value: txCostPrice,
-   *   },
-   * });
-   *
-   * await executeTx.wait();
    */
   override async requestExecute(transaction: {
     contractAddress: Address;
@@ -976,44 +988,16 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const CONTRACT_ADDRESS = "<CONTRACT_ADDRESS>";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
-   * const gasPrice = await signer.providerL1.getGasPrice();
-   *
-   * // The calldata can be encoded the same way as for Ethereum.
-   * // Here is an example of how to get the calldata from an ABI:
-   * const abi = [
-   *   {
-   *     inputs: [],
-   *     name: "increment",
-   *     outputs: [],
-   *     stateMutability: "nonpayable",
-   *     type: "function",
-   *   },
-   * ];
-   * const contractInterface = new ethers.utils.Interface(abi);
-   * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
-   *
-   * const txCostPrice = await signer.getBaseCost({
-   *   gasPrice,
-   *   calldataLength: ethers.utils.arrayify(calldata).length,
-   *   l2GasLimit,
-   * });
-   *
-   * console.log(`Executing the transaction will cost ${ethers.utils.formatEther(txCostPrice)} ETH`);
-   *
-   * const executeTx = await signer.getRequestExecuteTx({
-   *   contractAddress: CONTRACT_ADDRESS,
-   *   calldata,
-   *   l2Value: 1,
-   *   l2GasLimit,
-   *   overrides: {
-   *     gasPrice,
-   *     value: txCostPrice,
-   *   },
+   * await signer.estimateGasRequestExecute({
+   *     contractAddress: await signer.providerL2.getMainContractAddress(),
+   *     calldata: "0x",
+   *     l2Value: 7_000_000_000,
    * });
    */
   override async estimateGasRequestExecute(transaction: {
@@ -1040,44 +1024,16 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const CONTRACT_ADDRESS = "<CONTRACT_ADDRESS>";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    *
-   * const gasPrice = await signer.providerL1.getGasPrice();
-   *
-   * // The calldata can be encoded the same way as for Ethereum.
-   * // Here is an example of how to get the calldata from an ABI:
-   * const abi = [
-   *   {
-   *     inputs: [],
-   *     name: "increment",
-   *     outputs: [],
-   *     stateMutability: "nonpayable",
-   *     type: "function",
-   *   },
-   * ];
-   * const contractInterface = new ethers.utils.Interface(abi);
-   * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
-   *
-   * const txCostPrice = await signer.getBaseCost({
-   *   gasPrice,
-   *   calldataLength: ethers.utils.arrayify(calldata).length,
-   *   l2GasLimit,
-   * });
-   *
-   * console.log(`Executing the transaction will cost ${ethers.utils.formatEther(txCostPrice)} ETH`);
-   *
-   * const executeTx = await signer.getRequestExecuteTx({
-   *   contractAddress: CONTRACT_ADDRESS,
-   *   calldata,
-   *   l2Value: 1,
-   *   l2GasLimit,
-   *   overrides: {
-   *     gasPrice,
-   *     value: txCostPrice,
-   *   },
+   * await signer.getRequestExecuteTx({
+   *     contractAddress: await signer.providerL2.getMainContractAddress(),
+   *     calldata: "0x",
+   *     l2Value: 7_000_000_000,
    * });
    */
   override async getRequestExecuteTx(transaction: {
@@ -1105,9 +1061,11 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
-   * const provider = new ethers.BrowserProvider(window.ethereum);
-   * const zksyncProvider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = L1Signer.from(await provider.getSigner(), zksyncProvider);
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
    */
   static from(
     signer: ethers.JsonRpcSigner,
@@ -1125,6 +1083,19 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * Connects to the L2 network using the `provider`.
    *
    * @param provider The provider instance for connecting to a L2 network.
+   *
+   * @example
+   *
+   * import { Provider, L1Signer, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * signer.connectToL2(Provider.getDefaultProvider(types.Network.Mainnet));
    */
   connectToL2(provider: Provider): this {
     this.providerL2 = provider;
@@ -1176,7 +1147,7 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
    *
    * @example
    *
-   * import { Provider, L2VoidSigner, types } from "zksync-ethers";
+   * import { Provider, L2VoidSigner, Wallet, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const signer = new L2VoidSigner("<ADDRESS>", provider);
