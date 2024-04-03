@@ -487,43 +487,12 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const ethProvider = ethers.getDefaultProvider("sepolia");
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
-   * const gasPrice = await wallet.providerL1.getGasPrice();
-   *
-   * // The calldata can be encoded the same way as for Ethereum.
-   * // Here is an example of how to get the calldata from an ABI:
-   * const abi = [
-   *   {
-   *     inputs: [],
-   *     name: "increment",
-   *     outputs: [],
-   *     stateMutability: "nonpayable",
-   *     type: "function",
-   *   },
-   * ];
-   * const contractInterface = new ethers.utils.Interface(abi);
-   * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
-   *
-   * const txCostPrice = await wallet.getBaseCost({
-   *   gasPrice,
-   *   calldataLength: ethers.utils.arrayify(calldata).length,
-   *   l2GasLimit,
+   * const tx = await wallet.requestExecute({
+   *     contractAddress: await provider.getMainContractAddress(),
+   *     calldata: "0x",
+   *     l2Value: 7_000_000_000,
    * });
-   *
-   * console.log(`Executing the transaction will cost ${ethers.utils.formatEther(txCostPrice)} ETH`);
-   *
-   * const executeTx = await wallet.requestExecute({
-   *   contractAddress: CONTRACT_ADDRESS,
-   *   calldata,
-   *   l2Value: 1,
-   *   l2GasLimit,
-   *   overrides: {
-   *     gasPrice,
-   *     value: txCostPrice,
-   *   },
-   * });
-   *
-   * await executeTx.wait();
+   * await tx.wait();
    */
   override async requestExecute(transaction: {
     contractAddress: Address;
@@ -554,41 +523,12 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const ethProvider = ethers.getDefaultProvider("sepolia");
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
-   * const gasPrice = await wallet.providerL1.getGasPrice();
-   *
-   * // The calldata can be encoded the same way as for Ethereum.
-   * // Here is an example of how to get the calldata from an ABI:
-   * const abi = [
-   *   {
-   *     inputs: [],
-   *     name: "increment",
-   *     outputs: [],
-   *     stateMutability: "nonpayable",
-   *     type: "function",
-   *   },
-   * ];
-   * const contractInterface = new ethers.utils.Interface(abi);
-   * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
-   *
-   * const txCostPrice = await wallet.getBaseCost({
-   *   gasPrice,
-   *   calldataLength: ethers.utils.arrayify(calldata).length,
-   *   l2GasLimit,
+   * const gas = await wallet.estimateGasRequestExecute({
+   *     contractAddress: await provider.getMainContractAddress(),
+   *     calldata: "0x",
+   *     l2Value: 7_000_000_000,
    * });
-   *
-   * console.log(`Executing the transaction will cost ${ethers.utils.formatEther(txCostPrice)} ETH`);
-   *
-   * const executeTx = await wallet.getRequestExecuteTx({
-   *   contractAddress: CONTRACT_ADDRESS,
-   *   calldata,
-   *   l2Value: 1,
-   *   l2GasLimit,
-   *   overrides: {
-   *     gasPrice,
-   *     value: txCostPrice,
-   *   },
-   * });
+   * console.log(`Gas: ${gas}`);
    */
   override async estimateGasRequestExecute(transaction: {
     contractAddress: Address;
@@ -619,40 +559,10 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const ethProvider = ethers.getDefaultProvider("sepolia");
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
-   * const gasPrice = await wallet.providerL1.getGasPrice();
-   *
-   * // The calldata can be encoded the same way as for Ethereum.
-   * // Here is an example of how to get the calldata from an ABI:
-   * const abi = [
-   *   {
-   *     inputs: [],
-   *     name: "increment",
-   *     outputs: [],
-   *     stateMutability: "nonpayable",
-   *     type: "function",
-   *   },
-   * ];
-   * const contractInterface = new ethers.utils.Interface(abi);
-   * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
-   *
-   * const txCostPrice = await wallet.getBaseCost({
-   *   gasPrice,
-   *   calldataLength: ethers.utils.arrayify(calldata).length,
-   *   l2GasLimit,
-   * });
-   *
-   * console.log(`Executing the transaction will cost ${ethers.utils.formatEther(txCostPrice)} ETH`);
-   *
-   * const executeTx = await wallet.getRequestExecuteTx({
-   *   contractAddress: CONTRACT_ADDRESS,
-   *   calldata,
-   *   l2Value: 1,
-   *   l2GasLimit,
-   *   overrides: {
-   *     gasPrice,
-   *     value: txCostPrice,
-   *   },
+   * const tx = await wallet.getRequestExecuteTx({
+   *     contractAddress: await provider.getMainContractAddress(),
+   *     calldata: "0x",
+   *     l2Value: 7_000_000_000,
    * });
    */
   override async getRequestExecuteTx(transaction: {
@@ -699,7 +609,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const token = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
    *
    * console.log(`Token balance: ${await wallet.getBalance(token)}`);
-   *
    */
   override async getBalance(
     token?: Address,
