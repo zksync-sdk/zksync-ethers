@@ -652,7 +652,8 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * console.log(`Base cost: ${await signer.getBaseCost({ gasLimit: 100_000 })}`);
+   * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
+   * await signer.approveERC20(tokenL1, 5);
    */
   override async approveERC20(
     token: Address,
@@ -994,11 +995,12 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * await signer.estimateGasRequestExecute({
+   * const gas = await signer.estimateGasRequestExecute({
    *     contractAddress: await signer.providerL2.getMainContractAddress(),
    *     calldata: "0x",
    *     l2Value: 7_000_000_000,
    * });
+   * console.log(`Gas: ${gas}`);
    */
   override async estimateGasRequestExecute(transaction: {
     contractAddress: Address;
@@ -1030,7 +1032,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * await signer.getRequestExecuteTx({
+   * const tx = await signer.getRequestExecuteTx({
    *     contractAddress: await signer.providerL2.getMainContractAddress(),
    *     calldata: "0x",
    *     l2Value: 7_000_000_000,
