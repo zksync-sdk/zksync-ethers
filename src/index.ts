@@ -1,5 +1,6 @@
 export * as utils from './utils';
 export * as types from './types';
+export * as contracts from './typechain';
 export {
   EIP712Signer,
   Signer,
