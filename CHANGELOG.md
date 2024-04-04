@@ -1,3 +1,28 @@
+# [5.7.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.6.0...v5.7.0) (2024-04-04)
+
+
+### Bug Fixes
+
+* make `Block.sealFields` optional ([dc83275](https://github.com/zksync-sdk/zksync-ethers/commit/dc83275bc2dc316d4fd53376ee004af11358828e))
+* move `abi` folder at top level ([aacddbe](https://github.com/zksync-sdk/zksync-ethers/commit/aacddbe189dd916e713d044e4f59b50a0a280548))
+* **provider:** fix issue related to resolving `blockTag` value ([a9a1b30](https://github.com/zksync-sdk/zksync-ethers/commit/a9a1b3060db8d878870cad8c3f5633ac9785c736))
+* **signer, wallet:** make `l2GasLimit` optional parameter in `requestExecute` ([7279205](https://github.com/zksync-sdk/zksync-ethers/commit/7279205aaf40862229875f1b50a7a93021796852))
+* **signer:** add support for `zks` RPC methods in `Signer` ([5c718db](https://github.com/zksync-sdk/zksync-ethers/commit/5c718dbe43646f238f3fdd1a4c614b8f50f089a1))
+* **types:** `TransactionRespnose.wait()` return native `TransactionReceipt` ([9860d4d](https://github.com/zksync-sdk/zksync-ethers/commit/9860d4d61dde430df062b658c8e3e958528a01e0))
+* **wallet:** use native `TransactionRequest` type instead of `ethers` ([24c4071](https://github.com/zksync-sdk/zksync-ethers/commit/24c407192e9ec4016ca4d5771f1e84a38008ef82))
+
+
+### Features
+
+* add `SmartAccount` in order to provide better support for AA ([c38f20c](https://github.com/zksync-sdk/zksync-ethers/commit/c38f20c0c190a48f0e0cc04fa47f2ff3c25e9103))
+* **provider:** drop support for the `Goerly` network ([027d9b7](https://github.com/zksync-sdk/zksync-ethers/commit/027d9b7490842cfc0539d23f61266ae25d27e90a))
+
+
+### BREAKING CHANGES
+
+* **provider:** The function `Provider.getDefaultProvider()` no
+longer supports `types.Network.Goerli`.
+
 # [5.6.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.5.0...v5.6.0) (2024-03-18)
 
 
