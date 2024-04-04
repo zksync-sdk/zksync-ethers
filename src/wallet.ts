@@ -531,7 +531,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async requestExecute(transaction: {
     contractAddress: Address;
     calldata: string;
-    l2GasLimit: BigNumberish;
+    l2GasLimit?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
