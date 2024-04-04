@@ -964,7 +964,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
   override async requestExecute(transaction: {
     contractAddress: Address;
     calldata: string;
-    l2GasLimit: BigNumberish;
+    l2GasLimit?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
