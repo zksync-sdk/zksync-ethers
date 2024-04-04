@@ -1,3 +1,24 @@
+# [6.7.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.6.0...v6.7.0) (2024-04-04)
+
+
+### Bug Fixes
+
+* make `Block.sealFields` optional ([5825404](https://github.com/zksync-sdk/zksync-ethers/commit/5825404fc5124af9d6c22292da74b9929aa86152))
+* move `abi` folder at top level ([2759e5d](https://github.com/zksync-sdk/zksync-ethers/commit/2759e5da38bd09bae998aafa01c8a8ee8858a7e2))
+* **provider:** drop support for the `Goerli` network ([a395dae](https://github.com/zksync-sdk/zksync-ethers/commit/a395daed6aabb506b3355549f3d1201d8ae2795d))
+* **signer:** add support for `zks` RPC methods in `Signer` ([c63faea](https://github.com/zksync-sdk/zksync-ethers/commit/c63faeaa65f80aa3ada3092031eab622e9123df5))
+
+
+### Features
+
+* add `SmartAccount` in order to provide better support for AA ([d31a9b1](https://github.com/zksync-sdk/zksync-ethers/commit/d31a9b1f513099255a312288de2e9521831a2d4e))
+
+
+### BREAKING CHANGES
+
+* **provider:** The function `Provider.getDefaultProvider()` no
+longer supports `types.Network.Goerli`.
+
 # [6.6.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.5.0...v6.6.0) (2024-03-18)
 
 
