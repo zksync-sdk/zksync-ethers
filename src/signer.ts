@@ -180,26 +180,26 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
   /**
    * @inheritDoc
    *
-   * @example Get ETH balance
+   * @example Get ETH balance.
    *
    * import { Web3Provider, Provider, types } from "zksync-ethers";
    *
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * console.log(`ETH balance: ${await signer.getBalance()}`);
    *
-   * @example Get token balance
+   * @example Get token balance.
    *
    * import { Web3Provider, Provider, types } from "zksync-ethers";
    *
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const token = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
@@ -223,7 +223,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const allBalances = await signer.getAllBalances();
@@ -242,7 +242,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * console.log(`Nonce: ${await signer.getDeploymentNonce()}`);
@@ -261,7 +261,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const l2BridgeContracts = await signer.getL2BridgeContracts();
@@ -276,14 +276,14 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
   /**
    * @inheritDoc
    *
-   * @example Withdraw ETH
+   * @example Withdraw ETH.
    *
    * import { Web3Provider, Provider, types } from "zksync-ethers";
    *
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
@@ -302,7 +302,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
@@ -339,17 +339,13 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const tx = signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    * });
-   *
-   * const receipt = await tx.wait();
-   *
-   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
    * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token
    *
@@ -362,7 +358,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const tx = signer.transfer({
@@ -404,7 +400,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    */
   static from(
@@ -429,7 +425,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * const nonce = await signer.getNonce();
@@ -452,7 +448,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const browserProvider = new Web3Provider(window.ethereum);
    * const signer = Signer.from(
    *     browserProvider.getSigner(),
-   *     Provider.getDefaultProvider(types.Network.Sepolia);
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
    * await signer.sendTransaction({
@@ -561,7 +557,20 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
   /**
    * @inheritDoc
    *
-   * @example
+   * @example Get ETH balance.
+   *
+   * import { Provider, L1Signer, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const browserProvider = new ethers.providers.Web3Provider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * console.log(await signer.getBalanceL1());
+   *
+   * @example Get token balance.
    *
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -573,12 +582,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    * );
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-   *
-   * // Getting token balance
    * console.log(await signer.getBalanceL1(tokenL1));
-   *
-   * // Getting ETH balance
-   * console.log(await signer.getBalanceL1());
    */
   override async getBalanceL1(
     token?: Address,
@@ -688,7 +692,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
   /**
    * @inheritDoc
    *
-   * @example Deposit ETH
+   * @example Deposit ETH.
    *
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -704,7 +708,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    *   amount: 10_000_000,
    * });
    *
-   * @example Deposit token
+   * @example Deposit token.
    *
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -849,8 +853,6 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    *
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
-   *
-   * const CONTRACT_ADDRESS = "<CONTRACT_ADDRESS>";
    *
    * const browserProvider = new ethers.providers.Web3Provider(window.ethereum);
    * const signer = L1Signer.from(
