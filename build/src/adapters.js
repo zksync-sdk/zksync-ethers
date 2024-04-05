@@ -468,11 +468,13 @@ function AdapterL1(Base) {
         }
         // Default behaviour for calculating l2GasLimit of deposit transaction.
         async _getL2GasLimit(transaction) {
+            const baseToken = await this.getBaseToken();
+            const correcteBaseToken = baseToken == utils_1.ETH_ADDRESS_IN_CONTRACTS ? utils_1.ETH_ADDRESS : baseToken;
             if (transaction.bridgeAddress != null) {
                 return await this._getL2GasLimitFromCustomBridge(transaction);
             }
             else {
-                return await (0, utils_1.estimateDefaultBridgeDepositL2Gas)(this._providerL1(), this._providerL2(), transaction.token, transaction.amount, transaction.to, await this.getAddress(), transaction.gasPerPubdataByte);
+                return await (0, utils_1.estimateDefaultBridgeDepositL2Gas)(this._providerL1(), this._providerL2(), transaction.token, transaction.amount, transaction.to, await this.getAddress(), transaction.gasPerPubdataByte, transaction.token == correcteBaseToken);
             }
         }
         // Calculates the l2GasLimit of deposit transaction using custom bridge.

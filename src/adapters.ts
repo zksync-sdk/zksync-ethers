@@ -890,6 +890,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
         }): Promise<BigNumberish> {
+            const baseToken = await this.getBaseToken();
+            const correcteBaseToken = baseToken == ETH_ADDRESS_IN_CONTRACTS ? ETH_ADDRESS : baseToken;
             if (transaction.bridgeAddress != null) {
                 return await this._getL2GasLimitFromCustomBridge(transaction);
             } else {
@@ -901,6 +903,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     transaction.to,
                     await this.getAddress(),
                     transaction.gasPerPubdataByte,
+                    transaction.token == correcteBaseToken,
                 );
             }
         }
