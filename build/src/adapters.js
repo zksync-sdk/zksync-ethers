@@ -514,7 +514,7 @@ function AdapterL1(Base) {
                 }
                 // In case of token deposit, a sufficient token allowance is also required.
                 if (tx.token !== utils_1.ETH_ADDRESS && (await this.getAllowanceL1(tx.token)) < dummyAmount) {
-                    throw new Error("Not enough allowance to cover the deposit");
+                    throw new Error("Not enough allowance to cover the deposit!");
                 }
             }
             else {
