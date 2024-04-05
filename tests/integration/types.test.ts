@@ -208,14 +208,14 @@ describe('types', () => {
     describe('#serialized()', () => {
       it('should return the serialized EIP1559 transaction', async () => {
         const tx =
-          '0x02f87082010e01843b9aca008459682f0083025de894a61464658afeaf65cccaafd3a512b69a83b77618830f424080c080a09b9cfb09599c0e632deb3954505234448edaef0bae4776a88473692343d0013da035c2825459b717aa827569a4dd4077dcf4e35cb24a12fbdfcfa46be24bd271ae';
+          '0x02f87082010e01843b9aca008447868c008302719494a61464658afeaf65cccaafd3a512b69a83b77618830f424080c080a028a5a399b859e0dcc2aae91b20e5554cbffbd6767cbaceeb11f6df9f5cb74dc1a01c9034c1dce62f775e5f88c005850d36c32834cd0e105d5230d2b9785ec2bc90';
         const result = eip1559Tx.serialized;
         expect(result).to.be.equal(tx);
       });
 
       it('should return the serialized EIP712 transaction', async () => {
         const tx =
-          '0x71f88e01840ee6b280840ee6b28083025b0b94a61464658afeaf65cccaafd3a512b69a83b77618830f42408082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c0b841de26c3845dd9032d8fb6e761c89e155181e3cbd12d4294fec4065dafaa8628af482ba6f5361aa016b5371b00ff5e8222a148ced3d485f3cba9d25c08761b25b51cc0';
+          '0x71f890018405f5e1008405f5e1008302662294a61464658afeaf65cccaafd3a512b69a83b77618830f42408082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04984ffffffffc0b841c23a07fb6aa2f3f9fd1aa284b455799e37c5e70cdfc41c138ebf68ab005c1796242512709c548e9636fab11237cea25df965aaa81879f018023c7a41438887f91bc0';
         const result = eip712Tx.serialized;
         expect(result).to.be.equal(tx);
       });
@@ -224,14 +224,14 @@ describe('types', () => {
     describe('#unsignedSerialized()', () => {
       it('should return the unsigned serialized EIP1559 transaction', async () => {
         const tx =
-          '0x02ed82010e01843b9aca008459682f0083025de894a61464658afeaf65cccaafd3a512b69a83b77618830f424080c0';
+          '0x02ed82010e01843b9aca008447868c008302719494a61464658afeaf65cccaafd3a512b69a83b77618830f424080c0';
         const result = eip1559Tx.unsignedSerialized;
         expect(result).to.be.equal(tx);
       });
 
       it('should return the unsigned serialized EIP712 transaction', async () => {
         const tx =
-          '0x71f88e01840ee6b280840ee6b28083025b0b94a61464658afeaf65cccaafd3a512b69a83b77618830f42408082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c0b841de26c3845dd9032d8fb6e761c89e155181e3cbd12d4294fec4065dafaa8628af482ba6f5361aa016b5371b00ff5e8222a148ced3d485f3cba9d25c08761b25b51cc0';
+          '0x71f890018405f5e1008405f5e1008302662294a61464658afeaf65cccaafd3a512b69a83b77618830f42408082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04984ffffffffc0b841c23a07fb6aa2f3f9fd1aa284b455799e37c5e70cdfc41c138ebf68ab005c1796242512709c548e9636fab11237cea25df965aaa81879f018023c7a41438887f91bc0';
         const result = eip712Tx.unsignedSerialized;
         expect(result).to.be.equal(tx);
       });
