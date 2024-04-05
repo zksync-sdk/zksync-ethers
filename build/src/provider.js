@@ -432,7 +432,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
             const addresses = await this.send("zks_getBridgeContracts", []);
             this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
             this.contractAddresses.sharedBridgeL1 = addresses.l1SharedDefaultBridge;
-            this.contractAddresses.sharedBridgeL2 = addresses.l2Erc20DefaultBridge;
+            this.contractAddresses.sharedBridgeL2 = addresses.l2SharedDefaultBridge;
         }
         return {
             erc20L1: this.contractAddresses.erc20BridgeL1,
@@ -537,8 +537,6 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         switch (zksyncNetwork) {
             case types_1.Network.Localhost:
                 return new Provider("http://localhost:3050");
-            case types_1.Network.Goerli:
-                return new Provider("https://zksync2-testnet.zksync.dev");
             case types_1.Network.Sepolia:
                 return new Provider("https://sepolia.era.zksync.dev");
             case types_1.Network.Mainnet:

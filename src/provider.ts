@@ -565,7 +565,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             const addresses = await this.send("zks_getBridgeContracts", []);
             this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
             this.contractAddresses.sharedBridgeL1 = addresses.l1SharedDefaultBridge;
-            this.contractAddresses.sharedBridgeL2 = addresses.l2Erc20DefaultBridge;
+            this.contractAddresses.sharedBridgeL2 = addresses.l2SharedDefaultBridge;
         }
         return {
             erc20L1: this.contractAddresses.erc20BridgeL1,

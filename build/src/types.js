@@ -7,7 +7,6 @@ var Network;
     Network[Network["Mainnet"] = 1] = "Mainnet";
     Network[Network["Ropsten"] = 3] = "Ropsten";
     Network[Network["Rinkeby"] = 4] = "Rinkeby";
-    Network[Network["Goerli"] = 5] = "Goerli";
     Network[Network["Sepolia"] = 6] = "Sepolia";
     Network[Network["Localhost"] = 9] = "Localhost";
 })(Network = exports.Network || (exports.Network = {}));
