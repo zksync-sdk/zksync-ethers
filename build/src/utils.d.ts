@@ -54,6 +54,6 @@ export declare function getERC20DefaultBridgeData(l1TokenAddress: string, provid
 export declare function getERC20BridgeCalldata(l1TokenAddress: string, l1Sender: string, l2Receiver: string, amount: BigNumberish, bridgeData: BytesLike): Promise<string>;
 export declare function isMessageSignatureCorrect(provider: Provider, address: string, message: ethers.Bytes | string, signature: SignatureLike): Promise<boolean>;
 export declare function isTypedDataSignatureCorrect(provider: Provider, address: string, domain: TypedDataDomain, types: Record<string, Array<TypedDataField>>, value: Record<string, any>, signature: SignatureLike): Promise<boolean>;
-export declare function estimateDefaultBridgeDepositL2Gas(providerL1: ethers.providers.Provider, providerL2: Provider, token: Address, amount: BigNumberish, to: Address, from?: Address, gasPerPubdataByte?: BigNumberish): Promise<BigNumber>;
+export declare function estimateDefaultBridgeDepositL2Gas(providerL1: ethers.providers.Provider, providerL2: Provider, token: Address, amount: BigNumberish, to: Address, from?: Address, gasPerPubdataByte?: BigNumberish, isBaseTokenDeposit?: boolean): Promise<BigNumber>;
 export declare function scaleGasLimit(gasLimit: BigNumber): BigNumber;
 export declare function estimateCustomBridgeDepositL2Gas(providerL2: Provider, l1BridgeAddress: Address, l2BridgeAddress: Address, token: Address, amount: BigNumberish, to: Address, bridgeData: BytesLike, from?: Address, gasPerPubdataByte?: BigNumberish, l2Value?: BigNumberish): Promise<BigNumber>;

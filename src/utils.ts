@@ -545,13 +545,13 @@ export async function estimateDefaultBridgeDepositL2Gas(
     to: Address,
     from?: Address,
     gasPerPubdataByte?: BigNumberish,
+    isBaseTokenDeposit: boolean = false,
 ): Promise<BigNumber> {
     // If the `from` address is not provided, we use a random address, because
     // due to storage slot aggregation, the gas estimation will depend on the address
     // and so estimation for the zero address may be smaller than for the sender.
     from ??= ethers.Wallet.createRandom().address;
-
-    if (token == ETH_ADDRESS) {
+    if (isBaseTokenDeposit) {
         return await providerL2.estimateL1ToL2Execute({
             contractAddress: to,
             gasPerPubdataByte: gasPerPubdataByte,

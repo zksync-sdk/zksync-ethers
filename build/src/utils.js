@@ -426,12 +426,12 @@ async function isTypedDataSignatureCorrect(provider, address, domain, types, val
     return await isSignatureCorrect(provider, address, msgHash, signature);
 }
 exports.isTypedDataSignatureCorrect = isTypedDataSignatureCorrect;
-async function estimateDefaultBridgeDepositL2Gas(providerL1, providerL2, token, amount, to, from, gasPerPubdataByte) {
+async function estimateDefaultBridgeDepositL2Gas(providerL1, providerL2, token, amount, to, from, gasPerPubdataByte, isBaseTokenDeposit = false) {
     // If the `from` address is not provided, we use a random address, because
     // due to storage slot aggregation, the gas estimation will depend on the address
     // and so estimation for the zero address may be smaller than for the sender.
     from !== null && from !== void 0 ? from : (from = ethers_1.ethers.Wallet.createRandom().address);
-    if (token == exports.ETH_ADDRESS) {
+    if (isBaseTokenDeposit) {
         return await providerL2.estimateL1ToL2Execute({
             contractAddress: to,
             gasPerPubdataByte: gasPerPubdataByte,
