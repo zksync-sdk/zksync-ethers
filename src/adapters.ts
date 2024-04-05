@@ -982,7 +982,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 }
                 // In case of token deposit, a sufficient token allowance is also required.
                 if (tx.token !== ETH_ADDRESS && (await this.getAllowanceL1(tx.token)) < dummyAmount) {
-                    throw new Error("Not enough allowance to cover the deposit");
+                    throw new Error("Not enough allowance to cover the deposit!");
                 }
             } else  {
                 const mintValue = baseCost.add(tx.operatorTip);
