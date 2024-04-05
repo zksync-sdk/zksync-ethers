@@ -1253,15 +1253,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 gasLimit: l2GasLimit,
             });
 
-            overrides.value ??= isETHBaseToken ? baseCost.add(operatorTip).add(l2Value) : 0;
-            mintValue ??= isETHBaseToken ? 0 : baseCost.add(operatorTip).add(l2Value);
+            const l2Costs = baseCost.add(operatorTip).add(l2Value);
+            let providedValue =  isETHBaseToken ? overrides.value : mintValue;
+            providedValue ??= l2Costs;
 
-            await checkBaseCost(baseCost, isETHBaseToken ? overrides.value : mintValue);
+            await checkBaseCost(baseCost, providedValue);
 
             return await bridgehub.populateTransaction.requestL2TransactionDirect(
                 {
                     chainId,
-                    mintValue: isETHBaseToken ? await overrides.value : mintValue,
+                    mintValue: await providedValue,
                     l2Contract: contractAddress,
                     l2Value: l2Value,
                     l2Calldata: calldata,
