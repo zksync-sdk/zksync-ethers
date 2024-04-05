@@ -1224,7 +1224,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
             const { ...tx } = transaction;
             tx.l2Value ??= BigNumber.from(0);
-            tx.mintValue ??= BigNumber.from(0);
             tx.operatorTip ??= BigNumber.from(0);
             tx.factoryDeps ??= [];
             tx.overrides ??= {};
@@ -1234,7 +1233,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
             const {
                 contractAddress,
-                mintValue,
                 l2Value,
                 calldata,
                 l2GasLimit,
@@ -1244,6 +1242,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 gasPerPubdataByte,
                 refundRecipient,
             } = tx;
+            let { mintValue } = tx;
 
             await insertGasPrice(this._providerL1(), overrides);
             const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
@@ -1255,6 +1254,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             });
 
             overrides.value ??= isETHBaseToken ? baseCost.add(operatorTip).add(l2Value) : 0;
+            mintValue ??= isETHBaseToken ? 0 : baseCost.add(operatorTip).add(l2Value);
 
             await checkBaseCost(baseCost, isETHBaseToken ? overrides.value : mintValue);
 
