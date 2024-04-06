@@ -5,7 +5,7 @@ import {ethers} from 'ethers';
 
 const {expect} = chai;
 
-import TokensL1 from '../tokens.json';
+import TokensL1 from '../files/tokens.json';
 import Token from '../files/Token.json';
 import Paymaster from '../files/Paymaster.json';
 import Storage from '../files/Storage.json';

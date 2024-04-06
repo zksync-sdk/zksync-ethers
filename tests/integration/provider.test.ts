@@ -3,7 +3,7 @@ import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
 import {ethers} from 'ethers';
 
-import TokensL1 from '../tokens.json';
+import TokensL1 from '../files/tokens.json';
 
 describe('Provider', () => {
   const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';

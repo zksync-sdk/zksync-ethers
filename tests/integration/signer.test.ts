@@ -5,7 +5,7 @@ import {ethers} from 'ethers';
 
 const {expect} = chai;
 
-import TokensL1 from '../tokens.json';
+import TokensL1 from '../files/tokens.json';
 
 describe('L2VoidSigner', () => {
   const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';

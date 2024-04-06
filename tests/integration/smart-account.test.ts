@@ -13,7 +13,7 @@ import {ECDSASmartAccount, MultisigECDSASmartAccount} from '../../src';
 
 const {expect} = chai;
 
-import TokensL1 from '../tokens.json';
+import TokensL1 from '../files/tokens.json';
 import MultisigAccount from '../files/TwoUserMultisig.json';
 
 describe('SmartAccount', async () => {

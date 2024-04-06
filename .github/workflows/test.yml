@@ -33,6 +33,11 @@ jobs:
           popd
       - name: Wait for local-setup to be ready
         run: yarn test:wait
+      - name: Prepare proxy
+        run: |
+          pushd scripts
+          ./update-diamond-proxy.sh
+          popd
       - name: Prepare environment
         run: yarn test:prepare
       - name: Run tests
