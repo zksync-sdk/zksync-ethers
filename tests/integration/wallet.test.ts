@@ -131,7 +131,7 @@ describe("Wallet", async () => {
     describe("#getAllBalances()", () => {
         it("should return all balance", async () => {
             const result = await wallet.getAllBalances();
-            expect(Object.keys(result)).to.have.lengthOf(2);
+            expect(Object.keys(result)).to.have.lengthOf(1);
         });
     });
 
@@ -385,7 +385,7 @@ describe("Wallet", async () => {
                     amount: 5,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(222_613))).to.be.true;
+                expect(result.eq(BigNumber.from(225_284))).to.be.true;
             });
 
             it("should return gas estimation for DAI deposit transaction", async () => {
@@ -395,7 +395,7 @@ describe("Wallet", async () => {
                     amount: 5,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(335_965))).to.be.true;
+                expect(result.eq(BigNumber.from(338_568))).to.be.true;
             });
         } else {
             it("should throw an error for insufficient allowance when estimating gas for ETH deposit transaction", async () => {
@@ -465,7 +465,7 @@ describe("Wallet", async () => {
                     amount: amount,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(359_308))).to.be.true;
+                expect(result.eq(BigNumber.from(361_926))).to.be.true;
             }).timeout(10_000);
         }
     });
@@ -655,7 +655,7 @@ describe("Wallet", async () => {
             it("should return fee for ETH token deposit", async () => {
                 const FEE_DATA = {
                     baseCost: BigNumber.from(107_740_531_250_000),
-                    l1GasLimit: BigNumber.from(222_613),
+                    l1GasLimit: BigNumber.from(225_284),
                     l2GasLimit: BigNumber.from(400_895),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
@@ -674,14 +674,14 @@ describe("Wallet", async () => {
                         to: await wallet.getAddress(),
                     });
                 } catch (e) {
-                    expect(e.message).to.be.equal("Not enough allowance to cover the deposit");
+                    expect(e.message).to.be.equal("Not enough allowance to cover the deposit!");
                 }
             }).timeout(10_000);
 
             it("should return fee for DAI token deposit", async () => {
                 const FEE_DATA = {
                     baseCost: BigNumber.from(108_857_993_750_000),
-                    l1GasLimit: BigNumber.from(335_545),
+                    l1GasLimit: BigNumber.from(338_148),
                     l2GasLimit: BigNumber.from(405_053),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
@@ -730,7 +730,7 @@ describe("Wallet", async () => {
             it("should return fee for ETH token deposit", async () => {
                 const fee = {
                     baseCost: BigNumber.from(107_740_531_250_000),
-                    l1GasLimit: BigNumber.from(318_786),
+                    l1GasLimit: BigNumber.from(321_403),
                     l2GasLimit: BigNumber.from(400_895),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
@@ -774,7 +774,7 @@ describe("Wallet", async () => {
             it("should return fee for DAI token deposit", async () => {
                 const fee = {
                     baseCost: BigNumber.from(108_857_993_750_000),
-                    l1GasLimit: BigNumber.from(358_888),
+                    l1GasLimit: BigNumber.from(361_506),
                     l2GasLimit: BigNumber.from(405_053),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),

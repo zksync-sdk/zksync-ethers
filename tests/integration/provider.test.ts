@@ -117,7 +117,7 @@ describe("Provider", () => {
     describe("#getAllAccountBalances()", () => {
         it("should return all balances of the account at `address`", async () => {
             const result = await provider.getAllAccountBalances(ADDRESS);
-            expect(Object.keys(result)).to.have.lengthOf(2);
+            expect(Object.keys(result)).to.have.lengthOf(1);
         });
     });
 

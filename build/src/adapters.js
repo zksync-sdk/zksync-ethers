@@ -649,20 +649,19 @@ function AdapterL1(Base) {
             return this._providerL1().estimateGas(requestExecuteTx);
         }
         async getRequestExecuteTx(transaction) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+            var _a, _b, _c, _d, _e, _f, _g;
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const isETHBaseToken = (await bridgehub.baseToken(chainId)) == utils_1.ETH_ADDRESS_IN_CONTRACTS;
             const { ...tx } = transaction;
             (_a = tx.l2Value) !== null && _a !== void 0 ? _a : (tx.l2Value = ethers_1.BigNumber.from(0));
-            (_b = tx.mintValue) !== null && _b !== void 0 ? _b : (tx.mintValue = ethers_1.BigNumber.from(0));
-            (_c = tx.operatorTip) !== null && _c !== void 0 ? _c : (tx.operatorTip = ethers_1.BigNumber.from(0));
-            (_d = tx.factoryDeps) !== null && _d !== void 0 ? _d : (tx.factoryDeps = []);
-            (_e = tx.overrides) !== null && _e !== void 0 ? _e : (tx.overrides = {});
-            (_f = tx.gasPerPubdataByte) !== null && _f !== void 0 ? _f : (tx.gasPerPubdataByte = utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT);
-            (_g = tx.refundRecipient) !== null && _g !== void 0 ? _g : (tx.refundRecipient = await this.getAddress());
-            (_h = tx.l2GasLimit) !== null && _h !== void 0 ? _h : (tx.l2GasLimit = await this._providerL2().estimateL1ToL2Execute(transaction));
-            const { contractAddress, mintValue, l2Value, calldata, l2GasLimit, factoryDeps, operatorTip, overrides, gasPerPubdataByte, refundRecipient, } = tx;
+            (_b = tx.operatorTip) !== null && _b !== void 0 ? _b : (tx.operatorTip = ethers_1.BigNumber.from(0));
+            (_c = tx.factoryDeps) !== null && _c !== void 0 ? _c : (tx.factoryDeps = []);
+            (_d = tx.overrides) !== null && _d !== void 0 ? _d : (tx.overrides = {});
+            (_e = tx.gasPerPubdataByte) !== null && _e !== void 0 ? _e : (tx.gasPerPubdataByte = utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT);
+            (_f = tx.refundRecipient) !== null && _f !== void 0 ? _f : (tx.refundRecipient = await this.getAddress());
+            (_g = tx.l2GasLimit) !== null && _g !== void 0 ? _g : (tx.l2GasLimit = await this._providerL2().estimateL1ToL2Execute(transaction));
+            const { contractAddress, l2Value, mintValue, calldata, l2GasLimit, factoryDeps, operatorTip, overrides, gasPerPubdataByte, refundRecipient, } = tx;
             await insertGasPrice(this._providerL1(), overrides);
             const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
             const baseCost = await this.getBaseCost({
@@ -670,11 +669,16 @@ function AdapterL1(Base) {
                 gasPerPubdataByte,
                 gasLimit: l2GasLimit,
             });
-            (_j = overrides.value) !== null && _j !== void 0 ? _j : (overrides.value = isETHBaseToken ? baseCost.add(operatorTip).add(l2Value) : 0);
-            await (0, utils_1.checkBaseCost)(baseCost, isETHBaseToken ? overrides.value : mintValue);
+            const l2Costs = baseCost.add(operatorTip).add(l2Value);
+            let providedValue = isETHBaseToken ? overrides.value : mintValue;
+            if (providedValue === undefined || providedValue === null) {
+                providedValue = l2Costs;
+                overrides.value = providedValue;
+            }
+            await (0, utils_1.checkBaseCost)(baseCost, providedValue);
             return await bridgehub.populateTransaction.requestL2TransactionDirect({
                 chainId,
-                mintValue: isETHBaseToken ? await overrides.value : mintValue,
+                mintValue: await providedValue,
                 l2Contract: contractAddress,
                 l2Value: l2Value,
                 l2Calldata: calldata,
