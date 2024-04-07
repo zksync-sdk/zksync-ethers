@@ -58,6 +58,7 @@
   },
   "scripts": {
     "test:build": "rm -rf tests/build && tsc -p tsconfig.test.json",
+    "test:prepare-proxy": "cd scripts && ./update-diamond-proxy.sh && cd ../",
     "test:prepare": "ts-node tests/setup.ts",
     "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
     "test:wait": "ts-node tests/wait.ts",

@@ -8,7 +8,7 @@ apt-get update && apt-get install -y jq
 
 echo "Clone the matter-labs/era-contracts repository"
 git clone https://github.com/matter-labs/era-contracts.git era-contracts
-pushd era-contracts
+pushd era-contracts || exit 1
 
 echo "Install dependencies"
 yarn install
