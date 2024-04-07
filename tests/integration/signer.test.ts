@@ -3,7 +3,7 @@ import '../custom-matchers';
 import {Provider, utils, Wallet, L2VoidSigner, L1VoidSigner} from '../../src';
 import {ethers, BigNumber} from 'ethers';
 
-import TokensL1 from '../tokens.json';
+import TokensL1 from '../files/tokens.json';
 
 const {expect} = chai;
 

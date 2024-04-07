@@ -4,7 +4,8 @@ import {Provider, utils, Wallet} from '../../src';
 import {ethers, BigNumber} from 'ethers';
 import * as fs from 'fs';
 
-import TokensL1 from '../tokens.json';
+import TokensL1 from '../files/tokens.json';
+import CustomBridge from '../files/customBridge.json';
 
 const {expect} = chai;
 
@@ -597,6 +598,31 @@ describe('Wallet', () => {
       expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to.be
         .true;
     }).timeout(30_000);
+
+    it('should deposit USDC using custom bridge', async () => {
+      const amount = BigNumber.from(7);
+      const l2USDC = CustomBridge.l2Token;
+      const l1USDC = CustomBridge.l1Token;
+      const l2BalanceBeforeDeposit = await wallet.getBalance(l2USDC);
+      const l1BalanceBeforeDeposit = await wallet.getBalanceL1(l1USDC);
+      const tx = await wallet.deposit({
+        token: l1USDC,
+        bridgeAddress: CustomBridge.l1Bridge,
+        to: await wallet.getAddress(),
+        amount: amount,
+        approveERC20: true,
+        refundRecipient: await wallet.getAddress(),
+      });
+      const result = await tx.wait();
+      await tx.waitFinalize();
+      const l2BalanceAfterDeposit = await wallet.getBalance(l2USDC);
+      const l1BalanceAfterDeposit = await wallet.getBalanceL1(l1USDC);
+      expect(result).not.to.be.null;
+      expect(l2BalanceAfterDeposit.sub(l2BalanceBeforeDeposit).eq(amount)).to.be
+        .true;
+      expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to.be
+        .true;
+    }).timeout(30_000);
   });
 
   describe('#claimFailedDeposit()', () => {
@@ -880,6 +906,36 @@ describe('Wallet', () => {
           l2ApprovalTokenBalanceBeforeWithdrawal.sub(minimalAllowance)
         )
       ).to.be.true;
+
+      expect(result).not.to.be.null;
+      expect(l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).eq(amount))
+        .to.be.true;
+      expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
+        .to.be.true;
+    }).timeout(25_000);
+
+    it('should withdraw USDC to the L1 network using custom bridge', async () => {
+      const amount = BigNumber.from(5);
+      const l2USDC = CustomBridge.l2Token;
+      const l1USDC = CustomBridge.l1Token;
+      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2USDC);
+      const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(l1USDC);
+
+      const withdrawTx = await wallet.withdraw({
+        token: l2USDC,
+        bridgeAddress: CustomBridge.l2Bridge,
+        to: await wallet.getAddress(),
+        amount: amount,
+      });
+      await withdrawTx.waitFinalize();
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+      const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+        withdrawTx.hash
+      );
+      const result = await finalizeWithdrawTx.wait();
+      const l2BalanceAfterWithdrawal = await wallet.getBalance(l2USDC);
+      const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(l1USDC);
 
       expect(result).not.to.be.null;
       expect(l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).eq(amount))

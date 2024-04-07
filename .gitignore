@@ -1,6 +1,5 @@
 build
 node_modules
-tests/token.json
 tests/build
 coverage
 docs
