@@ -355,6 +355,20 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
         }): Promise<BigNumber>;
+        getRequestExecuteAllowanceParams(transaction: {
+            contractAddress: Address;
+            calldata: BytesLike;
+            l2GasLimit?: BigNumberish;
+            l2Value?: BigNumberish;
+            factoryDeps?: ethers.BytesLike[];
+            operatorTip?: BigNumberish;
+            gasPerPubdataByte?: BigNumberish;
+            refundRecipient?: Address;
+            overrides?: ethers.PayableOverrides;
+        }): Promise<{
+            token: Address;
+            allowance: BigNumberish;
+        }>;
         getRequestExecuteTx(transaction: {
             contractAddress: Address;
             calldata: BytesLike;

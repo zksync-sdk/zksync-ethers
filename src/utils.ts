@@ -13,7 +13,6 @@ import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer"
 import { Provider } from "./provider";
 import { EIP712Signer } from "./signer";
 import { Ierc20Factory } from "../typechain/Ierc20Factory";
-import { Il1BridgeFactory } from "../typechain/Il1BridgeFactory";
 import { AbiCoder } from "ethers/lib/utils";
 
 export * from "./paymaster-utils";
@@ -551,7 +550,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
     // due to storage slot aggregation, the gas estimation will depend on the address
     // and so estimation for the zero address may be smaller than for the sender.
     from ??= ethers.Wallet.createRandom().address;
-    if (isBaseTokenDeposit) {
+    if (isBaseTokenDeposit || token === ETH_ADDRESS) {
         return await providerL2.estimateL1ToL2Execute({
             contractAddress: to,
             gasPerPubdataByte: gasPerPubdataByte,
@@ -560,13 +559,12 @@ export async function estimateDefaultBridgeDepositL2Gas(
             l2Value: amount,
         });
     } else {
-        let value, l1BridgeAddress, l2BridgeAddress, bridgeData;
         const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
 
-        value = 0;
-        l1BridgeAddress = bridgeAddresses.sharedL1;
-        l2BridgeAddress = bridgeAddresses.sharedL2;
-        bridgeData = await getERC20DefaultBridgeData(token, providerL1);
+        const value = 0;
+        const l1BridgeAddress = bridgeAddresses.sharedL1;
+        const l2BridgeAddress = bridgeAddresses.sharedL2;
+        const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
 
         return await estimateCustomBridgeDepositL2Gas(
             providerL2,

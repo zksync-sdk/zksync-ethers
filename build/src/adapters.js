@@ -469,12 +469,12 @@ function AdapterL1(Base) {
         // Default behaviour for calculating l2GasLimit of deposit transaction.
         async _getL2GasLimit(transaction) {
             const baseToken = await this.getBaseToken();
-            const correcteBaseToken = baseToken == utils_1.ETH_ADDRESS_IN_CONTRACTS ? utils_1.ETH_ADDRESS : baseToken;
+            const correctBaseToken = baseToken === utils_1.ETH_ADDRESS_IN_CONTRACTS ? utils_1.ETH_ADDRESS : baseToken;
             if (transaction.bridgeAddress != null) {
                 return await this._getL2GasLimitFromCustomBridge(transaction);
             }
             else {
-                return await (0, utils_1.estimateDefaultBridgeDepositL2Gas)(this._providerL1(), this._providerL2(), transaction.token, transaction.amount, transaction.to, await this.getAddress(), transaction.gasPerPubdataByte, transaction.token == correcteBaseToken);
+                return await (0, utils_1.estimateDefaultBridgeDepositL2Gas)(this._providerL1(), this._providerL2(), transaction.token, transaction.amount, transaction.to, await this.getAddress(), transaction.gasPerPubdataByte, transaction.token === correctBaseToken);
             }
         }
         // Calculates the l2GasLimit of deposit transaction using custom bridge.
@@ -650,6 +650,35 @@ function AdapterL1(Base) {
             delete requestExecuteTx.maxPriorityFeePerGas;
             return this._providerL1().estimateGas(requestExecuteTx);
         }
+        async getRequestExecuteAllowanceParams(transaction) {
+            var _a, _b, _c, _d, _e, _f, _g;
+            const bridgehub = await this.getBridgehubContract();
+            const chainId = (await this._providerL2().getNetwork()).chainId;
+            const isETHBaseToken = (await bridgehub.baseToken(chainId)) == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            if (isETHBaseToken) {
+                throw new Error("Could not estitame mint value on ETH-based chain!");
+            }
+            const { ...tx } = transaction;
+            (_a = tx.l2Value) !== null && _a !== void 0 ? _a : (tx.l2Value = ethers_1.BigNumber.from(0));
+            (_b = tx.operatorTip) !== null && _b !== void 0 ? _b : (tx.operatorTip = ethers_1.BigNumber.from(0));
+            (_c = tx.factoryDeps) !== null && _c !== void 0 ? _c : (tx.factoryDeps = []);
+            (_d = tx.overrides) !== null && _d !== void 0 ? _d : (tx.overrides = {});
+            (_e = tx.gasPerPubdataByte) !== null && _e !== void 0 ? _e : (tx.gasPerPubdataByte = utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT);
+            (_f = tx.refundRecipient) !== null && _f !== void 0 ? _f : (tx.refundRecipient = await this.getAddress());
+            (_g = tx.l2GasLimit) !== null && _g !== void 0 ? _g : (tx.l2GasLimit = await this._providerL2().estimateL1ToL2Execute(transaction));
+            const { l2Value, l2GasLimit, operatorTip, overrides, gasPerPubdataByte, } = tx;
+            await insertGasPrice(this._providerL1(), overrides);
+            const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
+            const baseCost = await this.getBaseCost({
+                gasPrice: gasPriceForEstimation,
+                gasPerPubdataByte,
+                gasLimit: l2GasLimit,
+            });
+            return {
+                token: await this.getBaseToken(),
+                allowance: baseCost.add(operatorTip).add(l2Value)
+            };
+        }
         async getRequestExecuteTx(transaction) {
             var _a, _b, _c, _d, _e, _f, _g;
             const bridgehub = await this.getBridgehubContract();
@@ -675,7 +704,8 @@ function AdapterL1(Base) {
             let providedValue = isETHBaseToken ? overrides.value : mintValue;
             if (providedValue === undefined || providedValue === null) {
                 providedValue = l2Costs;
-                overrides.value = providedValue;
+                if (isETHBaseToken)
+                    overrides.value = providedValue;
             }
             await (0, utils_1.checkBaseCost)(baseCost, providedValue);
             return await bridgehub.populateTransaction.requestL2TransactionDirect({

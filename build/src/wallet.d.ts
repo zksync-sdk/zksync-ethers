@@ -374,6 +374,20 @@ declare const Wallet_base: {
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
         }): Promise<ethers.BigNumber>;
+        getRequestExecuteAllowanceParams(transaction: {
+            contractAddress: string;
+            calldata: ethers.utils.BytesLike;
+            l2GasLimit?: ethers.BigNumberish;
+            l2Value?: ethers.BigNumberish;
+            factoryDeps?: ethers.utils.BytesLike[];
+            operatorTip?: ethers.BigNumberish;
+            gasPerPubdataByte?: ethers.BigNumberish;
+            refundRecipient?: string;
+            overrides?: ethers.PayableOverrides;
+        }): Promise<{
+            token: string;
+            allowance: ethers.BigNumberish;
+        }>;
         getRequestExecuteTx(transaction: {
             contractAddress: string;
             calldata: ethers.utils.BytesLike;

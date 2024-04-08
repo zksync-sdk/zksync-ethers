@@ -891,7 +891,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             overrides?: ethers.PayableOverrides;
         }): Promise<BigNumberish> {
             const baseToken = await this.getBaseToken();
-            const correcteBaseToken = baseToken == ETH_ADDRESS_IN_CONTRACTS ? ETH_ADDRESS : baseToken;
+            const correctBaseToken = baseToken === ETH_ADDRESS_IN_CONTRACTS ? ETH_ADDRESS : baseToken;
             if (transaction.bridgeAddress != null) {
                 return await this._getL2GasLimitFromCustomBridge(transaction);
             } else {
@@ -903,7 +903,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     transaction.to,
                     await this.getAddress(),
                     transaction.gasPerPubdataByte,
-                    transaction.token == correcteBaseToken,
+                    transaction.token === correctBaseToken,
                 );
             }
         }
@@ -1209,6 +1209,57 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             return this._providerL1().estimateGas(requestExecuteTx);
         }
 
+        async getRequestExecuteAllowanceParams(transaction: {
+            contractAddress: Address;
+            calldata: BytesLike;
+            l2GasLimit?: BigNumberish;
+            l2Value?: BigNumberish;
+            factoryDeps?: ethers.BytesLike[];
+            operatorTip?: BigNumberish;
+            gasPerPubdataByte?: BigNumberish;
+            refundRecipient?: Address;
+            overrides?: ethers.PayableOverrides;
+        }): Promise<{ token: Address; allowance: BigNumberish }> {
+            const bridgehub = await this.getBridgehubContract();
+            const chainId = (await this._providerL2().getNetwork()).chainId;
+            const isETHBaseToken = (await bridgehub.baseToken(chainId)) == ETH_ADDRESS_IN_CONTRACTS;
+
+            if (isETHBaseToken) {
+                throw new Error("Could not estitame mint value on ETH-based chain!");
+            }
+
+            const { ...tx } = transaction;
+            tx.l2Value ??= BigNumber.from(0);
+            tx.operatorTip ??= BigNumber.from(0);
+            tx.factoryDeps ??= [];
+            tx.overrides ??= {};
+            tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+            tx.refundRecipient ??= await this.getAddress();
+            tx.l2GasLimit ??= await this._providerL2().estimateL1ToL2Execute(transaction);
+
+            const {
+                l2Value,
+                l2GasLimit,
+                operatorTip,
+                overrides,
+                gasPerPubdataByte,
+            } = tx;
+
+            await insertGasPrice(this._providerL1(), overrides);
+            const gasPriceForEstimation = (await overrides.maxFeePerGas) || (await overrides.gasPrice);
+
+            const baseCost = await this.getBaseCost({
+                gasPrice: gasPriceForEstimation,
+                gasPerPubdataByte,
+                gasLimit: l2GasLimit,
+            });
+
+            return {
+                token: await this.getBaseToken(),
+                allowance: baseCost.add(operatorTip).add(l2Value)
+            }
+        }
+
         async getRequestExecuteTx(transaction: {
             contractAddress: Address;
             calldata: BytesLike;
@@ -1260,7 +1311,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             let providedValue =  isETHBaseToken ? overrides.value : mintValue;
             if (providedValue === undefined || providedValue === null) {
                 providedValue = l2Costs;
-                overrides.value = providedValue;
+                if (isETHBaseToken) overrides.value = providedValue;
             }
 
             await checkBaseCost(baseCost, providedValue);
