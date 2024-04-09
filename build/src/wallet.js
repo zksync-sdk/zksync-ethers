@@ -74,7 +74,9 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
         (_a = populated.value) !== null && _a !== void 0 ? _a : (populated.value = 0);
         (_b = populated.data) !== null && _b !== void 0 ? _b : (populated.data = "0x");
         populated.customData = this._fillCustomData(transaction.customData);
-        populated.gasPrice = await this.provider.getGasPrice();
+        if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
+            populated.gasPrice = await this.provider.getGasPrice();
+        }
         return populated;
     }
     async signTransaction(transaction) {
