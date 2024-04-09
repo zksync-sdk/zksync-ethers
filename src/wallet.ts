@@ -101,7 +101,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         populated.value ??= 0;
         populated.data ??= "0x";
         populated.customData = this._fillCustomData(transaction.customData);
-        populated.gasPrice = await this.provider.getGasPrice();
+        if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
+            populated.gasPrice = await this.provider.getGasPrice();
+        }
         return populated;
     }
 
