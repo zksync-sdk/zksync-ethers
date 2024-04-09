@@ -252,8 +252,8 @@ describe("Wallet", async () => {
                     contractAddress: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     calldata: "0x",
                     l2Value: 7_000_000,
-                    l2GasLimit: BigNumber.from(405_053),
-                    mintValue: BigNumber.from(108_858_000_750_000),
+                    l2GasLimit: BigNumber.from(415_035),
+                    mintValue: BigNumber.from(111_540_663_250_000),
                     token: "0x0000000000000000000000000000000000000000",
                     to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     amount: 7_000_000,
@@ -262,7 +262,7 @@ describe("Wallet", async () => {
                     overrides: {
                         maxFeePerGas: BigNumber.from(1_500_000_001),
                         maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                        value: BigNumber.from(108_858_000_750_000),
+                        value: BigNumber.from(111_540_663_250_000),
                     },
                     gasPerPubdataByte: 800,
                 };
@@ -280,8 +280,8 @@ describe("Wallet", async () => {
                     contractAddress: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     calldata: "0x",
                     l2Value: 7_000_000,
-                    l2GasLimit: BigNumber.from(405_053),
-                    mintValue: BigNumber.from(108_858_000_750_000),
+                    l2GasLimit: BigNumber.from(415_035),
+                    mintValue: BigNumber.from(111_540_663_250_000),
                     token: "0x0000000000000000000000000000000000000000",
                     to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     amount: 7_000_000,
@@ -290,7 +290,7 @@ describe("Wallet", async () => {
                     overrides: {
                         maxFeePerGas: BigNumber.from(1_500_000_001),
                         maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                        value: BigNumber.from(108_858_000_750_000),
+                        value: BigNumber.from(111_540_663_250_000),
                     },
                     gasPerPubdataByte: 800,
                 };
@@ -306,7 +306,7 @@ describe("Wallet", async () => {
                 const transaction = {
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                    value: BigNumber.from(108_857_993_750_000),
+                    value: BigNumber.from(123_164_093_750_000),
                     from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                     to: await provider.getBridgehubContractAddress(),
                 };
@@ -385,7 +385,7 @@ describe("Wallet", async () => {
                     amount: 5,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(225_284))).to.be.true;
+                expect(result.eq(BigNumber.from(225_078))).to.be.true;
             });
 
             it("should return gas estimation for DAI deposit transaction", async () => {
@@ -395,7 +395,7 @@ describe("Wallet", async () => {
                     amount: 5,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(338_582))).to.be.true;
+                expect(result.eq(BigNumber.from(338_196))).to.be.true;
             });
         } else {
             it("should throw an error for insufficient allowance when estimating gas for ETH deposit transaction", async () => {
@@ -465,7 +465,7 @@ describe("Wallet", async () => {
                     amount: amount,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(361_926))).to.be.true;
+                expect(result.eq(BigNumber.from(361_501))).to.be.true;
             }).timeout(10_000);
         }
     });
@@ -654,9 +654,9 @@ describe("Wallet", async () => {
         if (isETHBasedChain) {
             it("should return fee for ETH token deposit", async () => {
                 const FEE_DATA = {
-                    baseCost: BigNumber.from(107_740_531_250_000),
-                    l1GasLimit: BigNumber.from(225_284),
-                    l2GasLimit: BigNumber.from(400_895),
+                    baseCost: BigNumber.from(111_540_656_250_000),
+                    l1GasLimit: BigNumber.from(225_078),
+                    l2GasLimit: BigNumber.from(415_035),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
@@ -680,9 +680,9 @@ describe("Wallet", async () => {
 
             it("should return fee for DAI token deposit", async () => {
                 const FEE_DATA = {
-                    baseCost: BigNumber.from(108_857_993_750_000),
-                    l1GasLimit: BigNumber.from(338_162),
-                    l2GasLimit: BigNumber.from(405_053),
+                    baseCost: BigNumber.from(123_164_093_750_000),
+                    l1GasLimit: BigNumber.from(337_776),
+                    l2GasLimit: BigNumber.from(458_285),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
@@ -729,9 +729,9 @@ describe("Wallet", async () => {
 
             it("should return fee for ETH token deposit", async () => {
                 const fee = {
-                    baseCost: BigNumber.from(107_740_531_250_000),
-                    l1GasLimit: BigNumber.from(321_403),
-                    l2GasLimit: BigNumber.from(400_895),
+                    baseCost: BigNumber.from(111_540_656_250_000),
+                    l1GasLimit: BigNumber.from(321_051),
+                    l2GasLimit: BigNumber.from(415_035),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
@@ -751,9 +751,9 @@ describe("Wallet", async () => {
 
             it("should return fee for base token deposit", async () => {
                 const fee = {
-                    baseCost: BigNumber.from(107_740_531_250_000),
+                    baseCost: BigNumber.from(0x657215319c90),
                     l1GasLimit: BigNumber.from(25_200),
-                    l2GasLimit: BigNumber.from(1_319_957),
+                    l2GasLimit: BigNumber.from(415_035),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
@@ -773,9 +773,9 @@ describe("Wallet", async () => {
 
             it("should return fee for DAI token deposit", async () => {
                 const fee = {
-                    baseCost: BigNumber.from(108_857_993_750_000),
-                    l1GasLimit: BigNumber.from(338_162),
-                    l2GasLimit: BigNumber.from(405_053),
+                    baseCost: BigNumber.from(123_164_093_750_000),
+                    l1GasLimit: BigNumber.from(361_081),
+                    l2GasLimit: BigNumber.from(458_285),
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
