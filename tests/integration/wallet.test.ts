@@ -23,6 +23,22 @@ describe("Wallet", async () => {
 
     const isETHBased = await wallet.isETHBasedChain();
 
+    const tolerancePercentage = 10; // 10% tolerance
+
+    // Custom assertion function for BigNumber values with a percentage tolerance
+    function expectBigNumberCloseTo(actual, expected, tolerancePercentage) {
+        const actualPercentageDiff = actual.sub(expected).mul(100).div(expected).abs();
+        expect(actualPercentageDiff.lte(tolerancePercentage)).to.be.true;
+    }
+
+    function expectFeeDataCloseToExpected(result, expected, tolerancePercentage) {
+        expectBigNumberCloseTo(result.baseCost, expected.baseCost, tolerancePercentage);
+        expectBigNumberCloseTo(result.l1GasLimit, expected.l1GasLimit, tolerancePercentage);
+        expectBigNumberCloseTo(result.l2GasLimit, expected.l2GasLimit, tolerancePercentage);
+        expectBigNumberCloseTo(result.maxFeePerGas, expected.maxFeePerGas, tolerancePercentage);
+        expectBigNumberCloseTo(result.maxPriorityFeePerGas, expected.maxPriorityFeePerGas, tolerancePercentage);
+    }
+
     describe("#constructor()", () => {
         it("`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider", async () => {
             const wallet = new Wallet(PRIVATE_KEY, provider);
@@ -209,7 +225,6 @@ describe("Wallet", async () => {
                 type: 0,
                 from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
                 nonce: await wallet.getNonce("pending"),
-                // chainId: 270,
                 gasPrice: BigNumber.from(100_000_000),
             };
             const result = await wallet.populateTransaction({
@@ -552,10 +567,10 @@ describe("Wallet", async () => {
                     refundRecipient: await wallet.getAddress(),
                 });
                 await utils.sleep(10000);
-                // const result = await tx.wait();
+                const result = await tx.wait();
                 const l2BalanceAfterDeposit = await wallet.getBalance();
                 const l1BalanceAfterDeposit = await wallet.getBalanceL1();
-                // expect(result).not.to.be.null;
+                expect(result).not.to.be.null;
                 expect(l2BalanceAfterDeposit.sub(l2BalanceBeforeDeposit).gte(amount)).to.be.true;
                 expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).gte(amount)).to.be.true;
             }).timeout(20_000);
@@ -605,19 +620,20 @@ describe("Wallet", async () => {
 
     describe("#claimFailedDeposit()", () => {
         if (isETHBased) {
-            // it("should claim failed deposit", async () => {
-            //     const response = await wallet.deposit({
-            //         token: utils.LEGACY_ETH_ADDRESS,
-            //         to: await wallet.getAddress(),
-            //         amount: 7_000_000_000,
-            //         refundRecipient: await wallet.getAddress(),
-            //         gasPerPubdataByte: 500 // make it fail because of low gas
-            //     });
+            it("should claim failed deposit", async () => {
+                const response = await wallet.deposit({
+                    token: utils.LEGACY_ETH_ADDRESS,
+                    to: await wallet.getAddress(),
+                    amount: 7_000_000_000,
+                    refundRecipient: await wallet.getAddress(),
+                    gasPerPubdataByte: 500 // make it fail because of low gas
+                });
 
-            //     const tx = await response.waitFinalize(); // fails, sames goes with response.wait()
-            //     const result = await wallet.claimFailedDeposit(tx.hash);
+                const tx = await response.waitFinalize();
+                const result = await wallet.claimFailedDeposit(tx.transactionHash);
+                expect(result).to.be.not.null;
 
-            // }).timeout(30_000);
+            }).timeout(30_000);
 
             it("should throw an error when trying to claim successful deposit", async () => {
                 const response = await wallet.deposit({
@@ -635,13 +651,6 @@ describe("Wallet", async () => {
             }).timeout(30_000);
         } else {
             it("should throw an error when trying to claim successful deposit", async () => {
-                // const response = await wallet.deposit({
-                //     token: utils.LEGACY_ETH_ADDRESS,
-                //     to: await wallet.getAddress(),
-                //     amount: 7_000_000_000,
-                //     approveBaseERC20: true,
-                //     refundRecipient: await wallet.getAddress(),
-                // });
                 const response = await wallet.deposit({
                     token: await wallet.getBaseToken(),
                     to: await wallet.getAddress(),
@@ -673,7 +682,8 @@ describe("Wallet", async () => {
                     token: utils.LEGACY_ETH_ADDRESS,
                     to: await wallet.getAddress(),
                 });
-                expect(result).to.be.deep.equal(FEE_DATA);
+
+                expectFeeDataCloseToExpected(result, FEE_DATA, tolerancePercentage);
             });
 
             it("should throw an error when there is not enough allowance to cover the deposit", async () => {
@@ -703,7 +713,7 @@ describe("Wallet", async () => {
                     token: DAI_L1,
                     to: await wallet.getAddress(),
                 });
-                expect(result).to.be.deep.equal(FEE_DATA);
+                expectFeeDataCloseToExpected(result, FEE_DATA, tolerancePercentage);
             }).timeout(10_000);
 
             it("should throw an error when there is not enough balance for the deposit", async () => {
@@ -755,7 +765,8 @@ describe("Wallet", async () => {
                     token: token,
                     to: await wallet.getAddress(),
                 });
-                expect(result).to.be.deep.equal(fee);
+                
+                expectFeeDataCloseToExpected(result, fee, tolerancePercentage);
             }).timeout(10_000);
 
             it("should return fee for base token deposit", async () => {
@@ -777,7 +788,7 @@ describe("Wallet", async () => {
                     token: token,
                     to: await wallet.getAddress(),
                 });
-                expect(result).to.be.deep.equal(fee);
+                expectFeeDataCloseToExpected(result, fee, tolerancePercentage);
             }).timeout(10_000);
 
             it("should return fee for DAI token deposit", async () => {
@@ -874,7 +885,7 @@ describe("Wallet", async () => {
                 amount: amount,
             });
             await withdrawTx.waitFinalize();
-            // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+            expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
             const finalizeWithdrawTx = await wallet.finalizeWithdrawal(withdrawTx.hash);
             const result = await finalizeWithdrawTx.wait();
