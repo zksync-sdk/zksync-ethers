@@ -1,19 +1,16 @@
 import { expect } from "chai";
 import { Provider, types, utils, Wallet } from "../../src";
 import { BigNumber, ethers } from "ethers";
+import { PRIVATE_KEY, ADDRESS, RECEIVER,  DAI_L1 } from "../utils";
 
 describe("Provider", () => {
-    const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-    const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
-    const RECEIVER = "0xa61464658AfeAf65CccaaFD3a512b69A83B77618";
 
     const provider = Provider.getDefaultProvider();
     const ethProvider = ethers.getDefaultProvider("http://localhost:8545");
     const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider); // overwritten transfer method use L1 network
 
-    const TOKENS_L1 = require("../tokens.json");
+    // const TOKENS_L1 = require("../tokens.json");
     // const DAI_L1 = TOKENS_L1[0].address;
-    const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";
 
     let tx;
     let isEthBased;

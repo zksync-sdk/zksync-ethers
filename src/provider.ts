@@ -34,7 +34,6 @@ import {
     LEGACY_ETH_ADDRESS,
     ETH_ADDRESS_IN_CONTRACTS,
     getL2HashFromPriorityOp,
-    isETH,
     L2_BASE_TOKEN_ADDRESS,
     parseTransaction,
     REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
@@ -380,8 +379,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     override async getBalance(address: Address, blockTag?: BlockTag, tokenAddress?: Address) {
         const tag = this.formatter.blockTag(blockTag);
-        if (tokenAddress == null || isETH(tokenAddress)) {
-            // requesting ETH balance
+        if (tokenAddress == null || await this.isBaseToken(tokenAddress)) {
+            // requesting base token balance
             return await super.getBalance(address, tag);
         } else {
             try {
@@ -572,6 +571,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return (await this.getBaseTokenContractAddress()) == ETH_ADDRESS_IN_CONTRACTS;
     }
 
+    async isBaseToken(token: Address): Promise<boolean> {
+        return token == (await this.getBaseTokenContractAddress()) || token == L2_BASE_TOKEN_ADDRESS;
+    }
+
     async getTestnetPaymasterAddress(): Promise<Address | null> {
         // Unlike contract's addresses, the testnet paymaster is not cached, since it can be trivially changed
         // on the fly by the server and should not be relied on to be constant
@@ -642,6 +645,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         bridgeAddress?: Address;
         overrides?: ethers.CallOverrides;
     }): Promise<ethers.providers.TransactionRequest> {
+        if (transaction.token == LEGACY_ETH_ADDRESS){
+            transaction.token = ETH_ADDRESS_IN_CONTRACTS;
+        }
         const { ...tx } = transaction;
 
         if (tx.to == null && tx.from == null) {
@@ -652,7 +658,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         tx.overrides ??= {};
         tx.overrides.from ??= tx.from;
 
-        if (isETH(tx.token)) {
+        if (await this.isBaseToken(tx.token)) {
             if (!tx.overrides.value) {
                 tx.overrides.value = tx.amount;
             }

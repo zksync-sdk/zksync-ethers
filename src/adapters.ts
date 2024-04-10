@@ -1125,10 +1125,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex);
 
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            if (isETH(sender)) {
-                const mainContract = await this.getMainContract();
-                return await mainContract.isEthWithdrawalFinalized(log.l1BatchNumber, proof.id);
-            }
 
             const l2Bridge = Il2BridgeFactory.connect(sender, this._providerL2());
             const l1Bridge = Il1BridgeFactory.connect(await l2Bridge.l1Bridge(), this._providerL1());

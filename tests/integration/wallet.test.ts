@@ -4,22 +4,18 @@ import { Provider, types, utils, Wallet } from "../../src";
 import { ethers, BigNumber } from "ethers";
 import * as fs from "fs";
 import { ITestnetErc20TokenFactory } from "../../typechain/ITestnetErc20TokenFactory";
+import { MNEMONIC, PRIVATE_KEY, ADDRESS, RECEIVER, DAI_L1 } from "../utils";
 
 const { expect } = chai;
 
 describe("Wallet", async () => {
-    const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-    const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
-    const MNEMONIC = "stuff slice staff easily soup parent arm payment cotton trade scatter struggle";
-    const RECEIVER = "0xa61464658AfeAf65CccaaFD3a512b69A83B77618";
 
     const provider = Provider.getDefaultProvider();
     const ethProvider = ethers.getDefaultProvider("http://localhost:8545");
     const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
-    const TOKENS_L1 = require("../tokens.json");
+    // const TOKENS_L1 = require("../tokens.json");
     // const DAI_L1 = TOKENS_L1[0].address;
-    const DAI_L1 = "0xB862e4D545ED92781a7d068A92Ad4D0EFba26b2a";
 
     const isETHBased = await wallet.isETHBasedChain();
 

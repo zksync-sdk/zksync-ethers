@@ -622,10 +622,6 @@ function AdapterL1(Base) {
             // which is returned as `proof.id`.
             const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex);
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            if ((0, utils_1.isETH)(sender)) {
-                const mainContract = await this.getMainContract();
-                return await mainContract.isEthWithdrawalFinalized(log.l1BatchNumber, proof.id);
-            }
             const l2Bridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(sender, this._providerL2());
             const l1Bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(await l2Bridge.l1Bridge(), this._providerL1());
             return await l1Bridge.isWithdrawalFinalized(chainId, log.l1BatchNumber, proof.id);

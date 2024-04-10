@@ -1,0 +1,9 @@
+export const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
+export const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+export const MNEMONIC = "stuff slice staff easily soup parent arm payment cotton trade scatter struggle";
+export const RECEIVER = "0xa61464658AfeAf65CccaaFD3a512b69A83B77618";
+export const tokenPath = "../files/Token.json";
+export const paymasterPath = "../files/Paymaster.json";
+export const storagePath = "../files/Storage.json";
+export const demoPath = "../files/Demo.json";
+export const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";

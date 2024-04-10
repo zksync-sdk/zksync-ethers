@@ -37,6 +37,7 @@ export declare class Provider extends ethers.providers.JsonRpcProvider {
     getMainContractAddress(): Promise<Address>;
     getBaseTokenContractAddress(): Promise<Address>;
     isETHBasedChain(): Promise<boolean>;
+    isBaseToken(token: Address): Promise<boolean>;
     getTestnetPaymasterAddress(): Promise<Address | null>;
     getDefaultBridgeAddresses(): Promise<{
         erc20L1: string;

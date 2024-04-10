@@ -2,12 +2,11 @@ import * as chai from "chai";
 import "../custom-matchers";
 import { Provider, types, utils, EIP712Signer } from "../../src";
 import { ethers } from "ethers";
+import { PRIVATE_KEY, ADDRESS } from "../utils";
 
 const { expect } = chai;
 
 describe("utils", () => {
-    const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-    const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
 
     const provider = Provider.getDefaultProvider(types.Network.Localhost);
 
