@@ -432,7 +432,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         }
         return this.contractAddresses.baseToken;
     }
-    async isETHBasedChain() {
+    async isEthBasedChain() {
         return (await this.getBaseTokenContractAddress()) == utils_1.ETH_ADDRESS_IN_CONTRACTS;
     }
     async isBaseToken(token) {

@@ -106,8 +106,8 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
     async transfer(transaction) {
         var _a;
         const baseToken = await this.getBaseToken();
-        const isETHBasedChain = await this.isETHBasedChain();
-        if (!isETHBasedChain && (!transaction.token || transaction.token === baseToken)) {
+        const isEthBasedChain = await this.isEthBasedChain();
+        if (!isEthBasedChain && (!transaction.token || transaction.token === baseToken)) {
             const tx = {
                 ...(await ethers_1.ethers.utils.resolveProperties(((_a = transaction.overrides) !== null && _a !== void 0 ? _a : (transaction.overrides = {})))),
                 from: await this.getAddress(),

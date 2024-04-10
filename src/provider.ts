@@ -41,8 +41,6 @@ import {
 } from "./utils";
 import { Signer } from "./signer";
 import Formatter = providers.Formatter;
-import { Il1BridgeFactory } from "../typechain/Il1BridgeFactory";
-import { Il1Erc20BridgeFactory } from "../typechain/Il1Erc20BridgeFactory";
 
 let defaultFormatter: Formatter = null;
 
@@ -567,7 +565,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return this.contractAddresses.baseToken;
     }
 
-    async isETHBasedChain(): Promise<boolean> {
+    async isEthBasedChain(): Promise<boolean> {
         return (await this.getBaseTokenContractAddress()) == ETH_ADDRESS_IN_CONTRACTS;
     }
 

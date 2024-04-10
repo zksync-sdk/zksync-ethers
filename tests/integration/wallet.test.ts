@@ -17,7 +17,7 @@ describe("Wallet", async () => {
     // const TOKENS_L1 = require("../tokens.json");
     // const DAI_L1 = TOKENS_L1[0].address;
 
-    const isETHBased = await wallet.isETHBasedChain();
+    const isEthBased = await wallet.isEthBasedChain();
 
     const tolerancePercentage = 10; // 10% tolerance
 
@@ -70,17 +70,17 @@ describe("Wallet", async () => {
         });
     });
 
-    describe("#isETHBasedChain()", () => {
+    describe("#isEthBasedChain()", () => {
         it("should return whether the chain is ETH-based or not", async () => {
-            const result = await wallet.isETHBasedChain();
-            expect(result).to.be.equal(isETHBased);
+            const result = await wallet.isEthBasedChain();
+            expect(result).to.be.equal(isEthBased);
         });
     });
 
     describe("#getBaseToken()", () => {
         it("should return base token", async () => {
             const result = await wallet.getBaseToken();
-            isETHBased
+            isEthBased
                 ? expect(result).to.be.equal(utils.ETH_ADDRESS_IN_CONTRACTS)
                 : expect(result).not.to.be.null;
         });
@@ -108,7 +108,7 @@ describe("Wallet", async () => {
         });
 
         it("should return the L2 ETH address", async () => {
-            if (!isETHBased) {
+            if (!isEthBased) {
                 const result = await wallet.l2TokenAddress(utils.LEGACY_ETH_ADDRESS);
                 expect(result).not.to.be.null;
             }
@@ -155,7 +155,7 @@ describe("Wallet", async () => {
     describe("#getAllBalances()", () => {
         it("should return all balance", async () => {
             const result = await wallet.getAllBalances();
-            const expected = isETHBased ? 2 : 3;
+            const expected = isEthBased ? 2 : 3;
             expect(Object.keys(result)).to.have.lengthOf(expected);
         });
     });
@@ -270,7 +270,7 @@ describe("Wallet", async () => {
     });
 
     describe("#getDepositTx()", () => {
-        if (isETHBased) {
+        if (isEthBased) {
             it("should return ETH deposit transaction", async () => {
                 const TRANSACTION = {
                     contractAddress: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
@@ -401,7 +401,7 @@ describe("Wallet", async () => {
     });
 
     describe("#estimateGasDeposit()", () => {
-        if (isETHBased) {
+        if (isEthBased) {
             it("should return gas estimation for ETH deposit transaction", async () => {
                 const result = await wallet.estimateGasDeposit({
                     token: utils.LEGACY_ETH_ADDRESS,
@@ -495,7 +495,7 @@ describe("Wallet", async () => {
     });
 
     describe("#deposit()", () => {
-        if (isETHBased) {
+        if (isEthBased) {
             it("should deposit ETH to L2 network", async () => {
                 const amount = 7_000_000_000;
                 const l2BalanceBeforeDeposit = await wallet.getBalance();
@@ -619,7 +619,7 @@ describe("Wallet", async () => {
     });
 
     describe("#claimFailedDeposit()", () => {
-        if (isETHBased) {
+        if (isEthBased) {
             it("should claim failed deposit", async () => {
                 const response = await wallet.deposit({
                     token: utils.LEGACY_ETH_ADDRESS,
@@ -668,7 +668,7 @@ describe("Wallet", async () => {
     });
 
     describe("#getFullRequiredDepositFee()", () => {
-        if (isETHBased) {
+        if (isEthBased) {
             it("should return fee for ETH token deposit", async () => {
                 const FEE_DATA = {
                     baseCost: BigNumber.from(111_540_656_250_000),
@@ -861,8 +861,9 @@ describe("Wallet", async () => {
         it("should withdraw ETH to L1 network", async () => {
             const amount = 7_000_000_000;
             const l2BalanceBeforeWithdrawal = await wallet.getBalance();
+            const tokenAddress = isEthBased ? utils.ETH_ADDRESS_IN_CONTRACTS : await wallet.l2TokenAddress(utils.ETH_ADDRESS_IN_CONTRACTS);
             const withdrawTx = await wallet.withdraw({
-                token: utils.LEGACY_ETH_ADDRESS,
+                token: tokenAddress,
                 to: await wallet.getAddress(),
                 amount: amount,
             });
@@ -901,7 +902,7 @@ describe("Wallet", async () => {
 
     describe("#getRequestExecuteTx()", () => {
         const amount = 7_000_000_000;
-        if (isETHBased) {
+        if (isEthBased) {
             it("should return request execute transaction", async () => {
                 const result = await wallet.getRequestExecuteTx({
                     contractAddress: await provider.getBridgehubContractAddress(),
@@ -924,7 +925,7 @@ describe("Wallet", async () => {
     });
 
     describe("#estimateGasRequestExecute()", () => {
-        if (isETHBased) {
+        if (isEthBased) {
             it("should return gas estimation for request execute transaction", async () => {
                 const result = await wallet.estimateGasRequestExecute({
                     contractAddress: await provider.getBridgehubContractAddress(),
@@ -952,7 +953,7 @@ describe("Wallet", async () => {
     });
 
     describe("#requestExecute()", () => {
-        if (isETHBased) {
+        if (isEthBased) {
             it("should request transaction execution on L2 network", async () => {
                 const amount = 7_000_000_000;
                 const l2BalanceBeforeExecution = await wallet.getBalance();
@@ -1036,7 +1037,7 @@ describe("Wallet", async () => {
             expect(balanceAfterTransfer.sub(balanceBeforeTransfer).eq(amount)).to.be.true;
         }).timeout(25_000);
 
-        if (isETHBased) {
+        if (isEthBased) {
             it("should transfer base token", async () => {
                 const amount = 7_000_000_000;
                 const token = await wallet.getBaseToken();
