@@ -19,7 +19,7 @@ describe("Wallet", async () => {
 
     const TOKENS_L1 = require("../tokens.json");
     // const DAI_L1 = TOKENS_L1[0].address;
-    const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";
+    const DAI_L1 = "0xB862e4D545ED92781a7d068A92Ad4D0EFba26b2a";
 
     const isETHBased = await wallet.isETHBasedChain();
 
@@ -904,38 +904,25 @@ describe("Wallet", async () => {
     });
 
     describe("#getRequestExecuteTx()", () => {
+        const amount = 7_000_000_000;
         if (isETHBased) {
             it("should return request execute transaction", async () => {
                 const result = await wallet.getRequestExecuteTx({
                     contractAddress: await provider.getBridgehubContractAddress(),
                     calldata: "0x",
-                    l2Value: 7_000_000_000,
+                    l2Value: amount,
                 });
                 expect(result).not.to.be.null;
             });
         } else {
             it("should return request execute transaction", async () => {
-                const TRANSACTION = {
-                    from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-                    to: "0xC33E616b13Ef21ea6C07Ee545fBcF6408AEA7575",
-                    maxFeePerGas: BigNumber.from(1_500_000_010),
-                    maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-                    data: "0xf195a2c50000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000010e0000000000000000000000000000000000000000000000000002731400992d0000000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000000000000000000000000000000000001a13b86000000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000006e42e0000000000000000000000000000000000000000000000000000000000000320000000000000000000000000000000000000000000000000000000000000014000000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-                    value: BigNumber.from(234_290_062_500_000),
-                };
-
-                const amount = 7_000_000_000;
-
                 const result = await wallet.getRequestExecuteTx({
                     contractAddress: await wallet.getAddress(),
                     calldata: "0x",
                     l2Value: amount,
-                    // mintValue: (
-                    //     await wallet.getDepositAllowanceParams(await wallet.getBaseToken(), amount)
-                    // )[0].allowance,
                     overrides: { value: 0, nonce: 0 },
                 });
-                expect(result).not.to.be.deep.equal(TRANSACTION);
+                expect(result).not.to.be.null;
             });
         }
     });
