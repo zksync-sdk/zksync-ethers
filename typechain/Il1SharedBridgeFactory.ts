@@ -747,7 +747,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "isWithdrawalFinalizedShared",
+    name: "isWithdrawalFinalized",
     outputs: [
       {
         internalType: "bool",
