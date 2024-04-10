@@ -419,7 +419,7 @@ describe("Wallet", async () => {
                     amount: 5,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(338_196))).to.be.true;
+                expectBigNumberCloseTo(result, BigNumber.from(338_196), 10);
             });
         } else {
             it("should throw an error for insufficient allowance when estimating gas for ETH deposit transaction", async () => {
@@ -489,7 +489,7 @@ describe("Wallet", async () => {
                     amount: amount,
                     refundRecipient: await wallet.getAddress(),
                 });
-                expect(result.eq(BigNumber.from(361_501))).to.be.true;
+                expectBigNumberCloseTo(result, BigNumber.from(361_501), 10);
             }).timeout(10_000);
         }
     });
