@@ -23,7 +23,6 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface Il1SharedBridgeInterface extends ethers.utils.Interface {
   functions: {
-    "acceptOwnership()": FunctionFragment;
     "bridgehub()": FunctionFragment;
     "bridgehubConfirmL2Transaction(uint256,bytes32,bytes32)": FunctionFragment;
     "bridgehubDeposit(uint256,address,uint256,bytes)": FunctionFragment;
@@ -34,22 +33,14 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     "depositLegacyErc20Bridge(address,address,address,uint256,uint256,uint256,address)": FunctionFragment;
     "finalizeWithdrawal(uint256,uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "finalizeWithdrawalLegacyErc20Bridge(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
-    "initialize(address,uint256)": FunctionFragment;
-    "initializeChainGovernance(uint256,address)": FunctionFragment;
     "isWithdrawalFinalized(uint256,uint256,uint256)": FunctionFragment;
     "l1WethAddress()": FunctionFragment;
     "l2BridgeAddress(uint256)": FunctionFragment;
     "legacyBridge()": FunctionFragment;
-    "owner()": FunctionFragment;
-    "pendingOwner()": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
+    "receiveEth(uint256)": FunctionFragment;
+    "setEraFirstPostUpgradeBatch(uint256)": FunctionFragment;
   };
 
-  encodeFunctionData(
-    functionFragment: "acceptOwnership",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "bridgehub", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "bridgehubConfirmL2Transaction",
@@ -122,14 +113,6 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     values: [BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "initializeChainGovernance",
-    values: [BigNumberish, string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "isWithdrawalFinalized",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
@@ -145,24 +128,15 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     functionFragment: "legacyBridge",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "pendingOwner",
-    values?: undefined
+    functionFragment: "receiveEth",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [string]
+    functionFragment: "setEraFirstPostUpgradeBatch",
+    values: [BigNumberish]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "acceptOwnership",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "bridgehub", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "bridgehubConfirmL2Transaction",
@@ -200,11 +174,6 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     functionFragment: "finalizeWithdrawalLegacyErc20Bridge",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "initializeChainGovernance",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "isWithdrawalFinalized",
     data: BytesLike
@@ -221,48 +190,30 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     functionFragment: "legacyBridge",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "receiveEth", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "pendingOwner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
+    functionFragment: "setEraFirstPostUpgradeBatch",
     data: BytesLike
   ): Result;
 
   events: {
+    "BridgehubDepositBaseTokenInitiated(uint256,address,address,uint256)": EventFragment;
     "BridgehubDepositFinalized(uint256,bytes32,bytes32)": EventFragment;
-    "BridgehubDepositInitiatedSharedBridge(uint256,bytes32,address,address,address,uint256)": EventFragment;
+    "BridgehubDepositInitiated(uint256,bytes32,address,address,address,uint256)": EventFragment;
     "ClaimedFailedDepositSharedBridge(uint256,address,address,uint256)": EventFragment;
-    "DepositInitiatedSharedBridge(uint256,bytes32,address,address,address,uint256)": EventFragment;
-    "EthReceived(uint256)": EventFragment;
-    "EthWithdrawalFinalized(uint256,address,uint256)": EventFragment;
-    "Initialized(uint8)": EventFragment;
-    "OwnershipTransferStarted(address,address)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
+    "LegacyDepositInitiated(uint256,bytes32,address,address,address,uint256)": EventFragment;
     "WithdrawalFinalizedSharedBridge(uint256,address,address,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "BridgehubDepositFinalized"): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "BridgehubDepositInitiatedSharedBridge"
+    nameOrSignatureOrTopic: "BridgehubDepositBaseTokenInitiated"
   ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BridgehubDepositFinalized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BridgehubDepositInitiated"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "ClaimedFailedDepositSharedBridge"
   ): EventFragment;
-  getEvent(
-    nameOrSignatureOrTopic: "DepositInitiatedSharedBridge"
-  ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EthReceived"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EthWithdrawalFinalized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferStarted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "LegacyDepositInitiated"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "WithdrawalFinalizedSharedBridge"
   ): EventFragment;
@@ -282,10 +233,6 @@ export class Il1SharedBridge extends Contract {
   interface: Il1SharedBridgeInterface;
 
   functions: {
-    acceptOwnership(overrides?: Overrides): Promise<ContractTransaction>;
-
-    "acceptOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
-
     bridgehub(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
@@ -311,7 +258,7 @@ export class Il1SharedBridge extends Contract {
     bridgehubDeposit(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
@@ -319,7 +266,7 @@ export class Il1SharedBridge extends Contract {
     "bridgehubDeposit(uint256,address,uint256,bytes)"(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
@@ -391,20 +338,18 @@ export class Il1SharedBridge extends Contract {
     ): Promise<ContractTransaction>;
 
     depositHappened(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<{
-      depositDataHash: string;
       0: string;
     }>;
 
     "depositHappened(uint256,bytes32)"(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<{
-      depositDataHash: string;
       0: string;
     }>;
 
@@ -468,47 +413,21 @@ export class Il1SharedBridge extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    initialize(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "initialize(address,uint256)"(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    initializeChainGovernance(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "initializeChainGovernance(uint256,address)"(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
     isWithdrawalFinalized(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      isFinalized: boolean;
       0: boolean;
     }>;
 
     "isWithdrawalFinalized(uint256,uint256,uint256)"(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      isFinalized: boolean;
       0: boolean;
     }>;
 
@@ -521,18 +440,16 @@ export class Il1SharedBridge extends Contract {
     }>;
 
     l2BridgeAddress(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      l2Bridge: string;
       0: string;
     }>;
 
     "l2BridgeAddress(uint256)"(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      l2Bridge: string;
       0: string;
     }>;
 
@@ -544,40 +461,26 @@ export class Il1SharedBridge extends Contract {
       0: string;
     }>;
 
-    owner(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
+    receiveEth(
+      _chainId: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
 
-    "owner()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
+    "receiveEth(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
 
-    pendingOwner(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "pendingOwner()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
-
-    "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
-
-    transferOwnership(
-      newOwner: string,
+    setEraFirstPostUpgradeBatch(
+      _eraFirstPostUpgradeBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "transferOwnership(address)"(
-      newOwner: string,
+    "setEraFirstPostUpgradeBatch(uint256)"(
+      _eraFirstPostUpgradeBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
   };
-
-  acceptOwnership(overrides?: Overrides): Promise<ContractTransaction>;
-
-  "acceptOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
 
   bridgehub(overrides?: CallOverrides): Promise<string>;
 
@@ -600,7 +503,7 @@ export class Il1SharedBridge extends Contract {
   bridgehubDeposit(
     _chainId: BigNumberish,
     _prevMsgSender: string,
-    arg2: BigNumberish,
+    _l2Value: BigNumberish,
     _data: BytesLike,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
@@ -608,7 +511,7 @@ export class Il1SharedBridge extends Contract {
   "bridgehubDeposit(uint256,address,uint256,bytes)"(
     _chainId: BigNumberish,
     _prevMsgSender: string,
-    arg2: BigNumberish,
+    _l2Value: BigNumberish,
     _data: BytesLike,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
@@ -680,14 +583,14 @@ export class Il1SharedBridge extends Contract {
   ): Promise<ContractTransaction>;
 
   depositHappened(
-    chainId: BigNumberish,
-    l2DepositTxHash: BytesLike,
+    _chainId: BigNumberish,
+    _l2TxHash: BytesLike,
     overrides?: CallOverrides
   ): Promise<string>;
 
   "depositHappened(uint256,bytes32)"(
-    chainId: BigNumberish,
-    l2DepositTxHash: BytesLike,
+    _chainId: BigNumberish,
+    _l2TxHash: BytesLike,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -751,41 +654,17 @@ export class Il1SharedBridge extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  initialize(
-    _owner: string,
-    _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "initialize(address,uint256)"(
-    _owner: string,
-    _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  initializeChainGovernance(
-    _chainId: BigNumberish,
-    _l2BridgeAddress: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "initializeChainGovernance(uint256,address)"(
-    _chainId: BigNumberish,
-    _l2BridgeAddress: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
   isWithdrawalFinalized(
-    chainId: BigNumberish,
-    l2BatchNumber: BigNumberish,
-    l2ToL1MessageNumber: BigNumberish,
+    _chainId: BigNumberish,
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   "isWithdrawalFinalized(uint256,uint256,uint256)"(
-    chainId: BigNumberish,
-    l2BatchNumber: BigNumberish,
-    l2ToL1MessageNumber: BigNumberish,
+    _chainId: BigNumberish,
+    _l2BatchNumber: BigNumberish,
+    _l2MessageIndex: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
@@ -794,12 +673,12 @@ export class Il1SharedBridge extends Contract {
   "l1WethAddress()"(overrides?: CallOverrides): Promise<string>;
 
   l2BridgeAddress(
-    chainId: BigNumberish,
+    _chainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
   "l2BridgeAddress(uint256)"(
-    chainId: BigNumberish,
+    _chainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -807,33 +686,27 @@ export class Il1SharedBridge extends Contract {
 
   "legacyBridge()"(overrides?: CallOverrides): Promise<string>;
 
-  owner(overrides?: CallOverrides): Promise<string>;
+  receiveEth(
+    _chainId: BigNumberish,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
 
-  "owner()"(overrides?: CallOverrides): Promise<string>;
+  "receiveEth(uint256)"(
+    _chainId: BigNumberish,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
 
-  pendingOwner(overrides?: CallOverrides): Promise<string>;
-
-  "pendingOwner()"(overrides?: CallOverrides): Promise<string>;
-
-  renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
-
-  "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
-
-  transferOwnership(
-    newOwner: string,
+  setEraFirstPostUpgradeBatch(
+    _eraFirstPostUpgradeBatch: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "transferOwnership(address)"(
-    newOwner: string,
+  "setEraFirstPostUpgradeBatch(uint256)"(
+    _eraFirstPostUpgradeBatch: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    acceptOwnership(overrides?: CallOverrides): Promise<void>;
-
-    "acceptOwnership()"(overrides?: CallOverrides): Promise<void>;
-
     bridgehub(overrides?: CallOverrides): Promise<string>;
 
     "bridgehub()"(overrides?: CallOverrides): Promise<string>;
@@ -855,7 +728,7 @@ export class Il1SharedBridge extends Contract {
     bridgehubDeposit(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: CallOverrides
     ): Promise<{
@@ -874,7 +747,7 @@ export class Il1SharedBridge extends Contract {
     "bridgehubDeposit(uint256,address,uint256,bytes)"(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: CallOverrides
     ): Promise<{
@@ -957,14 +830,14 @@ export class Il1SharedBridge extends Contract {
     ): Promise<void>;
 
     depositHappened(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<string>;
 
     "depositHappened(uint256,bytes32)"(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -1018,6 +891,9 @@ export class Il1SharedBridge extends Contract {
       _merkleProof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<{
+      l1Receiver: string;
+      l1Token: string;
+      amount: BigNumber;
       0: string;
       1: string;
       2: BigNumber;
@@ -1031,46 +907,25 @@ export class Il1SharedBridge extends Contract {
       _merkleProof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<{
+      l1Receiver: string;
+      l1Token: string;
+      amount: BigNumber;
       0: string;
       1: string;
       2: BigNumber;
     }>;
 
-    initialize(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "initialize(address,uint256)"(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    initializeChainGovernance(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "initializeChainGovernance(uint256,address)"(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     isWithdrawalFinalized(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     "isWithdrawalFinalized(uint256,uint256,uint256)"(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1079,12 +934,12 @@ export class Il1SharedBridge extends Contract {
     "l1WethAddress()"(overrides?: CallOverrides): Promise<string>;
 
     l2BridgeAddress(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
     "l2BridgeAddress(uint256)"(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -1092,37 +947,42 @@ export class Il1SharedBridge extends Contract {
 
     "legacyBridge()"(overrides?: CallOverrides): Promise<string>;
 
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    "owner()"(overrides?: CallOverrides): Promise<string>;
-
-    pendingOwner(overrides?: CallOverrides): Promise<string>;
-
-    "pendingOwner()"(overrides?: CallOverrides): Promise<string>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    "renounceOwnership()"(overrides?: CallOverrides): Promise<void>;
-
-    transferOwnership(
-      newOwner: string,
+    receiveEth(
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "transferOwnership(address)"(
-      newOwner: string,
+    "receiveEth(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setEraFirstPostUpgradeBatch(
+      _eraFirstPostUpgradeBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setEraFirstPostUpgradeBatch(uint256)"(
+      _eraFirstPostUpgradeBatch: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
+    BridgehubDepositBaseTokenInitiated(
+      chainId: BigNumberish | null,
+      from: string | null,
+      l1Token: null,
+      amount: null
+    ): EventFilter;
+
     BridgehubDepositFinalized(
       chainId: BigNumberish | null,
       txDataHash: BytesLike | null,
       l2DepositTxHash: BytesLike | null
     ): EventFilter;
 
-    BridgehubDepositInitiatedSharedBridge(
+    BridgehubDepositInitiated(
       chainId: BigNumberish | null,
       txDataHash: BytesLike | null,
       from: string | null,
@@ -1138,33 +998,13 @@ export class Il1SharedBridge extends Contract {
       amount: null
     ): EventFilter;
 
-    DepositInitiatedSharedBridge(
+    LegacyDepositInitiated(
       chainId: BigNumberish | null,
       l2DepositTxHash: BytesLike | null,
       from: string | null,
       to: null,
       l1Token: null,
       amount: null
-    ): EventFilter;
-
-    EthReceived(amount: null): EventFilter;
-
-    EthWithdrawalFinalized(
-      chainId: null,
-      to: string | null,
-      amount: null
-    ): EventFilter;
-
-    Initialized(version: null): EventFilter;
-
-    OwnershipTransferStarted(
-      previousOwner: string | null,
-      newOwner: string | null
-    ): EventFilter;
-
-    OwnershipTransferred(
-      previousOwner: string | null,
-      newOwner: string | null
     ): EventFilter;
 
     WithdrawalFinalizedSharedBridge(
@@ -1176,10 +1016,6 @@ export class Il1SharedBridge extends Contract {
   };
 
   estimateGas: {
-    acceptOwnership(overrides?: Overrides): Promise<BigNumber>;
-
-    "acceptOwnership()"(overrides?: Overrides): Promise<BigNumber>;
-
     bridgehub(overrides?: CallOverrides): Promise<BigNumber>;
 
     "bridgehub()"(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1201,7 +1037,7 @@ export class Il1SharedBridge extends Contract {
     bridgehubDeposit(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
@@ -1209,7 +1045,7 @@ export class Il1SharedBridge extends Contract {
     "bridgehubDeposit(uint256,address,uint256,bytes)"(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
@@ -1281,14 +1117,14 @@ export class Il1SharedBridge extends Contract {
     ): Promise<BigNumber>;
 
     depositHappened(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "depositHappened(uint256,bytes32)"(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1352,41 +1188,17 @@ export class Il1SharedBridge extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    initialize(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "initialize(address,uint256)"(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    initializeChainGovernance(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "initializeChainGovernance(uint256,address)"(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
     isWithdrawalFinalized(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "isWithdrawalFinalized(uint256,uint256,uint256)"(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1395,12 +1207,12 @@ export class Il1SharedBridge extends Contract {
     "l1WethAddress()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     l2BridgeAddress(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "l2BridgeAddress(uint256)"(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1408,34 +1220,28 @@ export class Il1SharedBridge extends Contract {
 
     "legacyBridge()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
+    receiveEth(
+      _chainId: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
 
-    "owner()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "receiveEth(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
 
-    pendingOwner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "pendingOwner()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    renounceOwnership(overrides?: Overrides): Promise<BigNumber>;
-
-    "renounceOwnership()"(overrides?: Overrides): Promise<BigNumber>;
-
-    transferOwnership(
-      newOwner: string,
+    setEraFirstPostUpgradeBatch(
+      _eraFirstPostUpgradeBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "transferOwnership(address)"(
-      newOwner: string,
+    "setEraFirstPostUpgradeBatch(uint256)"(
+      _eraFirstPostUpgradeBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    acceptOwnership(overrides?: Overrides): Promise<PopulatedTransaction>;
-
-    "acceptOwnership()"(overrides?: Overrides): Promise<PopulatedTransaction>;
-
     bridgehub(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "bridgehub()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1457,7 +1263,7 @@ export class Il1SharedBridge extends Contract {
     bridgehubDeposit(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
@@ -1465,7 +1271,7 @@ export class Il1SharedBridge extends Contract {
     "bridgehubDeposit(uint256,address,uint256,bytes)"(
       _chainId: BigNumberish,
       _prevMsgSender: string,
-      arg2: BigNumberish,
+      _l2Value: BigNumberish,
       _data: BytesLike,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
@@ -1537,14 +1343,14 @@ export class Il1SharedBridge extends Contract {
     ): Promise<PopulatedTransaction>;
 
     depositHappened(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "depositHappened(uint256,bytes32)"(
-      chainId: BigNumberish,
-      l2DepositTxHash: BytesLike,
+      _chainId: BigNumberish,
+      _l2TxHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1608,41 +1414,17 @@ export class Il1SharedBridge extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    initialize(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "initialize(address,uint256)"(
-      _owner: string,
-      _eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    initializeChainGovernance(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "initializeChainGovernance(uint256,address)"(
-      _chainId: BigNumberish,
-      _l2BridgeAddress: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
     isWithdrawalFinalized(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "isWithdrawalFinalized(uint256,uint256,uint256)"(
-      chainId: BigNumberish,
-      l2BatchNumber: BigNumberish,
-      l2ToL1MessageNumber: BigNumberish,
+      _chainId: BigNumberish,
+      _l2BatchNumber: BigNumberish,
+      _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1651,12 +1433,12 @@ export class Il1SharedBridge extends Contract {
     "l1WethAddress()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     l2BridgeAddress(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "l2BridgeAddress(uint256)"(
-      chainId: BigNumberish,
+      _chainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1664,25 +1446,23 @@ export class Il1SharedBridge extends Contract {
 
     "legacyBridge()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    receiveEth(
+      _chainId: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
 
-    "owner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "receiveEth(uint256)"(
+      _chainId: BigNumberish,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
 
-    pendingOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "pendingOwner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    renounceOwnership(overrides?: Overrides): Promise<PopulatedTransaction>;
-
-    "renounceOwnership()"(overrides?: Overrides): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: string,
+    setEraFirstPostUpgradeBatch(
+      _eraFirstPostUpgradeBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "transferOwnership(address)"(
-      newOwner: string,
+    "setEraFirstPostUpgradeBatch(uint256)"(
+      _eraFirstPostUpgradeBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
   };

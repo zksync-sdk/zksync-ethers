@@ -18,17 +18,6 @@ export class Il1Erc20BridgeFactory {
 
 const _abi = [
   {
-    inputs: [
-      {
-        internalType: "contract IL1SharedBridge",
-        name: "_sharedBridge",
-        type: "address",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
     anonymous: false,
     inputs: [
       {
@@ -190,7 +179,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bytes32",
-        name: "l2TxHash",
+        name: "txHash",
         type: "bytes32",
       },
     ],
@@ -234,7 +223,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bytes32",
-        name: "l2TxHash",
+        name: "txHash",
         type: "bytes32",
       },
     ],
@@ -245,17 +234,17 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "account",
+        name: "_account",
         type: "address",
       },
       {
         internalType: "address",
-        name: "l1Token",
+        name: "_l1Token",
         type: "address",
       },
       {
         internalType: "bytes32",
-        name: "depositL2TxHash",
+        name: "_depositL2TxHash",
         type: "bytes32",
       },
     ],
@@ -267,7 +256,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    stateMutability: "view",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -304,22 +293,15 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "initialize",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "uint256",
-        name: "l2BatchNumber",
+        name: "_l2BatchNumber",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "l2ToL1MessageNumber",
+        name: "_l2MessageIndex",
         type: "uint256",
       },
     ],
@@ -327,7 +309,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bool",
-        name: "isFinalized",
+        name: "",
         type: "bool",
       },
     ],
@@ -381,19 +363,6 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "l2TokenProxyBytecodeHash",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "sharedBridge",
     outputs: [
       {
@@ -403,6 +372,24 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "transferTokenToSharedBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ];

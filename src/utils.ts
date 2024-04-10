@@ -24,7 +24,7 @@ export const CONTRACT_DEPLOYER = new utils.Interface(require("../abi/IContractDe
 export const L1_MESSENGER = new utils.Interface(require("../abi/IL1Messenger.json"));
 export const IERC20 = new utils.Interface(require("../abi/IERC20.json"));
 export const IERC1271 = new utils.Interface(require("../abi/IERC1271.json"));
-export const L1_BRIDGE_ABI = new utils.Interface(require("../abi/IL1Bridge.json"));
+export const L1_BRIDGE_ABI = new utils.Interface(require("../abi/IL1Erc20Bridge.json"));
 export const L2_BRIDGE_ABI = new utils.Interface(require("../abi/IL2Bridge.json"));
 export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder.json"));
 

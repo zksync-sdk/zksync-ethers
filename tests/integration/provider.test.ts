@@ -17,7 +17,7 @@ describe("Provider", () => {
     let baseToken;
 
     before("setup", async function () {
-        isEthBased = await provider.isETHBasedChain();
+        isEthBased = await provider.isEthBasedChain();
         baseToken = await provider.getBaseTokenContractAddress();
 
         this.timeout(25_000);
@@ -314,7 +314,7 @@ describe("Provider", () => {
                 data: "0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
             };
             const result = await provider.getWithdrawTx({
-                token: utils.LEGACY_ETH_ADDRESS,
+                token: baseToken,
                 amount: 7_000_000_000,
                 to: ADDRESS,
                 from: ADDRESS,
@@ -330,7 +330,7 @@ describe("Provider", () => {
                 data: "0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
             };
             const result = await provider.getWithdrawTx({
-                token: utils.LEGACY_ETH_ADDRESS,
+                token: baseToken,
                 amount: 7_000_000_000,
                 from: ADDRESS,
             });
@@ -384,8 +384,9 @@ describe("Provider", () => {
 
     describe("#estimateGasWithdraw()", () => {
         it("should return gas estimation of withdraw transaction", async () => {
+            const tokenAddress = isEthBased ? utils.ETH_ADDRESS_IN_CONTRACTS : await wallet.l2TokenAddress(utils.ETH_ADDRESS_IN_CONTRACTS);
             const result = await provider.estimateGasWithdraw({
-                token: utils.LEGACY_ETH_ADDRESS,
+                token: tokenAddress,
                 amount: 7_000_000_000,
                 to: ADDRESS,
                 from: ADDRESS,

@@ -18,25 +18,35 @@ export class Il1SharedBridgeFactory {
 
 const _abi = [
   {
+    anonymous: false,
     inputs: [
       {
-        internalType: "address payable",
-        name: "_l1WethAddress",
+        indexed: true,
+        internalType: "uint256",
+        name: "chainId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
         type: "address",
       },
       {
-        internalType: "contract IBridgehub",
-        name: "_bridgehub",
+        indexed: false,
+        internalType: "address",
+        name: "l1Token",
         type: "address",
       },
       {
-        internalType: "contract IL1ERC20Bridge",
-        name: "_legacyBridge",
-        type: "address",
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
-    type: "constructor",
+    name: "BridgehubDepositBaseTokenInitiated",
+    type: "event",
   },
   {
     anonymous: false,
@@ -103,7 +113,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "BridgehubDepositInitiatedSharedBridge",
+    name: "BridgehubDepositInitiated",
     type: "event",
   },
   {
@@ -177,96 +187,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "DepositInitiatedSharedBridge",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "EthReceived",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "chainId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "EthWithdrawalFinalized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint8",
-        name: "version",
-        type: "uint8",
-      },
-    ],
-    name: "Initialized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferStarted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
+    name: "LegacyDepositInitiated",
     type: "event",
   },
   {
@@ -299,13 +220,6 @@ const _abi = [
     ],
     name: "WithdrawalFinalizedSharedBridge",
     type: "event",
-  },
-  {
-    inputs: [],
-    name: "acceptOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
   },
   {
     inputs: [],
@@ -357,7 +271,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "",
+        name: "_l2Value",
         type: "uint256",
       },
       {
@@ -537,12 +451,12 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "chainId",
+        name: "_chainId",
         type: "uint256",
       },
       {
         internalType: "bytes32",
-        name: "l2DepositTxHash",
+        name: "_l2TxHash",
         type: "bytes32",
       },
     ],
@@ -550,7 +464,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bytes32",
-        name: "depositDataHash",
+        name: "",
         type: "bytes32",
       },
     ],
@@ -599,7 +513,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bytes32",
-        name: "l2TxHash",
+        name: "txHash",
         type: "bytes32",
       },
     ],
@@ -676,38 +590,20 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "l1Receiver",
         type: "address",
       },
       {
         internalType: "address",
-        name: "",
+        name: "l1Token",
         type: "address",
       },
       {
         internalType: "uint256",
-        name: "",
+        name: "amount",
         type: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_owner",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_eraIsEthWithdrawalFinalizedStorageSwitchBatchNumber",
-        type: "uint256",
-      },
-    ],
-    name: "initialize",
-    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -719,31 +615,13 @@ const _abi = [
         type: "uint256",
       },
       {
-        internalType: "address",
-        name: "_l2BridgeAddress",
-        type: "address",
-      },
-    ],
-    name: "initializeChainGovernance",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint256",
-        name: "chainId",
+        name: "_l2BatchNumber",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "l2BatchNumber",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "l2ToL1MessageNumber",
+        name: "_l2MessageIndex",
         type: "uint256",
       },
     ],
@@ -751,7 +629,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bool",
-        name: "isFinalized",
+        name: "",
         type: "bool",
       },
     ],
@@ -763,7 +641,7 @@ const _abi = [
     name: "l1WethAddress",
     outputs: [
       {
-        internalType: "address payable",
+        internalType: "address",
         name: "",
         type: "address",
       },
@@ -775,7 +653,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "chainId",
+        name: "_chainId",
         type: "uint256",
       },
     ],
@@ -783,7 +661,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "l2Bridge",
+        name: "",
         type: "address",
       },
     ],
@@ -804,47 +682,27 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "owner",
-    outputs: [
+    inputs: [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
       },
     ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "pendingOwner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
+    name: "receiveEth",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
     inputs: [
       {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
+        internalType: "uint256",
+        name: "_eraFirstPostUpgradeBatch",
+        type: "uint256",
       },
     ],
-    name: "transferOwnership",
+    name: "setEraFirstPostUpgradeBatch",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

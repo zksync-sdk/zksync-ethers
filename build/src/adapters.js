@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdapterL2 = exports.AdapterL1 = void 0;
 const ethers_1 = require("ethers");
 const Ierc20Factory_1 = require("../typechain/Ierc20Factory");
-const Il1BridgeFactory_1 = require("../typechain/Il1BridgeFactory");
+const IL1Erc20BridgeFactory_1 = require("../typechain/IL1Erc20BridgeFactory");
 const Il2BridgeFactory_1 = require("../typechain/Il2BridgeFactory");
 const IBridgehubFactory_1 = require("../typechain/IBridgehubFactory");
 const Il1SharedBridgeFactory_1 = require("../typechain/Il1SharedBridgeFactory");
@@ -32,7 +32,7 @@ function AdapterL1(Base) {
         async getL1BridgeContracts() {
             const addresses = await this._providerL2().getDefaultBridgeAddresses();
             return {
-                erc20: Il1BridgeFactory_1.Il1BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
+                erc20: IL1Erc20BridgeFactory_1.Il1Erc20BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
                 shared: Il1SharedBridgeFactory_1.Il1SharedBridgeFactory.connect(addresses.sharedL1, this._signerL1()),
             };
         }
@@ -41,8 +41,8 @@ function AdapterL1(Base) {
             const chainId = (await this._providerL2().getNetwork()).chainId;
             return await bridgehub.baseToken(chainId);
         }
-        async isETHBasedChain() {
-            return this._providerL2().isETHBasedChain();
+        async isEthBasedChain() {
+            return this._providerL2().isEthBasedChain();
         }
         async getBalanceL1(token, blockTag) {
             token !== null && token !== void 0 ? token : (token = utils_1.LEGACY_ETH_ADDRESS);
@@ -74,9 +74,9 @@ function AdapterL1(Base) {
             let bridgeAddress = overrides === null || overrides === void 0 ? void 0 : overrides.bridgeAddress;
             const erc20contract = Ierc20Factory_1.Ierc20Factory.connect(token, this._signerL1());
             const baseToken = await this.getBaseToken();
-            const isETHBasedChain = await this.isETHBasedChain();
+            const isEthBasedChain = await this.isEthBasedChain();
             if (bridgeAddress == null) {
-                if (!isETHBasedChain && token == baseToken) {
+                if (!isEthBasedChain && token == baseToken) {
                     bridgeAddress = await (await this.getBridgehubContract()).sharedBridge();
                 }
                 else {
@@ -106,8 +106,8 @@ function AdapterL1(Base) {
                 token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
             }
             const baseTokenAddress = await this.getBaseToken();
-            const isETHBasedChain = await this.isETHBasedChain();
-            if (isETHBasedChain && token == utils_1.LEGACY_ETH_ADDRESS) {
+            const isEthBasedChain = await this.isEthBasedChain();
+            if (isEthBasedChain && token == utils_1.LEGACY_ETH_ADDRESS) {
                 throw new Error("ETH token can't be approved. The address of the token does not exist on L1.");
             }
             else if (baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
@@ -151,8 +151,8 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const isETHBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
-            if (isETHBasedChain && transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
+            const isEthBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            if (isEthBasedChain && transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return await this._depositETHToETHBasedChain(transaction);
             }
             else if (baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
@@ -314,11 +314,11 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const isETHBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
-            if (isETHBasedChain && transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
+            const isEthBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            if (isEthBasedChain && transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return await this._getDepositETHOnETHBasedChainTx(transaction);
             }
-            else if (isETHBasedChain) {
+            else if (isEthBasedChain) {
                 return await this._getDepositTokenOnETHBasedChainTx(transaction);
             }
             else if (transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
@@ -486,7 +486,7 @@ function AdapterL1(Base) {
         async _getL2GasLimitFromCustomBridge(transaction) {
             var _a;
             const customBridgeData = (_a = transaction.customBridgeData) !== null && _a !== void 0 ? _a : (await (0, utils_1.getERC20DefaultBridgeData)(transaction.token, this._providerL1()));
-            const bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(transaction.bridgeAddress, this._signerL1());
+            const bridge = Il1SharedBridgeFactory_1.Il1SharedBridgeFactory.connect(transaction.bridgeAddress, this._signerL1());
             const l2Address = await bridge.l2Bridge();
             return await (0, utils_1.estimateCustomBridgeDepositL2Gas)(this._providerL2(), transaction.bridgeAddress, l2Address, transaction.token, transaction.amount, transaction.to, customBridgeData, await this.getAddress(), transaction.gasPerPubdataByte);
         }
@@ -503,14 +503,14 @@ function AdapterL1(Base) {
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
-            const isETHBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            const isEthBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
             const tx = await this._getDepositTxWithDefaults({
                 ...transaction,
                 amount: dummyAmount
             });
             const gasPriceForEstimation = (await tx.overrides.maxFeePerGas) || (await tx.overrides.gasPrice);
             const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
-            if (isETHBasedChain) {
+            if (isEthBasedChain) {
                 // To ensure that L1 gas estimation succeeds when using estimateGasDeposit,
                 // the account needs to have a sufficient ETH balance.
                 const selfBalanceETH = await this.getBalanceL1();
@@ -622,8 +622,14 @@ function AdapterL1(Base) {
             // which is returned as `proof.id`.
             const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex);
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            const l2Bridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(sender, this._providerL2());
-            const l1Bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(await l2Bridge.l1Bridge(), this._providerL1());
+            let l1Bridge;
+            if (this._providerL2().isBaseToken(sender)) {
+                l1Bridge = (await this.getL1BridgeContracts()).shared;
+            }
+            else {
+                let l2Bridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(sender, this._providerL2());
+                l1Bridge = Il1SharedBridgeFactory_1.Il1SharedBridgeFactory.connect(await l2Bridge.l1Bridge(), this._providerL1());
+            }
             return await l1Bridge.isWithdrawalFinalized(chainId, log.l1BatchNumber, proof.id);
         }
         async claimFailedDeposit(depositHash, overrides) {
@@ -637,7 +643,7 @@ function AdapterL1(Base) {
             // Undo the aliasing, since the Mailbox contract set it as for contract address.
             const l1BridgeAddress = (0, utils_1.undoL1ToL2Alias)(receipt.from);
             const l2BridgeAddress = receipt.to;
-            const l1Bridge = Il1BridgeFactory_1.Il1BridgeFactory.connect(l1BridgeAddress, this._signerL1());
+            const l1Bridge = Il1SharedBridgeFactory_1.Il1SharedBridgeFactory.connect(l1BridgeAddress, this._signerL1());
             const l2Bridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(l2BridgeAddress, this._providerL2());
             const calldata = l2Bridge.interface.decodeFunctionData("finalizeDeposit", tx.data);
             const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);

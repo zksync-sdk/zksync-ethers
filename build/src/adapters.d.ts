@@ -1,7 +1,7 @@
 import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
 import { Il2Bridge } from "../typechain/Il2Bridge";
 import { IBridgehub } from "../typechain/IBridgehub";
-import { Il1Bridge } from "../typechain/Il1Bridge";
+import { Il1Erc20Bridge } from "../typechain/Il1Erc20Bridge";
 import { Il1SharedBridge } from "../typechain/Il1SharedBridge";
 import { IZkSyncStateTransition } from "../typechain/IZkSyncStateTransition";
 import { Provider } from "./provider";
@@ -19,11 +19,11 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
         getMainContract(): Promise<IZkSyncStateTransition>;
         getBridgehubContract(): Promise<IBridgehub>;
         getL1BridgeContracts(): Promise<{
-            erc20: Il1Bridge;
+            erc20: Il1Erc20Bridge;
             shared: Il1SharedBridge;
         }>;
         getBaseToken(): Promise<string>;
-        isETHBasedChain(): Promise<boolean>;
+        isEthBasedChain(): Promise<boolean>;
         getBalanceL1(token?: Address, blockTag?: ethers.providers.BlockTag): Promise<BigNumber>;
         getAllowanceL1(token: Address, bridgeAddress?: Address, blockTag?: ethers.providers.BlockTag): Promise<BigNumber>;
         l2TokenAddress(token: Address): Promise<string>;

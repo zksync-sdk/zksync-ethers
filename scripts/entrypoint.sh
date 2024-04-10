@@ -25,7 +25,7 @@ solc --base-path l1-contracts/  \
   l1-contracts/contracts/dev-contracts/interfaces/ITestnetERC20Token.sol \
   l1-contracts/contracts/bridge/interfaces/IL1ERC20Bridge.sol \
   l1-contracts/contracts/bridge/interfaces/IL1WethBridge.sol \
-  l1-contracts/contracts/bridge/interfaces/IL1Bridge.sol \
+  l1-contracts/contracts/bridge/interfaces/IL1Erc20Bridge.sol \
   l1-contracts/contracts/bridge/interfaces/IL2Bridge.sol
 
 solc --base-path system-contracts \
@@ -40,7 +40,7 @@ solc --base-path system-contracts \
 mkdir abi /abi
 mv l1-abi/* system-contracts-abi/* abi
 
-contracts="IBridgehub.abi IZkSyncStateTransition.abi IL1ERC20Bridge.abi IL1WethBridge.abi IL1Bridge.abi IL2Bridge.abi IContractDeployer.abi IEthToken.abi IL1Messenger.abi INonceHolder.abi IPaymasterFlow.abi ITestnetERC20Token.abi"
+contracts="IBridgehub.abi IZkSyncStateTransition.abi IL1ERC20Bridge.abi IL1WethBridge.abi IL1Erc20Bridge.abi IL2Bridge.abi IContractDeployer.abi IEthToken.abi IL1Messenger.abi INonceHolder.abi IPaymasterFlow.abi ITestnetERC20Token.abi"
 
 for filename in $contracts; do
     jq '.' "abi/$filename" > "/abi/${filename%.abi}.json"

@@ -38,11 +38,11 @@ declare const Wallet_base: {
         getMainContract(): Promise<import("../typechain/IZkSyncStateTransition").IZkSyncStateTransition>;
         getBridgehubContract(): Promise<import("../typechain/IBridgehub").IBridgehub>;
         getL1BridgeContracts(): Promise<{
-            erc20: import("../typechain/Il1Bridge").Il1Bridge;
+            erc20: import("../typechain/Il1Erc20Bridge").Il1Erc20Bridge;
             shared: import("../typechain/Il1SharedBridge").Il1SharedBridge;
         }>;
         getBaseToken(): Promise<string>;
-        isETHBasedChain(): Promise<boolean>;
+        isEthBasedChain(): Promise<boolean>;
         getBalanceL1(token?: string, blockTag?: ethers.providers.BlockTag): Promise<ethers.BigNumber>;
         getAllowanceL1(token: string, bridgeAddress?: string, blockTag?: ethers.providers.BlockTag): Promise<ethers.BigNumber>;
         l2TokenAddress(token: string): Promise<string>;
