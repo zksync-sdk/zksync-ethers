@@ -31,10 +31,11 @@ import {
     CONTRACT_DEPLOYER,
     CONTRACT_DEPLOYER_ADDRESS,
     EIP712_TX_TYPE,
-    ETH_ADDRESS,
+    LEGACY_ETH_ADDRESS,
+    ETH_ADDRESS_IN_CONTRACTS,
     getL2HashFromPriorityOp,
     isETH,
-    L2_ETH_TOKEN_ADDRESS,
+    L2_BASE_TOKEN_ADDRESS,
     parseTransaction,
     REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
     sleep,
@@ -54,6 +55,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         erc20BridgeL1?: Address;
         sharedBridgeL1?: Address;
         sharedBridgeL2?: Address;
+        baseToken?: Address;
     };
 
     // NOTE: this is almost a complete copy-paste of the parent poll method
@@ -392,8 +394,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     async l2TokenAddress(token: Address) {
-        if (token == ETH_ADDRESS) {
-            return ETH_ADDRESS;
+        if (token == LEGACY_ETH_ADDRESS) {
+            token = ETH_ADDRESS_IN_CONTRACTS;
+        }
+
+        const baseToken = await this.getBaseTokenContractAddress();
+        if (token.toLowerCase() == baseToken.toLowerCase()) {
+            return L2_BASE_TOKEN_ADDRESS;
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
@@ -402,8 +409,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     async l1TokenAddress(token: Address) {
-        if (token == ETH_ADDRESS) {
-            return ETH_ADDRESS;
+        if (token == LEGACY_ETH_ADDRESS) {
+            return LEGACY_ETH_ADDRESS;
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
@@ -554,6 +561,17 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return this.contractAddresses.mainContract;
     }
 
+    async getBaseTokenContractAddress(): Promise<Address> {
+        if (!this.contractAddresses.baseToken) {
+            this.contractAddresses.baseToken = await this.send("zks_getBaseTokenL1Address", []);
+        }
+        return this.contractAddresses.baseToken;
+    }
+
+    async isETHBasedChain(): Promise<boolean> {
+        return (await this.getBaseTokenContractAddress()) == ETH_ADDRESS_IN_CONTRACTS;
+    }
+
     async getTestnetPaymasterAddress(): Promise<Address | null> {
         // Unlike contract's addresses, the testnet paymaster is not cached, since it can be trivially changed
         // on the fly by the server and should not be relied on to be constant
@@ -647,7 +665,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
                 throw new Error("The tx.value is not equal to the value withdrawn");
             }
 
-            const ethL2Token = IEthTokenFactory.connect(L2_ETH_TOKEN_ADDRESS, this);
+            const ethL2Token = IEthTokenFactory.connect(L2_BASE_TOKEN_ADDRESS, this);
             return ethL2Token.populateTransaction.withdraw(tx.to, tx.overrides);
         }
 
@@ -683,7 +701,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         tx.overrides ??= {};
         tx.overrides.from ??= tx.from;
 
-        if (tx.token == null || tx.token == ETH_ADDRESS) {
+        if (tx.token == null || tx.token == LEGACY_ETH_ADDRESS) {
             // TODO: || tx.token == baseToken
             return {
                 ...(await ethers.utils.resolveProperties(tx.overrides)),
