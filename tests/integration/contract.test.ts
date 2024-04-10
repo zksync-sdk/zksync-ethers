@@ -3,22 +3,15 @@ import "../custom-matchers";
 import { ContractFactory, Provider, types, Wallet, Contract } from "../../src";
 import { ethers } from "ethers";
 
+import { PRIVATE_KEY, tokenPath, storagePath, demoPath, paymasterPath, DAI_L1 } from "../utils";
+
 const { expect } = chai;
 
 describe("ContractFactory", () => {
-    const PRIVATE_KEY = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
-
     const provider = Provider.getDefaultProvider(types.Network.Localhost);
     const wallet = new Wallet(PRIVATE_KEY, provider);
-
-    const tokenPath = "../files/Token.json";
-    const paymasterPath = "../files/Paymaster.json";
-    const storagePath = "../files/Storage.json";
-    const demoPath = "../files/Demo.json";
-
     const TOKENS_L1 = require("../tokens.json");
-    // const DAI_L1 = TOKENS_L1[0].address;
-    const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";
+    // export const DAI_L1 = TOKENS_L1[0].address;
 
     describe("#constructor()", () => {
         it("`ContractFactory(abi, bytecode, runner)` should return a `ContractFactory` with `create` deployment", async () => {

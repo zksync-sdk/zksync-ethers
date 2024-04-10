@@ -271,8 +271,8 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
     }
     async getBalance(address, blockTag, tokenAddress) {
         const tag = this.formatter.blockTag(blockTag);
-        if (tokenAddress == null || (0, utils_1.isETH)(tokenAddress)) {
-            // requesting ETH balance
+        if (tokenAddress == null || await this.isBaseToken(tokenAddress)) {
+            // requesting base token balance
             return await super.getBalance(address, tag);
         }
         else {
@@ -435,6 +435,9 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
     async isETHBasedChain() {
         return (await this.getBaseTokenContractAddress()) == utils_1.ETH_ADDRESS_IN_CONTRACTS;
     }
+    async isBaseToken(token) {
+        return token == (await this.getBaseTokenContractAddress()) || token == utils_1.L2_BASE_TOKEN_ADDRESS;
+    }
     async getTestnetPaymasterAddress() {
         // Unlike contract's addresses, the testnet paymaster is not cached, since it can be trivially changed
         // on the fly by the server and should not be relied on to be constant
@@ -489,6 +492,9 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
     async getWithdrawTx(transaction) {
         var _a, _b, _c;
         var _d;
+        if (transaction.token == utils_1.LEGACY_ETH_ADDRESS) {
+            transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+        }
         const { ...tx } = transaction;
         if (tx.to == null && tx.from == null) {
             throw new Error("withdrawal target address is undefined");
@@ -496,7 +502,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         (_a = tx.to) !== null && _a !== void 0 ? _a : (tx.to = tx.from);
         (_b = tx.overrides) !== null && _b !== void 0 ? _b : (tx.overrides = {});
         (_c = (_d = tx.overrides).from) !== null && _c !== void 0 ? _c : (_d.from = tx.from);
-        if ((0, utils_1.isETH)(tx.token)) {
+        if (await this.isBaseToken(tx.token)) {
             if (!tx.overrides.value) {
                 tx.overrides.value = tx.amount;
             }
