@@ -28,13 +28,13 @@ export const L1_BRIDGE_ABI = new utils.Interface(require("../abi/IL1Bridge.json"
 export const L2_BRIDGE_ABI = new utils.Interface(require("../abi/IL2Bridge.json"));
 export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder.json"));
 
-export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 // in the contracts the zero address can not be used, use one instead
 export const ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
 export const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
 export const CONTRACT_DEPLOYER_ADDRESS = "0x0000000000000000000000000000000000008006";
 export const L1_MESSENGER_ADDRESS = "0x0000000000000000000000000000000000008008";
-export const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
+export const L2_BASE_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 export const NONCE_HOLDER_ADDRESS = "0x0000000000000000000000000000000000008003";
 
 export const ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -68,7 +68,7 @@ export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50000;
 export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
 
 export function isETH(token: Address) {
-    return token.toLowerCase() == ETH_ADDRESS || token.toLowerCase() == L2_ETH_TOKEN_ADDRESS;
+    return token.toLowerCase() == LEGACY_ETH_ADDRESS || token.toLowerCase() == L2_BASE_TOKEN_ADDRESS || token.toLowerCase() == ETH_ADDRESS_IN_CONTRACTS;
 }
 
 export function sleep(millis: number) {
@@ -427,9 +427,9 @@ export async function getERC20DefaultBridgeData(
 ): Promise<string> {
     const token = Ierc20Factory.connect(l1TokenAddress, provider);
 
-    const name = await token.name();
-    const symbol = await token.symbol();
-    const decimals = await token.decimals();
+    const name = l1TokenAddress == ETH_ADDRESS_IN_CONTRACTS ? "Ether" :  await token.name();
+    const symbol =  l1TokenAddress == ETH_ADDRESS_IN_CONTRACTS ? "ETH" : await token.symbol();
+    const decimals =  l1TokenAddress == ETH_ADDRESS_IN_CONTRACTS ? 18 :  await token.decimals();
 
     const coder = new AbiCoder();
 
@@ -550,7 +550,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
     // due to storage slot aggregation, the gas estimation will depend on the address
     // and so estimation for the zero address may be smaller than for the sender.
     from ??= ethers.Wallet.createRandom().address;
-    if (isBaseTokenDeposit || token === ETH_ADDRESS) {
+    if (isBaseTokenDeposit) {
         return await providerL2.estimateL1ToL2Execute({
             contractAddress: to,
             gasPerPubdataByte: gasPerPubdataByte,

@@ -12,6 +12,7 @@ export declare class Provider extends ethers.providers.JsonRpcProvider {
         erc20BridgeL1?: Address;
         sharedBridgeL1?: Address;
         sharedBridgeL2?: Address;
+        baseToken?: Address;
     };
     poll(): Promise<void>;
     getTransactionReceipt(transactionHash: string | Promise<string>): Promise<TransactionReceipt>;
@@ -34,6 +35,8 @@ export declare class Provider extends ethers.providers.JsonRpcProvider {
     getL1BatchBlockRange(l1BatchNumber: number): Promise<[number, number] | null>;
     getBridgehubContractAddress(): Promise<Address>;
     getMainContractAddress(): Promise<Address>;
+    getBaseTokenContractAddress(): Promise<Address>;
+    isETHBasedChain(): Promise<boolean>;
     getTestnetPaymasterAddress(): Promise<Address | null>;
     getDefaultBridgeAddresses(): Promise<{
         erc20L1: string;

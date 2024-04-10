@@ -43,7 +43,7 @@ describe("Paymaster", () => {
 
             // transfer ETH to paymaster so it could pay fee
             const faucetTx = await wallet.transfer({
-                token: utils.ETH_ADDRESS,
+                token: utils.LEGACY_ETH_ADDRESS,
                 to: paymasterAddress,
                 amount: ethers.utils.parseEther("0.01"),
             });

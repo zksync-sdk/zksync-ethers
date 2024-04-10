@@ -16,11 +16,16 @@ describe("Provider", () => {
     const DAI_L1 = "0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55";
 
     let tx;
+    let isEthBased;
+    let baseToken;
 
     before("setup", async function () {
+        isEthBased = await provider.isETHBasedChain();
+        baseToken = await provider.getBaseTokenContractAddress();
+
         this.timeout(25_000);
         tx = await wallet.transfer({
-            token: utils.ETH_ADDRESS,
+            token: utils.LEGACY_ETH_ADDRESS,
             to: RECEIVER,
             amount: 1_000_000,
         });
@@ -117,7 +122,8 @@ describe("Provider", () => {
     describe("#getAllAccountBalances()", () => {
         it("should return all balances of the account at `address`", async () => {
             const result = await provider.getAllAccountBalances(ADDRESS);
-            expect(Object.keys(result)).to.have.lengthOf(1);
+            const expected = isEthBased ? 2 : 3;
+            expect(Object.keys(result)).to.have.lengthOf(expected);
         });
     });
 
@@ -209,7 +215,7 @@ describe("Provider", () => {
             const result = await provider.newFilter({
                 fromBlock: 0,
                 toBlock: 5,
-                address: utils.L2_ETH_TOKEN_ADDRESS,
+                address: utils.L2_BASE_TOKEN_ADDRESS,
             });
             expect(result).not.to.be.null;
         });
@@ -224,9 +230,16 @@ describe("Provider", () => {
     });
 
     describe("#l2TokenAddress()", () => {
-        it("should return L2 token address", async () => {
-            const result = await provider.l2TokenAddress(utils.ETH_ADDRESS);
-            expect(result).to.be.equal(utils.ETH_ADDRESS);
+        it("should return the L2 base address", async () => {
+            const result = await provider.l2TokenAddress(baseToken);
+            expect(result).to.be.equal(utils.L2_BASE_TOKEN_ADDRESS);
+        });
+
+        it("should return the L2 ETH address", async () => {
+            if (!isEthBased) {
+                const result = await provider.l2TokenAddress(utils.LEGACY_ETH_ADDRESS);
+                expect(result).not.to.be.null;
+            }
         });
 
         it("should return the L2 DAI address", async () => {
@@ -237,8 +250,8 @@ describe("Provider", () => {
 
     describe("#l1TokenAddress()", () => {
         it("should return L1 token address", async () => {
-            const result = await provider.l1TokenAddress(utils.ETH_ADDRESS);
-            expect(result).to.be.equal(utils.ETH_ADDRESS);
+            const result = await provider.l1TokenAddress(utils.LEGACY_ETH_ADDRESS);
+            expect(result).to.be.equal(utils.LEGACY_ETH_ADDRESS);
         });
 
         it("should return the L1 DAI address", async () => {
@@ -289,7 +302,7 @@ describe("Provider", () => {
             const result = await provider.getLogs({
                 fromBlock: 0,
                 toBlock: 5,
-                address: utils.L2_ETH_TOKEN_ADDRESS,
+                address: utils.L2_BASE_TOKEN_ADDRESS,
             });
             expect(result).not.to.be.null;
         });
@@ -304,7 +317,7 @@ describe("Provider", () => {
                 data: "0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
             };
             const result = await provider.getWithdrawTx({
-                token: utils.ETH_ADDRESS,
+                token: utils.LEGACY_ETH_ADDRESS,
                 amount: 7_000_000_000,
                 to: ADDRESS,
                 from: ADDRESS,
@@ -320,7 +333,7 @@ describe("Provider", () => {
                 data: "0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049",
             };
             const result = await provider.getWithdrawTx({
-                token: utils.ETH_ADDRESS,
+                token: utils.LEGACY_ETH_ADDRESS,
                 amount: 7_000_000_000,
                 from: ADDRESS,
             });
@@ -330,7 +343,7 @@ describe("Provider", () => {
         it("should throw an error when `tx.to=undefined && tx.from=undefined`", async () => {
             try {
                 await provider.getWithdrawTx({
-                    token: utils.ETH_ADDRESS,
+                    token: utils.LEGACY_ETH_ADDRESS,
                     amount: 5,
                     to: undefined,
                     from: undefined,
@@ -343,7 +356,7 @@ describe("Provider", () => {
         it("should throw an error when `tx.amount!=tx.overrides.value", async () => {
             try {
                 await provider.getWithdrawTx({
-                    token: utils.ETH_ADDRESS,
+                    token: utils.LEGACY_ETH_ADDRESS,
                     amount: 5,
                     to: ADDRESS,
                     from: ADDRESS,
@@ -363,7 +376,7 @@ describe("Provider", () => {
                 value: 7_000_000_000,
             };
             const result = await provider.getTransferTx({
-                token: utils.ETH_ADDRESS,
+                token: utils.LEGACY_ETH_ADDRESS,
                 amount: 7_000_000_000,
                 to: RECEIVER,
                 from: ADDRESS,
@@ -375,7 +388,7 @@ describe("Provider", () => {
     describe("#estimateGasWithdraw()", () => {
         it("should return gas estimation of withdraw transaction", async () => {
             const result = await provider.estimateGasWithdraw({
-                token: utils.ETH_ADDRESS,
+                token: utils.LEGACY_ETH_ADDRESS,
                 amount: 7_000_000_000,
                 to: ADDRESS,
                 from: ADDRESS,
@@ -387,7 +400,7 @@ describe("Provider", () => {
     describe("#estimateGasTransfer()", () => {
         it("should return gas estimation of transfer transaction", async () => {
             const result = await provider.estimateGasTransfer({
-                token: utils.ETH_ADDRESS,
+                token: utils.LEGACY_ETH_ADDRESS,
                 amount: 7_000_000_000,
                 to: RECEIVER,
                 from: ADDRESS,
@@ -459,7 +472,7 @@ describe("Provider", () => {
     describe("#getFilterChanges()", () => {
         it("should return filtered logs", async () => {
             const filter = await provider.newFilter({
-                address: utils.L2_ETH_TOKEN_ADDRESS,
+                address: utils.L2_BASE_TOKEN_ADDRESS,
                 topics: [ethers.utils.id("Transfer(address,address,uint256)")],
             });
             const result = await provider.getFilterChanges(filter);

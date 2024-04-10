@@ -42,10 +42,10 @@ function AdapterL1(Base) {
             return await bridgehub.baseToken(chainId);
         }
         async isETHBasedChain() {
-            return (await this.getBaseToken()) == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            return this._providerL2().isETHBasedChain();
         }
         async getBalanceL1(token, blockTag) {
-            token !== null && token !== void 0 ? token : (token = utils_1.ETH_ADDRESS);
+            token !== null && token !== void 0 ? token : (token = utils_1.LEGACY_ETH_ADDRESS);
             if ((0, utils_1.isETH)(token)) {
                 return await this._providerL1().getBalance(await this.getAddress(), blockTag);
             }
@@ -65,12 +65,7 @@ function AdapterL1(Base) {
             });
         }
         async l2TokenAddress(token) {
-            if (token == utils_1.ETH_ADDRESS) {
-                return utils_1.ETH_ADDRESS;
-            }
-            const bridgeAddresses = await this._providerL2().getDefaultBridgeAddresses();
-            const l2SharedBridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(bridgeAddresses.sharedL2, this._providerL2());
-            return await l2SharedBridge.l2TokenAddress(token);
+            return this._providerL2().l2TokenAddress(token);
         }
         async approveERC20(token, amount, overrides) {
             if ((0, utils_1.isETH)(token)) {
@@ -107,15 +102,18 @@ function AdapterL1(Base) {
         // Some deposit transactions require multiple approvals. Existing allowance for the bridge is not checked;
         // allowance is calculated solely based on the specified amount.
         async getDepositAllowanceParams(token, amount) {
+            if (token == utils_1.LEGACY_ETH_ADDRESS) {
+                token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            }
             const baseTokenAddress = await this.getBaseToken();
             const isETHBasedChain = await this.isETHBasedChain();
-            if (isETHBasedChain && token == utils_1.ETH_ADDRESS) {
+            if (isETHBasedChain && token == utils_1.LEGACY_ETH_ADDRESS) {
                 throw new Error("ETH token can't be approved. The address of the token does not exist on L1.");
             }
             else if (baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return [{ token, allowance: amount }];
             }
-            else if (token == utils_1.ETH_ADDRESS) {
+            else if (token == utils_1.LEGACY_ETH_ADDRESS) {
                 return [
                     {
                         token: baseTokenAddress,
@@ -147,17 +145,20 @@ function AdapterL1(Base) {
             }
         }
         async deposit(transaction) {
+            if (transaction.token == utils_1.LEGACY_ETH_ADDRESS) {
+                transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            }
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
             const isETHBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
-            if (isETHBasedChain && transaction.token == utils_1.ETH_ADDRESS) {
+            if (isETHBasedChain && transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return await this._depositETHToETHBasedChain(transaction);
             }
             else if (baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return await this._depositTokenToETHBasedChain(transaction);
             }
-            else if (transaction.token == utils_1.ETH_ADDRESS) {
+            else if (transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return await this._depositETHToNonETHBasedChain(transaction);
             }
             else if (transaction.token == baseTokenAddress) {
@@ -293,10 +294,12 @@ function AdapterL1(Base) {
             return this.requestExecute(tx);
         }
         async estimateGasDeposit(transaction) {
+            if (transaction.token == utils_1.LEGACY_ETH_ADDRESS) {
+                transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            }
             const tx = await this.getDepositTx(transaction);
-            const isETHBasedChain = await this.isETHBasedChain();
             let baseGasLimit;
-            if (isETHBasedChain && transaction.token == utils_1.ETH_ADDRESS) {
+            if (tx.token == this.getBaseToken()) {
                 baseGasLimit = await this.estimateGasRequestExecute(tx);
             }
             else {
@@ -305,17 +308,20 @@ function AdapterL1(Base) {
             return (0, utils_1.scaleGasLimit)(baseGasLimit);
         }
         async getDepositTx(transaction) {
+            if (transaction.token == utils_1.LEGACY_ETH_ADDRESS) {
+                transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            }
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
             const isETHBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
-            if (isETHBasedChain && transaction.token == utils_1.ETH_ADDRESS) {
+            if (isETHBasedChain && transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return await this._getDepositETHOnETHBasedChainTx(transaction);
             }
             else if (isETHBasedChain) {
                 return await this._getDepositTokenOnETHBasedChainTx(transaction);
             }
-            else if (transaction.token == utils_1.ETH_ADDRESS) {
+            else if (transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return (await this._getDepositETHOnNonETHBasedChainTx(transaction)).tx;
             }
             else if (transaction.token == baseTokenAddress) {
@@ -469,12 +475,11 @@ function AdapterL1(Base) {
         // Default behaviour for calculating l2GasLimit of deposit transaction.
         async _getL2GasLimit(transaction) {
             const baseToken = await this.getBaseToken();
-            const correctBaseToken = baseToken === utils_1.ETH_ADDRESS_IN_CONTRACTS ? utils_1.ETH_ADDRESS : baseToken;
             if (transaction.bridgeAddress != null) {
                 return await this._getL2GasLimitFromCustomBridge(transaction);
             }
             else {
-                return await (0, utils_1.estimateDefaultBridgeDepositL2Gas)(this._providerL1(), this._providerL2(), transaction.token, transaction.amount, transaction.to, await this.getAddress(), transaction.gasPerPubdataByte, transaction.token === correctBaseToken);
+                return await (0, utils_1.estimateDefaultBridgeDepositL2Gas)(this._providerL1(), this._providerL2(), transaction.token, transaction.amount, transaction.to, await this.getAddress(), transaction.gasPerPubdataByte, transaction.token === baseToken);
             }
         }
         // Calculates the l2GasLimit of deposit transaction using custom bridge.
@@ -490,6 +495,9 @@ function AdapterL1(Base) {
         async getFullRequiredDepositFee(transaction) {
             var _a, _b;
             var _c, _d;
+            if (transaction.token == utils_1.LEGACY_ETH_ADDRESS) {
+                transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            }
             // It is assumed that the L2 fee for the transaction does not depend on its value.
             const dummyAmount = ethers_1.BigNumber.from(1);
             const bridgehub = await this.getBridgehubContract();
@@ -507,7 +515,7 @@ function AdapterL1(Base) {
                 // the account needs to have a sufficient ETH balance.
                 const selfBalanceETH = await this.getBalanceL1();
                 if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
-                    const recommendedL1GasLimit = tx.token === utils_1.ETH_ADDRESS ? utils_1.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT : utils_1.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT;
+                    const recommendedL1GasLimit = tx.token === utils_1.ETH_ADDRESS_IN_CONTRACTS ? utils_1.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT : utils_1.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT;
                     const recommendedETHBalance = ethers_1.BigNumber.from(recommendedL1GasLimit)
                         .mul(gasPriceForEstimation)
                         .add(baseCost);
@@ -515,7 +523,7 @@ function AdapterL1(Base) {
                     throw new Error(`Not enough balance for deposit! Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`);
                 }
                 // In case of token deposit, a sufficient token allowance is also required.
-                if (tx.token !== utils_1.ETH_ADDRESS && (await this.getAllowanceL1(tx.token)) < dummyAmount) {
+                if (tx.token !== utils_1.ETH_ADDRESS_IN_CONTRACTS && (await this.getAllowanceL1(tx.token)) < dummyAmount) {
                     throw new Error("Not enough allowance to cover the deposit!");
                 }
             }
@@ -524,7 +532,7 @@ function AdapterL1(Base) {
                 if ((await this.getAllowanceL1(baseTokenAddress)) < mintValue) {
                     throw new Error("Not enough base token allowance to cover the deposit!");
                 }
-                if (tx.token === utils_1.ETH_ADDRESS || tx.token === baseTokenAddress) {
+                if (tx.token === utils_1.ETH_ADDRESS_IN_CONTRACTS || tx.token === baseTokenAddress) {
                     (_a = (_c = tx.overrides).value) !== null && _a !== void 0 ? _a : (_c.value = tx.amount);
                 }
                 else {

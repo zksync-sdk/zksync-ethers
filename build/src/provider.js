@@ -286,16 +286,20 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         }
     }
     async l2TokenAddress(token) {
-        if (token == utils_1.ETH_ADDRESS) {
-            return utils_1.ETH_ADDRESS;
+        if (token == utils_1.LEGACY_ETH_ADDRESS) {
+            token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+        }
+        const baseToken = await this.getBaseTokenContractAddress();
+        if (token.toLowerCase() == baseToken.toLowerCase()) {
+            return utils_1.L2_BASE_TOKEN_ADDRESS;
         }
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
         const l2SharedBridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(bridgeAddresses.sharedL2, this);
         return await l2SharedBridge.l2TokenAddress(token);
     }
     async l1TokenAddress(token) {
-        if (token == utils_1.ETH_ADDRESS) {
-            return utils_1.ETH_ADDRESS;
+        if (token == utils_1.LEGACY_ETH_ADDRESS) {
+            return utils_1.LEGACY_ETH_ADDRESS;
         }
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
         const sharedBridge = Il2BridgeFactory_1.Il2BridgeFactory.connect(bridgeAddresses.sharedL2, this);
@@ -422,6 +426,15 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         }
         return this.contractAddresses.mainContract;
     }
+    async getBaseTokenContractAddress() {
+        if (!this.contractAddresses.baseToken) {
+            this.contractAddresses.baseToken = await this.send("zks_getBaseTokenL1Address", []);
+        }
+        return this.contractAddresses.baseToken;
+    }
+    async isETHBasedChain() {
+        return (await this.getBaseTokenContractAddress()) == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+    }
     async getTestnetPaymasterAddress() {
         // Unlike contract's addresses, the testnet paymaster is not cached, since it can be trivially changed
         // on the fly by the server and should not be relied on to be constant
@@ -493,7 +506,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
                 // as the value
                 throw new Error("The tx.value is not equal to the value withdrawn");
             }
-            const ethL2Token = IEthTokenFactory_1.IEthTokenFactory.connect(utils_1.L2_ETH_TOKEN_ADDRESS, this);
+            const ethL2Token = IEthTokenFactory_1.IEthTokenFactory.connect(utils_1.L2_BASE_TOKEN_ADDRESS, this);
             return ethL2Token.populateTransaction.withdraw(tx.to, tx.overrides);
         }
         if (tx.bridgeAddress == null) {
@@ -513,7 +526,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         const { ...tx } = transaction;
         (_a = tx.overrides) !== null && _a !== void 0 ? _a : (tx.overrides = {});
         (_b = (_c = tx.overrides).from) !== null && _b !== void 0 ? _b : (_c.from = tx.from);
-        if (tx.token == null || tx.token == utils_1.ETH_ADDRESS) {
+        if (tx.token == null || tx.token == utils_1.LEGACY_ETH_ADDRESS) {
             // TODO: || tx.token == baseToken
             return {
                 ...(await ethers_1.ethers.utils.resolveProperties(tx.overrides)),
