@@ -31,7 +31,7 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     "deposit(uint256,address,address,uint256,uint256,uint256,uint256,address)": FunctionFragment;
     "depositHappened(uint256,bytes32)": FunctionFragment;
     "finalizeWithdrawal(uint256,uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
-    "isWithdrawalFinalizedShared(uint256,uint256,uint256)": FunctionFragment;
+    "isWithdrawalFinalized(uint256,uint256,uint256)": FunctionFragment;
     "l2BridgeAddress(uint256)": FunctionFragment;
   };
 
@@ -91,7 +91,7 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "isWithdrawalFinalizedShared",
+    functionFragment: "isWithdrawalFinalized",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -126,7 +126,7 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isWithdrawalFinalizedShared",
+    functionFragment: "isWithdrawalFinalized",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -309,7 +309,7 @@ export class Il1Bridge extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    isWithdrawalFinalizedShared(
+    isWithdrawalFinalized(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -318,7 +318,7 @@ export class Il1Bridge extends Contract {
       0: boolean;
     }>;
 
-    "isWithdrawalFinalizedShared(uint256,uint256,uint256)"(
+    "isWithdrawalFinalized(uint256,uint256,uint256)"(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -472,14 +472,14 @@ export class Il1Bridge extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  isWithdrawalFinalizedShared(
+  isWithdrawalFinalized(
     _chainId: BigNumberish,
     _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  "isWithdrawalFinalizedShared(uint256,uint256,uint256)"(
+  "isWithdrawalFinalized(uint256,uint256,uint256)"(
     _chainId: BigNumberish,
     _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
@@ -649,14 +649,14 @@ export class Il1Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    isWithdrawalFinalizedShared(
+    isWithdrawalFinalized(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    "isWithdrawalFinalizedShared(uint256,uint256,uint256)"(
+    "isWithdrawalFinalized(uint256,uint256,uint256)"(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -845,14 +845,14 @@ export class Il1Bridge extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    isWithdrawalFinalizedShared(
+    isWithdrawalFinalized(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "isWithdrawalFinalizedShared(uint256,uint256,uint256)"(
+    "isWithdrawalFinalized(uint256,uint256,uint256)"(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
@@ -1001,14 +1001,14 @@ export class Il1Bridge extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    isWithdrawalFinalizedShared(
+    isWithdrawalFinalized(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "isWithdrawalFinalizedShared(uint256,uint256,uint256)"(
+    "isWithdrawalFinalized(uint256,uint256,uint256)"(
       _chainId: BigNumberish,
       _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
