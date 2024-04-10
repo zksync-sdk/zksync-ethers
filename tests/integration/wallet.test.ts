@@ -36,7 +36,11 @@ describe("Wallet", async () => {
         expectBigNumberCloseTo(result.l1GasLimit, expected.l1GasLimit, tolerancePercentage);
         expectBigNumberCloseTo(result.l2GasLimit, expected.l2GasLimit, tolerancePercentage);
         expectBigNumberCloseTo(result.maxFeePerGas, expected.maxFeePerGas, tolerancePercentage);
-        expectBigNumberCloseTo(result.maxPriorityFeePerGas, expected.maxPriorityFeePerGas, tolerancePercentage);
+        expectBigNumberCloseTo(
+            result.maxPriorityFeePerGas,
+            expected.maxPriorityFeePerGas,
+            tolerancePercentage,
+        );
     }
 
     describe("#constructor()", () => {
@@ -626,13 +630,12 @@ describe("Wallet", async () => {
                     to: await wallet.getAddress(),
                     amount: 7_000_000_000,
                     refundRecipient: await wallet.getAddress(),
-                    gasPerPubdataByte: 500 // make it fail because of low gas
+                    gasPerPubdataByte: 500, // make it fail because of low gas
                 });
 
                 const tx = await response.waitFinalize();
                 const result = await wallet.claimFailedDeposit(tx.transactionHash);
                 expect(result).to.be.not.null;
-
             }).timeout(30_000);
 
             it("should throw an error when trying to claim successful deposit", async () => {
@@ -740,9 +743,11 @@ describe("Wallet", async () => {
                         .getFullRequiredDepositFee({
                             token: utils.LEGACY_ETH_ADDRESS,
                             to: await wallet.getAddress(),
-                    });
+                        });
                 } catch (e) {
-                    expect(e.message).to.be.equal("Not enough base token allowance to cover the deposit!");
+                    expect(e.message).to.be.equal(
+                        "Not enough base token allowance to cover the deposit!",
+                    );
                 }
             }).timeout(10_000);
 
@@ -754,7 +759,7 @@ describe("Wallet", async () => {
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
-                const token = utils.LEGACY_ETH_ADDRESS
+                const token = utils.LEGACY_ETH_ADDRESS;
                 const approveParams = await wallet.getDepositAllowanceParams(token, 1);
 
                 await (
@@ -765,7 +770,7 @@ describe("Wallet", async () => {
                     token: token,
                     to: await wallet.getAddress(),
                 });
-                
+
                 expectFeeDataCloseToExpected(result, FEE_DATA, tolerancePercentage);
             }).timeout(10_000);
 
@@ -777,7 +782,7 @@ describe("Wallet", async () => {
                     maxFeePerGas: BigNumber.from(1_500_000_001),
                     maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
                 };
-                const token = await wallet.getBaseToken()
+                const token = await wallet.getBaseToken();
                 const approveParams = await wallet.getDepositAllowanceParams(token, 1);
 
                 await (
@@ -818,15 +823,16 @@ describe("Wallet", async () => {
 
             it("should throw an error when there is not enough token allowance to cover the deposit", async () => {
                 const token = DAI_L1;
-                const randomWallet = Wallet.createRandom()
-                    .connectToL1(ethProvider)
-                    .connect(provider);
+                const randomWallet = Wallet.createRandom().connectToL1(ethProvider).connect(provider);
 
                 // mint base token to random wallet
-                const baseToken = ITestnetErc20TokenFactory.connect(await wallet.getBaseToken(), wallet._signerL1());
+                const baseToken = ITestnetErc20TokenFactory.connect(
+                    await wallet.getBaseToken(),
+                    wallet._signerL1(),
+                );
                 const baseTokenMintTx = await baseToken.mint(
-                        await randomWallet.getAddress(),
-                        ethers.utils.parseEther("0.5"),
+                    await randomWallet.getAddress(),
+                    ethers.utils.parseEther("0.5"),
                 );
                 await baseTokenMintTx.wait();
 
@@ -845,8 +851,8 @@ describe("Wallet", async () => {
 
                 try {
                     await randomWallet.getFullRequiredDepositFee({
-                            token: token,
-                            to: await wallet.getAddress(),
+                        token: token,
+                        to: await wallet.getAddress(),
                     });
                 } catch (e) {
                     expect(e.message).to.be.equal("Not enough token allowance to cover the deposit!");
@@ -951,12 +957,10 @@ describe("Wallet", async () => {
                     calldata: "0x",
                     l2Value: 7_000_000_000,
                     overrides: { value: 0 },
-                }
+                };
 
                 const approveParams = await wallet.getRequestExecuteAllowanceParams(tx);
-                await (
-                    await wallet.approveERC20(approveParams.token, approveParams.allowance)
-                ).wait();
+                await (await wallet.approveERC20(approveParams.token, approveParams.allowance)).wait();
 
                 const result = await wallet.estimateGasRequestExecute(tx);
                 expect(result.isZero()).to.be.false;
@@ -1003,9 +1007,7 @@ describe("Wallet", async () => {
                 };
 
                 const approveParams = await wallet.getRequestExecuteAllowanceParams(request);
-                await (
-                    await wallet.approveERC20(approveParams.token, approveParams.allowance)
-                ).wait();
+                await (await wallet.approveERC20(approveParams.token, approveParams.allowance)).wait();
 
                 const l2BalanceBeforeExecution = await wallet.getBalance();
                 const l1BalanceBeforeExecution = await wallet.getBalanceL1();
