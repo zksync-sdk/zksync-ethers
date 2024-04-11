@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdapterL2 = exports.AdapterL1 = void 0;
 const ethers_1 = require("ethers");
 const Ierc20Factory_1 = require("../typechain/Ierc20Factory");
-const IL1Erc20BridgeFactory_1 = require("../typechain/IL1Erc20BridgeFactory");
+const Il1Erc20BridgeFactory_1 = require("../typechain/Il1Erc20BridgeFactory");
 const Il2BridgeFactory_1 = require("../typechain/Il2BridgeFactory");
 const IBridgehubFactory_1 = require("../typechain/IBridgehubFactory");
 const Il1SharedBridgeFactory_1 = require("../typechain/Il1SharedBridgeFactory");
@@ -32,7 +32,7 @@ function AdapterL1(Base) {
         async getL1BridgeContracts() {
             const addresses = await this._providerL2().getDefaultBridgeAddresses();
             return {
-                erc20: IL1Erc20BridgeFactory_1.Il1Erc20BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
+                erc20: Il1Erc20BridgeFactory_1.Il1Erc20BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
                 shared: Il1SharedBridgeFactory_1.Il1SharedBridgeFactory.connect(addresses.sharedL1, this._signerL1()),
             };
         }
