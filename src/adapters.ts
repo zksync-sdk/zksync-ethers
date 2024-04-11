@@ -1,6 +1,6 @@
 import {BigNumber, BigNumberish, BytesLike, ethers, utils} from "ethers";
 import { Ierc20Factory } from "../typechain/Ierc20Factory";
-import { Il1Erc20BridgeFactory as IL1Erc20BridgeFactory } from "../typechain/IL1Erc20BridgeFactory";
+import { Il1Erc20BridgeFactory as IL1Erc20BridgeFactory } from "../typechain/Il1Erc20BridgeFactory";
 import { Il2BridgeFactory } from "../typechain/Il2BridgeFactory";
 import { Il2Bridge } from "../typechain/Il2Bridge";
 import { IBridgehubFactory } from "../typechain/IBridgehubFactory";
