@@ -28,9 +28,12 @@ export const L1_BRIDGE_ABI = new utils.Interface(require("../abi/IL1ERC20Bridge.
 export const L2_BRIDGE_ABI = new utils.Interface(require("../abi/IL2Bridge.json"));
 export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder.json"));
 
-export const LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
-// in the contracts the zero address can not be used, use one instead
+// In the contracts the zero address can not be used, use this constant instead of the legacy ETH addresses below
 export const ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
+// Legacy eth addresses, avoid using these. 
+export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 export const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
 export const CONTRACT_DEPLOYER_ADDRESS = "0x0000000000000000000000000000000000008006";
 export const L1_MESSENGER_ADDRESS = "0x0000000000000000000000000000000000008008";

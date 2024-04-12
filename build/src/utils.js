@@ -14,7 +14,8 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.estimateCustomBridgeDepositL2Gas = exports.scaleGasLimit = exports.estimateDefaultBridgeDepositL2Gas = exports.isTypedDataSignatureCorrect = exports.isMessageSignatureCorrect = exports.getERC20BridgeCalldata = exports.getERC20DefaultBridgeData = exports.undoL1ToL2Alias = exports.applyL1ToL2Alias = exports.getL2HashFromPriorityOp = exports.parseTransaction = exports.hashBytecode = exports.serialize = exports.checkBaseCost = exports.createAddress = exports.create2Address = exports.getDeployedContracts = exports.getHashedL2ToL1Msg = exports.layer1TxDefaults = exports.sleep = exports.isETH = exports.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = exports.DEFAULT_GAS_PER_PUBDATA_LIMIT = exports.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = exports.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = exports.L1_FEE_ESTIMATION_COEF_DENOMINATOR = exports.L1_FEE_ESTIMATION_COEF_NUMERATOR = exports.MAX_BYTECODE_LEN_BYTES = exports.PRIORITY_OPERATION_L2_TX_TYPE = exports.EIP712_TX_TYPE = exports.EIP1271_MAGIC_VALUE = exports.L1_TO_L2_ALIAS_OFFSET = exports.ZERO_HASH = exports.NONCE_HOLDER_ADDRESS = exports.L2_BASE_TOKEN_ADDRESS = exports.L1_MESSENGER_ADDRESS = exports.CONTRACT_DEPLOYER_ADDRESS = exports.BOOTLOADER_FORMAL_ADDRESS = exports.ETH_ADDRESS_IN_CONTRACTS = exports.LEGACY_ETH_ADDRESS = exports.NONCE_HOLDER_ABI = exports.L2_BRIDGE_ABI = exports.L1_BRIDGE_ABI = exports.IERC1271 = exports.IERC20 = exports.L1_MESSENGER = exports.CONTRACT_DEPLOYER = exports.BRIDGEHUB_ABI = exports.ZKSYNC_MAIN_ABI = exports.EIP712_TYPES = void 0;
+exports.scaleGasLimit = exports.estimateDefaultBridgeDepositL2Gas = exports.isTypedDataSignatureCorrect = exports.isMessageSignatureCorrect = exports.getERC20BridgeCalldata = exports.getERC20DefaultBridgeData = exports.undoL1ToL2Alias = exports.applyL1ToL2Alias = exports.getL2HashFromPriorityOp = exports.parseTransaction = exports.hashBytecode = exports.serialize = exports.checkBaseCost = exports.createAddress = exports.create2Address = exports.getDeployedContracts = exports.getHashedL2ToL1Msg = exports.layer1TxDefaults = exports.sleep = exports.isETH = exports.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = exports.DEFAULT_GAS_PER_PUBDATA_LIMIT = exports.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = exports.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = exports.L1_FEE_ESTIMATION_COEF_DENOMINATOR = exports.L1_FEE_ESTIMATION_COEF_NUMERATOR = exports.MAX_BYTECODE_LEN_BYTES = exports.PRIORITY_OPERATION_L2_TX_TYPE = exports.EIP712_TX_TYPE = exports.EIP1271_MAGIC_VALUE = exports.L1_TO_L2_ALIAS_OFFSET = exports.ZERO_HASH = exports.NONCE_HOLDER_ADDRESS = exports.L2_BASE_TOKEN_ADDRESS = exports.L1_MESSENGER_ADDRESS = exports.CONTRACT_DEPLOYER_ADDRESS = exports.BOOTLOADER_FORMAL_ADDRESS = exports.LEGACY_ETH_ADDRESS = exports.ETH_ADDRESS = exports.ETH_ADDRESS_IN_CONTRACTS = exports.NONCE_HOLDER_ABI = exports.L2_BRIDGE_ABI = exports.L1_BRIDGE_ABI = exports.IERC1271 = exports.IERC20 = exports.L1_MESSENGER = exports.CONTRACT_DEPLOYER = exports.BRIDGEHUB_ABI = exports.ZKSYNC_MAIN_ABI = exports.EIP712_TYPES = void 0;
+exports.estimateCustomBridgeDepositL2Gas = void 0;
 const ethers_1 = require("ethers");
 const types_1 = require("./types");
 const signer_1 = require("./signer");
@@ -32,9 +33,11 @@ exports.IERC1271 = new ethers_1.utils.Interface(require("../abi/IERC1271.json"))
 exports.L1_BRIDGE_ABI = new ethers_1.utils.Interface(require("../abi/IL1ERC20Bridge.json"));
 exports.L2_BRIDGE_ABI = new ethers_1.utils.Interface(require("../abi/IL2Bridge.json"));
 exports.NONCE_HOLDER_ABI = new ethers_1.utils.Interface(require("../abi/INonceHolder.json"));
-exports.LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
-// in the contracts the zero address can not be used, use one instead
+// In the contracts the zero address can not be used, use this constant instead of the legacy ETH addresses below
 exports.ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
+// Legacy eth addresses, avoid using these. 
+exports.ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+exports.LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 exports.BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
 exports.CONTRACT_DEPLOYER_ADDRESS = "0x0000000000000000000000000000000000008006";
 exports.L1_MESSENGER_ADDRESS = "0x0000000000000000000000000000000000008008";
