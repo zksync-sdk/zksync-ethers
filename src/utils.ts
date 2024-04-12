@@ -30,7 +30,7 @@ export const NONCE_HOLDER_ABI = new utils.Interface(require("../abi/INonceHolder
 
 // in the contracts the zero address can not be used, use this instead of legacy ETH addresses below
 export const ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
-// legacy eth addresses, don't use these. 
+// Legacy eth addresses, avoid using these. 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 
