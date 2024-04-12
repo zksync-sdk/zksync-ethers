@@ -14,6 +14,7 @@ export declare const IERC1271: ethers.utils.Interface;
 export declare const L1_BRIDGE_ABI: ethers.utils.Interface;
 export declare const L2_BRIDGE_ABI: ethers.utils.Interface;
 export declare const NONCE_HOLDER_ABI: ethers.utils.Interface;
+export declare const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export declare const LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export declare const ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
 export declare const BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
