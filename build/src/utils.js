@@ -33,9 +33,9 @@ exports.IERC1271 = new ethers_1.utils.Interface(require("../abi/IERC1271.json"))
 exports.L1_BRIDGE_ABI = new ethers_1.utils.Interface(require("../abi/IL1ERC20Bridge.json"));
 exports.L2_BRIDGE_ABI = new ethers_1.utils.Interface(require("../abi/IL2Bridge.json"));
 exports.NONCE_HOLDER_ABI = new ethers_1.utils.Interface(require("../abi/INonceHolder.json"));
-// in the contracts the zero address can not be used, use this instead of legacy ETH addresses below
+// In the contracts the zero address can not be used, use this constant instead of the legacy ETH addresses below
 exports.ETH_ADDRESS_IN_CONTRACTS = "0x0000000000000000000000000000000000000001";
-// legacy eth addresses, don't use these. 
+// Legacy eth addresses, avoid using these. 
 exports.ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 exports.LEGACY_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 exports.BOOTLOADER_FORMAL_ADDRESS = "0x0000000000000000000000000000000000008001";
