@@ -33,5 +33,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm install
+          npm run types
           npm run build
           npm publish --tag ${{ inputs.tag }} 

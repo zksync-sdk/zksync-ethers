@@ -24,7 +24,9 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Build
-        run: yarn test:build
+        run: |
+          yarn types
+          yarn test:build
       - name: Run local-setup
         run: |
           git clone https://github.com/matter-labs/local-setup.git
