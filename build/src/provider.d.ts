@@ -44,7 +44,6 @@ export declare class Provider extends ethers.providers.JsonRpcProvider {
         sharedL1: string;
         sharedL2: string;
     }>;
-    getBaseTokenL1Address(): Promise<Address>;
     getTokenPrice(token: Address): Promise<string | null>;
     getAllAccountBalances(address: Address): Promise<BalancesMap>;
     l1ChainId(): Promise<number>;
