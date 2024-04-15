@@ -593,10 +593,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         };
     }
 
-    async getBaseTokenL1Address(): Promise<Address> {
-        return await this.send('zks_getBaseTokenL1Address', []);
-    }
-
     async getTokenPrice(token: Address): Promise<string | null> {
         return await this.send("zks_getTokenPrice", [token]);
     }
