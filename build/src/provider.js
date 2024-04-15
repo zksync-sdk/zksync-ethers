@@ -456,6 +456,9 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
             sharedL2: this.contractAddresses.sharedBridgeL2,
         };
     }
+    async getBaseTokenL1Address() {
+        return await this.send('zks_getBaseTokenL1Address', []);
+    }
     async getTokenPrice(token) {
         return await this.send("zks_getTokenPrice", [token]);
     }
