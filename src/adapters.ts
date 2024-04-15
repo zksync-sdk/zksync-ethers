@@ -251,9 +251,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             if (transaction.token == LEGACY_ETH_ADDRESS) {
                 transaction.token = ETH_ADDRESS_IN_CONTRACTS;
             }
+            // Needed for comparison of strings
+            transaction.token = transaction.token.toLowerCase();
+
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            const baseTokenAddress = await bridgehub.baseToken(chainId);
+            // Needed for comparison of strings
+            const baseTokenAddress = (await bridgehub.baseToken(chainId)).toLowerCase();
             const isEthBasedChain = baseTokenAddress == ETH_ADDRESS_IN_CONTRACTS;
 
             if (isEthBasedChain && transaction.token == ETH_ADDRESS_IN_CONTRACTS) {
