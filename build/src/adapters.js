@@ -148,9 +148,12 @@ function AdapterL1(Base) {
             if (transaction.token == utils_1.LEGACY_ETH_ADDRESS) {
                 transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
             }
+            // Needed for comparison of strings
+            transaction.token = transaction.token.toLowerCase();
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            const baseTokenAddress = await bridgehub.baseToken(chainId);
+            // Needed for comparison of strings
+            const baseTokenAddress = (await bridgehub.baseToken(chainId)).toLowerCase();
             const isEthBasedChain = baseTokenAddress == utils_1.ETH_ADDRESS_IN_CONTRACTS;
             if (isEthBasedChain && transaction.token == utils_1.ETH_ADDRESS_IN_CONTRACTS) {
                 return await this._depositETHToETHBasedChain(transaction);
