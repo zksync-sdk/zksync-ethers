@@ -1,6 +1,6 @@
 import { EIP712Signer } from "./signer";
 import { Provider } from "./provider";
-import { serialize, EIP712_TX_TYPE } from "./utils";
+import { serialize, EIP712_TX_TYPE, isAddressEq } from "./utils";
 import { ethers, utils } from "ethers";
 import { BlockTag, TransactionResponse, TransactionRequest } from "./types";
 import { ProgressCallback } from "@ethersproject/json-wallets";
@@ -143,7 +143,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         const baseToken = await this.getBaseToken();
         const isEthBasedChain = await this.isEthBasedChain();
 
-        if (!isEthBasedChain && (!transaction.token || transaction.token === baseToken)) {
+        if (!isEthBasedChain && (!transaction.token || isAddressEq(transaction.token, baseToken))) {
             const tx = {
                 ...(await ethers.utils.resolveProperties((transaction.overrides ??= {}))),
                 from: await this.getAddress(),

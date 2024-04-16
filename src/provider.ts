@@ -38,6 +38,7 @@ import {
     parseTransaction,
     REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
     sleep,
+    isAddressEq,
 } from "./utils";
 import { Signer } from "./signer";
 import Formatter = providers.Formatter;
@@ -391,12 +392,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     async l2TokenAddress(token: Address) {
-        if (token == LEGACY_ETH_ADDRESS) {
+        if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
             token = ETH_ADDRESS_IN_CONTRACTS;
         }
 
         const baseToken = await this.getBaseTokenContractAddress();
-        if (token.toLowerCase() == baseToken.toLowerCase()) {
+        if (isAddressEq(token, baseToken)) {
             return L2_BASE_TOKEN_ADDRESS;
         }
 
@@ -406,7 +407,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     async l1TokenAddress(token: Address) {
-        if (token == LEGACY_ETH_ADDRESS) {
+        if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
             return LEGACY_ETH_ADDRESS;
         }
 
@@ -566,11 +567,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     async isEthBasedChain(): Promise<boolean> {
-        return (await this.getBaseTokenContractAddress()) == ETH_ADDRESS_IN_CONTRACTS;
+        return isAddressEq(await this.getBaseTokenContractAddress(), ETH_ADDRESS_IN_CONTRACTS);
     }
 
     async isBaseToken(token: Address): Promise<boolean> {
-        return token == (await this.getBaseTokenContractAddress()) || token == L2_BASE_TOKEN_ADDRESS;
+        return isAddressEq(token, await this.getBaseTokenContractAddress()) || isAddressEq(token, L2_BASE_TOKEN_ADDRESS);
     }
 
     async getTestnetPaymasterAddress(): Promise<Address | null> {
@@ -643,7 +644,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         bridgeAddress?: Address;
         overrides?: ethers.CallOverrides;
     }): Promise<ethers.providers.TransactionRequest> {
-        if (transaction.token == LEGACY_ETH_ADDRESS){
+        if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)){
             transaction.token = ETH_ADDRESS_IN_CONTRACTS;
         }
         const { ...tx } = transaction;
@@ -705,7 +706,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         tx.overrides ??= {};
         tx.overrides.from ??= tx.from;
 
-        if (tx.token == null || tx.token == LEGACY_ETH_ADDRESS) {
+        if (tx.token == null || isAddressEq(tx.token, LEGACY_ETH_ADDRESS)) {
             // TODO: || tx.token == baseToken
             return {
                 ...(await ethers.utils.resolveProperties(tx.overrides)),

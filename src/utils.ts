@@ -71,7 +71,7 @@ export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50000;
 export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
 
 export function isETH(token: Address) {
-    return token.toLowerCase() == LEGACY_ETH_ADDRESS || token.toLowerCase() == L2_BASE_TOKEN_ADDRESS || token.toLowerCase() == ETH_ADDRESS_IN_CONTRACTS;
+    return isAddressEq(token, LEGACY_ETH_ADDRESS) || isAddressEq(token, L2_BASE_TOKEN_ADDRESS) || isAddressEq(token, ETH_ADDRESS_IN_CONTRACTS);
 }
 
 export function sleep(millis: number) {
@@ -430,9 +430,9 @@ export async function getERC20DefaultBridgeData(
 ): Promise<string> {
     const token = Ierc20Factory.connect(l1TokenAddress, provider);
 
-    const name = l1TokenAddress == ETH_ADDRESS_IN_CONTRACTS ? "Ether" :  await token.name();
-    const symbol =  l1TokenAddress == ETH_ADDRESS_IN_CONTRACTS ? "ETH" : await token.symbol();
-    const decimals =  l1TokenAddress == ETH_ADDRESS_IN_CONTRACTS ? 18 :  await token.decimals();
+    const name = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS) ? "Ether" :  await token.name();
+    const symbol =  isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS) ? "ETH" : await token.symbol();
+    const decimals =  isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS) ? 18 :  await token.decimals();
 
     const coder = new AbiCoder();
 
@@ -608,4 +608,10 @@ export async function estimateCustomBridgeDepositL2Gas(
         calldata,
         l2Value,
     });
+}
+
+/// Function that should be used for comparing stringified addresses.
+/// It takes into account the fact that addresses might be represented in different casing.
+export function isAddressEq(a: Address, b: Address): boolean {
+    return a.toLowerCase() == b.toLowerCase();
 }
