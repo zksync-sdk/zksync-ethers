@@ -7,7 +7,7 @@ import {
   utils,
 } from '../src';
 import {ethers, Typed} from 'ethers';
-import {ITestnetERC20Token__factory} from '../typechain';
+import {ITestnetERC20Token__factory} from '../src/typechain';
 
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';

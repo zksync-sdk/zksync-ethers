@@ -11,6 +11,7 @@ import {
   DEFAULT_GAS_PER_PUBDATA_LIMIT,
   EIP712_TX_TYPE,
   hashBytecode,
+  isAddressEq,
   serializeEip712,
 } from './utils';
 import {
@@ -494,7 +495,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
       const from = !transaction.from
         ? address
         : await ethers.resolveAddress(transaction.from);
-      if (from.toLowerCase() !== address.toLowerCase()) {
+      if (!isAddressEq(from, address)) {
         throw new Error('Transaction `from` address mismatch!');
       }
       const tx: TransactionLike = {

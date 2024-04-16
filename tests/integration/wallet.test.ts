@@ -3,7 +3,7 @@ import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
 import {ethers} from 'ethers';
 import * as fs from 'fs';
-import {ITestnetERC20Token__factory} from '../../typechain';
+import {ITestnetERC20Token__factory} from '../../src/typechain';
 import {
   IS_ETH_BASED,
   ADDRESS1,

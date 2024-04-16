@@ -10,7 +10,7 @@ import {
 } from '../custom-matchers';
 const {expect} = chai;
 
-import {ITestnetERC20Token__factory} from '../../typechain';
+import {ITestnetERC20Token__factory} from '../../src/typechain';
 
 describe('L2VoidSigner', () => {
   const provider = Provider.getDefaultProvider();
