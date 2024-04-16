@@ -657,9 +657,7 @@ describe('L1VoidSigner', () => {
           maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
           value: BigNumber.from(210_121_243_750_000),
           from: ADDRESS1,
-          to: ethers.utils.getAddress(
-            await provider.getBridgehubContractAddress()
-          ),
+          to: (await provider.getBridgehubContractAddress()).toLowerCase(),
         };
 
         const result = await signer.getDepositTx({
