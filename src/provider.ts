@@ -705,8 +705,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         const { ...tx } = transaction;
         tx.overrides ??= {};
         tx.overrides.from ??= tx.from;
+        const isLegacyETHAddress = tx.token && isAddressEq(tx.token, LEGACY_ETH_ADDRESS);
 
-        if (tx.token == null || isAddressEq(tx.token, LEGACY_ETH_ADDRESS)) {
+        if (tx.token == null || isLegacyETHAddress) {
             // TODO: || tx.token == baseToken
             return {
                 ...(await ethers.utils.resolveProperties(tx.overrides)),

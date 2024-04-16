@@ -532,7 +532,8 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         const { ...tx } = transaction;
         (_a = tx.overrides) !== null && _a !== void 0 ? _a : (tx.overrides = {});
         (_b = (_c = tx.overrides).from) !== null && _b !== void 0 ? _b : (_c.from = tx.from);
-        if (tx.token == null || (0, utils_1.isAddressEq)(tx.token, utils_1.LEGACY_ETH_ADDRESS)) {
+        const isLegacyETHAddress = tx.token && (0, utils_1.isAddressEq)(tx.token, utils_1.LEGACY_ETH_ADDRESS);
+        if (tx.token == null || isLegacyETHAddress) {
             // TODO: || tx.token == baseToken
             return {
                 ...(await ethers_1.ethers.utils.resolveProperties(tx.overrides)),

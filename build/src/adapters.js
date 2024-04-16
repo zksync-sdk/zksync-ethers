@@ -299,7 +299,7 @@ function AdapterL1(Base) {
             }
             const tx = await this.getDepositTx(transaction);
             let baseGasLimit;
-            if ((0, utils_1.isAddressEq)(tx.token, await this.getBaseToken())) {
+            if (tx.token && (0, utils_1.isAddressEq)(tx.token, await this.getBaseToken())) {
                 baseGasLimit = await this.estimateGasRequestExecute(tx);
             }
             else {

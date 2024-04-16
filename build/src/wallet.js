@@ -107,7 +107,8 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
         var _a;
         const baseToken = await this.getBaseToken();
         const isEthBasedChain = await this.isEthBasedChain();
-        if (!isEthBasedChain && (!transaction.token || (0, utils_1.isAddressEq)(transaction.token, baseToken))) {
+        const isBaseToken = transaction.token && (0, utils_1.isAddressEq)(transaction.token, baseToken);
+        if (!isEthBasedChain && (!transaction.token || isBaseToken)) {
             const tx = {
                 ...(await ethers_1.ethers.utils.resolveProperties(((_a = transaction.overrides) !== null && _a !== void 0 ? _a : (transaction.overrides = {})))),
                 from: await this.getAddress(),
