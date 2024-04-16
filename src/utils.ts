@@ -253,9 +253,9 @@ export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
  */
 export function isETH(token: Address) {
   return (
-    token.toLowerCase() === LEGACY_ETH_ADDRESS ||
-    token.toLowerCase() === L2_BASE_TOKEN_ADDRESS ||
-    token.toLowerCase() === ETH_ADDRESS_IN_CONTRACTS
+    isAddressEq(token, LEGACY_ETH_ADDRESS) ||
+    isAddressEq(token, L2_BASE_TOKEN_ADDRESS) ||
+    isAddressEq(token.toLowerCase(), ETH_ADDRESS_IN_CONTRACTS)
   );
 }
 
@@ -335,7 +335,7 @@ export function getDeployedContracts(
         log =>
           log.topics[0] ===
             utils.id('ContractDeployed(address,bytes32,address)') &&
-          log.address === CONTRACT_DEPLOYER_ADDRESS
+          isAddressEq(log.address, CONTRACT_DEPLOYER_ADDRESS)
       )
       // Take the last topic (deployed contract address as U256) and extract address from it (U160).
       .map(log => {
@@ -811,7 +811,7 @@ export function getL2HashFromPriorityOp(
 ): string {
   let txHash: string | null = null;
   for (const log of txReceipt.logs) {
-    if (log.address.toLowerCase() !== zkSyncAddress.toLowerCase()) {
+    if (!isAddressEq(log.address, zkSyncAddress)) {
       continue;
     }
 
@@ -901,12 +901,15 @@ export async function getERC20DefaultBridgeData(
 ): Promise<string> {
   const token = IERC20Factory.connect(l1TokenAddress, provider);
 
-  const name =
-    l1TokenAddress === ETH_ADDRESS_IN_CONTRACTS ? 'Ether' : await token.name();
-  const symbol =
-    l1TokenAddress === ETH_ADDRESS_IN_CONTRACTS ? 'ETH' : await token.symbol();
-  const decimals =
-    l1TokenAddress === ETH_ADDRESS_IN_CONTRACTS ? 18 : await token.decimals();
+  const name = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+    ? 'Ether'
+    : await token.name();
+  const symbol = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+    ? 'ETH'
+    : await token.symbol();
+  const decimals = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+    ? 18
+    : await token.decimals();
 
   const coder = new AbiCoder();
 
@@ -981,7 +984,10 @@ function isECDSASignatureCorrect(
   signature: SignatureLike
 ): boolean {
   try {
-    return address === ethers.utils.recoverAddress(msgHash, signature);
+    return isAddressEq(
+      address,
+      ethers.utils.recoverAddress(msgHash, signature)
+    );
   } catch {
     // In case ECDSA signature verification has thrown an error,
     // we simply consider the signature as incorrect.
@@ -1281,4 +1287,16 @@ export function toJSON(object: any): string {
     },
     2
   );
+}
+
+/**
+ * Compares stringified addresses, taking into account the fact that
+ * addresses might be represented in different casing.
+ *
+ * @param a - The first address to compare.
+ * @param b - The second address to compare.
+ * @returns A boolean indicating whether the addresses are equal.
+ */
+export function isAddressEq(a: Address, b: Address): boolean {
+  return a.toLowerCase() === b.toLowerCase();
 }

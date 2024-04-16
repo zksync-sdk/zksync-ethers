@@ -41,6 +41,7 @@ import {
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   scaleGasLimit,
   undoL1ToL2Alias,
+  isAddressEq,
 } from './utils';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -220,7 +221,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const isEthBasedChain = await this.isETHBasedChain();
 
       if (!bridgeAddress) {
-        if (!isEthBasedChain && token === baseToken) {
+        if (!isEthBasedChain && isAddressEq(token, baseToken)) {
           bridgeAddress = await (
             await this.getBridgehubContract()
           ).sharedBridge();
@@ -275,19 +276,19 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       token: Address,
       amount: BigNumberish
     ): Promise<{token: Address; allowance: BigNumberish}[]> {
-      if (token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         token = ETH_ADDRESS_IN_CONTRACTS;
       }
       const baseTokenAddress = await this.getBaseToken();
       const isEthBasedChain = await this.isETHBasedChain();
 
-      if (isEthBasedChain && token === LEGACY_ETH_ADDRESS) {
+      if (isEthBasedChain && isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         throw new Error(
           "ETH token can't be approved! The address of the token does not exist on L1."
         );
-      } else if (baseTokenAddress === ETH_ADDRESS_IN_CONTRACTS) {
+      } else if (isAddressEq(baseTokenAddress, ETH_ADDRESS_IN_CONTRACTS)) {
         return [{token, allowance: amount}];
-      } else if (token === LEGACY_ETH_ADDRESS) {
+      } else if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         return [
           {
             token: baseTokenAddress,
@@ -296,7 +297,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             ).mintValue,
           },
         ];
-      } else if (token === baseTokenAddress) {
+      } else if (isAddressEq(token, baseTokenAddress)) {
         return [
           {
             token: baseTokenAddress,
@@ -378,21 +379,27 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       approveBaseOverrides?: ethers.Overrides;
       customBridgeData?: BytesLike;
     }): Promise<PriorityOpResponse> {
-      if (transaction.token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)) {
         transaction.token = ETH_ADDRESS_IN_CONTRACTS;
       }
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
       const baseTokenAddress = await bridgehub.baseToken(chainId);
-      const isEthBasedChain = baseTokenAddress === ETH_ADDRESS_IN_CONTRACTS;
+      const isEthBasedChain = isAddressEq(
+        baseTokenAddress,
+        ETH_ADDRESS_IN_CONTRACTS
+      );
 
-      if (isEthBasedChain && transaction.token === ETH_ADDRESS_IN_CONTRACTS) {
+      if (
+        isEthBasedChain &&
+        isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)
+      ) {
         return await this._depositETHToETHBasedChain(transaction);
-      } else if (baseTokenAddress === ETH_ADDRESS_IN_CONTRACTS) {
+      } else if (isAddressEq(baseTokenAddress, ETH_ADDRESS_IN_CONTRACTS)) {
         return await this._depositTokenToETHBasedChain(transaction);
-      } else if (transaction.token === ETH_ADDRESS_IN_CONTRACTS) {
+      } else if (isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)) {
         return await this._depositETHToNonETHBasedChain(transaction);
-      } else if (transaction.token === baseTokenAddress) {
+      } else if (isAddressEq(transaction.token, baseTokenAddress)) {
         return await this._depositBaseTokenToNonETHBasedChain(transaction);
       } else {
         return await this._depositNonBaseTokenToNonETHBasedChain(transaction);
@@ -698,13 +705,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       refundRecipient?: Address;
       overrides?: ethers.PayableOverrides;
     }): Promise<BigNumber> {
-      if (transaction.token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)) {
         transaction.token = ETH_ADDRESS_IN_CONTRACTS;
       }
       const tx = await this.getDepositTx(transaction);
 
       let baseGasLimit: BigNumber;
-      if (tx.token === (await this.getBaseToken())) {
+      if (tx.token && isAddressEq(tx.token, await this.getBaseToken())) {
         baseGasLimit = await this.estimateGasRequestExecute(tx);
       } else {
         baseGasLimit = await this._providerL1().estimateGas(tx);
@@ -744,21 +751,27 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       refundRecipient?: Address;
       overrides?: ethers.PayableOverrides;
     }): Promise<any> {
-      if (transaction.token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)) {
         transaction.token = ETH_ADDRESS_IN_CONTRACTS;
       }
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
       const baseTokenAddress = await bridgehub.baseToken(chainId);
-      const isEthBasedChain = baseTokenAddress === ETH_ADDRESS_IN_CONTRACTS;
+      const isEthBasedChain = isAddressEq(
+        baseTokenAddress,
+        ETH_ADDRESS_IN_CONTRACTS
+      );
 
-      if (isEthBasedChain && transaction.token === ETH_ADDRESS_IN_CONTRACTS) {
+      if (
+        isEthBasedChain &&
+        isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)
+      ) {
         return await this._getDepositETHOnETHBasedChainTx(transaction);
       } else if (isEthBasedChain) {
         return await this._getDepositTokenOnETHBasedChainTx(transaction);
-      } else if (transaction.token === ETH_ADDRESS_IN_CONTRACTS) {
+      } else if (isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)) {
         return (await this._getDepositETHOnNonETHBasedChainTx(transaction)).tx;
-      } else if (transaction.token === baseTokenAddress) {
+      } else if (isAddressEq(transaction.token, baseTokenAddress)) {
         return (
           await this._getDepositBaseTokenOnNonETHBasedChainTx(transaction)
         ).tx;
@@ -1198,15 +1211,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       gasPerPubdataByte?: BigNumberish;
       overrides?: ethers.PayableOverrides;
     }): Promise<FullDepositFee> {
-      if (transaction.token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)) {
         transaction.token = ETH_ADDRESS_IN_CONTRACTS;
       }
       // It is assumed that the L2 fee for the transaction does not depend on its value.
+      const token = transaction.token.toLowerCase();
       const dummyAmount = BigNumber.from(1);
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
-      const baseTokenAddress = await bridgehub.baseToken(chainId);
-      const isEthBasedChain = baseTokenAddress === ETH_ADDRESS_IN_CONTRACTS;
+      const baseTokenAddress = (
+        await bridgehub.baseToken(chainId)
+      ).toLowerCase();
+      const isEthBasedChain = isAddressEq(
+        baseTokenAddress,
+        ETH_ADDRESS_IN_CONTRACTS
+      );
 
       const tx = await this._getDepositTxWithDefaults({
         ...transaction,
@@ -1227,10 +1246,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         // the account needs to have a sufficient ETH balance.
         const selfBalanceETH = await this.getBalanceL1();
         if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
-          const recommendedL1GasLimit =
-            tx.token === ETH_ADDRESS_IN_CONTRACTS
-              ? L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT
-              : L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT;
+          const recommendedL1GasLimit = isAddressEq(
+            tx.token,
+            ETH_ADDRESS_IN_CONTRACTS
+          )
+            ? L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT
+            : L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT;
           const recommendedETHBalance = BigNumber.from(recommendedL1GasLimit)
             .mul(gasPriceForEstimation!)
             .add(baseCost);
@@ -1243,7 +1264,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }
         // In case of token deposit, a sufficient token allowance is also required.
         if (
-          tx.token !== ETH_ADDRESS_IN_CONTRACTS &&
+          !isAddressEq(token, ETH_ADDRESS_IN_CONTRACTS) &&
           (await this.getAllowanceL1(tx.token)) < dummyAmount
         ) {
           throw new Error('Not enough allowance to cover the deposit!');
@@ -1256,8 +1277,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           );
         }
         if (
-          tx.token === ETH_ADDRESS_IN_CONTRACTS ||
-          tx.token === baseTokenAddress
+          isAddressEq(token, ETH_ADDRESS_IN_CONTRACTS) ||
+          isAddressEq(token, baseTokenAddress)
         ) {
           tx.overrides.value ??= tx.amount;
         } else {
@@ -1318,7 +1339,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       const log = receipt.logs.filter(
         log =>
-          log.address === L1_MESSENGER_ADDRESS &&
+          isAddressEq(log.address, L1_MESSENGER_ADDRESS) &&
           log.topics[0] ===
             ethers.utils.id('L1MessageSent(address,bytes32,bytes)')
       )[index];
@@ -1333,7 +1354,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const hash = ethers.utils.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
-        ([, log]) => log.sender === L1_MESSENGER_ADDRESS
+        ([, log]) => isAddressEq(log.sender, L1_MESSENGER_ADDRESS)
       );
       const [l2ToL1LogIndex, l2ToL1Log] = messages[index];
 
@@ -1490,7 +1511,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
       const successL2ToL1LogIndex = receipt.l2ToL1Logs.findIndex(
         l2ToL1log =>
-          l2ToL1log.sender === BOOTLOADER_FORMAL_ADDRESS &&
+          isAddressEq(l2ToL1log.sender, BOOTLOADER_FORMAL_ADDRESS) &&
           l2ToL1log.key === depositHash
       );
       const successL2ToL1Log = receipt.l2ToL1Logs[successL2ToL1LogIndex];
@@ -1637,8 +1658,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }): Promise<{token: Address; allowance: BigNumberish}> {
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
-      const isETHBaseToken =
-        (await bridgehub.baseToken(chainId)) === ETH_ADDRESS_IN_CONTRACTS;
+      const isETHBaseToken = isAddressEq(
+        await bridgehub.baseToken(chainId),
+        ETH_ADDRESS_IN_CONTRACTS
+      );
 
       if (isETHBaseToken) {
         throw new Error('Could not estimate mint value on ETH-based chain!');
@@ -1705,8 +1728,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }): Promise<ethers.PopulatedTransaction> {
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
-      const isETHBaseToken =
-        (await bridgehub.baseToken(chainId)) === ETH_ADDRESS_IN_CONTRACTS;
+      const isETHBaseToken = isAddressEq(
+        await bridgehub.baseToken(chainId),
+        ETH_ADDRESS_IN_CONTRACTS
+      );
 
       const {...tx} = transaction;
       tx.l2Value ??= BigNumber.from(0);
