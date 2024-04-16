@@ -55,6 +55,7 @@ import {
   ETH_ADDRESS_IN_CONTRACTS,
   L2_BASE_TOKEN_ADDRESS,
   LEGACY_ETH_ADDRESS,
+  isAddressEq,
 } from './utils';
 import {Signer} from './signer';
 
@@ -218,12 +219,12 @@ export function JsonRpcApiProvider<
      * @param token The address of the token on L1.
      */
     async l2TokenAddress(token: Address): Promise<string> {
-      if (token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         token = ETH_ADDRESS_IN_CONTRACTS;
       }
 
       const baseToken = await this.getBaseTokenContractAddress();
-      if (token.toLowerCase() === baseToken.toLowerCase()) {
+      if (isAddressEq(token, baseToken)) {
         return L2_BASE_TOKEN_ADDRESS;
       }
 
@@ -244,7 +245,7 @@ export function JsonRpcApiProvider<
      * @param token The address of the token on L2.
      */
     async l1TokenAddress(token: Address): Promise<string> {
-      if (token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         return LEGACY_ETH_ADDRESS;
       }
 
@@ -371,8 +372,9 @@ export function JsonRpcApiProvider<
      * Returns whether the chain is ETH-based.
      */
     async isEthBasedChain(): Promise<boolean> {
-      return (
-        (await this.getBaseTokenContractAddress()) === ETH_ADDRESS_IN_CONTRACTS
+      return isAddressEq(
+        await this.getBaseTokenContractAddress(),
+        ETH_ADDRESS_IN_CONTRACTS
       );
     }
 
@@ -381,8 +383,8 @@ export function JsonRpcApiProvider<
      */
     async isBaseToken(token: Address): Promise<boolean> {
       return (
-        token === (await this.getBaseTokenContractAddress()) ||
-        token === L2_BASE_TOKEN_ADDRESS
+        isAddressEq(token, await this.getBaseTokenContractAddress()) ||
+        isAddressEq(token, L2_BASE_TOKEN_ADDRESS)
       );
     }
 
@@ -562,7 +564,7 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
-      if (tx.token === LEGACY_ETH_ADDRESS) {
+      if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS)) {
         tx.token = ETH_ADDRESS_IN_CONTRACTS;
       }
 
@@ -681,7 +683,7 @@ export function JsonRpcApiProvider<
 
       if (
         !tx.token ||
-        tx.token === LEGACY_ETH_ADDRESS ||
+        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
         (await this.isBaseToken(tx.token))
       ) {
         if (tx.paymasterParams) {
@@ -886,7 +888,7 @@ export function JsonRpcApiProvider<
       const hash = ethers.hexlify(txHash);
       const receipt = await this.getTransactionReceipt(hash);
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
-        ([, log]) => log.sender === BOOTLOADER_FORMAL_ADDRESS
+        ([, log]) => isAddressEq(log.sender, BOOTLOADER_FORMAL_ADDRESS)
       );
       const [l2ToL1LogIndex, l2ToL1Log] = messages[index];
 
@@ -2751,9 +2753,9 @@ export class BrowserProvider extends JsonRpcApiProvider(
       return accounts.length > address;
     }
 
-    address = address.toLowerCase();
     return (
-      accounts.filter((a: string) => a.toLowerCase() === address).length !== 0
+      accounts.filter((a: string) => isAddressEq(a, address as string))
+        .length !== 0
     );
   }
 
