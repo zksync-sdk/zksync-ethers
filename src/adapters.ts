@@ -518,7 +518,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const tx = await this.getDepositTx(transaction);
 
             let baseGasLimit: BigNumber;
-            if (isAddressEq(tx.token, await this.getBaseToken())) {
+            if (tx.token && isAddressEq(tx.token, await this.getBaseToken())) {
                 baseGasLimit = await this.estimateGasRequestExecute(tx);
             } else {
                 baseGasLimit = await this._providerL1().estimateGas(tx);
