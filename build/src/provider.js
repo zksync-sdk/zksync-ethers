@@ -286,11 +286,11 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         }
     }
     async l2TokenAddress(token) {
-        if (token == utils_1.LEGACY_ETH_ADDRESS) {
+        if ((0, utils_1.isAddressEq)(token, utils_1.LEGACY_ETH_ADDRESS)) {
             token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
         }
         const baseToken = await this.getBaseTokenContractAddress();
-        if (token.toLowerCase() == baseToken.toLowerCase()) {
+        if ((0, utils_1.isAddressEq)(token, baseToken)) {
             return utils_1.L2_BASE_TOKEN_ADDRESS;
         }
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
@@ -298,7 +298,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         return await l2SharedBridge.l2TokenAddress(token);
     }
     async l1TokenAddress(token) {
-        if (token == utils_1.LEGACY_ETH_ADDRESS) {
+        if ((0, utils_1.isAddressEq)(token, utils_1.LEGACY_ETH_ADDRESS)) {
             return utils_1.LEGACY_ETH_ADDRESS;
         }
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
@@ -433,10 +433,10 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         return this.contractAddresses.baseToken;
     }
     async isEthBasedChain() {
-        return (await this.getBaseTokenContractAddress()) == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+        return (0, utils_1.isAddressEq)(await this.getBaseTokenContractAddress(), utils_1.ETH_ADDRESS_IN_CONTRACTS);
     }
     async isBaseToken(token) {
-        return token == (await this.getBaseTokenContractAddress()) || token == utils_1.L2_BASE_TOKEN_ADDRESS;
+        return (0, utils_1.isAddressEq)(token, await this.getBaseTokenContractAddress()) || (0, utils_1.isAddressEq)(token, utils_1.L2_BASE_TOKEN_ADDRESS);
     }
     async getTestnetPaymasterAddress() {
         // Unlike contract's addresses, the testnet paymaster is not cached, since it can be trivially changed
@@ -492,7 +492,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
     async getWithdrawTx(transaction) {
         var _a, _b, _c;
         var _d;
-        if (transaction.token == utils_1.LEGACY_ETH_ADDRESS) {
+        if ((0, utils_1.isAddressEq)(transaction.token, utils_1.LEGACY_ETH_ADDRESS)) {
             transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
         }
         const { ...tx } = transaction;
@@ -532,7 +532,7 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
         const { ...tx } = transaction;
         (_a = tx.overrides) !== null && _a !== void 0 ? _a : (tx.overrides = {});
         (_b = (_c = tx.overrides).from) !== null && _b !== void 0 ? _b : (_c.from = tx.from);
-        if (tx.token == null || tx.token == utils_1.LEGACY_ETH_ADDRESS) {
+        if (tx.token == null || (0, utils_1.isAddressEq)(tx.token, utils_1.LEGACY_ETH_ADDRESS)) {
             // TODO: || tx.token == baseToken
             return {
                 ...(await ethers_1.ethers.utils.resolveProperties(tx.overrides)),

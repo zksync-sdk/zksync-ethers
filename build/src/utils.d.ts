@@ -58,3 +58,4 @@ export declare function isTypedDataSignatureCorrect(provider: Provider, address:
 export declare function estimateDefaultBridgeDepositL2Gas(providerL1: ethers.providers.Provider, providerL2: Provider, token: Address, amount: BigNumberish, to: Address, from?: Address, gasPerPubdataByte?: BigNumberish, isBaseTokenDeposit?: boolean): Promise<BigNumber>;
 export declare function scaleGasLimit(gasLimit: BigNumber): BigNumber;
 export declare function estimateCustomBridgeDepositL2Gas(providerL2: Provider, l1BridgeAddress: Address, l2BridgeAddress: Address, token: Address, amount: BigNumberish, to: Address, bridgeData: BytesLike, from?: Address, gasPerPubdataByte?: BigNumberish, l2Value?: BigNumberish): Promise<BigNumber>;
+export declare function isAddressEq(a: Address, b: Address): boolean;
