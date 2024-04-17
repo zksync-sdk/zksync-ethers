@@ -1,8 +1,9 @@
 name: Run tests
 on:
   workflow_dispatch:
+  push:
   pull_request:
-    branches:  [ main ]
+    branches:  [ main, ethers-v5 ]
     types: [ opened, reopened, synchronize ]
 
 permissions:
