@@ -30,7 +30,7 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
-          INSTANCE_TYPE=mmzk_0417-bridge-1 docker-compose up -d
+          INSTANCE_TYPE=kl-factory-0417-1 docker-compose up -d
           popd
       - name: Wait for local-setup to be ready
         run: yarn test:wait
