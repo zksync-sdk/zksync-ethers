@@ -2,7 +2,7 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, utils, Wallet, L2VoidSigner, L1VoidSigner} from '../../src';
 import {ethers, BigNumber} from 'ethers';
-import {ITestnetErc20TokenFactory} from '../../typechain/ITestnetErc20TokenFactory';
+import {ITestnetErc20TokenFactory} from '../../src/typechain/ITestnetErc20TokenFactory';
 import {IS_ETH_BASED, ADDRESS1, PRIVATE_KEY1, DAI_L1, ADDRESS2} from '../utils';
 
 import {

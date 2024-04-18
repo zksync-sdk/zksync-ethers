@@ -1,8 +1,9 @@
 name: Run tests
 on:
   workflow_dispatch:
+  push:
   pull_request:
-    branches: [ethers-v5]
+    branches: [ethers-v5, ethers-v5-beta]
     types: [ opened, reopened, synchronize ]
 
 permissions:
@@ -29,15 +30,10 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
-          docker-compose up -d
+          INSTANCE_TYPE=kl-factory-0417-1 docker-compose up -d
           popd
       - name: Wait for local-setup to be ready
         run: yarn test:wait
-      - name: Prepare proxy
-        run: |
-          pushd scripts
-          ./update-diamond-proxy.sh
-          popd
       - name: Prepare environment
         run: yarn test:prepare
       - name: Run tests

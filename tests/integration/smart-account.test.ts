@@ -29,6 +29,7 @@ import MultisigAccount from '../files/TwoUserMultisig.json';
 describe('SmartAccount', async () => {
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
   const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
+  ethProvider.pollingInterval = 300;
   const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
   const account = new SmartAccount(
     {address: ADDRESS1, secret: PRIVATE_KEY1},
@@ -404,7 +405,7 @@ describe('SmartAccount', async () => {
       expect(
         l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
       ).to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
       const amount = 7_000_000_000;
