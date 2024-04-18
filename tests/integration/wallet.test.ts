@@ -3,7 +3,7 @@ import '../custom-matchers';
 import {Provider, Wallet, utils} from '../../src';
 import {ethers, BigNumber} from 'ethers';
 import * as fs from 'fs';
-import {ITestnetErc20TokenFactory} from '../../typechain/ITestnetErc20TokenFactory';
+import {ITestnetErc20TokenFactory} from '../../src/typechain/ITestnetErc20TokenFactory';
 import {
   MNEMONIC1,
   PRIVATE_KEY1,
