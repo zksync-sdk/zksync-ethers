@@ -29,6 +29,7 @@ import MultisigAccount from '../files/TwoUserMultisig.json';
 describe('SmartAccount', async () => {
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
   const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
+  ethProvider.pollingInterval = 300;
   const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
   const account = new SmartAccount(
     {address: ADDRESS1, secret: PRIVATE_KEY1},
