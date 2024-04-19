@@ -964,12 +964,14 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     operatorTip?: BigNumberish;
     bridgeAddress?: Address;
     approveERC20?: boolean;
+    approveBaseERC20?: boolean;
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
     overrides?: Overrides;
     approveOverrides?: Overrides;
-    customBridgeData?: BytesLike;
+    approveBaseOverrides?: Overrides;
+    customBridgeData?: BytesLike
   }): Promise<PriorityOpResponse> {
     return super.deposit(transaction);
   }
@@ -1005,7 +1007,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<bigint> {
     return super.estimateGasDeposit(transaction);
   }
@@ -1040,7 +1042,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     gasPerPubdataByte?: BigNumberish;
     customBridgeData?: BytesLike;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<any> {
     return super.getDepositTx(transaction);
   }
@@ -1239,13 +1241,14 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
   override async requestExecute(transaction: {
     contractAddress: Address;
     calldata: string;
-    l2GasLimit: BigNumberish;
+    l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<PriorityOpResponse> {
     return super.requestExecute(transaction);
   }
@@ -1275,12 +1278,13 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     contractAddress: Address;
     calldata: string;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<bigint> {
     return super.estimateGasRequestExecute(transaction);
   }
@@ -1309,12 +1313,13 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     contractAddress: Address;
     calldata: string;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<TransactionRequest> {
     return super.getRequestExecuteTx(transaction);
   }

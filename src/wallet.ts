@@ -498,10 +498,10 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: ethers.Overrides;
-    approveOverrides?: ethers.Overrides;
-    approveBaseOverrides?: ethers.Overrides;
-    customBridgeData?: BytesLike;
+    overrides?: Overrides;
+    approveOverrides?: Overrides;
+    approveBaseOverrides?: Overrides;
+    customBridgeData?: BytesLike
   }): Promise<PriorityOpResponse> {
     return super.deposit(transaction);
   }
@@ -537,7 +537,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<bigint> {
     return super.estimateGasDeposit(transaction);
   }
@@ -572,7 +572,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     gasPerPubdataByte?: BigNumberish;
     customBridgeData?: BytesLike;
     refundRecipient?: Address;
-    overrides?: ethers.Overrides;
+    overrides?: Overrides
   }): Promise<any> {
     return super.getDepositTx(transaction);
   }
@@ -773,13 +773,14 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async requestExecute(transaction: {
     contractAddress: Address;
     calldata: string;
-    l2GasLimit: BigNumberish;
+    l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<PriorityOpResponse> {
     return super.requestExecute(transaction);
   }
@@ -810,12 +811,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     contractAddress: Address;
     calldata: string;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: Overrides
   }): Promise<bigint> {
     return super.estimateGasRequestExecute(transaction);
   }
@@ -847,11 +849,11 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     l2GasLimit?: BigNumberish;
     mintValue?: BigNumberish;
     l2Value?: BigNumberish;
-    factoryDeps?: ethers.BytesLike[];
+    factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: ethers.Overrides;
+    overrides?: Overrides
   }): Promise<TransactionRequest> {
     return super.getRequestExecuteTx(transaction);
   }
