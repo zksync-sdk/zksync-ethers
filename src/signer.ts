@@ -1,4 +1,4 @@
-import {BigNumber, BigNumberish, BytesLike, ethers, Overrides} from 'ethers';
+import {BigNumber, BigNumberish, BytesLike, ethers, Overrides, PopulatedTransaction} from 'ethers';
 import {Provider} from './provider';
 import {
   DEFAULT_GAS_PER_PUBDATA_LIMIT,
@@ -27,6 +27,7 @@ import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {IZkSyncStateTransition} from './typechain/IZkSyncStateTransition';
 import {IBridgehub} from './typechain/IBridgehub';
+import {PayableOverrides} from "@ethersproject/contracts";
 
 /**
  * All typed data conforming to the EIP712 standard within zkSync Era.
@@ -933,12 +934,14 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
     operatorTip?: BigNumberish;
     bridgeAddress?: Address;
     approveERC20?: boolean;
+    approveBaseERC20?: boolean;
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides;
     approveOverrides?: Overrides;
-    customBridgeData?: BytesLike;
+    approveBaseOverrides?: Overrides;
+    customBridgeData?: BytesLike
   }): Promise<PriorityOpResponse> {
     return super.deposit(transaction);
   }
@@ -974,7 +977,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<BigNumber> {
     return super.estimateGasDeposit(transaction);
   }
@@ -1009,7 +1012,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
     gasPerPubdataByte?: BigNumberish;
     customBridgeData?: BytesLike;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<any> {
     return super.getDepositTx(transaction);
   }
@@ -1041,7 +1044,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
     bridgeAddress?: Address;
     customBridgeData?: BytesLike;
     gasPerPubdataByte?: BigNumberish;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<FullDepositFee> {
     return super.getFullRequiredDepositFee(transaction);
   }
@@ -1207,14 +1210,15 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    */
   override async requestExecute(transaction: {
     contractAddress: Address;
-    calldata: string;
+    calldata: BytesLike;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<PriorityOpResponse> {
     return super.requestExecute(transaction);
   }
@@ -1243,14 +1247,15 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    */
   override async estimateGasRequestExecute(transaction: {
     contractAddress: Address;
-    calldata: string;
+    calldata: BytesLike;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<BigNumber> {
     return super.estimateGasRequestExecute(transaction);
   }
@@ -1277,15 +1282,16 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    */
   override async getRequestExecuteTx(transaction: {
     contractAddress: Address;
-    calldata: string;
+    calldata: BytesLike;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
-  }): Promise<ethers.PopulatedTransaction> {
+    overrides?: PayableOverrides
+  }): Promise<PopulatedTransaction> {
     return super.getRequestExecuteTx(transaction);
   }
 

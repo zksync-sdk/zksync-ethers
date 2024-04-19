@@ -7,7 +7,7 @@ import {
   Bytes,
   BytesLike,
   ethers,
-  Overrides,
+  Overrides, PopulatedTransaction,
   utils,
 } from 'ethers';
 import {
@@ -28,6 +28,7 @@ import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {Il2Bridge as IL2Bridge} from './typechain/Il2Bridge';
 import {IBridgehub} from './typechain/IBridgehub';
+import {PayableOverrides} from "@ethersproject/contracts";
 
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
@@ -536,7 +537,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     l2GasLimit?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<BigNumber> {
     return super.estimateGasDeposit(transaction);
   }
@@ -571,7 +572,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     gasPerPubdataByte?: BigNumberish;
     customBridgeData?: BytesLike;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<any> {
     return super.getDepositTx(transaction);
   }
@@ -603,7 +604,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     bridgeAddress?: Address;
     customBridgeData?: BytesLike;
     gasPerPubdataByte?: BigNumberish;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<FullDepositFee> {
     return super.getFullRequiredDepositFee(transaction);
   }
@@ -802,14 +803,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async requestExecute(transaction: {
     contractAddress: Address;
-    calldata: string;
+    calldata: BytesLike;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<PriorityOpResponse> {
     return super.requestExecute(transaction);
   }
@@ -867,14 +869,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async estimateGasRequestExecute(transaction: {
     contractAddress: Address;
-    calldata: string;
+    calldata: BytesLike;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
+    overrides?: PayableOverrides
   }): Promise<BigNumber> {
     return super.estimateGasRequestExecute(transaction);
   }
@@ -932,15 +935,16 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async getRequestExecuteTx(transaction: {
     contractAddress: Address;
-    calldata: string;
+    calldata: BytesLike;
     l2GasLimit?: BigNumberish;
+    mintValue?: BigNumberish;
     l2Value?: BigNumberish;
     factoryDeps?: BytesLike[];
     operatorTip?: BigNumberish;
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
-    overrides?: Overrides;
-  }): Promise<ethers.PopulatedTransaction> {
+    overrides?: PayableOverrides
+  }): Promise<PopulatedTransaction> {
     return super.getRequestExecuteTx(transaction);
   }
 
