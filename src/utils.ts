@@ -899,6 +899,9 @@ export async function getERC20DefaultBridgeData(
   l1TokenAddress: string,
   provider: ethers.providers.Provider
 ): Promise<string> {
+  if (isAddressEq(l1TokenAddress, LEGACY_ETH_ADDRESS)) {
+    l1TokenAddress = ETH_ADDRESS_IN_CONTRACTS;
+  }
   const token = IERC20Factory.connect(l1TokenAddress, provider);
 
   const name = isAddressEq(l1TokenAddress, ETH_ADDRESS_IN_CONTRACTS)
@@ -1192,7 +1195,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
       providerL2,
       l1BridgeAddress,
       l2BridgeAddress,
-      token,
+      isAddressEq(token, LEGACY_ETH_ADDRESS) ? ETH_ADDRESS_IN_CONTRACTS : token,
       amount,
       to,
       bridgeData,

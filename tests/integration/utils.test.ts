@@ -2,12 +2,13 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, EIP712Signer} from '../../src';
 import {BigNumber, ethers} from 'ethers';
-import {PRIVATE_KEY1, ADDRESS1} from '../utils';
+import {PRIVATE_KEY1, ADDRESS1, IS_ETH_BASED, ADDRESS2, DAI_L1} from '../utils';
 
 const {expect} = chai;
 
 describe('utils', () => {
   const provider = Provider.getDefaultProvider(types.Network.Localhost);
+  const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
 
   describe('#isMessageSignatureCorrect()', () => {
     it('should return true for a valid message signature', async () => {
@@ -96,5 +97,69 @@ describe('utils', () => {
       );
       expect(result).to.be.false;
     });
+  });
+
+  describe('#estimateDefaultBridgeDepositL2Gas()', () => {
+    if(IS_ETH_BASED) {
+      it('should return estimation for ETH token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          utils.LEGACY_ETH_ADDRESS,
+          ethers.utils.parseEther('1'),
+          ADDRESS2,
+          ADDRESS1,
+        );
+        expect(result.isZero()).to.be.false;
+      });
+
+      it('should return estimation for DAI token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          DAI_L1,
+          5,
+          ADDRESS2,
+          ADDRESS1,
+        );
+        expect(result.isZero()).to.be.false;
+      });
+    } else {
+      it('should return estimation for ETH token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          utils.LEGACY_ETH_ADDRESS,
+          ethers.utils.parseEther('1'),
+          ADDRESS2,
+          ADDRESS1,
+        );
+        expect(result.isZero()).to.be.false;
+      });
+
+      it('should return estimation for base token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          await provider.getBaseTokenContractAddress(),
+          ethers.utils.parseEther('1'),
+          ADDRESS2,
+          ADDRESS1,
+        );
+        expect(result.isZero()).to.be.false;
+      });
+
+      it('should return estimation for DAI token', async () => {
+        const result = await utils.estimateDefaultBridgeDepositL2Gas(
+          ethProvider,
+          provider,
+          DAI_L1,
+          5,
+          ADDRESS2,
+          ADDRESS1,
+        );
+        expect(result.isZero()).to.be.false;
+      });
+    }
   });
 });
