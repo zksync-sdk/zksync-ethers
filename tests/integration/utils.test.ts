@@ -110,7 +110,7 @@ describe('utils', () => {
           ADDRESS2,
           ADDRESS1,
         );
-        expect(result > 0).to.be.true;
+        expect(result > 0n).to.be.true;
       });
 
       it('should return estimation for DAI token', async () => {

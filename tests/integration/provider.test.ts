@@ -118,7 +118,7 @@ describe('Provider', () => {
   describe('#getBalance()', () => {
     it('should return an ETH balance of the account at `address`', async () => {
       const result = await provider.getBalance(ADDRESS1);
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
 
     it('should return a DAI balance of the account at `address`', async () => {
@@ -127,7 +127,7 @@ describe('Provider', () => {
         'latest',
         await provider.l2TokenAddress(DAI_L1)
       );
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
@@ -611,7 +611,7 @@ describe('Provider', () => {
         to: ADDRESS1,
         from: ADDRESS1,
       });
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
 
     it('should return a gas estimation of the withdraw transaction with paymaster', async () => {
@@ -630,7 +630,7 @@ describe('Provider', () => {
           innerInput: new Uint8Array(),
         }),
       });
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
@@ -642,7 +642,7 @@ describe('Provider', () => {
         to: ADDRESS2,
         from: ADDRESS1,
       });
-      expect(result > 0).to.be.be.true;
+      expect(result > 0n).to.be.be.true;
     });
 
     it('should return a gas estimation of the transfer transaction with paymaster', async () => {
@@ -658,7 +658,7 @@ describe('Provider', () => {
           innerInput: new Uint8Array(),
         }),
       });
-      expect(result > 0).to.be.be.true;
+      expect(result > 0n).to.be.be.true;
     });
   });
 
@@ -684,7 +684,7 @@ describe('Provider', () => {
         caller: ADDRESS1,
         l2Value: 7_000_000_000,
       });
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
@@ -706,7 +706,7 @@ describe('Provider', () => {
         to: await provider.l2TokenAddress(DAI_L1),
         data: utils.IERC20.encodeFunctionData('approve', [ADDRESS2, 1]),
       });
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
 
     it('should return a gas estimation of the EIP712 transaction', async () => {
@@ -718,7 +718,7 @@ describe('Provider', () => {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       });
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
