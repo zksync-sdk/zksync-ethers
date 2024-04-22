@@ -118,7 +118,7 @@ describe('SmartAccount', async () => {
   describe('#getBalance()', () => {
     it('should return a `SmartAccount` balance', async () => {
       const result = await account.getBalance();
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 

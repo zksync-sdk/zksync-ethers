@@ -42,7 +42,7 @@ describe('L2VoidSigner', () => {
   describe('#getBalance()', () => {
     it('should return the `L2VoidSigner` balance', async () => {
       const result = await signer.getBalance();
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
@@ -366,7 +366,7 @@ describe('L1VoidSigner', async () => {
   describe('#getBalanceL1()', () => {
     it('should return a L1 balance', async () => {
       const result = await signer.getBalanceL1();
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
@@ -735,7 +735,7 @@ describe('L1VoidSigner', async () => {
           amount: amount,
           refundRecipient: await signer.getAddress(),
         });
-        expect(result > 0).to.be.true;
+        expect(result > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should return gas estimation for base token deposit transaction', async () => {
@@ -761,7 +761,7 @@ describe('L1VoidSigner', async () => {
           amount: amount,
           refundRecipient: await signer.getAddress(),
         });
-        expect(result > 0).to.be.true;
+        expect(result > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should return gas estimation for DAI deposit transaction', async () => {
@@ -1107,7 +1107,7 @@ describe('L1VoidSigner', async () => {
         calldata: '0x',
         l2Value: 7_000_000_000,
       });
-      expect(result > 0).to.be.true;
+      expect(result > 0n).to.be.true;
     });
   });
 
