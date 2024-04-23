@@ -185,7 +185,8 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   }
 
   override _providerL2() {
-    return this.providerL2!;
+    // Make it compatible when singer is created with Web3Provider.getSigner()
+    return this.providerL2 ? this.providerL2 : this.provider;
   }
 
   /**
@@ -359,7 +360,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = signer.transfer({
+   * const tx = await signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
@@ -377,7 +378,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
    *
    * const browserProvider = new BrowserProvider(window.ethereum);
-   * const signer = Signer.from(
+   * const signer = await Signer.from(
    *     await browserProvider.getSigner(),
    *     Number((await browserProvider.getNetwork()).chainId),
    *     Provider.getDefaultProvider(types.Network.Sepolia)
