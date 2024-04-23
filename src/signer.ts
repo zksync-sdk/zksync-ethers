@@ -178,7 +178,8 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
   }
 
   override _providerL2() {
-    return this.providerL2!;
+    // Make it compatible when singer is created with Web3Provider.getSigner()
+    return this.providerL2 ? this.providerL2 : this.provider;
   }
 
   /**
@@ -345,7 +346,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = signer.transfer({
+   * const tx = await signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    * });
@@ -364,7 +365,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = signer.transfer({
+   * const tx = await signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
