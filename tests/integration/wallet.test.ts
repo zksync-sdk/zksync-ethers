@@ -202,10 +202,8 @@ describe('Wallet', () => {
         value: 7_000_000_000,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
-      // @ts-ignore
-      expect(result.gasLimit > 0n).to.be.true;
-      // @ts-ignore
-      expect(result.gasPrice > 0n).to.be.true;
+      expect((result.gasLimit as bigint) > 0n).to.be.true;
+      expect((result.gasPrice as bigint) > 0n).to.be.true;
     }).timeout(25_000);
 
     it('should return a populated transaction with default values if are omitted', async () => {
@@ -704,16 +702,11 @@ describe('Wallet', () => {
         token: utils.ETH_ADDRESS,
         to: await wallet.getAddress(),
       });
-      // @ts-ignore
-      expect(result.baseCost > 0n).to.be.true;
-      // @ts-ignore
-      expect(result.l1GasLimit > 0n).to.be.true;
-      // @ts-ignore
-      expect(result.l2GasLimit > 0n).to.be.true;
-      // @ts-ignore
-      expect(result.maxPriorityFeePerGas > 0n).to.be.true;
-      // @ts-ignore
-      expect(result.maxFeePerGas > 0n).to.be.true;
+      expect((result.baseCost as bigint) > 0n).to.be.true;
+      expect((result.l1GasLimit as bigint) > 0n).to.be.true;
+      expect((result.l2GasLimit as bigint) > 0n).to.be.true;
+      expect((result.maxPriorityFeePerGas as bigint) > 0n).to.be.true;
+      expect((result.maxFeePerGas as bigint) > 0n).to.be.true;
     });
 
     it('should throw an error when there is not enough allowance to cover the deposit', async () => {

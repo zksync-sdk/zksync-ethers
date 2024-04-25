@@ -663,22 +663,15 @@ describe('L1VoidSigner', () => {
 
   describe('#getFullRequiredDepositFee()', () => {
     it('should return fee for ETH token deposit', async () => {
-      const feeData = {
-        baseCost: 285_096_500_000_000n,
-        l1GasLimit: 132_711n,
-        l2GasLimit: '0x8b351',
-        maxFeePerGas: 1_500_000_010n,
-        maxPriorityFeePerGas: 1_500_000_000n,
-      };
       const result = await signer.getFullRequiredDepositFee({
         token: utils.ETH_ADDRESS,
         to: await signer.getAddress(),
       });
-      expect(result.baseCost as bigint > 0n).to.be.true;
-      expect(result.l1GasLimit as bigint > 0n).to.be.true;
-      expect(result.l2GasLimit as bigint > 0n).to.be.true;
-      expect(result.maxPriorityFeePerGas as bigint > 0n).to.be.true;
-      expect(result.maxFeePerGas as bigint > 0n).to.be.true;
+      expect((result.baseCost as bigint) > 0n).to.be.true;
+      expect((result.l1GasLimit as bigint) > 0n).to.be.true;
+      expect((result.l2GasLimit as bigint) > 0n).to.be.true;
+      expect((result.maxPriorityFeePerGas as bigint) > 0n).to.be.true;
+      expect((result.maxFeePerGas as bigint) > 0n).to.be.true;
     });
 
     it('should throw an error when there is not enough allowance to cover the deposit', async () => {
@@ -695,23 +688,15 @@ describe('L1VoidSigner', () => {
     }).timeout(10_000);
 
     it('should return fee for DAI token deposit', async () => {
-      const feeData = {
-        baseCost: 288_992_000_000_000n,
-        l1GasLimit: 253_177n,
-        l2GasLimit: '0x8d1c0',
-        maxFeePerGas: 1_500_000_010n,
-        maxPriorityFeePerGas: 1_500_000_000n,
-      };
-
       const result = await signer.getFullRequiredDepositFee({
         token: DAI_L1,
         to: await signer.getAddress(),
       });
-      expect(result.baseCost as bigint > BigInt(0)).to.be.true;
-      expect(result.l1GasLimit as bigint > BigInt(0)).to.be.true;
-      expect(result.l2GasLimit as bigint > BigInt(0)).to.be.true;
-      expect(result.maxFeePerGas as bigint > BigInt(0)).to.be.true;
-      expect(result.maxPriorityFeePerGas as bigint > BigInt(0)).to.be.true;
+      expect((result.baseCost as bigint) > BigInt(0)).to.be.true;
+      expect((result.l1GasLimit as bigint) > BigInt(0)).to.be.true;
+      expect((result.l2GasLimit as bigint) > BigInt(0)).to.be.true;
+      expect((result.maxFeePerGas as bigint) > BigInt(0)).to.be.true;
+      expect((result.maxPriorityFeePerGas as bigint) > BigInt(0)).to.be.true;
     }).timeout(10_000);
 
     it('should throw an error when there is not enough balance for the deposit', async () => {
