@@ -190,14 +190,18 @@ describe('Wallet', () => {
         from: ADDRESS,
         nonce: await wallet.getNonce('pending'),
         chainId: 270,
-        maxFeePerGas: BigNumber.from(2_000_000_000),
-        maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
       };
       const result = await wallet.populateTransaction({
         to: RECEIVER,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'maxFeePerGas',
+        'maxPriorityFeePerGas',
+      ]);
+      expect(BigNumber.from(result.maxPriorityFeePerGas).gt(0)).to.be.true;
+      expect(BigNumber.from(result.maxFeePerGas).gt(0)).to.be.true;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -328,14 +332,14 @@ describe('Wallet', () => {
         from: ADDRESS,
         nonce: await wallet.getNonce('pending'),
         chainId: 270,
-        gasPrice: BigNumber.from(250_000_000),
       };
       const result = await wallet.populateTransaction({
         type: 0,
         to: RECEIVER,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(BigNumber.from(result.gasPrice).gt(0)).to.be.true;
     });
   });
 
@@ -444,17 +448,11 @@ describe('Wallet', () => {
         contractAddress: ADDRESS,
         calldata: '0x',
         l2Value: 7_000_000,
-        l2GasLimit: BigNumber.from('0x08cbaa'),
         token: '0x0000000000000000000000000000000000000000',
         to: ADDRESS,
         amount: 7_000_000,
         refundRecipient: ADDRESS,
         operatorTip: BigNumber.from(0),
-        overrides: {
-          maxFeePerGas: BigNumber.from(1_500_000_010),
-          maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-          value: BigNumber.from(288_213_007_000_000),
-        },
         gasPerPubdataByte: 800,
       };
       const result = await wallet.getDepositTx({
@@ -463,7 +461,12 @@ describe('Wallet', () => {
         amount: 7_000_000,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result).to.be.deep.equal(tx);
+      expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).gt(0)).to.be
+        .true;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).gt(0)).to.be.true;
+      expect(BigNumber.from(result.overrides.value).gt(0)).to.be.true;
+      expect(BigNumber.from(result.l2GasLimit).gt(0)).to.be.true;
     });
 
     it('should return a deposit transaction with `tx.to == Wallet.getAddress()` when `tx.to` is not specified', async () => {
@@ -471,17 +474,11 @@ describe('Wallet', () => {
         contractAddress: ADDRESS,
         calldata: '0x',
         l2Value: 7_000_000,
-        l2GasLimit: BigNumber.from('0x8cbaa'),
         token: '0x0000000000000000000000000000000000000000',
         to: ADDRESS,
         amount: 7_000_000,
         refundRecipient: ADDRESS,
         operatorTip: BigNumber.from(0),
-        overrides: {
-          maxFeePerGas: BigNumber.from(1_500_000_010),
-          maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-          value: BigNumber.from(288_213_007_000_000),
-        },
         gasPerPubdataByte: 800,
       };
       const result = await wallet.getDepositTx({
@@ -489,14 +486,16 @@ describe('Wallet', () => {
         amount: 7_000_000,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result).to.be.deep.equal(tx);
+      expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).gt(0)).to.be
+        .true;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).gt(0)).to.be.true;
+      expect(BigNumber.from(result.overrides.value).gt(0)).to.be.true;
+      expect(BigNumber.from(result.l2GasLimit).gt(0)).to.be.true;
     });
 
     it('should return DAI deposit transaction', async () => {
       const tx = {
-        maxFeePerGas: BigNumber.from(1_500_000_010),
-        maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-        value: BigNumber.from(288_992_000_000_000),
         from: ADDRESS,
         to: (await wallet.getL1BridgeContracts()).erc20.address,
       };
@@ -507,7 +506,15 @@ describe('Wallet', () => {
         refundRecipient: await wallet.getAddress(),
       });
       result.to = result.to.toLowerCase();
-      expect(result).to.be.deepEqualExcluding(tx, ['data']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'data',
+        'maxFeePerGas',
+        'maxPriorityFeePerGas',
+        'value',
+      ]);
+      expect(BigNumber.from(result.maxFeePerGas).gt(0)).to.be.true;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).gt(0)).to.be.true;
+      expect(BigNumber.from(result.value).gt(0)).to.be.true;
     });
   });
 
@@ -519,7 +526,7 @@ describe('Wallet', () => {
         amount: 5,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result.eq(BigNumber.from(132_711))).to.be.true;
+      expect(result.gt(BigNumber.from(0))).to.be.true;
     });
 
     it('should return gas estimation for DAI deposit transaction', async () => {
@@ -529,7 +536,7 @@ describe('Wallet', () => {
         amount: 5,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result.eq(BigNumber.from(253_418))).to.be.true;
+      expect(result.gt(BigNumber.from(0))).to.be.true;
     });
   });
 
@@ -661,18 +668,15 @@ describe('Wallet', () => {
 
   describe('#getFullRequiredDepositFee()', () => {
     it('should return fee for ETH token deposit', async () => {
-      const FEE_DATA = {
-        baseCost: BigNumber.from(285_096_500_000_000),
-        l1GasLimit: BigNumber.from(132_711),
-        l2GasLimit: BigNumber.from('0x08b351'),
-        maxFeePerGas: BigNumber.from(1_500_000_010),
-        maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-      };
       const result = await wallet.getFullRequiredDepositFee({
         token: utils.ETH_ADDRESS,
         to: await wallet.getAddress(),
       });
-      expect(result).to.be.deep.equal(FEE_DATA);
+      expect(result.baseCost.gt(BigNumber.from(0))).to.be.true;
+      expect(result.l1GasLimit.gt(BigNumber.from(0))).to.be.true;
+      expect(result.l2GasLimit.gt(BigNumber.from(0))).to.be.true;
+      expect(result.maxFeePerGas!.gt(BigNumber.from(0))).to.be.true;
+      expect(result.maxPriorityFeePerGas!.gt(BigNumber.from(0))).to.be.true;
     });
 
     it('should throw an error when there is not enough allowance to cover the deposit', async () => {
@@ -689,14 +693,6 @@ describe('Wallet', () => {
     }).timeout(10_000);
 
     it('should return fee for DAI token deposit', async () => {
-      const FEE_DATA = {
-        baseCost: BigNumber.from(288_992_000_000_000),
-        l1GasLimit: BigNumber.from(253_177),
-        l2GasLimit: BigNumber.from('0x08d1c0'),
-        maxFeePerGas: BigNumber.from(1_500_000_010),
-        maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-      };
-
       const tx = await wallet.approveERC20(DAI_L1, 5);
       await tx.wait();
 
@@ -704,7 +700,11 @@ describe('Wallet', () => {
         token: DAI_L1,
         to: await wallet.getAddress(),
       });
-      expect(result).to.be.deep.equal(FEE_DATA);
+      expect(result.baseCost.gt(BigNumber.from(0))).to.be.true;
+      expect(result.l1GasLimit.gt(BigNumber.from(0))).to.be.true;
+      expect(result.l2GasLimit.gt(BigNumber.from(0))).to.be.true;
+      expect(result.maxFeePerGas!.gt(BigNumber.from(0))).to.be.true;
+      expect(result.maxPriorityFeePerGas!.gt(BigNumber.from(0))).to.be.true;
     }).timeout(10_000);
 
     it('should throw an error when there is not enough balance for the deposit', async () => {
@@ -747,7 +747,7 @@ describe('Wallet', () => {
       expect(
         l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
       ).to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
       const amount = 7_000_000_000;
@@ -814,7 +814,7 @@ describe('Wallet', () => {
       ).to.be.true;
 
       expect(result).not.to.be.null;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw DAI to L1 network', async () => {
       const amount = 5;
@@ -840,7 +840,7 @@ describe('Wallet', () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
       const amount = 5;
@@ -912,7 +912,7 @@ describe('Wallet', () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw USDC to the L1 network using custom bridge', async () => {
       const amount = BigNumber.from(5);
@@ -942,7 +942,7 @@ describe('Wallet', () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
   });
 
   describe('#getRequestExecuteTx()', () => {

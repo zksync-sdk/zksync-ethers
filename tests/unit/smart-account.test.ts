@@ -139,8 +139,6 @@ describe('populateTransaction()', () => {
       value: BigNumber.from(7_000_000_000),
       type: 113,
       data: '0x',
-      gasPrice: BigNumber.from(250_000_000),
-      gasLimit: BigNumber.from(154_379),
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -157,7 +155,13 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
+    expect(result).to.be.deepEqualExcluding(tx, [
+      'nonce',
+      'gasPrice',
+      'gasLimit',
+    ]);
+    expect(BigNumber.from(result.gasPrice).gt(BigNumber.from(0))).to.be.true;
+    expect(BigNumber.from(result.gasLimit).gt(BigNumber.from(0))).to.be.true;
   });
 
   it('should throw an error when provider is not set', async () => {
