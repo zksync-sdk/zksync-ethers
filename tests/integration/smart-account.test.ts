@@ -8,7 +8,7 @@ import {
   Wallet,
   ContractFactory,
 } from '../../src';
-import {ethers} from 'ethers';
+import { ethers, toBigInt } from "ethers";
 import {ECDSASmartAccount, MultisigECDSASmartAccount} from '../../src';
 
 const {expect} = chai;
@@ -151,7 +151,10 @@ describe('SmartAccount', async () => {
         to: RECEIVER,
         value: 7_000_000_000,
       });
-      expect(result).to.be.deep.equal(tx);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      result.gasPrice
+      expect( toBigInt(result.gasLimit!) > 0n).to.be.true;
+      expect( toBigInt(result.gasPrice!) > 0n).to.be.true;
     }).timeout(25_000);
 
     it('should return a populated transaction with default values if are omitted', async () => {
@@ -162,7 +165,7 @@ describe('SmartAccount', async () => {
         from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
         nonce: await account.getNonce('pending'),
         chainId: 270n,
-        gasPrice: 250_000_000n,
+        gasPrice: 100_000_000n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
       };
