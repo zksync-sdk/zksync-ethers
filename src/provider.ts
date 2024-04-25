@@ -845,7 +845,9 @@ export function JsonRpcApiProvider<
     ): Promise<PriorityOpResponse> {
       const l2Response = {...l1TxResponse} as PriorityOpResponse;
 
-      l2Response.waitL1Commit = l2Response.wait;
+      l2Response.waitL1Commit = l1TxResponse.wait.bind(
+        l1TxResponse
+      ) as PriorityOpResponse['wait'];
       l2Response.wait = async () => {
         const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
         return await l2Tx.wait();
