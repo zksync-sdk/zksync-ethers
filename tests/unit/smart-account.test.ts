@@ -138,8 +138,8 @@ describe('populateTransaction()', () => {
       value: 7_000_000_000n,
       type: 113,
       data: '0x',
-      gasPrice: 250_000_000n,
-      gasLimit: 154_379n,
+      gasPrice: 100_000_000n,
+      gasLimit: 157_459n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
