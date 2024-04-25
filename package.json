@@ -68,7 +68,7 @@
     "lint:fix": "gts fix",
     "watch": "tsc --watch",
     "types:fetch": "cd scripts && ./update-abi.sh && cd ../",
-    "types": "rm typechain/*.ts && find ./abi -name \"*.json\" -print0 | xargs -0 -I {} npx typechain --target ethers-v5 --outDir src/typechain {}",
+    "types": "rm src/typechain/*.ts && find ./abi -name \"*.json\" -print0 | xargs -0 -I {} npx typechain --target ethers-v5 --outDir src/typechain {}",
     "clean": "gts clean",
     "docs": "typedoc --out docs --hideInPageTOC true --useCodeBlocks true --includeVersion true  src/index.ts && cd scripts && ./post-process-doc.sh && cd ../"
   },
