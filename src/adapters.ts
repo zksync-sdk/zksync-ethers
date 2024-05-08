@@ -99,6 +99,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      */
     async getL1BridgeContracts(): Promise<{
       erc20: IL1ERC20Bridge;
+      weth: IL1ERC20Bridge;
       shared: IL1SharedBridge;
     }> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
@@ -107,6 +108,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           addresses.erc20L1,
           this._signerL1()
         ),
+        weth: IL1ERC20BridgeFactory.connect(addresses.wethL1, this._signerL1()),
         shared: IL1SharedBridgeFactory.connect(
           addresses.sharedL1,
           this._signerL1()
@@ -217,18 +219,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides ??= {};
       let bridgeAddress = overrides.bridgeAddress;
       const erc20contract = IERC20Factory.connect(token, this._signerL1());
-      const baseToken = await this.getBaseToken();
-      const isEthBasedChain = await this.isETHBasedChain();
 
       if (!bridgeAddress) {
-        if (!isEthBasedChain && isAddressEq(token, baseToken)) {
-          bridgeAddress = await (
-            await this.getBridgehubContract()
-          ).sharedBridge();
-        } else {
-          const bridgeContracts = await this.getL1BridgeContracts();
-          bridgeAddress = bridgeContracts.shared.address;
-        }
+        bridgeAddress = (await this.getL1BridgeContracts()).shared.address;
       } else {
         delete overrides.bridgeAddress;
       }
@@ -282,13 +275,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const baseTokenAddress = await this.getBaseToken();
       const isEthBasedChain = await this.isETHBasedChain();
 
-      if (isEthBasedChain && isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+      if (isEthBasedChain && isAddressEq(token, ETH_ADDRESS_IN_CONTRACTS)) {
         throw new Error(
           "ETH token can't be approved! The address of the token does not exist on L1."
         );
       } else if (isAddressEq(baseTokenAddress, ETH_ADDRESS_IN_CONTRACTS)) {
         return [{token, allowance: amount}];
-      } else if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+      } else if (isAddressEq(token, ETH_ADDRESS_IN_CONTRACTS)) {
         return [
           {
             token: baseTokenAddress,
@@ -504,11 +497,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
       const baseTokenAddress = await bridgehub.baseToken(chainId);
-      const sharedBridge = await bridgehub.sharedBridge();
+      const sharedBridge = (await this.getL1BridgeContracts()).shared.address;
       const {tx, mintValue} =
         await this._getDepositBaseTokenOnNonETHBasedChainTx(transaction);
 
       if (transaction.approveERC20 || transaction.approveBaseERC20) {
+        const approveOverrides =
+          transaction.approveBaseOverrides ?? transaction.approveOverrides!;
         // Only request the allowance if the current one is not enough.
         const allowance = await this.getAllowanceL1(
           baseTokenAddress,
@@ -520,7 +515,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             mintValue,
             {
               bridgeAddress: sharedBridge,
-              ...transaction.approveBaseOverrides,
+              ...approveOverrides,
             }
           );
           await approveTx.wait();
@@ -556,7 +551,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
       const baseTokenAddress = await bridgehub.baseToken(chainId);
-      const sharedBridge = await bridgehub.sharedBridge();
+      const sharedBridge = (await this.getL1BridgeContracts()).shared.address;
       const {tx, mintValue} =
         await this._getDepositETHOnNonETHBasedChainTx(transaction);
 
@@ -909,7 +904,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }) {
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
-      const sharedBridge = (await this.getL1BridgeContracts()).shared;
+      const sharedBridge = (await this.getL1BridgeContracts()).shared.address;
 
       const tx = await this._getDepositTxWithDefaults(transaction);
       const {
@@ -944,7 +939,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             l2GasLimit: l2GasLimit,
             l2GasPerPubdataByteLimit: gasPerPubdataByte,
             refundRecipient: refundRecipient ?? ethers.constants.AddressZero,
-            secondBridgeAddress: sharedBridge.address,
+            secondBridgeAddress: sharedBridge,
             secondBridgeValue: amount,
             secondBridgeCalldata: ethers.utils.defaultAbiCoder.encode(
               ['address', 'uint256', 'address'],
@@ -1265,7 +1260,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         // In case of token deposit, a sufficient token allowance is also required.
         if (
           !isAddressEq(token, ETH_ADDRESS_IN_CONTRACTS) &&
-          (await this.getAllowanceL1(tx.token)) < dummyAmount
+          (await this.getAllowanceL1(tx.token, tx.bridgeAddress)) < dummyAmount
         ) {
           throw new Error('Not enough allowance to cover the deposit!');
         }
@@ -1425,9 +1420,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const {l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, proof} =
         await this.finalizeWithdrawalParams(withdrawalHash, index);
 
-      const bridgehub = await this.getBridgehubContract();
       const l1SharedBridge = IL1SharedBridgeFactory.connect(
-        await bridgehub.sharedBridge(),
+        (await this.getL1BridgeContracts()).shared.address,
         this._signerL1()
       );
 
@@ -1664,7 +1658,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
 
       if (isETHBaseToken) {
-        throw new Error('Could not estimate mint value on ETH-based chain!');
+        throw new Error(
+          "ETH token can't be approved! The address of the token does not exist on L1."
+        );
       }
 
       const {...tx} = transaction;
@@ -1848,9 +1844,15 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     /**
      * Returns L2 bridge contracts.
      */
-    async getL2BridgeContracts(): Promise<{shared: IL2Bridge}> {
+    async getL2BridgeContracts(): Promise<{
+      erc20: IL2Bridge;
+      weth: IL2Bridge;
+      shared: IL2Bridge;
+    }> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
+        erc20: IL2BridgeFactory.connect(addresses.erc20L2, this._signerL2()),
+        weth: IL2BridgeFactory.connect(addresses.wethL2, this._signerL2()),
         shared: IL2BridgeFactory.connect(addresses.sharedL2, this._signerL2()),
       };
     }

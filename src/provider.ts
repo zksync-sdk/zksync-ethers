@@ -67,6 +67,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     bridgehubContract?: Address;
     mainContract?: Address;
     erc20BridgeL1?: Address;
+    erc20BridgeL2?: Address;
+    wethBridgeL1?: Address;
+    wethBridgeL2?: Address;
     sharedBridgeL1?: Address;
     sharedBridgeL2?: Address;
     baseToken?: Address;
@@ -624,6 +627,17 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * Estimates the amount of gas required to execute `transaction`.
    *
    * @param transaction The transaction for which to estimate gas.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const gas = await provider.estimateGas({
+   *   value: 7_000_000_000,
+   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+   * });
    */
   override async estimateGas(
     transaction: utils.Deferrable<TransactionRequest>
@@ -811,6 +825,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * Returns the Bridgehub smart contract address.
    *
    * Calls the {@link https://docs.zksync.io/build/api.html#zks-getbridgehubcontract zks_getBridgehubContract} JSON-RPC method.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Bridgehub: ${await provider.getBridgehubContractAddress()}`);
    */
   async getBridgehubContractAddress(): Promise<Address> {
     if (!this.contractAddresses.bridgehubContract) {
@@ -832,6 +853,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Main contract: ${await provider.getMainContractAddress()}`);
    */
   async getMainContractAddress(): Promise<Address> {
     if (!this.contractAddresses.mainContract) {
@@ -845,6 +867,15 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
   /**
    * Returns the L1 base token address.
+   *
+   * Calls the {@link https://docs.zksync.io/build/api.html#zks-getbasetokenl1address zks_getBaseTokenL1Address} JSON-RPC method.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Base token: ${await provider.getBaseTokenContractAddress()}`);
    */
   async getBaseTokenContractAddress(): Promise<Address> {
     if (!this.contractAddresses.baseToken) {
@@ -858,6 +889,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
   /**
    * Returns whether the chain is ETH-based.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Is ETH based chain: ${await provider.isEthBasedChain()}`);
    */
   async isEthBasedChain(): Promise<boolean> {
     return isAddressEq(
@@ -868,6 +906,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
   /**
    * Returns whether the `token` is the base token.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Is base token: ${await provider.isBaseToken("0x5C221E77624690fff6dd741493D735a17716c26B")}`);
    */
   async isBaseToken(token: Address): Promise<boolean> {
     return (
@@ -909,21 +954,33 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    */
   async getDefaultBridgeAddresses(): Promise<{
     erc20L1: string;
+    erc20L2: string;
+    wethL1: string;
+    wethL2: string;
     sharedL1: string;
     sharedL2: string;
   }> {
     if (!this.contractAddresses.erc20BridgeL1) {
       const addresses: {
         l1Erc20DefaultBridge: string;
+        l2Erc20DefaultBridge: string;
+        l1WethBridge: string;
+        l2WethBridge: string;
         l1SharedDefaultBridge: string;
         l2SharedDefaultBridge: string;
       } = await this.send('zks_getBridgeContracts', []);
       this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
+      this.contractAddresses.erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
+      this.contractAddresses.wethBridgeL1 = addresses.l1WethBridge;
+      this.contractAddresses.wethBridgeL2 = addresses.l2WethBridge;
       this.contractAddresses.sharedBridgeL1 = addresses.l1SharedDefaultBridge;
       this.contractAddresses.sharedBridgeL2 = addresses.l2SharedDefaultBridge;
     }
     return {
       erc20L1: this.contractAddresses.erc20BridgeL1,
+      erc20L2: this.contractAddresses.erc20BridgeL2!,
+      wethL1: this.contractAddresses.wethBridgeL1!,
+      wethL2: this.contractAddresses.wethBridgeL2!,
       sharedL1: this.contractAddresses.sharedBridgeL1!,
       sharedL2: this.contractAddresses.sharedBridgeL2!,
     };
@@ -1431,6 +1488,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * Creates a new `Provider` from provided URL or network name.
    *
    * @param zksyncNetwork The type of zkSync network.
+   *
+   * @example
+   *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    */
   static getDefaultProvider(
     zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost
@@ -2162,6 +2225,27 @@ export class Web3Provider extends Provider {
    */
   override async getTestnetPaymasterAddress(): Promise<Address | null> {
     return super.getTestnetPaymasterAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * console.log(`Bridge addresses: ${await provider.getDefaultBridgeAddresses()}`);
+   */
+  override async getDefaultBridgeAddresses(): Promise<{
+    erc20L1: string;
+    erc20L2: string;
+    wethL1: string;
+    wethL2: string;
+    sharedL1: string;
+    sharedL2: string;
+  }> {
+    return super.getDefaultBridgeAddresses();
   }
 
   /**

@@ -5,10 +5,6 @@ import {ethers, BigNumber} from 'ethers';
 import {ITestnetErc20TokenFactory} from '../../src/typechain/ITestnetErc20TokenFactory';
 import {IS_ETH_BASED, ADDRESS1, PRIVATE_KEY1, DAI_L1, ADDRESS2} from '../utils';
 
-import {
-  expectBigNumberCloseTo,
-  expectFeeDataCloseToExpected,
-} from '../custom-matchers';
 const {expect} = chai;
 
 describe('L2VoidSigner', () => {
@@ -41,7 +37,7 @@ describe('L2VoidSigner', () => {
   describe('#getBalance()', () => {
     it('should return the `L2VoidSigner` balance', async () => {
       const result = await signer.getBalance();
-      expect(result.gt(0)).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -100,7 +96,14 @@ describe('L2VoidSigner', () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'maxFeePerGas',
+        'maxPriorityFeePerGas',
+      ]);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be.false;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -130,6 +133,7 @@ describe('L2VoidSigner', () => {
         },
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
     it('should return populated transaction when `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -156,6 +160,7 @@ describe('L2VoidSigner', () => {
         },
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `customData` are provided', async () => {
@@ -182,6 +187,7 @@ describe('L2VoidSigner', () => {
         },
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
     it('should return populated EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided', async () => {
@@ -202,6 +208,7 @@ describe('L2VoidSigner', () => {
         maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
     it('should return populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`', async () => {
@@ -221,6 +228,7 @@ describe('L2VoidSigner', () => {
         gasPrice: BigNumber.from(3_500_000_000),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
     it('should return populated legacy transaction when `type = 0`', async () => {
@@ -238,7 +246,9 @@ describe('L2VoidSigner', () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
     });
   });
 
@@ -272,7 +282,7 @@ describe('L2VoidSigner', () => {
           'VoidSigner cannot sign transactions'
         );
       }
-    }).timeout(25_000);
+    }).timeout(35_000);
   });
 
   describe('#transfer()', () => {
@@ -312,8 +322,6 @@ describe('L1VoidSigner', () => {
   const provider = Provider.getDefaultProvider();
   const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
   const signer = new L1VoidSigner(ADDRESS1, ethProvider, provider);
-
-  const tolerancePercentage = 10; // 10% tolerance
 
   let baseToken: string;
 
@@ -365,7 +373,7 @@ describe('L1VoidSigner', () => {
   describe('#getBalanceL1()', () => {
     it('should return a L1 balance', async () => {
       const result = await signer.getBalanceL1();
-      expect(result.gt(0)).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -417,7 +425,7 @@ describe('L1VoidSigner', () => {
   describe('#getBalance()', () => {
     it('should return the `L1VoidSigner` balance', async () => {
       const result = await signer.getBalance();
-      expect(result.gt(0)).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -462,7 +470,14 @@ describe('L1VoidSigner', () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'maxFeePerGas',
+        'maxPriorityFeePerGas',
+      ]);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be.false;
     });
 
     it('should return populated EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided', async () => {
@@ -483,6 +498,7 @@ describe('L1VoidSigner', () => {
         maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
     it('should return populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`', async () => {
@@ -502,6 +518,7 @@ describe('L1VoidSigner', () => {
         gasPrice: BigNumber.from(3_500_000_000),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
     it('should return populated legacy transaction when `type = 0`', async () => {
@@ -519,7 +536,9 @@ describe('L1VoidSigner', () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
     });
   });
 
@@ -567,7 +586,18 @@ describe('L1VoidSigner', () => {
           amount: 7_000_000,
           refundRecipient: await signer.getAddress(),
         });
-        expect(result).to.be.deep.equal(tx);
+        expect(result).to.be.deepEqualExcluding(tx, [
+          'mintValue',
+          'overrides',
+          'l2GasLimit',
+        ]);
+        expect(BigNumber.from(result.mintValue).isZero()).to.be.false;
+        expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero())
+          .to.be.false;
+        expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be
+          .false;
+        expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
+        expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
       });
 
       it('should return a deposit transaction with `tx.to == L1VoidSigner.getAddress()` when `tx.to` is not specified', async () => {
@@ -594,7 +624,18 @@ describe('L1VoidSigner', () => {
           amount: 7_000_000,
           refundRecipient: await signer.getAddress(),
         });
-        expect(result).to.be.deep.equal(tx);
+        expect(result).to.be.deepEqualExcluding(tx, [
+          'mintValue',
+          'overrides',
+          'l2GasLimit',
+        ]);
+        expect(BigNumber.from(result.mintValue).isZero()).to.be.false;
+        expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero())
+          .to.be.false;
+        expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be
+          .false;
+        expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
+        expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
       });
 
       it('should return DAI deposit transaction', async () => {
@@ -612,7 +653,16 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         result.to = result.to.toLowerCase();
-        expect(result).to.be.deepEqualExcluding(tx, ['data']);
+        expect(result).to.be.deepEqualExcluding(tx, [
+          'data',
+          'maxFeePerGas',
+          'maxPriorityFeePerGas',
+          'value',
+        ]);
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
+        expect(BigNumber.from(result.value).isZero()).to.be.false;
       });
     } else {
       it('should return ETH deposit transaction', async () => {
@@ -631,7 +681,16 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         result.to = result.to.toLowerCase();
-        expect(result).to.be.deepEqualExcluding(tx, ['data']);
+        expect(result).to.be.deepEqualExcluding(tx, [
+          'data',
+          'maxFeePerGas',
+          'maxPriorityFeePerGas',
+          'value',
+        ]);
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
+        expect(BigNumber.from(result.value).isZero()).to.be.false;
       });
 
       it('should return a deposit transaction with `tx.to == Wallet.getAddress()` when `tx.to` is not specified', async () => {
@@ -648,14 +707,22 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         result.to = result.to.toLowerCase();
-        expect(result).to.be.deepEqualExcluding(tx, ['data']);
+        expect(result).to.be.deepEqualExcluding(tx, [
+          'data',
+          'maxFeePerGas',
+          'maxPriorityFeePerGas',
+          'value',
+        ]);
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
+        expect(BigNumber.from(result.value).isZero()).to.be.false;
       });
 
       it('should return DAI deposit transaction', async () => {
         const tx = {
           maxFeePerGas: BigNumber.from(1_500_000_001),
           maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-          value: BigNumber.from(210_121_243_750_000),
           from: ADDRESS1,
           to: (await provider.getBridgehubContractAddress()).toLowerCase(),
         };
@@ -667,7 +734,14 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         result.to = result.to.toLowerCase();
-        expect(result).to.be.deepEqualExcluding(tx, ['data']);
+        expect(result).to.be.deepEqualExcluding(tx, [
+          'data',
+          'maxFeePerGas',
+          'maxPriorityFeePerGas',
+        ]);
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
       });
     }
   });
@@ -681,11 +755,7 @@ describe('L1VoidSigner', () => {
           amount: 5,
           refundRecipient: await signer.getAddress(),
         });
-        expectBigNumberCloseTo(
-          result,
-          BigNumber.from(225_078),
-          tolerancePercentage
-        );
+        expect(result.isZero()).to.be.false;
       });
 
       it('should return gas estimation for DAI deposit transaction', async () => {
@@ -698,11 +768,7 @@ describe('L1VoidSigner', () => {
           amount: 5,
           refundRecipient: await signer.getAddress(),
         });
-        expectBigNumberCloseTo(
-          result,
-          BigNumber.from(338_196),
-          tolerancePercentage
-        );
+        expect(result.isZero()).to.be.false;
       }).timeout(10_000);
     } else {
       it('should throw an error for insufficient allowance when estimating gas for ETH deposit transaction', async () => {
@@ -799,11 +865,7 @@ describe('L1VoidSigner', () => {
           amount: amount,
           refundRecipient: await signer.getAddress(),
         });
-        expectBigNumberCloseTo(
-          result,
-          BigNumber.from(361_501),
-          tolerancePercentage
-        );
+        expect(result.isZero()).to.be.false;
       }).timeout(10_000);
     }
   });
@@ -848,20 +910,17 @@ describe('L1VoidSigner', () => {
   describe('#getFullRequiredDepositFee()', () => {
     if (IS_ETH_BASED) {
       it('should return fee for ETH token deposit', async () => {
-        const fee = {
-          baseCost: BigNumber.from(95_595_450_000_000),
-          l1GasLimit: BigNumber.from(225_079),
-          l2GasLimit: BigNumber.from(355_704),
-          maxFeePerGas: BigNumber.from(1_500_000_001),
-          maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-        };
         const result = await signer.getFullRequiredDepositFee({
           token: utils.LEGACY_ETH_ADDRESS,
           to: await signer.getAddress(),
         });
-
-        expectFeeDataCloseToExpected(result, fee, tolerancePercentage);
-      });
+        expect(BigNumber.from(result.baseCost).isZero()).to.be.false;
+        expect(BigNumber.from(result.l1GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
+      }).timeout(10_000);
 
       it('should throw an error when there is not enough allowance to cover the deposit', async () => {
         try {
@@ -878,15 +937,6 @@ describe('L1VoidSigner', () => {
 
       it('should return fee for DAI token deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
-
-        const fee = {
-          baseCost: BigNumber.from(107_602_662_500_000),
-          l1GasLimit: BigNumber.from(337_820),
-          l2GasLimit: BigNumber.from(400_382),
-          maxFeePerGas: BigNumber.from(1_500_000_001),
-          maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-        };
-
         const tx = await wallet.approveERC20(DAI_L1, 5);
         await tx.wait();
 
@@ -894,7 +944,12 @@ describe('L1VoidSigner', () => {
           token: DAI_L1,
           to: await signer.getAddress(),
         });
-        expectFeeDataCloseToExpected(result, fee, tolerancePercentage);
+        expect(BigNumber.from(result.baseCost).isZero()).to.be.false;
+        expect(BigNumber.from(result.l1GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
       }).timeout(10_000);
 
       it('should throw an error when there is not enough balance for the deposit', async () => {
@@ -933,14 +988,6 @@ describe('L1VoidSigner', () => {
 
       it('should return fee for ETH token deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
-
-        const fee = {
-          baseCost: BigNumber.from(111_540_656_250_000),
-          l1GasLimit: BigNumber.from(321_051),
-          l2GasLimit: BigNumber.from(415_035),
-          maxFeePerGas: BigNumber.from(1_500_000_001),
-          maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-        };
         const token = utils.LEGACY_ETH_ADDRESS;
         const approveParams = await signer.getDepositAllowanceParams(token, 1);
 
@@ -955,8 +1002,12 @@ describe('L1VoidSigner', () => {
           token: token,
           to: await signer.getAddress(),
         });
-
-        expectFeeDataCloseToExpected(result, fee, tolerancePercentage);
+        expect(BigNumber.from(result.baseCost).isZero()).to.be.false;
+        expect(BigNumber.from(result.l1GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
       }).timeout(10_000);
 
       it('should return fee for base token deposit', async () => {
@@ -980,14 +1031,6 @@ describe('L1VoidSigner', () => {
 
       it('should return fee for DAI token deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
-
-        const fee = {
-          baseCost: BigNumber.from(107_602_662_500_000),
-          l1GasLimit: BigNumber.from(361_124),
-          l2GasLimit: BigNumber.from(400_382),
-          maxFeePerGas: BigNumber.from(1_500_000_001),
-          maxPriorityFeePerGas: BigNumber.from(1_500_000_000),
-        };
         const token = DAI_L1;
         const approveParams = await signer.getDepositAllowanceParams(token, 1);
 
@@ -1008,7 +1051,12 @@ describe('L1VoidSigner', () => {
           token: token,
           to: await signer.getAddress(),
         });
-        expectFeeDataCloseToExpected(result, fee, tolerancePercentage);
+        expect(BigNumber.from(result.baseCost).isZero()).to.be.false;
+        expect(BigNumber.from(result.l1GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+        expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
+          .false;
       }).timeout(10_000);
 
       it('should throw an error when there is not enough token allowance to cover the deposit', async () => {

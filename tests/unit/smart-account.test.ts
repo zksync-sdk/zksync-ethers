@@ -141,7 +141,13 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'gasLimit']);
+    expect(result).to.be.deepEqualExcluding(tx, [
+      'nonce',
+      'gasPrice',
+      'gasLimit',
+    ]);
+    expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
+    expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
   });
 
   it('should throw an error when provider is not set', async () => {

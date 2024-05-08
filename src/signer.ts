@@ -272,6 +272,8 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * const l2BridgeContracts = await signer.getL2BridgeContracts();
    */
   override async getL2BridgeContracts(): Promise<{
+    erc20: IL2Bridge;
+    weth: IL2Bridge;
     shared: IL2Bridge;
   }> {
     return super.getL2BridgeContracts();
@@ -346,7 +348,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = await signer.transfer({
+   * const tx = signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    * });
@@ -365,7 +367,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = await signer.transfer({
+   * const tx = signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -572,6 +574,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    */
   override async getL1BridgeContracts(): Promise<{
     erc20: IL1ERC20Bridge;
+    weth: IL1ERC20Bridge;
     shared: IL1SharedBridge;
   }> {
     return super.getL1BridgeContracts();
