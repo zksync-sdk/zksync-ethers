@@ -30,7 +30,8 @@
   "files": [
     "build/",
     "abi/",
-    "src/"
+    "src/",
+    "typechain"
   ],
   "dependencies": {},
   "devDependencies": {
@@ -66,7 +67,7 @@
     "lint:fix": "gts fix",
     "watch": "tsc --watch",
     "types:fetch": "cd scripts && ./update-abi.sh && cd ../",
-    "types": "typechain --target ethers-v6 --out-dir src/typechain abi/*.json",
+    "types": "typechain --target ethers-v6 --out-dir src/typechain abi/*.json && ncp src/typechain typechain",
     "clean": "gts clean",
     "docs": "typedoc --out docs --hideInPageTOC true --useCodeBlocks true --includeVersion true  src/index.ts && cd scripts && ./post-process-doc.sh && cd ../"
   },
