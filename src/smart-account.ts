@@ -437,7 +437,7 @@ export class SmartAccount extends AbstractSigner {
    *
    * @returns A Promise resolving to a withdrawal transaction response.
    *
-   * @example Withdraw ETH
+   * @example Withdraw ETH.
    *
    * import { SmartAccount, Provider, types, utils } from "zksync-ethers";
    *
@@ -450,9 +450,9 @@ export class SmartAccount extends AbstractSigner {
    *   provider
    * );
    *
-   * const tokenWithdrawHandle = await account.withdraw({
+   * const tokenWithdrawTx = await account.withdraw({
    *   token: utils.ETH_ADDRESS,
-   *   amount: 10_000_000,
+   *   amount: 10_000_000n,
    * });
    *
    * @example Withdraw ETH using paymaster to facilitate fee payment with an ERC20 token.
@@ -471,9 +471,9 @@ export class SmartAccount extends AbstractSigner {
    *   provider
    * );
    *
-   * const tokenWithdrawHandle = await account.withdraw({
+   * const tokenWithdrawTx = await account.withdraw({
    *   token: utils.ETH_ADDRESS,
-   *   amount: 10_000_000,
+   *   amount: 10_000_000n,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
    *     type: "ApprovalBased",
    *     token: token,
@@ -511,7 +511,7 @@ export class SmartAccount extends AbstractSigner {
    *
    * @returns A Promise resolving to a transfer transaction response.
    *
-   * @example Transfer ETH
+   * @example Transfer ETH.
    *
    * import { SmartAccount, Wallet, Provider, types } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -525,17 +525,17 @@ export class SmartAccount extends AbstractSigner {
    *   provider
    * );
    *
-   * const transferHandle = await account.transfer({
+   * const transferTx = await account.transfer({
    *   token: utils.ETH_ADDRESS,
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
-   * const tx = await transferHandle.wait();
+   * const tx = await transferTx.wait();
    *
    * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
    *
-   * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token
+   * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token.
    *
    * import { SmartAccount, Wallet, Provider, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -552,7 +552,7 @@ export class SmartAccount extends AbstractSigner {
    *   provider
    * );
    *
-   * const transferHandle = await account.transfer({
+   * const transferTx = await account.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -563,7 +563,7 @@ export class SmartAccount extends AbstractSigner {
    *   }),
    * });
    *
-   * const tx = await transferHandle.wait();
+   * const tx = await transferTx.wait();
    *
    * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
    */

@@ -8,7 +8,7 @@ import {TransactionLike, TransactionBuilder, PayloadSigner} from './types';
  * @param payload The payload that needs to be signed.
  * @param secret The ECDSA private key.
  *
- * @example Sign EIP712 transaction hash
+ * @example Sign EIP712 transaction hash.
  *
  * import { EIP712Signer, types, utils } from "zksync-ethers";
  *
@@ -24,7 +24,7 @@ import {TransactionLike, TransactionBuilder, PayloadSigner} from './types';
  * const txHash = EIP712Signer.getSignedDigest(tx);
  * const result = await utils.signPayloadWithECDSA(txHash, PRIVATE_KEY);
  *
- * @example Sign message hash
+ * @example Sign message hash.
  *
  * import { utils } from "zksync-ethers";
  * import { hashMessage } from "ethers";
@@ -36,7 +36,7 @@ import {TransactionLike, TransactionBuilder, PayloadSigner} from './types';
  *
  * const result = await utils.signPayloadWithECDSA(messageHash, PRIVATE_KEY);
  *
- * @example Sign typed data hash
+ * @example Sign typed data hash.
  *
  * import { utils } from "zksync-ethers";
  * import { TypedDataEncoder } from "ethers";
@@ -72,7 +72,7 @@ export const signPayloadWithECDSA: PayloadSigner = async (
  *
  * @throws {Error} If the `secret` is not an array of at least two elements.
  *
- * @example Sign EIP712 transaction hash
+ * @example Sign EIP712 transaction hash.
  *
  * import { EIP712Signer, types, utils } from "zksync-ethers";
  *
@@ -89,7 +89,7 @@ export const signPayloadWithECDSA: PayloadSigner = async (
  * const txHash = EIP712Signer.getSignedDigest(tx);
  * const result = await utils.signPayloadWithMultipleECDSA(typedDataHash, [PRIVATE_KEY1, PRIVATE_KEY2]);
  *
- * @example Sign message hash
+ * @example Sign message hash.
  *
  * import { utils } from "zksync-ethers";
  * import { hashMessage } from "ethers";
@@ -102,7 +102,7 @@ export const signPayloadWithECDSA: PayloadSigner = async (
  *
  * const result = await utils.signPayloadWithMultipleECDSA(typedDataHash, [PRIVATE_KEY1, PRIVATE_KEY2]);
  *
- * @example Sign typed data hash
+ * @example Sign typed data hash.
  *
  * import { utils } from "zksync-ethers";
  * import { TypedDataEncoder } from "ethers";
