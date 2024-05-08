@@ -110,7 +110,7 @@ describe('Provider', () => {
   describe('#getBalance()', () => {
     it('should return balance of the account at `address`', async () => {
       const result = await provider.getBalance(ADDRESS1);
-      expect(result.gte(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
 
     it('should return a DAI balance of the account at `address`', async () => {
@@ -147,7 +147,7 @@ describe('Provider', () => {
     });
   });
 
-  describe('#getBytecodeByHash(txHash)', () => {
+  describe('#getBytecodeByHash()', () => {
     it('should return bytecode of a contract', async () => {
       const testnetPaymasterBytecode = await provider.getCode(
         (await provider.getTestnetPaymasterAddress()) as string
@@ -630,7 +630,7 @@ describe('Provider', () => {
         to: ADDRESS1,
         from: ADDRESS1,
       });
-      expect(result.gte(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
 
     it('should return a gas estimation of the withdraw transaction with paymaster', async () => {
@@ -649,7 +649,7 @@ describe('Provider', () => {
           innerInput: new Uint8Array(),
         }),
       });
-      expect(result.gte(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -661,7 +661,7 @@ describe('Provider', () => {
         to: ADDRESS2,
         from: ADDRESS1,
       });
-      expect(result.gte(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
 
     it('should return a gas estimation of the transfer transaction with paymaster', async () => {
@@ -677,7 +677,7 @@ describe('Provider', () => {
           innerInput: new Uint8Array(),
         }),
       });
-      expect(result.gte(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -691,7 +691,7 @@ describe('Provider', () => {
           gasPerPubdata: 800,
         },
       });
-      expect(result.gte(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -703,7 +703,7 @@ describe('Provider', () => {
         caller: ADDRESS1,
         l2Value: 7_000_000_000,
       });
-      expect(result.gte(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -725,7 +725,7 @@ describe('Provider', () => {
         to: await provider.l2TokenAddress(DAI_L1),
         data: utils.IERC20.encodeFunctionData('approve', [ADDRESS2, 1]),
       });
-      expect(result.gt(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
 
     it('should return a gas estimation of the EIP712 transaction', async () => {
@@ -749,6 +749,6 @@ describe('Provider', () => {
       });
       const result = await provider.getFilterChanges(filter);
       expect(result).not.to.be.null;
-    });
+    }).timeout(10_000);
   });
 });

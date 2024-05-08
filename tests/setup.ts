@@ -87,33 +87,15 @@ async function deployPaymasterAndToken(): Promise<{
 Mints tokens on L1 in case L2 is non-ETH based chain.
 It mints based token, provided alternative tokens (different from base token) and wETH.
 */
-async function mintTokensOnL1(alternativeToken: string) {
-  const bridgehub = await wallet.getBridgehubContract();
-  const chainId = (await provider.getNetwork()).chainId;
-  const baseTokenAddress = await bridgehub.baseToken(chainId);
-
-  if (baseTokenAddress !== utils.ETH_ADDRESS_IN_CONTRACTS) {
-    const baseToken = ITestnetErc20TokenFactory.connect(
-      baseTokenAddress,
-      wallet._signerL1()
-    );
-    const baseTokenMintTx = await baseToken.mint(
+async function mintTokensOnL1(l1Token: string) {
+  if (l1Token !== utils.ETH_ADDRESS_IN_CONTRACTS) {
+    const to = ITestnetErc20TokenFactory.connect(l1Token, wallet._signerL1());
+    const mintTx = await to.mint(
       await wallet.getAddress(),
       ethers.utils.parseEther('20000')
     );
-    await baseTokenMintTx.wait();
+    await mintTx.wait();
   }
-
-  const altToken = ITestnetErc20TokenFactory.connect(
-    alternativeToken,
-    wallet._signerL1()
-  );
-  const altTokenMintTx = await altToken.mint(
-    await wallet.getAddress(),
-    ethers.utils.parseEther('20000')
-  );
-  await altTokenMintTx.wait();
-  console.log('Minting tokens on L1 finished');
 }
 
 /*
@@ -154,20 +136,20 @@ async function main() {
     const l2EthAddress = await wallet.l2TokenAddress(
       utils.ETH_ADDRESS_IN_CONTRACTS
     );
-    console.log(`Eth L1: ${utils.ETH_ADDRESS_IN_CONTRACTS}`);
-    console.log(`Eth L2: ${l2EthAddress}`);
+    console.log(`ETH L1: ${utils.ETH_ADDRESS_IN_CONTRACTS}`);
+    console.log(`ETH L2: ${l2EthAddress}`);
 
-    console.log(`L1 eth balance before: ${await wallet.getBalanceL1()}`);
+    console.log(`L1 ETH balance before: ${await wallet.getBalanceL1()}`);
     console.log(
-      `L2 eth balance before: ${await wallet.getBalance(l2EthAddress)}`
+      `L2 ETH balance before: ${await wallet.getBalance(l2EthAddress)}`
     );
 
     await mintTokensOnL1(utils.ETH_ADDRESS_IN_CONTRACTS);
     await sendTokenToL2(utils.ETH_ADDRESS_IN_CONTRACTS);
 
-    console.log(`L1 eth balance after: ${await wallet.getBalanceL1()}`);
+    console.log(`L1 ETH balance after: ${await wallet.getBalanceL1()}`);
     console.log(
-      `L2 eth balance after: ${await wallet.getBalance(l2EthAddress)}\n`
+      `L2 ETH balance after: ${await wallet.getBalance(l2EthAddress)}\n`
     );
   }
 

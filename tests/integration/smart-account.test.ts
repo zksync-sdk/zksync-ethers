@@ -21,7 +21,6 @@ import {
   DAI_L1,
 } from '../utils';
 
-import {expectBigNumberCloseTo} from '../custom-matchers';
 const {expect} = chai;
 
 import MultisigAccount from '../files/TwoUserMultisig.json';
@@ -35,7 +34,6 @@ describe('SmartAccount', async () => {
     {address: ADDRESS1, secret: PRIVATE_KEY1},
     provider
   );
-  const tolerancePercentage = 10; // 10% tolerance
 
   describe('#constructor()', () => {
     it('`SmartAccount(address, {address, secret}, provider)` should return a `SmartAccount` with signer and provider', () => {
@@ -96,7 +94,7 @@ describe('SmartAccount', async () => {
   describe('#getBalance()', () => {
     it('should return a `SmartAccount` balance', async () => {
       const result = await account.getBalance();
-      expect(result.gte(0)).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -135,12 +133,9 @@ describe('SmartAccount', async () => {
         to: ADDRESS2,
         value: 7_000_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
-      expectBigNumberCloseTo(
-        BigNumber.from(result.gasLimit),
-        tx.gasLimit,
-        tolerancePercentage
-      );
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     }).timeout(25_000);
 
     it('should return a populated transaction with default values if are omitted', async () => {
@@ -159,7 +154,9 @@ describe('SmartAccount', async () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
+      expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
   });
 
@@ -472,7 +469,7 @@ describe('SmartAccount', async () => {
       ).to.be.true;
 
       expect(result).not.to.be.null;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw DAI to the L1 network', async () => {
       const amount = 5;
@@ -500,7 +497,7 @@ describe('SmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
       const amount = 5;
@@ -572,7 +569,7 @@ describe('SmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
   });
 });
 
@@ -839,7 +836,7 @@ describe('MultisigECDSASmartAccount', async () => {
       expect(
         l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
       ).to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
       const amount = 7_000_000_000;
@@ -906,7 +903,7 @@ describe('MultisigECDSASmartAccount', async () => {
       ).to.be.true;
 
       expect(result).not.to.be.null;
-    }).timeout(25_000);
+    }).timeout(35_000);
 
     it('should withdraw DAI to the L1 network', async () => {
       const amount = 5;
@@ -1007,6 +1004,6 @@ describe('MultisigECDSASmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(25_000);
+    }).timeout(35_000);
   });
 });

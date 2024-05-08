@@ -10,4 +10,4 @@ export const DAI_L1 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
 export const APPROVAL_TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4'; // Crown token
 export const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174'; // Crown token paymaster
 
-export const IS_ETH_BASED = true;
+export const IS_ETH_BASED = false;
