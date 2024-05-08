@@ -1047,12 +1047,12 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    *
    * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * const txHandle = await provider.getTransaction(TX_HASH);
+   * const tx = await provider.getTransaction(TX_HASH);
    *
    * // Wait until the transaction is processed by the server.
-   * await txHandle.wait();
+   * await tx.wait();
    * // Wait until the transaction is finalized.
-   * await txHandle.waitFinalize();
+   * await tx.waitFinalize();
    */
   override async getTransaction(txHash: string): Promise<TransactionResponse> {
     return super.getTransaction(txHash);
@@ -1798,6 +1798,10 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * Creates a new `Provider` from provided URL or network name.
    *
    * @param zksyncNetwork The type of zkSync network.
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    */
   static getDefaultProvider(
     zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost
@@ -1914,12 +1918,12 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * const provider = new BrowserProvider(window.ethereum);
    *
    * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * const txHandle = await provider.getTransaction(TX_HASH);
+   * const tx = await provider.getTransaction(TX_HASH);
    *
    * // Wait until the transaction is processed by the server.
-   * await txHandle.wait();
+   * await tx.wait();
    * // Wait until the transaction is finalized.
-   * await txHandle.waitFinalize();
+   * await tx.waitFinalize();
    */
   override async getTransaction(txHash: string): Promise<TransactionResponse> {
     return super.getTransaction(txHash);
@@ -2125,6 +2129,25 @@ export class BrowserProvider extends JsonRpcApiProvider(
    */
   override async getTestnetPaymasterAddress(): Promise<Address | null> {
     return super.getTestnetPaymasterAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Default bridges: ${utils.toJSON(await provider.getDefaultBridgeAddresses())}`);
+   */
+  override async getDefaultBridgeAddresses(): Promise<{
+    erc20L1: string | undefined;
+    erc20L2: string | undefined;
+    wethL1: string | undefined;
+    wethL2: string | undefined
+  }> {
+    return super.getDefaultBridgeAddresses();
   }
 
   /**
