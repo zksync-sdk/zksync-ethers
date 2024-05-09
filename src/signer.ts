@@ -298,7 +298,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await signer.withdraw({
+   * const withdrawTx = await signer.withdraw({
    *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000n,
    * });
@@ -317,7 +317,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = await signer.withdraw({
+   * const withdrawTx = await signer.withdraw({
    *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000n,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -341,7 +341,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await signer.withdraw({
+   * const withdrawTx = await signer.withdraw({
    *   token: tokenL2,
    *   amount: 10_000_000n,
    * });
@@ -361,7 +361,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await signer.withdraw({
+   * const withdrawTx = await signer.withdraw({
    *   token: tokenL2,
    *   amount: 10_000_000n,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -398,13 +398,12 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await signer.transfer({
+   * const transferTx = await signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
    * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
@@ -423,7 +422,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = signer.transfer({
+   * const transferTx = signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -434,7 +433,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *   }),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
    * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
@@ -451,15 +450,15 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await signer.transfer({
+   * const transferTx = await signer.transfer({
    *   token: tokenL2,
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
-   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    *
    * @example Transfer token using paymaster to facilitate fee payment with an ERC20 token.
    *
@@ -477,7 +476,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = signer.transfer({
+   * const transferTx = signer.transfer({
    *   token: tokenL2,
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
@@ -489,9 +488,9 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *   }),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
-   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    */
   override async transfer(transaction: {
     to: Address;

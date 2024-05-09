@@ -450,7 +450,7 @@ export class SmartAccount extends AbstractSigner {
    *   provider
    * );
    *
-   * const tokenWithdrawTx = await account.withdraw({
+   * const withdrawTx = await account.withdraw({
    *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000n,
    * });
@@ -471,7 +471,7 @@ export class SmartAccount extends AbstractSigner {
    *   provider
    * );
    *
-   * const tokenWithdrawTx = await account.withdraw({
+   * const withdrawTx = await account.withdraw({
    *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000n,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -531,9 +531,9 @@ export class SmartAccount extends AbstractSigner {
    *   amount: ethers.parseEther("0.01"),
    * });
    *
-   * const tx = await transferTx.wait();
+   * const receipt = await transferTx.wait();
    *
-   * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
+   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
    * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token.
    *
@@ -563,9 +563,9 @@ export class SmartAccount extends AbstractSigner {
    *   }),
    * });
    *
-   * const tx = await transferTx.wait();
+   * const receipt = await transferTx.wait();
    *
-   * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
+   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    */
   async transfer(transaction: {
     to: Address;
