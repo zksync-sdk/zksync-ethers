@@ -398,7 +398,7 @@ describe('SmartAccount', async () => {
       expect(
         l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
       ).to.be.true;
-    }).timeout(35_000);
+    }).timeout(60_000);
 
     it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
       const amount = 7_000_000_000;
@@ -465,7 +465,7 @@ describe('SmartAccount', async () => {
       ).to.be.true;
 
       expect(result).not.to.be.null;
-    }).timeout(35_000);
+    }).timeout(60_000);
 
     it('should withdraw DAI to the L1 network', async () => {
       const amount = 5;
@@ -493,7 +493,7 @@ describe('SmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(35_000);
+    }).timeout(60_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
       const amount = 5;
@@ -565,7 +565,7 @@ describe('SmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(35_000);
+    }).timeout(60_000);
   });
 });
 

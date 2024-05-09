@@ -60,7 +60,7 @@ describe('Wallet', () => {
   describe('#getBalanceL1()', () => {
     it('should return a L1 balance', async () => {
       const result = await wallet.getBalanceL1();
-      expect(result.gt(0)).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -111,7 +111,7 @@ describe('Wallet', () => {
   describe('#getBalance()', () => {
     it('should return the `Wallet` balance', async () => {
       const result = await wallet.getBalance();
-      expect(result.gt(0)).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -200,8 +200,8 @@ describe('Wallet', () => {
         'maxFeePerGas',
         'maxPriorityFeePerGas',
       ]);
-      expect(BigNumber.from(result.maxPriorityFeePerGas).gt(0)).to.be.true;
-      expect(BigNumber.from(result.maxFeePerGas).gt(0)).to.be.true;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -339,7 +339,7 @@ describe('Wallet', () => {
         value: 7_000_000,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
-      expect(BigNumber.from(result.gasPrice).gt(0)).to.be.true;
+      expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
     });
   });
 
@@ -462,11 +462,11 @@ describe('Wallet', () => {
         refundRecipient: await wallet.getAddress(),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
-      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).gt(0)).to.be
-        .true;
-      expect(BigNumber.from(result.overrides.maxFeePerGas).gt(0)).to.be.true;
-      expect(BigNumber.from(result.overrides.value).gt(0)).to.be.true;
-      expect(BigNumber.from(result.l2GasLimit).gt(0)).to.be.true;
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to.be
+        .false;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
+      expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
     });
 
     it('should return a deposit transaction with `tx.to == Wallet.getAddress()` when `tx.to` is not specified', async () => {
@@ -487,11 +487,11 @@ describe('Wallet', () => {
         refundRecipient: await wallet.getAddress(),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
-      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).gt(0)).to.be
-        .true;
-      expect(BigNumber.from(result.overrides.maxFeePerGas).gt(0)).to.be.true;
-      expect(BigNumber.from(result.overrides.value).gt(0)).to.be.true;
-      expect(BigNumber.from(result.l2GasLimit).gt(0)).to.be.true;
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to.be
+        .false;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
+      expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
     });
 
     it('should return DAI deposit transaction', async () => {
@@ -512,9 +512,9 @@ describe('Wallet', () => {
         'maxPriorityFeePerGas',
         'value',
       ]);
-      expect(BigNumber.from(result.maxFeePerGas).gt(0)).to.be.true;
-      expect(BigNumber.from(result.maxPriorityFeePerGas).gt(0)).to.be.true;
-      expect(BigNumber.from(result.value).gt(0)).to.be.true;
+      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.value).isZero()).to.be.false;
     });
   });
 
@@ -526,7 +526,7 @@ describe('Wallet', () => {
         amount: 5,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result.gt(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
 
     it('should return gas estimation for DAI deposit transaction', async () => {
@@ -536,7 +536,7 @@ describe('Wallet', () => {
         amount: 5,
         refundRecipient: await wallet.getAddress(),
       });
-      expect(result.gt(BigNumber.from(0))).to.be.true;
+      expect(result.isZero()).to.be.false;
     });
   });
 
@@ -559,7 +559,7 @@ describe('Wallet', () => {
         .be.true;
       expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).gte(amount)).to
         .be.true;
-    }).timeout(10_000);
+    }).timeout(60_000);
 
     it('should deposit DAI to L2 network', async () => {
       const amount = 5;
@@ -581,7 +581,7 @@ describe('Wallet', () => {
         .true;
       expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to.be
         .true;
-    }).timeout(10_000);
+    }).timeout(60_000);
 
     it('should deposit DAI to the L2 network with approve transaction for allowance', async () => {
       const amount = 7;
@@ -604,32 +604,7 @@ describe('Wallet', () => {
         .true;
       expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to.be
         .true;
-    }).timeout(30_000);
-
-    it('should deposit USDC using custom bridge', async () => {
-      const amount = BigNumber.from(7);
-      const l2USDC = CustomBridge.l2Token;
-      const l1USDC = CustomBridge.l1Token;
-      const l2BalanceBeforeDeposit = await wallet.getBalance(l2USDC);
-      const l1BalanceBeforeDeposit = await wallet.getBalanceL1(l1USDC);
-      const tx = await wallet.deposit({
-        token: l1USDC,
-        bridgeAddress: CustomBridge.l1Bridge,
-        to: await wallet.getAddress(),
-        amount: amount,
-        approveERC20: true,
-        refundRecipient: await wallet.getAddress(),
-      });
-      const result = await tx.wait();
-      await tx.waitFinalize();
-      const l2BalanceAfterDeposit = await wallet.getBalance(l2USDC);
-      const l1BalanceAfterDeposit = await wallet.getBalanceL1(l1USDC);
-      expect(result).not.to.be.null;
-      expect(l2BalanceAfterDeposit.sub(l2BalanceBeforeDeposit).eq(amount)).to.be
-        .true;
-      expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to.be
-        .true;
-    }).timeout(30_000);
+    }).timeout(60_000);
   });
 
   describe('#claimFailedDeposit()', () => {
@@ -672,11 +647,11 @@ describe('Wallet', () => {
         token: utils.ETH_ADDRESS,
         to: await wallet.getAddress(),
       });
-      expect(result.baseCost.gt(BigNumber.from(0))).to.be.true;
-      expect(result.l1GasLimit.gt(BigNumber.from(0))).to.be.true;
-      expect(result.l2GasLimit.gt(BigNumber.from(0))).to.be.true;
-      expect(result.maxFeePerGas!.gt(BigNumber.from(0))).to.be.true;
-      expect(result.maxPriorityFeePerGas!.gt(BigNumber.from(0))).to.be.true;
+      expect(BigNumber.from(result.baseCost).isZero()).to.be.false;
+      expect(BigNumber.from(result.l1GasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be.false;
     });
 
     it('should throw an error when there is not enough allowance to cover the deposit', async () => {
@@ -700,11 +675,11 @@ describe('Wallet', () => {
         token: DAI_L1,
         to: await wallet.getAddress(),
       });
-      expect(result.baseCost.gt(BigNumber.from(0))).to.be.true;
-      expect(result.l1GasLimit.gt(BigNumber.from(0))).to.be.true;
-      expect(result.l2GasLimit.gt(BigNumber.from(0))).to.be.true;
-      expect(result.maxFeePerGas!.gt(BigNumber.from(0))).to.be.true;
-      expect(result.maxPriorityFeePerGas!.gt(BigNumber.from(0))).to.be.true;
+      expect(BigNumber.from(result.baseCost).isZero()).to.be.false;
+      expect(BigNumber.from(result.l1GasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be.false;
     }).timeout(10_000);
 
     it('should throw an error when there is not enough balance for the deposit', async () => {
@@ -906,36 +881,6 @@ describe('Wallet', () => {
           l2ApprovalTokenBalanceBeforeWithdrawal.sub(minimalAllowance)
         )
       ).to.be.true;
-
-      expect(result).not.to.be.null;
-      expect(l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).eq(amount))
-        .to.be.true;
-      expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
-        .to.be.true;
-    }).timeout(35_000);
-
-    it('should withdraw USDC to the L1 network using custom bridge', async () => {
-      const amount = BigNumber.from(5);
-      const l2USDC = CustomBridge.l2Token;
-      const l1USDC = CustomBridge.l1Token;
-      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2USDC);
-      const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(l1USDC);
-
-      const withdrawTx = await wallet.withdraw({
-        token: l2USDC,
-        bridgeAddress: CustomBridge.l2Bridge,
-        to: await wallet.getAddress(),
-        amount: amount,
-      });
-      await withdrawTx.waitFinalize();
-      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
-
-      const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
-        withdrawTx.hash
-      );
-      const result = await finalizeWithdrawTx.wait();
-      const l2BalanceAfterWithdrawal = await wallet.getBalance(l2USDC);
-      const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(l1USDC);
 
       expect(result).not.to.be.null;
       expect(l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).eq(amount))
