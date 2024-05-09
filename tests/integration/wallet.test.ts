@@ -5,7 +5,6 @@ import {ethers, BigNumber} from 'ethers';
 import * as fs from 'fs';
 
 import TokensL1 from '../files/tokens.json';
-import CustomBridge from '../files/customBridge.json';
 
 const {expect} = chai;
 
@@ -462,9 +461,10 @@ describe('Wallet', () => {
         refundRecipient: await wallet.getAddress(),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
-      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to.be
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to
+        .be.false;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be
         .false;
-      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be.false;
       expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
       expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
     });
@@ -487,9 +487,10 @@ describe('Wallet', () => {
         refundRecipient: await wallet.getAddress(),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
-      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to.be
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to
+        .be.false;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be
         .false;
-      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be.false;
       expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
       expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
     });

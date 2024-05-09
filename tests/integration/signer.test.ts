@@ -94,10 +94,8 @@ describe('L2VoidSigner', () => {
         'maxFeePerGas',
         'maxPriorityFeePerGas',
       ]);
-      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be
-        .false;
-      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero())
-        .to.be.false;
+      expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be.false;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -550,8 +548,10 @@ describe('L1VoidSigner', () => {
         refundRecipient: await signer.getAddress(),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
-      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to.be.false;
-      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be.false;
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to
+        .be.false;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be
+        .false;
       expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
       expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
     });
@@ -574,9 +574,10 @@ describe('L1VoidSigner', () => {
         refundRecipient: await signer.getAddress(),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['overrides', 'l2GasLimit']);
-      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to.be
+      expect(BigNumber.from(result.overrides.maxPriorityFeePerGas).isZero()).to
+        .be.false;
+      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be
         .false;
-      expect(BigNumber.from(result.overrides.maxFeePerGas).isZero()).to.be.false;
       expect(BigNumber.from(result.overrides.value).isZero()).to.be.false;
       expect(BigNumber.from(result.l2GasLimit).isZero()).to.be.false;
     });

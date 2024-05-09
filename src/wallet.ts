@@ -61,7 +61,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -81,7 +81,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -104,7 +104,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -129,7 +129,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -154,7 +154,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -176,7 +176,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -205,7 +205,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -227,9 +227,29 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   /**
    * @inheritDoc
    *
-   * @example
+   * @example Deposit ETH.
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const depositTx = await wallet.deposit({
+   *   token: utils.ETH_ADDRESS,
+   *   amount: "10000000",
+   * });
+   * // Note that we wait not only for the L1 transaction to complete but also for it to be
+   * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
+   * // we can use `await depositTx.waitL1Commit()`
+   * await depositTx.wait();
+   *
+   * @example Deposit token.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -239,24 +259,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-   * const tokenDepositHandle = await wallet.deposit({
+   * const depositTx = await wallet.deposit({
    *   token: tokenL1,
    *   amount: "10000000",
    *   approveERC20: true,
    * });
    * // Note that we wait not only for the L1 transaction to complete but also for it to be
    * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
-   * // we can use `await tokenDepositHandle.waitL1Commit()`
-   * await tokenDepositHandle.wait();
-   *
-   * const ethDepositHandle = await wallet.deposit({
-   *   token: utils.ETH_ADDRESS,
-   *   amount: "10000000",
-   * });
-   * // Note that we wait not only for the L1 transaction to complete but also for it to be
-   * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
-   * // we can use `await ethDepositHandle.waitL1Commit()`
-   * await ethDepositHandle.wait();
+   * // we can use `await depositTx.waitL1Commit()`
+   * await depositTx.wait();
    */
   override async deposit(transaction: {
     token: Address;
@@ -280,7 +291,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -316,7 +327,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -351,7 +362,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -383,7 +394,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -407,7 +418,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -417,7 +428,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
    * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-   * const finalizeWithdrawHandle = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
+   * const finalizeWithdrawTx = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
    */
   override async finalizeWithdrawal(
     withdrawalHash: BytesLike,
@@ -432,7 +443,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -456,7 +467,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -466,7 +477,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
    * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-   * const claimFailedDepositHandle = await wallet.claimFailedDeposit(FAILED_DEPOSIT_HASH);
+   * const claimFailedDepositTx = await wallet.claimFailedDeposit(FAILED_DEPOSIT_HASH);
    */
   override async claimFailedDeposit(
     depositHash: BytesLike,
@@ -480,7 +491,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -547,7 +558,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -612,7 +623,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -675,9 +686,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   /**
    * @inheritDoc
    *
-   * @example Get ETH balance
+   * @example Get ETH balance.
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -688,9 +699,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * console.log(`ETH balance: ${await wallet.getBalance()}`);
    *
-   * @example Get token balance
+   * @example Get token balance.
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -716,7 +727,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -736,7 +747,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -756,7 +767,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -777,24 +788,23 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   /**
    * @inheritDoc
    *
-   * @example Withdraw ETH
+   * @example Withdraw ETH.
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tokenWithdrawHandle = await wallet.withdraw({
-   *   token: tokenL2,
+   * const withdrawTx = await wallet.withdraw({
+   *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000,
    * });
    *
    * @example Withdraw ETH using paymaster to facilitate fee payment with an ERC20 token.
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
    * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
@@ -803,8 +813,46 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const tokenWithdrawHandle = await wallet.withdraw({
+   * const withdrawTx = await wallet.withdraw({
    *   token: utils.ETH_ADDRESS,
+   *   amount: 10_000_000,
+   *   paymasterParams: utils.getPaymasterParams(paymaster, {
+   *     type: "ApprovalBased",
+   *     token: token,
+   *     minimalAllowance: 1,
+   *     innerInput: new Uint8Array(),
+   *   }),
+   * });
+   *
+   * @example Withdraw token.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const wallet = new Wallet(PRIVATE_KEY, provider);
+   *
+   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+   * const withdrawTx = await wallet.withdraw({
+   *   token: tokenL2,
+   *   amount: 10_000_000,
+   * });
+   *
+   * @example Withdraw token using paymaster to facilitate fee payment with an ERC20 token.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
+   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const wallet = new Wallet(PRIVATE_KEY, provider);
+   *
+   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+   * const withdrawTx = await wallet.withdraw({
+   *   token: tokenL2,
    *   amount: 10_000_000,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
    *     type: "ApprovalBased",
@@ -828,9 +876,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   /**
    * @inheritDoc
    *
-   * @example Transfer ETH
+   * @example Transfer ETH.
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -838,18 +886,18 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const transferHandle = await wallet.transfer({
+   * const transferTx = await wallet.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    * });
    *
-   * const tx = await transferHandle.wait();
+   * const receipt = await transferHandle.wait();
    *
-   * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
+   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
-   * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token
+   * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token.
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -859,7 +907,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const transferHandle = await wallet.transfer({
+   * const transferTx = await wallet.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -870,9 +918,59 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *   }),
    * });
    *
-   * const tx = await transferHandle.wait();
+   * const receipt = await transferTx.wait();
    *
-   * console.log(`The sum of ${tx.value} ETH was transferred to ${tx.to}`);
+   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
+   *
+   * @example Transfer token.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const wallet = new Wallet(PRIVATE_KEY, provider);
+   *
+   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+   * const transferTx = await wallet.transfer({
+   *   token: tokenL2,
+   *   to: Wallet.createRandom().address,
+   *   amount: ethers.utils.parseEther("0.01"),
+   * });
+   *
+   * const receipt = await transferHandle.wait();
+   *
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
+   *
+   * @example Transfer token using paymaster to facilitate fee payment with an ERC20 token.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
+   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const wallet = new Wallet(PRIVATE_KEY, provider);
+   *
+   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+   * const transferTx = await wallet.transfer({
+   *   token: tokenL2,
+   *   to: Wallet.createRandom().address,
+   *   amount: ethers.utils.parseEther("0.01"),
+   *   paymasterParams: utils.getPaymasterParams(paymaster, {
+   *     type: "ApprovalBased",
+   *     token: token,
+   *     minimalAllowance: 1,
+   *     innerInput: new Uint8Array(),
+   *   }),
+   * });
+   *
+   * const receipt = await transferTx.wait();
+   *
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    */
   override async transfer(transaction: {
     to: Address;
@@ -889,7 +987,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -911,7 +1009,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -1100,7 +1198,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -1145,7 +1243,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -1181,7 +1279,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * @example
    *
-   * import { Wallet, Provider, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
