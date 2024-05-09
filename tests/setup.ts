@@ -7,17 +7,10 @@ import {
   utils,
 } from '../src';
 import {ethers, Typed} from 'ethers';
-import {IL1Bridge} from '../src/typechain';
-import fs from 'fs';
 
 import TokensL1 from './files/tokens.json';
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
-import TokenL2Bridged from './files/TokenL2Bridged.json';
-import TokenL1 from './files/TokenL1.json';
-import CustomBridgeL1 from './files/CustomBridgeL1.json';
-import CustomBridgeL2 from './files/CustomBridgeL2.json';
-import DiamondProxy from './files/diamondProxy.json';
 
 const PRIVATE_KEY =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
@@ -100,76 +93,9 @@ async function createTokenL2(l1TokenAddress: string): Promise<string> {
   return await wallet.l2TokenAddress(l1TokenAddress);
 }
 
-async function deployCustomBridges() {
-  // deploy L2 token
-  const l2TokenFactory = new ContractFactory(
-    TokenL2Bridged.abi,
-    TokenL2Bridged.bytecode,
-    wallet
-  );
-  const l2Token = (await l2TokenFactory.deploy('USDC', 'USDC', 18)) as Contract;
-  await l2Token.waitForDeployment();
-
-  // deploy L1 token
-  const l1TokenFactory = new ethers.ContractFactory(
-    TokenL1.abi,
-    TokenL1.bytecode,
-    wallet._signerL1()
-  );
-  const l1Token = (await l1TokenFactory.deploy('USDC', 'USDC', 18)) as Contract;
-  await l1Token.waitForDeployment();
-
-  // mint token to L1
-  const tx = (await l1Token.mint(
-    wallet.address,
-    ethers.parseEther('100')
-  )) as ethers.ContractTransactionResponse;
-  await tx.wait();
-
-  // deploy custom bridges
-  const gasPrice = (await ethProvider.getFeeData()).gasPrice!;
-  const zkSync = await wallet.getMainContract();
-  const requiredValueToInitializeBridge = await zkSync.l2TransactionBaseCost(
-    gasPrice,
-    10_000_000,
-    utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT
-  );
-  const l1BridgeFactory = new ethers.ContractFactory(
-    CustomBridgeL1.abi,
-    CustomBridgeL1.bytecode,
-    wallet._signerL1()
-  );
-  const l1Bridge = (await l1BridgeFactory.deploy(
-    [CustomBridgeL2.bytecode],
-    [
-      await l1Token.getAddress(),
-      await l2Token.getAddress(),
-      DiamondProxy.address,
-    ],
-    requiredValueToInitializeBridge,
-    {
-      gasPrice,
-      value: requiredValueToInitializeBridge,
-      gasLimit: 10_000_000,
-    }
-  )) as IL1Bridge;
-  await l1Bridge.waitForDeployment();
-
-  // connect L2 token to L2 custom bridge
-  await l2Token.setBridge(await l1Bridge.l2Bridge());
-
-  return {
-    l1Token: await l1Token.getAddress(),
-    l2Token: await l2Token.getAddress(),
-    l1Bridge: await l1Bridge.getAddress(),
-    l2Bridge: await l1Bridge.l2Bridge(),
-  };
-}
-
 /*
 Deploy token to the L2 network through deposit transaction.
 Deploy approval token and it's paymaster.
-Deploy custom bridges for custom token.
  */
 async function main() {
   console.log('===== Depositing DAI to L2 =====');
@@ -182,21 +108,6 @@ async function main() {
   console.log(`Paymaster: ${paymaster}`);
   console.log(`Paymaster ETH balance: ${await provider.getBalance(paymaster)}`);
   console.log(`Wallet Crown balance: ${await wallet.getBalance(token)}`);
-
-  console.log('===== Deploying custom bridges =====');
-  const customAddresses = await deployCustomBridges();
-  const {l1Token, l2Token, l1Bridge, l2Bridge} = customAddresses;
-  console.log(`L1 USDC address: ${l1Token}`);
-  console.log(`L2 USDC address: ${l2Token}`);
-  console.log(`L1 custom bridge address: ${l1Bridge}`);
-  console.log(`L2 custom bridge address: ${l2Bridge}`);
-  console.log(`L1 USDC balance: ${await wallet.getBalanceL1(l1Token)}`);
-  console.log(`L2 USDC balance: ${await wallet.getBalance(l2Token)}`);
-
-  fs.writeFileSync(
-    'tests/files/customBridge.json',
-    utils.toJSON(customAddresses)
-  );
 }
 
 main()

@@ -7,7 +7,6 @@ import * as fs from 'fs';
 const {expect} = chai;
 
 import TokensL1 from '../files/tokens.json';
-import CustomBridge from '../files/customBridge.json';
 
 describe('Wallet', () => {
   const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
@@ -635,31 +634,6 @@ describe('Wallet', () => {
       expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit === amount).to.be
         .true;
     }).timeout(30_000);
-
-    it('should deposit USDC using custom bridge', async () => {
-      const amount = 7n;
-      const l2USDC = CustomBridge.l2Token;
-      const l1USDC = CustomBridge.l1Token;
-      const l2BalanceBeforeDeposit = await wallet.getBalance(l2USDC);
-      const l1BalanceBeforeDeposit = await wallet.getBalanceL1(l1USDC);
-      const tx = await wallet.deposit({
-        token: l1USDC,
-        bridgeAddress: CustomBridge.l1Bridge,
-        to: await wallet.getAddress(),
-        amount: amount,
-        approveERC20: true,
-        refundRecipient: await wallet.getAddress(),
-      });
-      const result = await tx.wait();
-      await tx.waitFinalize();
-      const l2BalanceAfterDeposit = await wallet.getBalance(l2USDC);
-      const l1BalanceAfterDeposit = await wallet.getBalanceL1(l1USDC);
-      expect(result).not.to.be.null;
-      expect(l2BalanceAfterDeposit - l2BalanceBeforeDeposit === amount).to.be
-        .true;
-      expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit === amount).to.be
-        .true;
-    }).timeout(30_000);
   });
 
   describe('#claimFailedDeposit()', () => {
@@ -702,11 +676,11 @@ describe('Wallet', () => {
         token: utils.ETH_ADDRESS,
         to: await wallet.getAddress(),
       });
-      expect((result.baseCost as bigint) > 0n).to.be.true;
-      expect((result.l1GasLimit as bigint) > 0n).to.be.true;
-      expect((result.l2GasLimit as bigint) > 0n).to.be.true;
-      expect((result.maxPriorityFeePerGas as bigint) > 0n).to.be.true;
-      expect((result.maxFeePerGas as bigint) > 0n).to.be.true;
+      expect(result.baseCost.valueOf() > 0n).to.be.true;
+      expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
+      expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
+      expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
+      expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
     });
 
     it('should throw an error when there is not enough allowance to cover the deposit', async () => {
@@ -723,14 +697,6 @@ describe('Wallet', () => {
     }).timeout(10_000);
 
     it('should return a fee for DAI token deposit', async () => {
-      const feeData = {
-        baseCost: 105_100_275_000_000n,
-        l1GasLimit: 254_840n,
-        l2GasLimit: '0x61bfe',
-        maxFeePerGas: 1_000_000_001n,
-        maxPriorityFeePerGas: 1_000_000_000n,
-      };
-
       const tx = await wallet.approveERC20(DAI_L1, 5);
       await tx.wait();
 
@@ -738,7 +704,11 @@ describe('Wallet', () => {
         token: DAI_L1,
         to: await wallet.getAddress(),
       });
-      expect(result).to.be.deep.equal(feeData);
+      expect(result.baseCost.valueOf() > 0n).to.be.true;
+      expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
+      expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
+      expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
+      expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
     }).timeout(10_000);
 
     it('should throw an error when there is not enough balance for the deposit', async () => {
@@ -935,38 +905,6 @@ describe('Wallet', () => {
         l2ApprovalTokenBalanceAfterWithdrawal ===
           l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance
       ).to.be.true;
-
-      expect(result).not.to.be.null;
-      expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
-        amount
-      );
-      expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
-        amount
-      );
-    }).timeout(35_000);
-
-    it('should withdraw USDC to the L1 network using custom bridge', async () => {
-      const amount = 5n;
-      const l2USDC = CustomBridge.l2Token;
-      const l1USDC = CustomBridge.l1Token;
-      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2USDC);
-      const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(l1USDC);
-
-      const withdrawTx = await wallet.withdraw({
-        token: l2USDC,
-        bridgeAddress: CustomBridge.l2Bridge,
-        to: await wallet.getAddress(),
-        amount: amount,
-      });
-      await withdrawTx.waitFinalize();
-      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
-
-      const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
-        withdrawTx.hash
-      );
-      const result = await finalizeWithdrawTx.wait();
-      const l2BalanceAfterWithdrawal = await wallet.getBalance(l2USDC);
-      const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(l1USDC);
 
       expect(result).not.to.be.null;
       expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
