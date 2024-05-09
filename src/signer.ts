@@ -279,6 +279,45 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *
    * @example Withdraw ETH.
    *
+   * import { Web3Provider, Provider, types, utils } from "zksync-ethers";
+   *
+   * const browserProvider = new Web3Provider(window.ethereum);
+   * const signer = Signer.from(
+   *     browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * await signer.withdraw({
+   *   token: utils.ETH_ADDRESS,
+   *   amount: 10_000_000,
+   * });
+   *
+   * @example Withdraw ETH using paymaster to facilitate fee payment with an ERC20 token.
+   *
+   * import { Web3Provider, Provider, types, utils } from "zksync-ethers";
+   *
+   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
+   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
+   *
+   * const browserProvider = new Web3Provider(window.ethereum);
+   * const signer = Signer.from(
+   *     browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * await signer.withdraw({
+   *   token: utils.ETH_ADDRESS,
+   *   amount: 10_000_000,
+   *   paymasterParams: utils.getPaymasterParams(paymaster, {
+   *     type: "ApprovalBased",
+   *     token: token,
+   *     minimalAllowance: 1,
+   *     innerInput: new Uint8Array(),
+   *   }),
+   * });
+   *
+   * @example Withdraw token.
+   *
    * import { Web3Provider, Provider, types } from "zksync-ethers";
    *
    * const browserProvider = new Web3Provider(window.ethereum);
@@ -293,7 +332,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *   amount: 10_000_000,
    * });
    *
-   * @example Withdraw ETH using paymaster to facilitate fee payment with an ERC20 token.
+   * @example Withdraw token using paymaster to facilitate fee payment with an ERC20 token.
    *
    * import { Web3Provider, Provider, types } from "zksync-ethers";
    *
@@ -307,7 +346,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    * );
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * await wallet.withdraw({
+   * await signer.withdraw({
    *   token: tokenL2,
    *   amount: 10_000_000,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -332,7 +371,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
   /**
    * @inheritDoc
    *
-   * @example Transfer ETH
+   * @example Transfer ETH.
    *
    * import { Web3Provider, Provider, Wallet, types } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -343,12 +382,16 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = await signer.transfer({
+   * const transferTx = await signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    * });
    *
-   * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token
+   * const receipt = await transferTx.wait();
+   *
+   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
+   *
+   * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token.
    *
    * import { Web3Provider, Provider, Wallet, types } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -362,7 +405,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *     Provider.getDefaultProvider(types.Network.Sepolia)
    * );
    *
-   * const tx = await signer.transfer({
+   * const transferTx = await signer.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.utils.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -373,9 +416,62 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
    *   }),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
    * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
+   *
+   * @example Transfer token.
+   *
+   * import { Web3Provider, Provider, Wallet, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const browserProvider = new Web3Provider(window.ethereum);
+   * const signer = Signer.from(
+   *     browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+   * const transferTx = await signer.transfer({
+   *   token: tokenL2,
+   *   to: Wallet.createRandom().address,
+   *   amount: ethers.utils.parseEther("0.01"),
+   * });
+   *
+   * const receipt = await transferTx.wait();
+   *
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
+   *
+   * @example Transfer token using paymaster to facilitate fee payment with an ERC20 token.
+   *
+   * import { Web3Provider, Provider, Wallet, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
+   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
+   *
+   * const browserProvider = new Web3Provider(window.ethereum);
+   * const signer = Signer.from(
+   *     browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+   * const transferTx = await signer.transfer({
+   *   token: tokenL2,
+   *   to: Wallet.createRandom().address,
+   *   amount: ethers.utils.parseEther("0.01"),
+   *   paymasterParams: utils.getPaymasterParams(paymaster, {
+   *     type: "ApprovalBased",
+   *     token: token,
+   *     minimalAllowance: 1,
+   *     innerInput: new Uint8Array(),
+   *   }),
+   * });
+   *
+   * const receipt = await transferTx.wait();
+   *
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    */
   override async transfer(transaction: {
     to: Address;
@@ -886,7 +982,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    * );
    *
    * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-   * const finalizeWithdrawHandle = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
+   * const finalizeWithdrawTx = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
    */
   override async finalizeWithdrawal(
     withdrawalHash: BytesLike,
@@ -935,7 +1031,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    * );
    *
    * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-   * const claimFailedDepositHandle = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
+   * const claimFailedDepositTx = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
    */
   override async claimFailedDeposit(
     depositHash: BytesLike,

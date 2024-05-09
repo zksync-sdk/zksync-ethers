@@ -640,6 +640,17 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * Estimates the amount of gas required to execute `transaction`.
    *
    * @param transaction The transaction for which to estimate gas.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const gas = await provider.estimateGas({
+   *   value: 7_000_000_000,
+   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+   * });
    */
   override async estimateGas(
     transaction: utils.Deferrable<TransactionRequest>
@@ -1409,6 +1420,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * Creates a new `Provider` from provided URL or network name.
    *
    * @param zksyncNetwork The type of zkSync network.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    */
   static getDefaultProvider(
     zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost
@@ -1610,12 +1627,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    *
    * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * const txHandle = await provider.getTransaction(TX_HASH);
+   * const tx = await provider.getTransaction(TX_HASH);
    *
    * // Wait until the transaction is processed by the server.
-   * await txHandle.wait();
+   * await tx.wait();
    * // Wait until the transaction is finalized.
-   * await txHandle.waitFinalize();
+   * await tx.waitFinalize();
    */
   override async getTransaction(
     hash: string | Promise<string>
@@ -1866,12 +1883,12 @@ export class Web3Provider extends Provider {
    * const provider = new Web3Provider(window.ethereum);
    *
    * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * const txHandle = await provider.getTransaction(TX_HASH);
+   * const tx = await provider.getTransaction(TX_HASH);
    *
    * // Wait until the transaction is processed by the server.
-   * await txHandle.wait();
+   * await tx.wait();
    * // Wait until the transaction is finalized.
-   * await txHandle.waitFinalize();
+   * await tx.waitFinalize();
    */
   override async getTransaction(txHash: string): Promise<TransactionResponse> {
     return super.getTransaction(txHash);
@@ -2094,6 +2111,25 @@ export class Web3Provider extends Provider {
    */
   override async getTestnetPaymasterAddress(): Promise<Address | null> {
     return super.getTestnetPaymasterAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * console.log(`Default bridges: ${await provider.getDefaultBridgeAddresses()}`);
+   */
+  override async getDefaultBridgeAddresses(): Promise<{
+    erc20L1: string | undefined;
+    erc20L2: string | undefined;
+    wethL1: string | undefined;
+    wethL2: string | undefined;
+  }> {
+    return super.getDefaultBridgeAddresses();
   }
 
   /**
@@ -2622,6 +2658,20 @@ export class Web3Provider extends Provider {
     return Signer.from(super.getSigner(addressOrIndex) as any);
   }
 
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * const gas = await provider.estimateGas({
+   *   value: 7_000_000_000,
+   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+   * });
+   */
   override async estimateGas(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): Promise<BigNumber> {
