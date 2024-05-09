@@ -2145,7 +2145,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
     erc20L1: string | undefined;
     erc20L2: string | undefined;
     wethL1: string | undefined;
-    wethL2: string | undefined
+    wethL2: string | undefined;
   }> {
     return super.getDefaultBridgeAddresses();
   }
