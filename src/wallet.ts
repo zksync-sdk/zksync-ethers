@@ -235,14 +235,14 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const ethProvider = ethers.getDefaultProvider("sepolia");
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
-   * const tx = await wallet.deposit({
+   * const depositTx = await wallet.deposit({
    *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000n,
    * });
    * // Note that we wait not only for the L1 transaction to complete but also for it to be
    * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
-   * // we can use `await tx.waitL1Commit()`
-   * await tx.wait();
+   * // we can use `await depositTx.waitL1Commit()`
+   * await depositTx.wait();
    *
    * @example Deposit token.
    *
@@ -256,15 +256,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-   * const tx = await wallet.deposit({
+   * const depositTx = await wallet.deposit({
    *   token: tokenL1,
    *   amount: 10_000_000n,
    *   approveERC20: true,
    * });
    * // Note that we wait not only for the L1 transaction to complete but also for it to be
    * // processed by zkSync. If we want to wait only for the transaction to be processed on L1,
-   * // we can use `await tx.waitL1Commit()`
-   * await tx.wait();
+   * // we can use `await depositTx.waitL1Commit()`
+   * await depositTx.wait();
    */
   override async deposit(transaction: {
     token: Address;
@@ -703,8 +703,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await wallet.withdraw({
+   * const withdrawTx = await wallet.withdraw({
    *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000n,
    * });
@@ -720,7 +719,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const tx = await wallet.withdraw({
+   * const withdrawTx = await wallet.withdraw({
    *   token: utils.ETH_ADDRESS,
    *   amount: 10_000_000n,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -741,7 +740,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await wallet.withdraw({
+   * const withdrawTx = await wallet.withdraw({
    *   token: tokenL2,
    *   amount: 10_000_000,
    * });
@@ -758,7 +757,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await wallet.withdraw({
+   * const withdrawTx = await wallet.withdraw({
    *   token: tokenL2,
    *   amount: 10_000_000n,
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -792,12 +791,12 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const tx = await wallet.transfer({
+   * const transferTx = await wallet.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
    * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
@@ -813,7 +812,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
-   * const tx = await wallet.transfer({
+   * const transferTx = await wallet.transfer({
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    *   paymasterParams: utils.getPaymasterParams(paymaster, {
@@ -824,7 +823,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *   }),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
    * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
@@ -839,15 +838,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await wallet.transfer({
+   * const transferTx = await wallet.transfer({
    *   token: tokenL2,
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
-   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    *
    * @example Transfer token using paymaster to facilitate fee payment with an ERC20 token.
    *
@@ -862,7 +861,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const wallet = new Wallet(PRIVATE_KEY, provider);
    *
    * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const tx = await wallet.transfer({
+   * const transferTx = await wallet.transfer({
    *   token: tokenL2,
    *   to: Wallet.createRandom().address,
    *   amount: ethers.parseEther("0.01"),
@@ -874,9 +873,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *   }),
    * });
    *
-   * const receipt = await tx.wait();
+   * const receipt = await transferTx.wait();
    *
-   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
+   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    */
   override async transfer(transaction: {
     to: Address;
