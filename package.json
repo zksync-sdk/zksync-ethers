@@ -1,6 +1,6 @@
 {
   "name": "zksync-ethers",
-  "version": "6.7.0",
+  "version": "6.7.1",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
