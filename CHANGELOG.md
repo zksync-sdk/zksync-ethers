@@ -1,3 +1,12 @@
+## [6.7.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.7.0...v6.7.1) (2024-05-09)
+
+
+### Bug Fixes
+
+* export `typechain` at the top level of the package ([d125eea](https://github.com/zksync-sdk/zksync-ethers/commit/d125eea0534c4660176cabf251e410ce7ff1f229))
+* getPriorityOpResponse correctly assigns waitL1Commit to l2Response object ([0cfedc9](https://github.com/zksync-sdk/zksync-ethers/commit/0cfedc96456adbb2613ead8f498c28022f409039))
+* **signer:** make `Signer` compatible when created using `BrowserProvider.getSigner()` ([e62c98d](https://github.com/zksync-sdk/zksync-ethers/commit/e62c98d9e066a01697d517d2a3966fd822777b5b))
+
 # [6.7.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.6.0...v6.7.0) (2024-04-04)
 
 
