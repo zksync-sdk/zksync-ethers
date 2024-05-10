@@ -58,13 +58,13 @@
     "ethers": "~5.7.0"
   },
   "scripts": {
-    "test:build": "rm -rf tests/build && tsc -p tsconfig.test.json",
+    "test:build": "rm -rf tests/build && tsc -p tsconfig.test.json && cp -r src/typechain/*.d.ts tests/build/src/typechain",
     "test:prepare-proxy": "cd scripts && ./update-diamond-proxy.sh && cd ../",
     "test:prepare": "ts-node tests/setup.ts",
     "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
     "test:wait": "ts-node tests/wait.ts",
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r src/typechain/*.d.ts build/typechain",
     "lint": "gts lint",
     "lint:fix": "gts fix",
     "watch": "tsc --watch",
