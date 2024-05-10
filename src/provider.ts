@@ -2209,6 +2209,62 @@ export class Web3Provider extends Provider {
    * import { Web3Provider } from "zksync-ethers";
    *
    * const provider = new Web3Provider(window.ethereum);
+   * console.log(`Bridgehub: ${await provider.getBridgehubContractAddress()}`);
+   */
+  override async getBridgehubContractAddress(): Promise<Address> {
+    return super.getBridgehubContractAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * console.log(`Base token: ${await provider.getBaseTokenContractAddress()}`);
+   */
+  override async getBaseTokenContractAddress(): Promise<Address> {
+    return super.getBaseTokenContractAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * console.log(`Is ETH based chain: ${await provider.isEthBasedChain()}`);
+   */
+  override async isEthBasedChain(): Promise<boolean> {
+    return super.isEthBasedChain();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * console.log(`Is base token: ${await provider.isBaseToken("0x5C221E77624690fff6dd741493D735a17716c26B")}`);
+   */
+  override async isBaseToken(token: Address): Promise<boolean> {
+    return super.isBaseToken(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
    * console.log(`Main contract: ${await provider.getMainContractAddress()}`);
    */
   override async getMainContractAddress(): Promise<Address> {
@@ -2702,6 +2758,28 @@ export class Web3Provider extends Provider {
     l1TxResponse: ethers.providers.TransactionResponse
   ): Promise<PriorityOpResponse> {
     return super.getPriorityOpResponse(l1TxResponse);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider, utils } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * // Any L2 -> L1 transaction can be used.
+   * // In this case, withdrawal transaction is used.
+   * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
+   * console.log(`Confirmation data: ${utils.toJSON(await provider.getPriorityOpConfirmation(tx, 0))}`);
+   */
+  override async getPriorityOpConfirmation(txHash: string, index: number = 0): Promise<{
+    l1BatchNumber: number;
+    l2MessageIndex: number;
+    l2TxNumberInBlock: number;
+    proof: string[]
+  }> {
+    return super.getPriorityOpConfirmation(txHash, index);
   }
 
   /**
