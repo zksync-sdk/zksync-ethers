@@ -1,3 +1,10 @@
+## [5.7.2](https://github.com/zksync-sdk/zksync-ethers/compare/v5.7.1...v5.7.2) (2024-05-10)
+
+
+### Bug Fixes
+
+* resolve module resolution for `typechain` definition files ([c70ccc4](https://github.com/zksync-sdk/zksync-ethers/commit/c70ccc46ea60650aef13b47b79d207d5bdb01f06))
+
 ## [5.7.1](https://github.com/zksync-sdk/zksync-ethers/compare/v5.7.0...v5.7.1) (2024-05-09)
 
 
