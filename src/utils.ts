@@ -96,7 +96,10 @@ export const ETH_ADDRESS: Address =
 export const LEGACY_ETH_ADDRESS: Address =
   '0x0000000000000000000000000000000000000000';
 
-// in the contracts the zero address can not be used, use one instead
+/**
+ * In the contracts the zero address can not be used, use one instead
+ * @constant
+ */
 export const ETH_ADDRESS_IN_CONTRACTS: Address =
   '0x0000000000000000000000000000000000000001';
 

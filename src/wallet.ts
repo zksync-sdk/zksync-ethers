@@ -293,6 +293,28 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   /**
    * @inheritDoc
    *
+   * @example Get allowance parameters for depositing ETH on ETH-based chain.
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const token = "<L1_TOKEN>";
+   * const amount = 5;
+   * const approveParams = await wallet.getDepositAllowanceParams(token, amount);
+   *
+   * await (
+   *    await wallet.approveERC20(
+   *        approveParams[0].token,
+   *        approveParams[0].allowance
+   *    )
+   * ).wait();
+   *
    * @example Get allowance parameters for depositing ETH on non-ETH-based chain.
    *
    * import { Wallet, Provider, types, utils } from "zksync-ethers";

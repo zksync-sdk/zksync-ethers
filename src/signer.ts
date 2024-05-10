@@ -887,6 +887,28 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
   /**
    * @inheritDoc
    *
+   * @example Get allowance parameters for depositing ETH on ETH-based chain.
+   *
+   * import { Provider, L1Signer, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * const token = "<L1_TOKEN>";
+   * const amount = 5;
+   * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+   *
+   * await (
+   *    await signer.approveERC20(
+   *        approveParams[0].token,
+   *        approveParams[0].allowance
+   *    )
+   * ).wait();
+   *
    * @example Get allowance parameters for depositing ETH on non-ETH-based chain.
    *
    * import { Provider, L1Signer, types } from "zksync-ethers";
