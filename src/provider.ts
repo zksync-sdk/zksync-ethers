@@ -1353,6 +1353,8 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   /**
    * @inheritDoc
    *
+   * @example
+   *
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
