@@ -579,13 +579,13 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
-      const isEthBasedChain = await this.isEthBasedChain()
+      const isEthBasedChain = await this.isEthBasedChain();
 
       // In case of Ether on non Ether based chain it should get l2 Ether address,
       // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
-      if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) && !isEthBasedChain){
+      if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) && !isEthBasedChain) {
         tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
-      } else if (await this.isBaseToken(tx.token)){
+      } else if (await this.isBaseToken(tx.token)) {
         tx.token = L2_BASE_TOKEN_ADDRESS;
       }
 
@@ -699,13 +699,17 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
-      const isEthBasedChain = await this.isEthBasedChain()
+      const isEthBasedChain = await this.isEthBasedChain();
 
       // In case of Ether on non Ether based chain it should get l2 Ether address,
       // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
-      if (tx.token && isAddressEq(tx.token, LEGACY_ETH_ADDRESS) && !isEthBasedChain){
+      if (
+        tx.token &&
+        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) &&
+        !isEthBasedChain
+      ) {
         tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
-      } else if (!tx.token || await this.isBaseToken(tx.token)){
+      } else if (!tx.token || (await this.isBaseToken(tx.token))) {
         tx.token = L2_BASE_TOKEN_ADDRESS;
       }
 
