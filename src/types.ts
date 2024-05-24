@@ -658,17 +658,17 @@ export interface TransactionDetails {
 /** Represents the full deposit fee containing fees for both L1 and L2 transactions. */
 export interface FullDepositFee {
   /** The maximum fee per gas for L1 transaction. */
-  maxFeePerGas?: BigInt;
+  maxFeePerGas?: bigint;
   /** The maximum priority fee per gas for L1 transaction. */
-  maxPriorityFeePerGas?: BigInt;
+  maxPriorityFeePerGas?: bigint;
   /** The gas price for L2 transaction. */
-  gasPrice?: BigInt;
+  gasPrice?: bigint;
   /** The base cost of the deposit transaction on L2. */
-  baseCost: BigInt;
+  baseCost: bigint;
   /** The gas limit for L1 transaction. */
-  l1GasLimit: BigInt;
+  l1GasLimit: bigint;
   /** The gas limit for L2 transaction. */
-  l2GasLimit: BigInt;
+  l2GasLimit: bigint;
 }
 
 /** Represents a raw block transaction. */
