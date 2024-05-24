@@ -1022,11 +1022,11 @@ describe('Wallet', () => {
           token: utils.LEGACY_ETH_ADDRESS,
           to: await wallet.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       });
 
       it('should throw an error when there is not enough allowance to cover the deposit', async () => {
@@ -1050,11 +1050,11 @@ describe('Wallet', () => {
           token: DAI_L1,
           to: await wallet.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should throw an error when there is not enough balance for the deposit', async () => {
@@ -1107,11 +1107,11 @@ describe('Wallet', () => {
           token: token,
           to: await wallet.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should return fee for base token deposit', async () => {
@@ -1153,11 +1153,11 @@ describe('Wallet', () => {
           token: token,
           to: await wallet.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should throw an error when there is not enough token allowance to cover the deposit', async () => {
