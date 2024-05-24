@@ -1264,7 +1264,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         if (baseCost >= selfBalanceETH + dummyAmount) {
           const recommendedL1GasLimit = isAddressEq(
             tx.token,
-            LEGACY_ETH_ADDRESS
+            ETH_ADDRESS_IN_CONTRACTS
           )
             ? L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT
             : L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT;
