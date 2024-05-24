@@ -619,16 +619,16 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
  * tx: types.TransactionLike = {
  *   type: 113,
  *   nonce: 0,
- *   maxPriorityFeePerGas: BigInt(0),
- *   maxFeePerGas: BigInt(0),
- *   gasLimit: BigInt(0),
+ *   maxPriorityFeePerGas: 0n,
+ *   maxFeePerGas: 0n,
+ *   gasLimit: 0n,
  *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
- *   value: BigInt(1000000),
+ *   value: 1000000n,
  *   data: "0x",
- *   chainId: BigInt(270),
+ *   chainId: 270n,
  *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
  *   customData: {
- *     gasPerPubdata: BigInt(50000),
+ *     gasPerPubdata: 50000n,
  *     factoryDeps: [],
  *     customSignature: "0x",
  *     paymasterParams: null,
@@ -1089,7 +1089,7 @@ export async function isMessageSignatureCorrect(
  *   chainId: 270,
  *   from: ADDRESS,
  *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
- *   value: BigInt(7_000_000),
+ *   value: 7_000_000n,
  * };
  *
  * const eip712Signer = new EIP712Signer(
