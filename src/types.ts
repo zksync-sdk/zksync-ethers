@@ -729,7 +729,7 @@ export interface StorageProof {
 /**
  *  Signs various types of payloads, optionally using a some kind of secret.
  *
- *  @param payload The payload that needs to be sign already populated transaction to sign.
+ *  @param payload The payload that needs to be sign.
  *  @param [secret] The secret used for signing the `payload`.
  *  @param [provider] The provider is used to fetch data from the network if it is required for signing.
  *  @returns A promise that resolves to the serialized signature in hexadecimal format.

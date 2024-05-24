@@ -127,9 +127,7 @@ export const signPayloadWithMultipleECDSA: PayloadSigner = async (
   secret: string[] | SigningKey[]
 ) => {
   if (!Array.isArray(secret) || secret.length < 2) {
-    throw new Error(
-      'Multiple keys are required for multisig transaction signing!'
-    );
+    throw new Error('Multiple keys are required for multisig signing!');
   }
 
   const signatures = secret.map(
@@ -259,6 +257,6 @@ export const populateTransactionMultisigECDSA: TransactionBuilder = async (
   if (!Array.isArray(secret) || secret.length < 2) {
     throw new Error('Multiple keys are required to build the transaction!');
   }
-  // populatesTransaction estimates gas which accepts only one address, so the first signer is chosen.
+  // estimates gas accepts only one address, so the first signer is chosen.
   return populateTransactionECDSA(tx, secret[0], provider);
 };
