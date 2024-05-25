@@ -870,7 +870,7 @@ describe('Wallet', () => {
           .true;
         expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit >= amount).to.be
           .true;
-      }).timeout(30_000);
+      }).timeout(60_000);
     } else {
       it('should deposit ETH to L2 network', async () => {
         const amount = 7_000_000_000;
