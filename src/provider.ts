@@ -136,18 +136,8 @@ export function JsonRpcApiProvider<
      */
     override async getTransactionReceipt(
       txHash: string
-    ): Promise<TransactionReceipt> {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const receipt = (await super.getTransactionReceipt(
-          txHash
-        )) as TransactionReceipt;
-        if (receipt && receipt.blockNumber) {
-          // otherwise transaction has not been mined yet
-          return receipt;
-        }
-        await sleep(500);
-      }
+    ): Promise<TransactionReceipt | null> {
+      return await super.getTransactionReceipt(txHash) as TransactionReceipt | null;
     }
 
     /**
@@ -159,7 +149,7 @@ export function JsonRpcApiProvider<
     override async getTransaction(
       txHash: string
     ): Promise<TransactionResponse> {
-      return (await super.getTransaction(txHash)) as TransactionResponse;
+      return await super.getTransaction(txHash) as TransactionResponse;
     }
 
     /**
@@ -904,7 +894,7 @@ export function JsonRpcApiProvider<
 
       l2Response.waitL1Commit = l1TxResponse.wait.bind(
         l1TxResponse
-      ) as PriorityOpResponse['wait'];
+      ) as PriorityOpResponse['waitL1Commit'];
       l2Response.wait = async () => {
         const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
         return await l2Tx.wait();
@@ -920,6 +910,9 @@ export function JsonRpcApiProvider<
     async _getPriorityOpConfirmationL2ToL1Log(txHash: string, index = 0) {
       const hash = ethers.hexlify(txHash);
       const receipt = await this.getTransactionReceipt(hash);
+      if (!receipt) {
+        throw new Error("Transaction is not mined!")
+      }
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
         ([, log]) => isAddressEq(log.sender, BOOTLOADER_FORMAL_ADDRESS)
       );
@@ -968,8 +961,8 @@ export function JsonRpcApiProvider<
       const data = await deployerContract.getAccountInfo(address);
 
       return {
-        supportedAAVersion: data.supportedAAVersion,
-        nonceOrdering: data.nonceOrdering,
+        supportedAAVersion: Number(data.supportedAAVersion),
+        nonceOrdering: Number(data.nonceOrdering),
       };
     }
 
@@ -1125,7 +1118,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getTransactionReceipt(
     txHash: string
-  ): Promise<TransactionReceipt> {
+  ): Promise<TransactionReceipt | null> {
     return super.getTransactionReceipt(txHash);
   }
 
@@ -2081,7 +2074,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    */
   override async getTransactionReceipt(
     txHash: string
-  ): Promise<TransactionReceipt> {
+  ): Promise<TransactionReceipt | null> {
     return super.getTransactionReceipt(txHash);
   }
 
