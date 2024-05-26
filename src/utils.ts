@@ -302,7 +302,7 @@ export function getHashedL2ToL1Msg(
   const encodedMsg = new Uint8Array([
     0, // l2ShardId
     1, // isService
-    ...ethers.getBytes(ethers.zeroPadValue(ethers.toBeHex(txNumberInBlock), 2)),
+    ...ethers.getBytes(ethers.toBeHex(txNumberInBlock, 2)),
     ...ethers.getBytes(L1_MESSENGER_ADDRESS),
     ...ethers.getBytes(ethers.zeroPadValue(sender, 32)),
     ...ethers.getBytes(ethers.keccak256(msg)),
@@ -408,7 +408,7 @@ export function createAddress(
       ethers.concat([
         prefix,
         ethers.zeroPadValue(sender, 32),
-        ethers.zeroPadValue(ethers.toBeHex(senderNonce), 32),
+        ethers.toBeHex(senderNonce, 32),
       ])
     )
     .slice(26);
@@ -827,10 +827,8 @@ const ADDRESS_MODULO = 2n ** 160n;
  *
  */
 export function applyL1ToL2Alias(address: string): string {
-  return ethers.zeroPadValue(
-    ethers.toBeHex(
-      (BigInt(address) + BigInt(L1_TO_L2_ALIAS_OFFSET)) % ADDRESS_MODULO
-    ),
+  return ethers.toBeHex(
+      (BigInt(address) + BigInt(L1_TO_L2_ALIAS_OFFSET)) % ADDRESS_MODULO,
     20
   );
 }
@@ -854,7 +852,7 @@ export function undoL1ToL2Alias(address: string): string {
   if (result < 0n) {
     result += ADDRESS_MODULO;
   }
-  return ethers.zeroPadValue(ethers.toBeHex(result), 20);
+  return ethers.toBeHex(result, 20);
 }
 
 /**
