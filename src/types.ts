@@ -2,7 +2,8 @@ import {
   assert,
   assertArgument,
   BigNumberish,
-  BytesLike, defineProperties,
+  BytesLike,
+  defineProperties,
   ethers,
   Signature as EthersSignature,
   TransactionRequest as EthersTransactionRequest,
@@ -145,7 +146,7 @@ export class TransactionResponse extends ethers.TransactionResponse {
     super(params, provider);
     defineProperties<TransactionResponse>(this, {
       l1BatchNumber: params.l1BatchNumber,
-      l1BatchTxIndex: params.l1BatchTxIndex
+      l1BatchTxIndex: params.l1BatchTxIndex,
     });
   }
 
@@ -170,7 +171,7 @@ export class TransactionResponse extends ethers.TransactionResponse {
   }
 
   override async getTransaction(): Promise<TransactionResponse> {
-    return await super.getTransaction() as TransactionResponse;
+    return (await super.getTransaction()) as TransactionResponse;
   }
 
   override replaceableTransaction(startBlock: number): TransactionResponse {
@@ -181,7 +182,7 @@ export class TransactionResponse extends ethers.TransactionResponse {
   }
 
   override async getBlock(): Promise<Block> {
-    return await super.getBlock() as Block;
+    return (await super.getBlock()) as Block;
   }
 
   /** Waits for transaction to be finalized. */
@@ -276,15 +277,17 @@ export class Block extends ethers.Block {
 
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
-    this.#transactions = params.transactions.map((tx: TransactionResponse | string) => {
-      if (typeof(tx) !== "string") {
-        return new TransactionResponse(tx, provider);
+    this.#transactions = params.transactions.map(
+      (tx: TransactionResponse | string) => {
+        if (typeof tx !== 'string') {
+          return new TransactionResponse(tx, provider);
+        }
+        return tx;
       }
-      return tx;
-    });
+    );
     defineProperties<Block>(this, {
-      l1BatchNumber:  params.l1BatchNumber,
-      l1BatchTimestamp:  params.l1BatchTimestamp
+      l1BatchNumber: params.l1BatchNumber,
+      l1BatchTimestamp: params.l1BatchTimestamp,
     });
   }
 
@@ -301,12 +304,19 @@ export class Block extends ethers.Block {
     const txs = this.#transactions.slice();
 
     // Doesn't matter...
-    if (txs.length === 0) { return [ ]; }
+    if (txs.length === 0) {
+      return [];
+    }
 
     // Make sure we prefetched the transactions
-    assert(typeof(txs[0]) === "object", "transactions were not prefetched with block request", "UNSUPPORTED_OPERATION", {
-      operation: "transactionResponses()"
-    });
+    assert(
+      typeof txs[0] === 'object',
+      'transactions were not prefetched with block request',
+      'UNSUPPORTED_OPERATION',
+      {
+        operation: 'transactionResponses()',
+      }
+    );
 
     return txs as TransactionResponse[];
   }
@@ -316,27 +326,32 @@ export class Block extends ethers.Block {
   ): Promise<TransactionResponse> {
     // Find the internal value by its index or hash
     let tx: string | TransactionResponse | undefined = undefined;
-    if (typeof(indexOrHash) === "number") {
+    if (typeof indexOrHash === 'number') {
       tx = this.#transactions[indexOrHash];
-
     } else {
       const hash = indexOrHash.toLowerCase();
       for (const v of this.#transactions) {
-        if (typeof(v) === "string") {
-          if (v !== hash) { continue; }
+        if (typeof v === 'string') {
+          if (v !== hash) {
+            continue;
+          }
           tx = v;
           break;
         } else {
-          if (v.hash === hash) { continue; }
+          if (v.hash === hash) {
+            continue;
+          }
           tx = v;
           break;
         }
       }
     }
-    if (tx == null) { throw new Error("no such tx"); }
+    if (!tx) {
+      throw new Error('no such tx');
+    }
 
-    if (typeof(tx) === "string") {
-      return <TransactionResponse>(await this.provider.getTransaction(tx));
+    if (typeof tx === 'string') {
+      return <TransactionResponse>await this.provider.getTransaction(tx);
     } else {
       return tx;
     }
@@ -368,15 +383,15 @@ export class Log extends ethers.Log {
   }
 
   override async getBlock(): Promise<Block> {
-    return await super.getBlock() as Block;
+    return (await super.getBlock()) as Block;
   }
 
   override async getTransaction(): Promise<TransactionResponse> {
-    return await super.getTransaction() as TransactionResponse;
+    return (await super.getTransaction()) as TransactionResponse;
   }
 
   override async getTransactionReceipt(): Promise<TransactionReceipt> {
-    return await super.getTransactionReceipt() as TransactionReceipt;
+    return (await super.getTransactionReceipt()) as TransactionReceipt;
   }
 }
 

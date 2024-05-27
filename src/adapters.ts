@@ -1354,7 +1354,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const hash = ethers.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       if (!receipt) {
-        throw new Error("Transaction is not mined!")
+        throw new Error('Transaction is not mined!');
       }
       const log = receipt.logs.filter(
         log =>
@@ -1372,7 +1372,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const hash = ethers.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       if (!receipt) {
-        throw new Error("Transaction is not mined!")
+        throw new Error('Transaction is not mined!');
       }
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
         ([, log]) => isAddressEq(log.sender, L1_MESSENGER_ADDRESS)
@@ -1529,7 +1529,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ethers.hexlify(depositHash)
       );
       if (!receipt) {
-        throw new Error("Transaction is not mined!")
+        throw new Error('Transaction is not mined!');
       }
       const successL2ToL1LogIndex = receipt.l2ToL1Logs.findIndex(
         l2ToL1log =>

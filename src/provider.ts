@@ -137,7 +137,9 @@ export function JsonRpcApiProvider<
     override async getTransactionReceipt(
       txHash: string
     ): Promise<TransactionReceipt | null> {
-      return await super.getTransactionReceipt(txHash) as TransactionReceipt | null;
+      return (await super.getTransactionReceipt(
+        txHash
+      )) as TransactionReceipt | null;
     }
 
     /**
@@ -149,7 +151,7 @@ export function JsonRpcApiProvider<
     override async getTransaction(
       txHash: string
     ): Promise<TransactionResponse> {
-      return await super.getTransaction(txHash) as TransactionResponse;
+      return (await super.getTransaction(txHash)) as TransactionResponse;
     }
 
     /**
@@ -911,7 +913,7 @@ export function JsonRpcApiProvider<
       const hash = ethers.hexlify(txHash);
       const receipt = await this.getTransactionReceipt(hash);
       if (!receipt) {
-        throw new Error("Transaction is not mined!")
+        throw new Error('Transaction is not mined!');
       }
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
         ([, log]) => isAddressEq(log.sender, BOOTLOADER_FORMAL_ADDRESS)
