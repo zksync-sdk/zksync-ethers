@@ -828,7 +828,7 @@ const ADDRESS_MODULO = 2n ** 160n;
  */
 export function applyL1ToL2Alias(address: string): string {
   return ethers.toBeHex(
-      (BigInt(address) + BigInt(L1_TO_L2_ALIAS_OFFSET)) % ADDRESS_MODULO,
+    (BigInt(address) + BigInt(L1_TO_L2_ALIAS_OFFSET)) % ADDRESS_MODULO,
     20
   );
 }
