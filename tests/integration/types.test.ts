@@ -52,8 +52,7 @@ describe('types', () => {
         to: ADDRESS2,
         amount: 1_000_000,
       });
-      await tx.wait();
-      receipt = await provider.getTransactionReceipt(tx.hash);
+      receipt = await tx.wait();
     });
 
     describe('#getTransaction()', () => {
@@ -88,8 +87,7 @@ describe('types', () => {
         to: ADDRESS2,
         amount: 1_000_000,
       });
-      await tx.wait();
-      const receipt = await provider.getTransactionReceipt(tx.hash);
+      const receipt = await tx.wait();
       block = await provider.getBlock(receipt.blockHash, true);
     });
 
@@ -132,8 +130,7 @@ describe('types', () => {
         to: ADDRESS2,
         amount: 1_000_000,
       });
-      await tx.wait();
-      const receipt = await provider.getTransactionReceipt(tx.hash);
+      const receipt = await tx.wait();
       log = new types.Log(
         {
           blockHash: receipt.blockHash,

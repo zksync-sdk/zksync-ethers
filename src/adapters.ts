@@ -1264,7 +1264,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         if (baseCost >= selfBalanceETH + dummyAmount) {
           const recommendedL1GasLimit = isAddressEq(
             tx.token,
-            LEGACY_ETH_ADDRESS
+            ETH_ADDRESS_IN_CONTRACTS
           )
             ? L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT
             : L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT;
@@ -1353,6 +1353,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async _getWithdrawalLog(withdrawalHash: BytesLike, index = 0) {
       const hash = ethers.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
+      if (!receipt) {
+        throw new Error('Transaction is not mined!');
+      }
       const log = receipt.logs.filter(
         log =>
           isAddressEq(log.address, L1_MESSENGER_ADDRESS) &&
@@ -1368,6 +1371,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async _getWithdrawalL2ToL1Log(withdrawalHash: BytesLike, index = 0) {
       const hash = ethers.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
+      if (!receipt) {
+        throw new Error('Transaction is not mined!');
+      }
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
         ([, log]) => isAddressEq(log.sender, L1_MESSENGER_ADDRESS)
       );
@@ -1522,6 +1528,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const receipt = await this._providerL2().getTransactionReceipt(
         ethers.hexlify(depositHash)
       );
+      if (!receipt) {
+        throw new Error('Transaction is not mined!');
+      }
       const successL2ToL1LogIndex = receipt.l2ToL1Logs.findIndex(
         l2ToL1log =>
           isAddressEq(l2ToL1log.sender, BOOTLOADER_FORMAL_ADDRESS) &&

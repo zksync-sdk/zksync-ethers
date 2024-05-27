@@ -8,7 +8,6 @@ import {
   ethers,
   Interface,
   InterfaceAbi,
-  TransactionReceipt,
 } from 'ethers';
 import {
   CONTRACT_DEPLOYER,
@@ -218,15 +217,15 @@ export class ContractFactory<
       deploymentTransaction(): ContractTransactionResponse;
     } & Omit<I, keyof BaseContract>
   > {
-    const contract = await super.deploy(...args);
+    const contract = await (await super.deploy(...args)).waitForDeployment();
 
     const deployTxReceipt = await this.runner?.provider?.getTransactionReceipt(
-      (contract.deploymentTransaction() as ContractTransactionResponse).hash
+      contract.deploymentTransaction()!.hash
     );
 
-    const deployedAddresses = getDeployedContracts(
-      deployTxReceipt as TransactionReceipt
-    ).map(info => info.deployedAddress);
+    const deployedAddresses = getDeployedContracts(deployTxReceipt!).map(
+      info => info.deployedAddress
+    );
 
     const contractWithCorrectAddress = new ethers.Contract(
       deployedAddresses[deployedAddresses.length - 1],
@@ -237,7 +236,7 @@ export class ContractFactory<
     } & Omit<I, keyof BaseContract>;
 
     contractWithCorrectAddress.deploymentTransaction = () =>
-      contract.deploymentTransaction() as ContractTransactionResponse;
+      contract.deploymentTransaction()!;
     return contractWithCorrectAddress;
   }
 }

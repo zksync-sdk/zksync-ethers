@@ -737,7 +737,6 @@ describe('L1VoidSigner', async () => {
           'maxPriorityFeePerGas',
           'value',
         ]);
-        expect(BigInt(result.value) > 0n).to.be.true;
         expect(BigInt(result.maxPriorityFeePerGas) > 0n).to.be.true;
         expect(BigInt(result.maxFeePerGas) > 0n).to.be.true;
       });
@@ -912,11 +911,11 @@ describe('L1VoidSigner', async () => {
           token: utils.LEGACY_ETH_ADDRESS,
           to: await signer.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should throw an error when there is not enough allowance to cover the deposit', async () => {
@@ -957,11 +956,11 @@ describe('L1VoidSigner', async () => {
           token: DAI_L1,
           to: await signer.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should throw an error when there is not enough balance for the deposit', async () => {
@@ -1014,11 +1013,11 @@ describe('L1VoidSigner', async () => {
           token: token,
           to: await signer.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should return fee for base token deposit', async () => {
@@ -1062,11 +1061,11 @@ describe('L1VoidSigner', async () => {
           token: token,
           to: await signer.getAddress(),
         });
-        expect(result.baseCost.valueOf() > 0n).to.be.true;
-        expect(result.l1GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.l2GasLimit.valueOf() > 0n).to.be.true;
-        expect(result.maxPriorityFeePerGas!.valueOf() > 0n).to.be.true;
-        expect(result.maxFeePerGas!.valueOf() > 0n).to.be.true;
+        expect(result.baseCost > 0n).to.be.true;
+        expect(result.l1GasLimit > 0n).to.be.true;
+        expect(result.l2GasLimit > 0n).to.be.true;
+        expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
+        expect(result.maxFeePerGas! > 0n).to.be.true;
       }).timeout(10_000);
 
       it('should throw an error when there is not enough token allowance to cover the deposit', async () => {

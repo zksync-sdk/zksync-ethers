@@ -14,4 +14,5 @@ export { IL2Bridge__factory } from "./IL2Bridge__factory";
 export { INonceHolder__factory } from "./INonceHolder__factory";
 export { IPaymasterFlow__factory } from "./IPaymasterFlow__factory";
 export { ITestnetERC20Token__factory } from "./ITestnetERC20Token__factory";
+export { IZkSync__factory } from "./IZkSync__factory";
 export { IZkSyncStateTransition__factory } from "./IZkSyncStateTransition__factory";

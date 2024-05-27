@@ -96,7 +96,10 @@ export const ETH_ADDRESS: Address =
 export const LEGACY_ETH_ADDRESS: Address =
   '0x0000000000000000000000000000000000000000';
 
-// in the contracts the zero address can not be used, use one instead
+/**
+ * In the contracts the zero address can not be used, use one instead
+ * @constant
+ */
 export const ETH_ADDRESS_IN_CONTRACTS: Address =
   '0x0000000000000000000000000000000000000001';
 
@@ -299,7 +302,7 @@ export function getHashedL2ToL1Msg(
   const encodedMsg = new Uint8Array([
     0, // l2ShardId
     1, // isService
-    ...ethers.getBytes(ethers.zeroPadValue(ethers.toBeHex(txNumberInBlock), 2)),
+    ...ethers.getBytes(ethers.toBeHex(txNumberInBlock, 2)),
     ...ethers.getBytes(L1_MESSENGER_ADDRESS),
     ...ethers.getBytes(ethers.zeroPadValue(sender, 32)),
     ...ethers.getBytes(ethers.keccak256(msg)),
@@ -405,7 +408,7 @@ export function createAddress(
       ethers.concat([
         prefix,
         ethers.zeroPadValue(sender, 32),
-        ethers.zeroPadValue(ethers.toBeHex(senderNonce), 32),
+        ethers.toBeHex(senderNonce, 32),
       ])
     )
     .slice(26);
@@ -616,16 +619,16 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
  * tx: types.TransactionLike = {
  *   type: 113,
  *   nonce: 0,
- *   maxPriorityFeePerGas: BigInt(0),
- *   maxFeePerGas: BigInt(0),
- *   gasLimit: BigInt(0),
+ *   maxPriorityFeePerGas: 0n,
+ *   maxFeePerGas: 0n,
+ *   gasLimit: 0n,
  *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
- *   value: BigInt(1000000),
+ *   value: 1000000n,
  *   data: "0x",
- *   chainId: BigInt(270),
+ *   chainId: 270n,
  *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
  *   customData: {
- *     gasPerPubdata: BigInt(50000),
+ *     gasPerPubdata: 50000n,
  *     factoryDeps: [],
  *     customSignature: "0x",
  *     paymasterParams: null,
@@ -824,10 +827,8 @@ const ADDRESS_MODULO = 2n ** 160n;
  *
  */
 export function applyL1ToL2Alias(address: string): string {
-  return ethers.zeroPadValue(
-    ethers.toBeHex(
-      (BigInt(address) + BigInt(L1_TO_L2_ALIAS_OFFSET)) % ADDRESS_MODULO
-    ),
+  return ethers.toBeHex(
+    (BigInt(address) + BigInt(L1_TO_L2_ALIAS_OFFSET)) % ADDRESS_MODULO,
     20
   );
 }
@@ -851,7 +852,7 @@ export function undoL1ToL2Alias(address: string): string {
   if (result < 0n) {
     result += ADDRESS_MODULO;
   }
-  return ethers.zeroPadValue(ethers.toBeHex(result), 20);
+  return ethers.toBeHex(result, 20);
 }
 
 /**
@@ -1086,7 +1087,7 @@ export async function isMessageSignatureCorrect(
  *   chainId: 270,
  *   from: ADDRESS,
  *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
- *   value: BigInt(7_000_000),
+ *   value: 7_000_000n,
  * };
  *
  * const eip712Signer = new EIP712Signer(

@@ -1,7 +1,9 @@
 import {
+  assert,
   assertArgument,
   BigNumberish,
   BytesLike,
+  defineProperties,
   ethers,
   Signature as EthersSignature,
   TransactionRequest as EthersTransactionRequest,
@@ -136,14 +138,16 @@ export interface MessageProof {
  */
 export class TransactionResponse extends ethers.TransactionResponse {
   /** The batch number on the L1 network. */
-  readonly l1BatchNumber: null | number;
+  readonly l1BatchNumber!: null | number;
   /** The transaction index within the batch on the L1 network. */
-  readonly l1BatchTxIndex: null | number;
+  readonly l1BatchTxIndex!: null | number;
 
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
-    this.l1BatchNumber = params.l1BatchNumber;
-    this.l1BatchTxIndex = params.l1BatchTxIndex;
+    defineProperties<TransactionResponse>(this, {
+      l1BatchNumber: params.l1BatchNumber,
+      l1BatchTxIndex: params.l1BatchTxIndex,
+    });
   }
 
   /**
@@ -216,20 +220,23 @@ export class TransactionResponse extends ethers.TransactionResponse {
  */
 export class TransactionReceipt extends ethers.TransactionReceipt {
   /** The batch number on the L1 network. */
-  readonly l1BatchNumber: null | number;
+  readonly l1BatchNumber!: null | number;
   /** The transaction index within the batch on the L1 network. */
-  readonly l1BatchTxIndex: null | number;
+  readonly l1BatchTxIndex!: null | number;
   /** The logs of L2 to L1 messages. */
-  readonly l2ToL1Logs: L2ToL1Log[];
+  readonly l2ToL1Logs!: L2ToL1Log[];
   /** All logs included in the transaction receipt. */
-  readonly _logs: ReadonlyArray<Log>;
+  readonly #logs: ReadonlyArray<Log>;
 
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
-    this.l1BatchNumber = params.l1BatchNumber;
-    this.l1BatchTxIndex = params.l1BatchTxIndex;
-    this.l2ToL1Logs = params.l2ToL1Logs;
-    this._logs = Object.freeze(
+    defineProperties<TransactionReceipt>(this, {
+      l1BatchNumber: params.l1BatchNumber,
+      l1BatchTxIndex: params.l1BatchTxIndex,
+      l2ToL1Logs: params.l2ToL1Logs,
+    });
+
+    this.#logs = Object.freeze(
       params.logs.map((log: Log) => {
         return new Log(log, provider);
       })
@@ -237,7 +244,7 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
   }
 
   override get logs(): ReadonlyArray<Log> {
-    return this._logs;
+    return this.#logs;
   }
 
   override getBlock(): Promise<Block> {
@@ -262,33 +269,92 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
 /** A `Block` is an extension of {@link ethers.Block} with additional features for interacting with zkSync Era. */
 export class Block extends ethers.Block {
   /** The batch number on L1. */
-  readonly l1BatchNumber: null | number;
+  readonly l1BatchNumber!: null | number;
   /** The timestamp of the batch on L1. */
-  readonly l1BatchTimestamp: null | number;
+  readonly l1BatchTimestamp!: null | number;
+
+  readonly #transactions: Array<string | TransactionResponse>;
 
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
-    this.l1BatchNumber = params.l1BatchNumber;
-    this.l1BatchTimestamp = params.l1BatchTxIndex;
+    this.#transactions = params.transactions.map(
+      (tx: TransactionResponse | string) => {
+        if (typeof tx !== 'string') {
+          return new TransactionResponse(tx, provider);
+        }
+        return tx;
+      }
+    );
+    defineProperties<Block>(this, {
+      l1BatchNumber: params.l1BatchNumber,
+      l1BatchTimestamp: params.l1BatchTimestamp,
+    });
   }
 
   override toJSON(): any {
-    const {l1BatchNumber, l1BatchTimestamp: l1BatchTxIndex} = this;
+    const {l1BatchNumber, l1BatchTimestamp} = this;
     return {
       ...super.toJSON(),
       l1BatchNumber,
-      l1BatchTxIndex,
+      l1BatchTimestamp,
     };
   }
 
   override get prefetchedTransactions(): TransactionResponse[] {
-    return super.prefetchedTransactions as TransactionResponse[];
+    const txs = this.#transactions.slice();
+
+    // Doesn't matter...
+    if (txs.length === 0) {
+      return [];
+    }
+
+    // Make sure we prefetched the transactions
+    assert(
+      typeof txs[0] === 'object',
+      'transactions were not prefetched with block request',
+      'UNSUPPORTED_OPERATION',
+      {
+        operation: 'transactionResponses()',
+      }
+    );
+
+    return txs as TransactionResponse[];
   }
 
-  override getTransaction(
+  override async getTransaction(
     indexOrHash: number | string
   ): Promise<TransactionResponse> {
-    return super.getTransaction(indexOrHash) as Promise<TransactionResponse>;
+    // Find the internal value by its index or hash
+    let tx: string | TransactionResponse | undefined = undefined;
+    if (typeof indexOrHash === 'number') {
+      tx = this.#transactions[indexOrHash];
+    } else {
+      const hash = indexOrHash.toLowerCase();
+      for (const v of this.#transactions) {
+        if (typeof v === 'string') {
+          if (v !== hash) {
+            continue;
+          }
+          tx = v;
+          break;
+        } else {
+          if (v.hash === hash) {
+            continue;
+          }
+          tx = v;
+          break;
+        }
+      }
+    }
+    if (!tx) {
+      throw new Error('no such tx');
+    }
+
+    if (typeof tx === 'string') {
+      return <TransactionResponse>await this.provider.getTransaction(tx);
+    } else {
+      return tx;
+    }
   }
 }
 
@@ -658,17 +724,17 @@ export interface TransactionDetails {
 /** Represents the full deposit fee containing fees for both L1 and L2 transactions. */
 export interface FullDepositFee {
   /** The maximum fee per gas for L1 transaction. */
-  maxFeePerGas?: BigInt;
+  maxFeePerGas?: bigint;
   /** The maximum priority fee per gas for L1 transaction. */
-  maxPriorityFeePerGas?: BigInt;
+  maxPriorityFeePerGas?: bigint;
   /** The gas price for L2 transaction. */
-  gasPrice?: BigInt;
+  gasPrice?: bigint;
   /** The base cost of the deposit transaction on L2. */
-  baseCost: BigInt;
+  baseCost: bigint;
   /** The gas limit for L1 transaction. */
-  l1GasLimit: BigInt;
+  l1GasLimit: bigint;
   /** The gas limit for L2 transaction. */
-  l2GasLimit: BigInt;
+  l2GasLimit: bigint;
 }
 
 /** Represents a raw block transaction. */
@@ -729,7 +795,7 @@ export interface StorageProof {
 /**
  *  Signs various types of payloads, optionally using a some kind of secret.
  *
- *  @param payload The payload that needs to be sign already populated transaction to sign.
+ *  @param payload The payload that needs to be sign.
  *  @param [secret] The secret used for signing the `payload`.
  *  @param [provider] The provider is used to fetch data from the network if it is required for signing.
  *  @returns A promise that resolves to the serialized signature in hexadecimal format.

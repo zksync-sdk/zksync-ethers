@@ -136,18 +136,10 @@ export function JsonRpcApiProvider<
      */
     override async getTransactionReceipt(
       txHash: string
-    ): Promise<TransactionReceipt> {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const receipt = (await super.getTransactionReceipt(
-          txHash
-        )) as TransactionReceipt;
-        if (receipt && receipt.blockNumber) {
-          // otherwise transaction has not been mined yet
-          return receipt;
-        }
-        await sleep(500);
-      }
+    ): Promise<TransactionReceipt | null> {
+      return (await super.getTransactionReceipt(
+        txHash
+      )) as TransactionReceipt | null;
     }
 
     /**
@@ -579,8 +571,14 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
-      if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS)) {
-        tx.token = ETH_ADDRESS_IN_CONTRACTS;
+      const isEthBasedChain = await this.isEthBasedChain();
+
+      // In case of Ether on non Ether based chain it should get l2 Ether address,
+      // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
+      if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) && !isEthBasedChain) {
+        tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
+      } else if (await this.isBaseToken(tx.token)) {
+        tx.token = L2_BASE_TOKEN_ADDRESS;
       }
 
       if (
@@ -693,14 +691,24 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
+      const isEthBasedChain = await this.isEthBasedChain();
+
+      // In case of Ether on non Ether based chain it should get l2 Ether address,
+      // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
+      if (
+        tx.token &&
+        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) &&
+        !isEthBasedChain
+      ) {
+        tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
+      } else if (!tx.token || (await this.isBaseToken(tx.token))) {
+        tx.token = L2_BASE_TOKEN_ADDRESS;
+      }
+
       tx.overrides ??= {};
       tx.overrides.from ??= tx.from;
 
-      if (
-        !tx.token ||
-        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
-        (await this.isBaseToken(tx.token))
-      ) {
+      if (isETH(tx.token)) {
         if (tx.paymasterParams) {
           return {
             ...tx.overrides,
@@ -888,7 +896,7 @@ export function JsonRpcApiProvider<
 
       l2Response.waitL1Commit = l1TxResponse.wait.bind(
         l1TxResponse
-      ) as PriorityOpResponse['wait'];
+      ) as PriorityOpResponse['waitL1Commit'];
       l2Response.wait = async () => {
         const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
         return await l2Tx.wait();
@@ -904,6 +912,9 @@ export function JsonRpcApiProvider<
     async _getPriorityOpConfirmationL2ToL1Log(txHash: string, index = 0) {
       const hash = ethers.hexlify(txHash);
       const receipt = await this.getTransactionReceipt(hash);
+      if (!receipt) {
+        throw new Error('Transaction is not mined!');
+      }
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
         ([, log]) => isAddressEq(log.sender, BOOTLOADER_FORMAL_ADDRESS)
       );
@@ -923,16 +934,6 @@ export function JsonRpcApiProvider<
      * @param [index=0] In case there were multiple transactions in one message, you may pass an index of the
      * transaction which confirmation data should be fetched.
      * @throws {Error} If log proof can not be found.
-     *
-     * @example
-     *
-     * import { Provider, types, utils } from "zksync-ethers";
-     *
-     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-     * // Any L2 -> L1 transaction can be used.
-     * // In this case, withdrawal transaction is used.
-     * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
-     * console.log(`Confirmation data: ${utils.toJSON(await provider.getPriorityOpConfirmation(tx, 0))}`);
      */
     async getPriorityOpConfirmation(txHash: string, index = 0) {
       const {l2ToL1LogIndex, l2ToL1Log, l1BatchTxId} =
@@ -962,8 +963,8 @@ export function JsonRpcApiProvider<
       const data = await deployerContract.getAccountInfo(address);
 
       return {
-        supportedAAVersion: data.supportedAAVersion,
-        nonceOrdering: data.nonceOrdering,
+        supportedAAVersion: Number(data.supportedAAVersion),
+        nonceOrdering: Number(data.nonceOrdering),
       };
     }
 
@@ -1119,7 +1120,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getTransactionReceipt(
     txHash: string
-  ): Promise<TransactionReceipt> {
+  ): Promise<TransactionReceipt | null> {
     return super.getTransactionReceipt(txHash);
   }
 
@@ -1133,12 +1134,12 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    *
    * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * const txHandle = await provider.getTransaction(TX_HASH);
+   * const tx = await provider.getTransaction(TX_HASH);
    *
    * // Wait until the transaction is processed by the server.
-   * await txHandle.wait();
+   * await tx.wait();
    * // Wait until the transaction is finalized.
-   * await txHandle.waitFinalize();
+   * await tx.waitFinalize();
    */
   override async getTransaction(txHash: string): Promise<TransactionResponse> {
     return super.getTransaction(txHash);
@@ -1330,6 +1331,62 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getMainContractAddress(): Promise<Address> {
     return super.getMainContractAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Bridgehub: ${await provider.getBridgehubContractAddress()}`);
+   */
+  override async getBridgehubContractAddress(): Promise<Address> {
+    return super.getBridgehubContractAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Base token: ${await provider.getBaseTokenContractAddress()}`);
+   */
+  override async getBaseTokenContractAddress(): Promise<Address> {
+    return super.getBaseTokenContractAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Is ETH based chain: ${await provider.isEthBasedChain()}`);
+   */
+  override async isEthBasedChain(): Promise<boolean> {
+    return super.isEthBasedChain();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Is base token: ${await provider.isBaseToken("0x5C221E77624690fff6dd741493D735a17716c26B")}`);
+   */
+  override async isBaseToken(token: Address): Promise<boolean> {
+    return super.isBaseToken(token);
   }
 
   /**
@@ -1827,6 +1884,31 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * import { Provider, types, utils } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * // Any L2 -> L1 transaction can be used.
+   * // In this case, withdrawal transaction is used.
+   * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
+   * console.log(`Confirmation data: ${utils.toJSON(await provider.getPriorityOpConfirmation(tx, 0))}`);
+   */
+  override async getPriorityOpConfirmation(
+    txHash: string,
+    index = 0
+  ): Promise<{
+    l1BatchNumber: number;
+    l2MessageIndex: number;
+    l2TxNumberInBlock: number | null;
+    proof: string[];
+  }> {
+    return super.getPriorityOpConfirmation(txHash, index);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const tokenAddress = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
    * console.log(`Contract account info: ${utils.toJSON(await provider.getContractAccountInfo(tokenAddress))}`);
    */
@@ -1886,6 +1968,12 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * Creates a new `Provider` from provided URL or network name.
    *
    * @param zksyncNetwork The type of zkSync network.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    */
   static getDefaultProvider(
     zksyncNetwork: ZkSyncNetwork = ZkSyncNetwork.Localhost
@@ -1988,7 +2076,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    */
   override async getTransactionReceipt(
     txHash: string
-  ): Promise<TransactionReceipt> {
+  ): Promise<TransactionReceipt | null> {
     return super.getTransactionReceipt(txHash);
   }
 
@@ -2002,12 +2090,12 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * const provider = new BrowserProvider(window.ethereum);
    *
    * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * const txHandle = await provider.getTransaction(TX_HASH);
+   * const tx = await provider.getTransaction(TX_HASH);
    *
    * // Wait until the transaction is processed by the server.
-   * await txHandle.wait();
+   * await tx.wait();
    * // Wait until the transaction is finalized.
-   * await txHandle.waitFinalize();
+   * await tx.waitFinalize();
    */
   override async getTransaction(txHash: string): Promise<TransactionResponse> {
     return super.getTransaction(txHash);
@@ -2209,10 +2297,85 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Bridgehub: ${await provider.getBridgehubContractAddress()}`);
+   */
+  override async getBridgehubContractAddress(): Promise<Address> {
+    return super.getBridgehubContractAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Base token: ${await provider.getBaseTokenContractAddress()}`);
+   */
+  override async getBaseTokenContractAddress(): Promise<Address> {
+    return super.getBaseTokenContractAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Is ETH based chain: ${await provider.isEthBasedChain()}`);
+   */
+  override async isEthBasedChain(): Promise<boolean> {
+    return super.isEthBasedChain();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Is base token: ${await provider.isBaseToken("0x5C221E77624690fff6dd741493D735a17716c26B")}`);
+   */
+  override async isBaseToken(token: Address): Promise<boolean> {
+    return super.isBaseToken(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
    * console.log(`Testnet paymaster: ${await provider.getTestnetPaymasterAddress()}`);
    */
   override async getTestnetPaymasterAddress(): Promise<Address | null> {
     return super.getTestnetPaymasterAddress();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Default bridges: ${utils.toJSON(await provider.getDefaultBridgeAddresses())}`);
+   */
+  override async getDefaultBridgeAddresses(): Promise<{
+    erc20L1: string;
+    erc20L2: string;
+    wethL1: string;
+    wethL2: string;
+    sharedL1: string;
+    sharedL2: string;
+  }> {
+    return super.getDefaultBridgeAddresses();
   }
 
   /**
@@ -2665,6 +2828,30 @@ export class BrowserProvider extends JsonRpcApiProvider(
     l1TxResponse: ethers.TransactionResponse
   ): Promise<PriorityOpResponse> {
     return super.getPriorityOpResponse(l1TxResponse);
+  }
+
+  /**
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * // Any L2 -> L1 transaction can be used.
+   * // In this case, withdrawal transaction is used.
+   * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
+   * console.log(`Confirmation data: ${utils.toJSON(await provider.getPriorityOpConfirmation(tx, 0))}`);
+   */
+  override async getPriorityOpConfirmation(
+    txHash: string,
+    index = 0
+  ): Promise<{
+    l1BatchNumber: number;
+    l2MessageIndex: number;
+    l2TxNumberInBlock: number | null;
+    proof: string[];
+  }> {
+    return super.getPriorityOpConfirmation(txHash, index);
   }
 
   /**
