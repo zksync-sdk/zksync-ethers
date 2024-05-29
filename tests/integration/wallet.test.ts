@@ -1171,7 +1171,7 @@ describe('Wallet', () => {
   });
 
   describe('#withdraw()', () => {
-    if(IS_ETH_BASED){
+    if (IS_ETH_BASED) {
       it('should withdraw ETH to L1 network', async () => {
         const amount = 7_000_000_000;
         const l2BalanceBeforeWithdrawal = await wallet.getBalance();
@@ -1250,8 +1250,9 @@ describe('Wallet', () => {
             .eq(minimalAllowance)
         ).to.be.true;
 
-        expect(l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).eq(amount))
-          .to.be.true;
+        expect(
+          l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).eq(amount)
+        ).to.be.true;
         expect(
           l2ApprovalTokenBalanceAfterWithdrawal.eq(
             l2ApprovalTokenBalanceBeforeWithdrawal.sub(minimalAllowance)
@@ -1312,8 +1313,6 @@ describe('Wallet', () => {
         ).to.be.true;
       }).timeout(35_000);
     }
-
-
 
     it('should withdraw DAI to L1 network', async () => {
       const amount = 5;
@@ -1622,20 +1621,28 @@ describe('Wallet', () => {
       ).to.be.true;
     }).timeout(25_000);
 
-    if(!IS_ETH_BASED){
+    if (!IS_ETH_BASED) {
       it('should transfer ETH on non eth based chain', async () => {
         const amount = 7_000_000_000;
         const token = await wallet.l2TokenAddress(
           utils.ETH_ADDRESS_IN_CONTRACTS
         );
-        const balanceBeforeTransfer = await provider.getBalance(ADDRESS2, 'latest', token);
+        const balanceBeforeTransfer = await provider.getBalance(
+          ADDRESS2,
+          'latest',
+          token
+        );
         const tx = await wallet.transfer({
           token: utils.LEGACY_ETH_ADDRESS,
           to: ADDRESS2,
           amount: amount,
         });
         const result = await tx.wait();
-        const balanceAfterTransfer = await provider.getBalance(ADDRESS2, 'latest', token);
+        const balanceAfterTransfer = await provider.getBalance(
+          ADDRESS2,
+          'latest',
+          token
+        );
         expect(result).not.to.be.null;
         expect(balanceAfterTransfer.sub(balanceBeforeTransfer).eq(amount)).to.be
           .true;
@@ -1658,7 +1665,11 @@ describe('Wallet', () => {
         const senderBalanceBeforeTransfer = await wallet.getBalance(token);
         const senderApprovalTokenBalanceBeforeTransfer =
           await wallet.getBalance(APPROVAL_TOKEN);
-        const receiverBalanceBeforeTransfer = await provider.getBalance(ADDRESS2, 'latest', token);
+        const receiverBalanceBeforeTransfer = await provider.getBalance(
+          ADDRESS2,
+          'latest',
+          token
+        );
 
         const tx = await wallet.transfer({
           token: token,
@@ -1683,10 +1694,16 @@ describe('Wallet', () => {
         const senderBalanceAfterTransfer = await wallet.getBalance(token);
         const senderApprovalTokenBalanceAfterTransfer =
           await wallet.getBalance(APPROVAL_TOKEN);
-        const receiverBalanceAfterTransfer = await provider.getBalance(ADDRESS2, 'latest', token);
+        const receiverBalanceAfterTransfer = await provider.getBalance(
+          ADDRESS2,
+          'latest',
+          token
+        );
 
         expect(
-          paymasterBalanceBeforeTransfer.sub(paymasterBalanceAfterTransfer).gte(0)
+          paymasterBalanceBeforeTransfer
+            .sub(paymasterBalanceAfterTransfer)
+            .gte(0)
         ).to.be.true;
         expect(
           paymasterTokenBalanceAfterTransfer
@@ -1722,7 +1739,8 @@ describe('Wallet', () => {
         const result = await tx.wait();
         const balanceAfterTransfer = await provider.getBalance(ADDRESS2);
         expect(result).not.to.be.null;
-        expect(balanceAfterTransfer.sub(balanceBeforeTransfer).eq(amount)).to.be.true;
+        expect(balanceAfterTransfer.sub(balanceBeforeTransfer).eq(amount)).to.be
+          .true;
       }).timeout(25_000);
     }
 
