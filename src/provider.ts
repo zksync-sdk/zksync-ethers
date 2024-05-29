@@ -1248,8 +1248,14 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     overrides?: ethers.CallOverrides;
   }): Promise<ethers.providers.TransactionRequest> {
     const {...tx} = transaction;
-    if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS)) {
-      tx.token = ETH_ADDRESS_IN_CONTRACTS;
+    const isEthBasedChain = await this.isEthBasedChain();
+
+    // In case of Ether on non Ether based chain it should get l2 Ether address,
+    // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
+    if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) && !isEthBasedChain) {
+      tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
+    } else if (await this.isBaseToken(tx.token)) {
+      tx.token = L2_BASE_TOKEN_ADDRESS;
     }
 
     if (!tx.to && !tx.from) {
@@ -1405,14 +1411,23 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     overrides?: ethers.CallOverrides;
   }): Promise<ethers.providers.TransactionRequest> {
     const {...tx} = transaction;
+    const isEthBasedChain = await this.isEthBasedChain();
+
+    // In case of Ether on non Ether based chain it should get l2 Ether address,
+    // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
+    if (
+      tx.token &&
+      isAddressEq(tx.token, LEGACY_ETH_ADDRESS) &&
+      !isEthBasedChain
+    ) {
+      tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
+    } else if (!tx.token || (await this.isBaseToken(tx.token))) {
+      tx.token = L2_BASE_TOKEN_ADDRESS;
+    }
     tx.overrides ??= {};
     tx.overrides.from ??= tx.from;
 
-    if (
-      !tx.token ||
-      isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
-      (await this.isBaseToken(tx.token))
-    ) {
+    if (isETH(tx.token)) {
       if (tx.paymasterParams) {
         return {
           ...(await ethers.utils.resolveProperties(tx.overrides)),
