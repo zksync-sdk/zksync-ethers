@@ -1799,7 +1799,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     l2Response.waitL1Commit = l1TxResponse.wait.bind(
       l1TxResponse
-    ) as PriorityOpResponse['wait'];
+    ) as PriorityOpResponse['waitL1Commit'];
     l2Response.wait = async () => {
       const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
       return await l2Tx.wait();

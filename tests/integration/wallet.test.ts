@@ -1712,7 +1712,7 @@ describe('Wallet', () => {
       }).timeout(25_000);
 
       it('should transfer base token', async () => {
-        const amount = 7_000_000_000n;
+        const amount = 7_000_000_000;
         const balanceBeforeTransfer = await provider.getBalance(ADDRESS2);
         const tx = await wallet.transfer({
           token: await wallet.getBaseToken(),
