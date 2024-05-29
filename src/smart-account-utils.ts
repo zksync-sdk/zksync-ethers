@@ -129,8 +129,7 @@ export const signPayloadWithMultipleECDSA: PayloadSigner = async (
   secret: string[] | utils.SigningKey[]
 ) => {
   if (!Array.isArray(secret) || secret.length < 2) {
-    throw new Error('Multiple keys are required for multisig signing!'
-    );
+    throw new Error('Multiple keys are required for multisig signing!');
   }
 
   const signatures = secret.map(key =>

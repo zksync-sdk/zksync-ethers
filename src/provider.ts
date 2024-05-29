@@ -2788,11 +2788,14 @@ export class Web3Provider extends Provider {
    * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
    * console.log(`Confirmation data: ${utils.toJSON(await provider.getPriorityOpConfirmation(tx, 0))}`);
    */
-  override async getPriorityOpConfirmation(txHash: string, index: number = 0): Promise<{
+  override async getPriorityOpConfirmation(
+    txHash: string,
+    index = 0
+  ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
     l2TxNumberInBlock: number;
-    proof: string[]
+    proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);
   }
