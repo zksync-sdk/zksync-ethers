@@ -1,22 +1,16 @@
-import {
-  Provider,
-  types,
-  Wallet,
-  ContractFactory,
-  Contract,
-  utils,
-} from '../src';
+import {Provider, Wallet, ContractFactory, Contract, utils} from '../src';
 import {ethers, Typed} from 'ethers';
 import {ITestnetERC20Token__factory} from '../src/typechain';
 
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
+import {L1_CHAIN_URL, L2_CHAIN_URL} from './utils';
 
 const PRIVATE_KEY =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
 
-const provider = Provider.getDefaultProvider(types.Network.Localhost);
-const ethProvider = ethers.getDefaultProvider('http://127.0.0.1:8545');
+const provider = new Provider(L2_CHAIN_URL);
+const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
@@ -63,9 +57,8 @@ async function deployPaymasterAndToken(): Promise<{
   });
   const paymasterAddress = await paymasterContract.getAddress();
 
-  // transfer ETH to paymaster so it could pay fee
+  // transfer base token to paymaster so it could pay fee
   const faucetTx = await wallet.transfer({
-    token: utils.ETH_ADDRESS,
     to: paymasterAddress,
     amount: ethers.parseEther('100'),
   });
