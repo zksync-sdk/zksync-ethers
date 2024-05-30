@@ -11,8 +11,8 @@ permissions:
   contents: read # for checkout
 
 jobs:
-  test:
-    name: Test
+  eth-based-chain-test:
+    name: ETH-based Chain Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,9 +33,46 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
-          ./start.sh
+          ./start-zk-chains.sh
           popd
       - name: Prepare environment
+        env:
+          IS_ETH_CHAIN: true
         run: yarn test:prepare
       - name: Run tests
+        env:
+          IS_ETH_CHAIN: true
+        run: yarn test
+
+  non-eth-based-chain-test:
+    name: Non-ETH-based Chain Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+      - name: Install dependencies
+        run: yarn install
+      - name: Build
+        run: |
+          yarn types
+          yarn test:build
+      - name: Run local-setup
+        run: |
+          git clone https://github.com/matter-labs/local-setup.git
+          pushd local-setup
+          ./start-zk-chains.sh
+          popd
+      - name: Prepare environment
+        env:
+          IS_ETH_CHAIN: false
+        run: yarn test:prepare
+      - name: Run tests
+        env:
+          IS_ETH_CHAIN: false
         run: yarn test

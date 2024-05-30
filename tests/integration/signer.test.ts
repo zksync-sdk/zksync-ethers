@@ -2,14 +2,22 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, utils, Wallet, L2VoidSigner, L1VoidSigner} from '../../src';
 import {ethers} from 'ethers';
-import {IS_ETH_BASED, ADDRESS1, PRIVATE_KEY1, ADDRESS2, DAI_L1} from '../utils';
+import {
+  IS_ETH_BASED,
+  ADDRESS1,
+  PRIVATE_KEY1,
+  ADDRESS2,
+  DAI_L1,
+  L2_CHAIN_URL,
+  L1_CHAIN_URL,
+} from '../utils';
 
 const {expect} = chai;
 
 import {ITestnetERC20Token__factory} from '../../src/typechain';
 
 describe('L2VoidSigner', () => {
-  const provider = Provider.getDefaultProvider();
+  const provider = new Provider(L2_CHAIN_URL);
   const signer = new L2VoidSigner(ADDRESS1, provider);
 
   let baseToken: string;
@@ -101,6 +109,7 @@ describe('L2VoidSigner', () => {
         'gasLimit',
         'maxFeePerGas',
         'maxPriorityFeePerGas',
+        'chainId',
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
       expect(BigInt(result.maxFeePerGas!) > 0n).to.be.true;
@@ -133,7 +142,7 @@ describe('L2VoidSigner', () => {
           factoryDeps: [],
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
 
@@ -160,7 +169,7 @@ describe('L2VoidSigner', () => {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
 
@@ -187,7 +196,7 @@ describe('L2VoidSigner', () => {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
 
@@ -208,7 +217,7 @@ describe('L2VoidSigner', () => {
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 2_000_000_000n,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
 
@@ -228,7 +237,7 @@ describe('L2VoidSigner', () => {
         value: 7_000_000,
         gasPrice: 3_500_000_000n,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
 
@@ -247,7 +256,7 @@ describe('L2VoidSigner', () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
   });
@@ -319,8 +328,8 @@ describe('L2VoidSigner', () => {
 });
 
 describe('L1VoidSigner', async () => {
-  const provider = Provider.getDefaultProvider();
-  const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
+  const provider = new Provider(L2_CHAIN_URL);
+  const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
   const signer = new L1VoidSigner(ADDRESS1, ethProvider, provider);
 
   let baseToken: string;
@@ -474,6 +483,7 @@ describe('L1VoidSigner', async () => {
         'gasLimit',
         'maxPriorityFeePerGas',
         'maxFeePerGas',
+        'chainId',
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
       expect(BigInt(result.maxPriorityFeePerGas!) > 0n).to.be.true;
@@ -497,7 +507,7 @@ describe('L1VoidSigner', async () => {
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 2_000_000_000n,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
 
@@ -517,7 +527,7 @@ describe('L1VoidSigner', async () => {
         value: 7_000_000,
         gasPrice: 3_500_000_000n,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
 
@@ -536,7 +546,11 @@ describe('L1VoidSigner', async () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'gasPrice',
+        'chainId',
+      ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
       expect(BigInt(result.gasPrice!) > 0n).to.be.true;
     });

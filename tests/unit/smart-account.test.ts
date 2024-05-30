@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import '../custom-matchers';
-import {EIP712Signer, Provider, types} from '../../src';
+import {EIP712Signer, Provider} from '../../src';
 import {TransactionRequest} from '../../src/types';
 import {
   populateTransactionECDSA,
@@ -9,7 +9,7 @@ import {
   signPayloadWithMultipleECDSA,
 } from '../../src/smart-account-utils';
 import {TypedDataEncoder, hashMessage} from 'ethers';
-import {ADDRESS1, PRIVATE_KEY1, ADDRESS2} from '../utils';
+import {ADDRESS1, PRIVATE_KEY1, ADDRESS2, L2_CHAIN_URL} from '../utils';
 
 const {expect} = chai;
 
@@ -120,7 +120,7 @@ describe('signPayloadWithMultipleECDSA()', () => {
 });
 
 describe('populateTransaction()', () => {
-  const provider = Provider.getDefaultProvider(types.Network.Localhost);
+  const provider = new Provider(L2_CHAIN_URL);
 
   it('should populate `tx.from` to address derived from private key if it not set', async () => {
     const tx: TransactionRequest = {
