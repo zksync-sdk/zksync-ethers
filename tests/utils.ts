@@ -10,4 +10,10 @@ export const DAI_L1 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
 export const APPROVAL_TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4'; // Crown token
 export const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174'; // Crown token paymaster
 
-export const IS_ETH_BASED = true;
+export const IS_ETH_BASED = ['true', '1', 'yes'].includes(
+  process.env.IS_ETH_CHAIN ?? 'true'
+);
+export const L2_CHAIN_URL = IS_ETH_BASED
+  ? 'http://localhost:15100'
+  : 'http://localhost:15200';
+export const L1_CHAIN_URL = 'http://localhost:15045';

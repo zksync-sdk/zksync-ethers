@@ -1,7 +1,8 @@
 import * as chai from 'chai';
 import '../custom-matchers';
-import {Provider, types} from '../../src';
+import {Provider} from '../../src';
 import {ethers} from 'ethers';
+import {L2_CHAIN_URL} from '../utils';
 
 const {expect} = chai;
 
@@ -9,7 +10,7 @@ describe('format', () => {
   const ADDRESS = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
   const RECEIVER = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
 
-  const provider = Provider.getDefaultProvider(types.Network.Localhost);
+  const provider = new Provider(L2_CHAIN_URL);
 
   describe('formatTransactionResponse()', () => {
     it("should return `response.to=zeroAddress' when `value.to='0x0'`", async () => {
