@@ -1,8 +1,8 @@
 import * as chai from 'chai';
 import '../custom-matchers';
-import {ContractFactory, Provider, types, Wallet, Contract} from '../../src';
+import {ContractFactory, Provider, Wallet, Contract} from '../../src';
 import {ethers} from 'ethers';
-import {PRIVATE_KEY1, DAI_L1} from '../utils';
+import {PRIVATE_KEY1, DAI_L1, L2_CHAIN_URL} from '../utils';
 
 const {expect} = chai;
 
@@ -12,7 +12,7 @@ import Storage from '../files/Storage.json';
 import Demo from '../files/Demo.json';
 
 describe('ContractFactory', () => {
-  const provider = Provider.getDefaultProvider(types.Network.Localhost);
+  const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
 
   describe('#constructor()', () => {

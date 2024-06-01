@@ -1,22 +1,16 @@
-import {
-  Provider,
-  Wallet,
-  ContractFactory,
-  Contract,
-  types,
-  utils,
-} from '../src';
+import {Provider, Wallet, ContractFactory, Contract, utils} from '../src';
 import {ethers} from 'ethers';
 import {ITestnetErc20TokenFactory} from '../src/typechain/ITestnetErc20TokenFactory';
 
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
+import {L1_CHAIN_URL, L2_CHAIN_URL} from './utils';
 
 const PRIVATE_KEY =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
 
-const provider = Provider.getDefaultProvider(types.Network.Localhost);
-const ethProvider = ethers.getDefaultProvider('http://127.0.0.1:8545');
+const provider = new Provider(L2_CHAIN_URL);
+const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
@@ -59,9 +53,8 @@ async function deployPaymasterAndToken(): Promise<{
   });
   const paymasterAddress = paymasterContract.address;
 
-  // transfer ETH to paymaster so it could pay fee
+  // transfer base token to paymaster so it could pay fee
   const faucetTx = await wallet.transfer({
-    token: utils.ETH_ADDRESS,
     to: paymasterAddress,
     amount: ethers.utils.parseEther('100'),
   });
@@ -89,8 +82,11 @@ It mints based token, provided alternative tokens (different from base token) an
 */
 async function mintTokensOnL1(l1Token: string) {
   if (l1Token !== utils.ETH_ADDRESS_IN_CONTRACTS) {
-    const to = ITestnetErc20TokenFactory.connect(l1Token, wallet._signerL1());
-    const mintTx = await to.mint(
+    const token = ITestnetErc20TokenFactory.connect(
+      l1Token,
+      wallet._signerL1()
+    );
+    const mintTx = await token.mint(
       await wallet.getAddress(),
       ethers.utils.parseEther('20000')
     );

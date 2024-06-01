@@ -3,12 +3,20 @@ import '../custom-matchers';
 import {Provider, utils, Wallet, L2VoidSigner, L1VoidSigner} from '../../src';
 import {ethers, BigNumber} from 'ethers';
 import {ITestnetErc20TokenFactory} from '../../src/typechain/ITestnetErc20TokenFactory';
-import {IS_ETH_BASED, ADDRESS1, PRIVATE_KEY1, DAI_L1, ADDRESS2} from '../utils';
+import {
+  IS_ETH_BASED,
+  ADDRESS1,
+  PRIVATE_KEY1,
+  DAI_L1,
+  ADDRESS2,
+  L2_CHAIN_URL,
+  L1_CHAIN_URL,
+} from '../utils';
 
 const {expect} = chai;
 
 describe('L2VoidSigner', () => {
-  const provider = Provider.getDefaultProvider();
+  const provider = new Provider(L2_CHAIN_URL);
   const signer = new L2VoidSigner(ADDRESS1, provider);
 
   let baseToken: string;
@@ -100,6 +108,7 @@ describe('L2VoidSigner', () => {
         'gasLimit',
         'maxFeePerGas',
         'maxPriorityFeePerGas',
+        'chainId',
       ]);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
       expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
@@ -132,7 +141,7 @@ describe('L2VoidSigner', () => {
           factoryDeps: [],
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
@@ -159,7 +168,7 @@ describe('L2VoidSigner', () => {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
@@ -186,7 +195,7 @@ describe('L2VoidSigner', () => {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
@@ -207,7 +216,7 @@ describe('L2VoidSigner', () => {
         maxFeePerGas: BigNumber.from(3_500_000_000),
         maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
@@ -227,7 +236,7 @@ describe('L2VoidSigner', () => {
         value: 7_000_000,
         gasPrice: BigNumber.from(3_500_000_000),
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
@@ -246,7 +255,11 @@ describe('L2VoidSigner', () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'gasPrice',
+        'chainId',
+      ]);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
       expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
     });
@@ -319,8 +332,8 @@ describe('L2VoidSigner', () => {
 });
 
 describe('L1VoidSigner', () => {
-  const provider = Provider.getDefaultProvider();
-  const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
+  const provider = new Provider(L2_CHAIN_URL);
+  const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
   const signer = new L1VoidSigner(ADDRESS1, ethProvider, provider);
 
   let baseToken: string;
@@ -474,6 +487,7 @@ describe('L1VoidSigner', () => {
         'gasLimit',
         'maxFeePerGas',
         'maxPriorityFeePerGas',
+        'chainId',
       ]);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
       expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
@@ -497,7 +511,7 @@ describe('L1VoidSigner', () => {
         maxFeePerGas: BigNumber.from(3_500_000_000),
         maxPriorityFeePerGas: BigNumber.from(2_000_000_000),
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
@@ -517,7 +531,7 @@ describe('L1VoidSigner', () => {
         value: 7_000_000,
         gasPrice: BigNumber.from(3_500_000_000),
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
     });
 
@@ -536,7 +550,11 @@ describe('L1VoidSigner', () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'gasPrice']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'gasPrice',
+        'chainId',
+      ]);
       expect(BigNumber.from(result.gasLimit).isZero()).to.be.false;
       expect(BigNumber.from(result.gasPrice).isZero()).to.be.false;
     });

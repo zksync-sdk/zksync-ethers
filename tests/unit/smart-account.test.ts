@@ -10,7 +10,13 @@ import {
 } from '../../src/smart-account-utils';
 import {BigNumber} from 'ethers';
 import {_TypedDataEncoder, hashMessage} from '@ethersproject/hash';
-import {PRIVATE_KEY1, ADDRESS1, PRIVATE_KEY2, ADDRESS2} from '../utils';
+import {
+  PRIVATE_KEY1,
+  ADDRESS1,
+  PRIVATE_KEY2,
+  ADDRESS2,
+  L2_CHAIN_URL,
+} from '../utils';
 
 const {expect} = chai;
 
@@ -114,7 +120,7 @@ describe('signPayloadWithMultipleECDSA()', () => {
 });
 
 describe('populateTransaction()', () => {
-  const provider = Provider.getDefaultProvider(types.Network.Localhost);
+  const provider = new Provider(L2_CHAIN_URL);
 
   it('should populate `tx.from` to address derived from private key if it not set', async () => {
     const tx: TransactionRequest = {
