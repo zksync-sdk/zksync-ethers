@@ -1,9 +1,15 @@
 import * as chai from 'chai';
 import '../custom-matchers';
-import {Provider, types, utils, Wallet, ContractFactory} from '../../src';
+import {Provider, utils, Wallet, ContractFactory} from '../../src';
 import {BigNumber, Contract, ethers} from 'ethers';
 import {ECDSASmartAccount, MultisigECDSASmartAccount} from '../../src';
-import {PRIVATE_KEY1, ADDRESS1, APPROVAL_TOKEN, PAYMASTER} from '../utils';
+import {
+  PRIVATE_KEY1,
+  ADDRESS1,
+  APPROVAL_TOKEN,
+  PAYMASTER,
+  L2_CHAIN_URL,
+} from '../utils';
 
 const {expect} = chai;
 
@@ -13,7 +19,7 @@ import Storage from '../files/Storage.json';
 import MultisigAccount from '../files/TwoUserMultisig.json';
 
 describe('Account Abstraction', () => {
-  const provider = Provider.getDefaultProvider(types.Network.Localhost);
+  const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
 
   it('use the ERC20 token for paying transaction fee', async () => {
@@ -49,9 +55,8 @@ describe('Account Abstraction', () => {
     const paymasterContract = await accountFactory.deploy(tokenAddress);
     const paymasterAddress = paymasterContract.address;
 
-    // transfer ETH to paymaster so it could pay fee
+    // transfer base to paymaster so it could pay fee
     const faucetTx = await wallet.transfer({
-      token: utils.ETH_ADDRESS,
       to: paymasterAddress,
       amount: ethers.utils.parseEther('0.01'),
     });
@@ -127,7 +132,7 @@ describe('Account Abstraction', () => {
     );
     const multisigAddress = multisigContract.address;
 
-    // send ETH to multisig account
+    // send base token to multisig account
     await (
       await account.sendTransaction({
         to: multisigAddress,

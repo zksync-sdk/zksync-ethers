@@ -2,13 +2,21 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, EIP712Signer} from '../../src';
 import {BigNumber, ethers} from 'ethers';
-import {PRIVATE_KEY1, ADDRESS1, IS_ETH_BASED, ADDRESS2, DAI_L1} from '../utils';
+import {
+  PRIVATE_KEY1,
+  ADDRESS1,
+  IS_ETH_BASED,
+  ADDRESS2,
+  DAI_L1,
+  L2_CHAIN_URL,
+  L1_CHAIN_URL,
+} from '../utils';
 
 const {expect} = chai;
 
 describe('utils', () => {
-  const provider = Provider.getDefaultProvider(types.Network.Localhost);
-  const ethProvider = ethers.getDefaultProvider('http://localhost:8545');
+  const provider = new Provider(L2_CHAIN_URL);
+  const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
 
   describe('#isMessageSignatureCorrect()', () => {
     it('should return true for a valid message signature', async () => {
