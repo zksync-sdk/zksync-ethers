@@ -2,6 +2,7 @@
   "name": "zksync-ethers",
   "version": "6.7.1",
   "main": "build/index.js",
+  "module": "build-esm/index.js",
   "types": "build/index.d.ts",
   "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
   "author": {
@@ -29,6 +30,7 @@
   },
   "files": [
     "build/",
+    "build-esm/",
     "abi/",
     "src/",
     "typechain"
@@ -61,7 +63,7 @@
     "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
     "test:wait": "ts-node tests/wait.ts",
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "build": "tsc",
+    "build": "tsc & tsc --module ESNEXT --moduleResolution Node --outDir build-esm",
     "lint": "gts lint",
     "lint:fix": "gts fix",
     "watch": "tsc --watch",
