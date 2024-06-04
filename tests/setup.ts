@@ -65,7 +65,7 @@ async function deployPaymasterAndToken(): Promise<{
 
   // transfer ETH to paymaster so it could pay fee
   const faucetTx = await wallet.transfer({
-    token: utils.ETH_ADDRESS,
+    token: await wallet.getBaseToken(),
     to: paymasterAddress,
     amount: ethers.parseEther('100'),
   });
