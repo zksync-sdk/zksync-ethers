@@ -6,4 +6,5 @@ CHANGELOG.md
 typechain
 abi
 build
+build-esm
 tests/files
