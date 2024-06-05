@@ -740,35 +740,32 @@ export interface FullDepositFee {
 /** Represents a raw block transaction. */
 export interface RawBlockTransaction {
   common_data: {
-    L2: {
-      nonce: number;
-      fee: {
-        gas_limit: BigInt;
-        max_fee_per_gas: BigInt;
-        max_priority_fee_per_gas: BigInt;
-        gas_per_pubdata_limit: BigInt;
-      };
-      initiatorAddress: Address;
-      signature: Uint8Array;
-      transactionType: string;
-      input: {
-        hash: string;
-        data: Uint8Array;
-      };
-      paymasterParams: {
-        paymaster: Address;
-        paymasterInput: Uint8Array;
-      };
+    L1: {
+      canonicalTxHash: string;
+      deadlineBlock: number;
+      ethBlock: number;
+      ethHash: string;
+      fullFee: bigint;
+      gasLimit: bigint;
+      gasPerPubdataLimit: bigint;
+      layer2TipFee: bigint;
+      maxFeePerGas: bigint;
+      opProcessingType: string;
+      priorityQueueType: string;
+      refundRecipient: Address;
+      sender: Address;
+      serialId: number;
+      toMint: string;
     };
   };
   execute: {
     calldata: string;
     contractAddress: Address;
     factoryDeps: BytesLike[];
-    value: BigInt;
+    value: bigint;
   };
   received_timestamp_ms: number;
-  raw_bytes: string;
+  raw_bytes: string | null;
 }
 
 /** Contains parameters for finalizing the withdrawal transaction. */
