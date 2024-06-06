@@ -1467,17 +1467,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       const chainId = (await this._providerL2().getNetwork()).chainId;
 
-      let l1Bridge: IL1SharedBridge;
-
-      if (await this._providerL2().isBaseToken(sender)) {
-        l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else {
-        const l2Bridge = IL2BridgeFactory.connect(sender, this._providerL2());
-        l1Bridge = IL1SharedBridgeFactory.connect(
-          await l2Bridge.l1Bridge(),
-          this._providerL1()
-        );
-      }
+      let l1Bridge = (await this.getL1BridgeContracts()).shared;
 
       return await l1Bridge.isWithdrawalFinalized(
         chainId,
