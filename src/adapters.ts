@@ -1453,7 +1453,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         withdrawalHash,
         index
       );
-      const sender = ethers.utils.hexDataSlice(log.topics[1], 12);
       // `getLogProof` is called not to get proof but
       // to get the index of the corresponding L2->L1 log,
       // which is returned as `proof.id`.
@@ -1467,7 +1466,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       const chainId = (await this._providerL2().getNetwork()).chainId;
 
-      let l1Bridge = (await this.getL1BridgeContracts()).shared;
+      const l1Bridge = (await this.getL1BridgeContracts()).shared;
 
       return await l1Bridge.isWithdrawalFinalized(
         chainId,
