@@ -20,10 +20,11 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface Il2BridgeInterface extends ethers.utils.Interface {
+interface Il2SharedBridgeInterface extends ethers.utils.Interface {
   functions: {
     "finalizeDeposit(address,address,address,uint256,bytes)": FunctionFragment;
     "l1Bridge()": FunctionFragment;
+    "l1SharedBridge()": FunctionFragment;
     "l1TokenAddress(address)": FunctionFragment;
     "l2TokenAddress(address)": FunctionFragment;
     "withdraw(address,address,uint256)": FunctionFragment;
@@ -34,6 +35,10 @@ interface Il2BridgeInterface extends ethers.utils.Interface {
     values: [string, string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "l1Bridge", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "l1SharedBridge",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "l1TokenAddress",
     values: [string]
@@ -53,6 +58,10 @@ interface Il2BridgeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "l1Bridge", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "l1SharedBridge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "l1TokenAddress",
     data: BytesLike
   ): Result;
@@ -62,10 +71,16 @@ interface Il2BridgeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
-  events: {};
+  events: {
+    "FinalizeDeposit(address,address,address,uint256)": EventFragment;
+    "WithdrawalInitiated(address,address,address,uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "FinalizeDeposit"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WithdrawalInitiated"): EventFragment;
 }
 
-export class Il2Bridge extends Contract {
+export class Il2SharedBridge extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -76,7 +91,7 @@ export class Il2Bridge extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: Il2BridgeInterface;
+  interface: Il2SharedBridgeInterface;
 
   functions: {
     finalizeDeposit(
@@ -102,6 +117,14 @@ export class Il2Bridge extends Contract {
     }>;
 
     "l1Bridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    l1SharedBridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "l1SharedBridge()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
@@ -170,6 +193,10 @@ export class Il2Bridge extends Contract {
 
   "l1Bridge()"(overrides?: CallOverrides): Promise<string>;
 
+  l1SharedBridge(overrides?: CallOverrides): Promise<string>;
+
+  "l1SharedBridge()"(overrides?: CallOverrides): Promise<string>;
+
   l1TokenAddress(_l2Token: string, overrides?: CallOverrides): Promise<string>;
 
   "l1TokenAddress(address)"(
@@ -221,6 +248,10 @@ export class Il2Bridge extends Contract {
 
     "l1Bridge()"(overrides?: CallOverrides): Promise<string>;
 
+    l1SharedBridge(overrides?: CallOverrides): Promise<string>;
+
+    "l1SharedBridge()"(overrides?: CallOverrides): Promise<string>;
+
     l1TokenAddress(
       _l2Token: string,
       overrides?: CallOverrides
@@ -256,7 +287,21 @@ export class Il2Bridge extends Contract {
     ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    FinalizeDeposit(
+      l1Sender: string | null,
+      l2Receiver: string | null,
+      l2Token: string | null,
+      amount: null
+    ): EventFilter;
+
+    WithdrawalInitiated(
+      l2Sender: string | null,
+      l1Receiver: string | null,
+      l2Token: string | null,
+      amount: null
+    ): EventFilter;
+  };
 
   estimateGas: {
     finalizeDeposit(
@@ -280,6 +325,10 @@ export class Il2Bridge extends Contract {
     l1Bridge(overrides?: CallOverrides): Promise<BigNumber>;
 
     "l1Bridge()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    l1SharedBridge(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "l1SharedBridge()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     l1TokenAddress(
       _l2Token: string,
@@ -338,6 +387,12 @@ export class Il2Bridge extends Contract {
     l1Bridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "l1Bridge()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    l1SharedBridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "l1SharedBridge()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     l1TokenAddress(
       _l2Token: string,

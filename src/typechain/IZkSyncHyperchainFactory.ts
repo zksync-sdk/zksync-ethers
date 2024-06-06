@@ -5,18 +5,14 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { IZkSyncStateTransition } from "./IZkSyncStateTransition";
+import type { IZkSyncHyperchain } from "./IZkSyncHyperchain";
 
-export class IZkSyncStateTransitionFactory {
+export class IZkSyncHyperchainFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): IZkSyncStateTransition {
-    return new Contract(
-      address,
-      _abi,
-      signerOrProvider
-    ) as IZkSyncStateTransition;
+  ): IZkSyncHyperchain {
+    return new Contract(address, _abi, signerOrProvider) as IZkSyncHyperchain;
   }
 }
 
@@ -113,25 +109,6 @@ const _abi = [
       },
     ],
     name: "BlocksVerification",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "EthWithdrawalFinalized",
     type: "event",
   },
   {
@@ -712,7 +689,7 @@ const _abi = [
         type: "bytes32",
       },
     ],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1462,6 +1439,29 @@ const _abi = [
         internalType: "enum PubdataPricingMode",
         name: "",
         type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getSemverProtocolVersion",
+    outputs: [
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
       },
     ],
     stateMutability: "view",
@@ -2273,6 +2273,19 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "enum PubdataPricingMode",
+        name: "_pricingMode",
+        type: "uint8",
+      },
+    ],
+    name: "setPubdataPricingMode",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint128",
         name: "_nominator",
         type: "uint128",
@@ -2315,19 +2328,6 @@ const _abi = [
       },
     ],
     name: "setValidator",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "enum PubdataPricingMode",
-        name: "_validiumMode",
-        type: "uint8",
-      },
-    ],
-    name: "setValidiumMode",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
