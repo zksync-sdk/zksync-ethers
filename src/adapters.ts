@@ -42,8 +42,8 @@ import {
   INonceHolder__factory,
   IZkSyncHyperchain,
   IZkSyncHyperchain__factory,
-  IL2SharedBridge__factory,
-} from './typechain';
+  IL2SharedBridge__factory, IL2SharedBridge
+} from "./typechain";
 import {
   Address,
   BalancesMap,
@@ -1886,13 +1886,13 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getL2BridgeContracts(): Promise<{
       erc20: IL2Bridge;
       weth: IL2Bridge;
-      shared: IL2Bridge;
+      shared: IL2SharedBridge;
     }> {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
         erc20: IL2Bridge__factory.connect(addresses.erc20L2, this._signerL2()),
         weth: IL2Bridge__factory.connect(addresses.wethL2, this._signerL2()),
-        shared: IL2Bridge__factory.connect(
+        shared: IL2SharedBridge__factory.connect(
           addresses.sharedL2,
           this._signerL2()
         ),
