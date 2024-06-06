@@ -16,7 +16,7 @@ import {
   L2_CHAIN_URL,
   L1_CHAIN_URL,
 } from '../utils';
-import { L2_BASE_TOKEN_ADDRESS } from "../../src/utils";
+import {L2_BASE_TOKEN_ADDRESS} from '../../src/utils';
 
 const {expect} = chai;
 

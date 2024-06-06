@@ -12,7 +12,7 @@ import {
   PAYMASTER,
   L2_CHAIN_URL,
 } from '../utils';
-import { L2_BASE_TOKEN_ADDRESS } from "../../src/utils";
+import {L2_BASE_TOKEN_ADDRESS} from '../../src/utils';
 
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);

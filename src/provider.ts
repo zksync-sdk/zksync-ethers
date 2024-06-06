@@ -49,7 +49,6 @@ import {
   parseTransaction,
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   sleep,
-  isETH,
   isAddressEq,
 } from './utils';
 import {Signer} from './signer';
@@ -495,15 +494,18 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * console.log(`Token balance: ${await provider.getBalance(account, "latest", tokenAddress)}`);
    */
   override async getBalance(
-      address: Address,
-      blockTag?: BlockTag,
-      tokenAddress?: Address
+    address: Address,
+    blockTag?: BlockTag,
+    tokenAddress?: Address
   ): Promise<BigNumber> {
     const tag = this.formatter.blockTag(blockTag);
-    if(!tokenAddress){
-      tokenAddress = L2_BASE_TOKEN_ADDRESS
-    }else if (isAddressEq(tokenAddress, LEGACY_ETH_ADDRESS) || isAddressEq(tokenAddress, ETH_ADDRESS_IN_CONTRACTS)){
-      tokenAddress = await this.l2TokenAddress(tokenAddress)
+    if (!tokenAddress) {
+      tokenAddress = L2_BASE_TOKEN_ADDRESS;
+    } else if (
+      isAddressEq(tokenAddress, LEGACY_ETH_ADDRESS) ||
+      isAddressEq(tokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+    ) {
+      tokenAddress = await this.l2TokenAddress(tokenAddress);
     }
     if (isAddressEq(tokenAddress, L2_BASE_TOKEN_ADDRESS)) {
       // requesting base token balance
@@ -1254,10 +1256,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }): Promise<ethers.providers.TransactionRequest> {
     const {...tx} = transaction;
 
-    if(!tx.token){
-      tx.token = L2_BASE_TOKEN_ADDRESS
-    }else if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) || isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)){
-      tx.token = await this.l2TokenAddress(tx.token)
+    if (!tx.token) {
+      tx.token = L2_BASE_TOKEN_ADDRESS;
+    } else if (
+      isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+      isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)
+    ) {
+      tx.token = await this.l2TokenAddress(tx.token);
     }
 
     if (!tx.to && !tx.from) {
@@ -1283,8 +1288,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
       const ethL2Token = IEthTokenFactory.connect(L2_BASE_TOKEN_ADDRESS, this);
       const populatedTx = await ethL2Token.populateTransaction.withdraw(
-          tx.to!,
-          tx.overrides
+        tx.to!,
+        tx.overrides
       );
       if (tx.paymasterParams) {
         return {
@@ -1304,10 +1309,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
     const populatedTx = await bridge.populateTransaction.withdraw(
-        tx.to!,
-        tx.token,
-        tx.amount,
-        tx.overrides
+      tx.to!,
+      tx.token,
+      tx.amount,
+      tx.overrides
     );
     if (tx.paymasterParams) {
       return {
@@ -1413,10 +1418,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     overrides?: ethers.CallOverrides;
   }): Promise<ethers.providers.TransactionRequest> {
     const {...tx} = transaction;
-    if(!tx.token){
-      tx.token = L2_BASE_TOKEN_ADDRESS
-    }else if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) || isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)){
-      tx.token = await this.l2TokenAddress(tx.token)
+    if (!tx.token) {
+      tx.token = L2_BASE_TOKEN_ADDRESS;
+    } else if (
+      isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+      isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)
+    ) {
+      tx.token = await this.l2TokenAddress(tx.token);
     }
 
     tx.overrides ??= {};
@@ -1443,9 +1451,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     } else {
       const token = IERC20Factory.connect(tx.token, this);
       const populatedTx = await token.populateTransaction.transfer(
-          tx.to,
-          tx.amount,
-          tx.overrides
+        tx.to,
+        tx.amount,
+        tx.overrides
       );
       if (tx.paymasterParams) {
         return {
