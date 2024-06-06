@@ -4,9 +4,9 @@
 
 import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
-  IZkSyncStateTransition,
-  IZkSyncStateTransitionInterface,
-} from "../IZkSyncStateTransition";
+  IZkSyncHyperchain,
+  IZkSyncHyperchainInterface,
+} from "../IZkSyncHyperchain";
 
 const _abi = [
   {
@@ -101,25 +101,6 @@ const _abi = [
       },
     ],
     name: "BlocksVerification",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "EthWithdrawalFinalized",
     type: "event",
   },
   {
@@ -700,7 +681,7 @@ const _abi = [
         type: "bytes32",
       },
     ],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1450,6 +1431,29 @@ const _abi = [
         internalType: "enum PubdataPricingMode",
         name: "",
         type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getSemverProtocolVersion",
+    outputs: [
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
       },
     ],
     stateMutability: "view",
@@ -2261,6 +2265,19 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "enum PubdataPricingMode",
+        name: "_pricingMode",
+        type: "uint8",
+      },
+    ],
+    name: "setPubdataPricingMode",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint128",
         name: "_nominator",
         type: "uint128",
@@ -2303,19 +2320,6 @@ const _abi = [
       },
     ],
     name: "setValidator",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "enum PubdataPricingMode",
-        name: "_validiumMode",
-        type: "uint8",
-      },
-    ],
-    name: "setValidiumMode",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -2412,19 +2416,15 @@ const _abi = [
   },
 ] as const;
 
-export class IZkSyncStateTransition__factory {
+export class IZkSyncHyperchain__factory {
   static readonly abi = _abi;
-  static createInterface(): IZkSyncStateTransitionInterface {
-    return new Interface(_abi) as IZkSyncStateTransitionInterface;
+  static createInterface(): IZkSyncHyperchainInterface {
+    return new Interface(_abi) as IZkSyncHyperchainInterface;
   }
   static connect(
     address: string,
     runner?: ContractRunner | null
-  ): IZkSyncStateTransition {
-    return new Contract(
-      address,
-      _abi,
-      runner
-    ) as unknown as IZkSyncStateTransition;
+  ): IZkSyncHyperchain {
+    return new Contract(address, _abi, runner) as unknown as IZkSyncHyperchain;
   }
 }
