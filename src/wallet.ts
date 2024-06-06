@@ -27,6 +27,7 @@ import {
   IL1ERC20Bridge,
   IL1SharedBridge,
   IL2Bridge,
+  IL2SharedBridge,
   IZkSyncHyperchain,
 } from './typechain';
 
@@ -978,7 +979,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async getL2BridgeContracts(): Promise<{
     erc20: IL2Bridge;
     weth: IL2Bridge;
-    shared: IL2Bridge;
+    shared: IL2SharedBridge;
   }> {
     return super.getL2BridgeContracts();
   }
