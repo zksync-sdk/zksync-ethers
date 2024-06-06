@@ -1407,7 +1407,7 @@ describe('Wallet', () => {
         const amount = 7_000_000_000n;
         const l2BalanceBeforeWithdrawal = await wallet.getBalance();
         const withdrawTx = await wallet.withdraw({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: await wallet.getAddress(),
           amount: amount,
         });
@@ -1440,7 +1440,7 @@ describe('Wallet', () => {
           await wallet.getBalance(APPROVAL_TOKEN);
 
         const withdrawTx = await wallet.withdraw({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: await wallet.getAddress(),
           amount: amount,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
@@ -1900,7 +1900,7 @@ describe('Wallet', () => {
         const amount = 7_000_000_000n;
         const balanceBeforeTransfer = await provider.getBalance(ADDRESS2);
         const tx = await wallet.transfer({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: ADDRESS2,
           amount: amount,
         });
