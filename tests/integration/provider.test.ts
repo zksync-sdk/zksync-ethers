@@ -12,6 +12,7 @@ import {
   PAYMASTER,
   L2_CHAIN_URL,
 } from '../utils';
+import { L2_BASE_TOKEN_ADDRESS } from "../../src/utils";
 
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -522,7 +523,7 @@ describe('Provider', () => {
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
         };
         const result = await provider.getWithdrawTx({
-          token: await provider.getBaseTokenContractAddress(),
+          token: L2_BASE_TOKEN_ADDRESS,
           amount: 7_000_000_000,
           to: ADDRESS1,
           from: ADDRESS1,
@@ -545,7 +546,7 @@ describe('Provider', () => {
           },
         };
         const result = await provider.getWithdrawTx({
-          token: await provider.getBaseTokenContractAddress(),
+          token: L2_BASE_TOKEN_ADDRESS,
           amount: 7_000_000_000,
           to: ADDRESS1,
           from: ADDRESS1,

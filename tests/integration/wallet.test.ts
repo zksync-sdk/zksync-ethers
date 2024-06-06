@@ -16,6 +16,7 @@ import {
   L2_CHAIN_URL,
   L1_CHAIN_URL,
 } from '../utils';
+import { L2_BASE_TOKEN_ADDRESS } from "../../src/utils";
 
 const {expect} = chai;
 
@@ -1184,7 +1185,7 @@ describe('Wallet', () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1224,7 +1225,7 @@ describe('Wallet', () => {
           }),
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1278,7 +1279,7 @@ describe('Wallet', () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1302,7 +1303,7 @@ describe('Wallet', () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1327,7 +1328,7 @@ describe('Wallet', () => {
         amount: amount,
       });
       await withdrawTx.waitFinalize();
-      // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
       const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
         withdrawTx.hash
@@ -1371,7 +1372,7 @@ describe('Wallet', () => {
         }),
       });
       await withdrawTx.waitFinalize();
-      // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
       const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
         withdrawTx.hash
@@ -1767,7 +1768,7 @@ describe('Wallet', () => {
           await provider.getBalance(ADDRESS2);
 
         const tx = await wallet.transfer({
-          token: await wallet.getBaseToken(),
+          token: L2_BASE_TOKEN_ADDRESS,
           to: ADDRESS2,
           amount: amount,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
