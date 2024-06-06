@@ -1,3 +1,18 @@
+# [5.8.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.7.2...v5.8.0) (2024-06-06)
+
+
+### Bug Fixes
+
+* **adapter:** fix `isWithdrawalFinalized` ([53bd0df](https://github.com/zksync-sdk/zksync-ethers/commit/53bd0df4cfa98cf18e3c0a03332f26491a1fbba1))
+* **provider:** `getTransferTx` and `getWithdrawTx` non eth chain ([9ef3836](https://github.com/zksync-sdk/zksync-ethers/commit/9ef38363ee2834df67078072b7d87857a7d6f2bc))
+* **provider:** fix type l2Response.waitL1Commit as `waitL1Commit` ([c33b117](https://github.com/zksync-sdk/zksync-ethers/commit/c33b117b68749951c4cba3470e8017b895ed9707))
+* **types:** update `RawBlockTransaction` ([fe3a0ee](https://github.com/zksync-sdk/zksync-ethers/commit/fe3a0ee16e9a136634bc13828bd0dc0d88d418ce))
+
+
+### Features
+
+* provide support for Bridgehub ([bf234e3](https://github.com/zksync-sdk/zksync-ethers/commit/bf234e3e40fa86a577b30b63d7a2e4a93544603b))
+
 ## [5.7.2](https://github.com/zksync-sdk/zksync-ethers/compare/v5.7.1...v5.7.2) (2024-05-10)
 
 
