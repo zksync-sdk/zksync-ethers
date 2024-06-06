@@ -44,7 +44,7 @@ import {
   isAddressEq,
 } from './utils';
 import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
-import { Il2SharedBridge } from "./typechain/Il2SharedBridge";
+import {Il2SharedBridge} from './typechain/Il2SharedBridge';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -1858,7 +1858,10 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       return {
         erc20: IL2BridgeFactory.connect(addresses.erc20L2, this._signerL2()),
         weth: IL2BridgeFactory.connect(addresses.wethL2, this._signerL2()),
-        shared: Il2SharedBridgeFactory.connect(addresses.sharedL2, this._signerL2()),
+        shared: Il2SharedBridgeFactory.connect(
+          addresses.sharedL2,
+          this._signerL2()
+        ),
       };
     }
 
