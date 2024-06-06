@@ -29,6 +29,7 @@ import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {Il2Bridge as IL2Bridge} from './typechain/Il2Bridge';
 import {IBridgehub} from './typechain/IBridgehub';
+import { Il2SharedBridge } from "./typechain/Il2SharedBridge";
 
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
@@ -1069,7 +1070,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async getL2BridgeContracts(): Promise<{
     erc20: IL2Bridge;
     weth: IL2Bridge;
-    shared: IL2Bridge;
+    shared: Il2SharedBridge;
   }> {
     return super.getL2BridgeContracts();
   }

@@ -34,6 +34,7 @@ import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {IZkSyncHyperchain} from './typechain/IZkSyncHyperchain';
 import {IBridgehub} from './typechain/IBridgehub';
+import { Il2SharedBridge } from "./typechain/Il2SharedBridge";
 
 /**
  * All typed data conforming to the EIP712 standard within zkSync Era.
@@ -280,7 +281,7 @@ export class Signer extends AdapterL2(ethers.providers.JsonRpcSigner) {
   override async getL2BridgeContracts(): Promise<{
     erc20: IL2Bridge;
     weth: IL2Bridge;
-    shared: IL2Bridge;
+    shared: Il2SharedBridge;
   }> {
     return super.getL2BridgeContracts();
   }
