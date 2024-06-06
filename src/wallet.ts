@@ -24,7 +24,7 @@ import {
 } from './types';
 import {ProgressCallback} from '@ethersproject/json-wallets';
 import {AdapterL1, AdapterL2} from './adapters';
-import {IZkSyncStateTransition} from './typechain/IZkSyncStateTransition';
+import {IZkSyncHyperchain} from './typechain/IZkSyncHyperchain';
 import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {Il2Bridge as IL2Bridge} from './typechain/Il2Bridge';
@@ -77,7 +77,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * const mainContract = await wallet.getMainContract();
    */
-  override async getMainContract(): Promise<IZkSyncStateTransition> {
+  override async getMainContract(): Promise<IZkSyncHyperchain> {
     return super.getMainContract();
   }
 

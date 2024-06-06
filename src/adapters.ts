@@ -9,8 +9,8 @@ import {IBridgehub} from './typechain/IBridgehub';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {Il1SharedBridgeFactory as IL1SharedBridgeFactory} from './typechain/Il1SharedBridgeFactory';
 import {INonceHolderFactory} from './typechain/INonceHolderFactory';
-import {IZkSyncStateTransitionFactory} from './typechain/IZkSyncStateTransitionFactory';
-import {IZkSyncStateTransition} from './typechain/IZkSyncStateTransition';
+import {IZkSyncHyperchainFactory} from './typechain/IZkSyncHyperchainFactory';
+import {IZkSyncHyperchain} from './typechain/IZkSyncHyperchain';
 import {Provider} from './provider';
 import {
   Address,
@@ -43,6 +43,7 @@ import {
   undoL1ToL2Alias,
   isAddressEq,
 } from './utils';
+import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -79,9 +80,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     /**
      * Returns `Contract` wrapper of the zkSync Era smart contract.
      */
-    async getMainContract(): Promise<IZkSyncStateTransition> {
+    async getMainContract(): Promise<IZkSyncHyperchain> {
       const address = await this._providerL2().getMainContractAddress();
-      return IZkSyncStateTransitionFactory.connect(address, this._signerL1());
+      return IZkSyncHyperchainFactory.connect(address, this._signerL1());
     }
 
     /**
@@ -1453,6 +1454,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         withdrawalHash,
         index
       );
+      const sender = ethers.utils.hexDataSlice(log.topics[1], 12);
       // `getLogProof` is called not to get proof but
       // to get the index of the corresponding L2->L1 log,
       // which is returned as `proof.id`.
@@ -1466,7 +1468,20 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       const chainId = (await this._providerL2().getNetwork()).chainId;
 
-      const l1Bridge = (await this.getL1BridgeContracts()).shared;
+      let l1Bridge: IL1SharedBridge;
+
+      if (await this._providerL2().isBaseToken(sender)) {
+        l1Bridge = (await this.getL1BridgeContracts()).shared;
+      } else {
+        const l2Bridge = Il2SharedBridgeFactory.connect(
+          sender,
+          this._providerL2()
+        );
+        l1Bridge = IL1SharedBridgeFactory.connect(
+          await l2Bridge.l1SharedBridge(),
+          this._providerL1()
+        );
+      }
 
       return await l1Bridge.isWithdrawalFinalized(
         chainId,

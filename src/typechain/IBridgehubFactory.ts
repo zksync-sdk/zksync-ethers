@@ -184,7 +184,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "getStateTransition",
+    name: "getHyperchain",
     outputs: [
       {
         internalType: "address",

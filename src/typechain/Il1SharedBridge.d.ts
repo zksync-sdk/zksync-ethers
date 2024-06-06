@@ -23,7 +23,8 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface Il1SharedBridgeInterface extends ethers.utils.Interface {
   functions: {
-    "bridgehub()": FunctionFragment;
+    "BRIDGE_HUB()": FunctionFragment;
+    "L1_WETH_TOKEN()": FunctionFragment;
     "bridgehubConfirmL2Transaction(uint256,bytes32,bytes32)": FunctionFragment;
     "bridgehubDeposit(uint256,address,uint256,bytes)": FunctionFragment;
     "bridgehubDepositBaseToken(uint256,address,address,uint256)": FunctionFragment;
@@ -34,14 +35,22 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     "finalizeWithdrawal(uint256,uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "finalizeWithdrawalLegacyErc20Bridge(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "isWithdrawalFinalized(uint256,uint256,uint256)": FunctionFragment;
-    "l1WethAddress()": FunctionFragment;
     "l2BridgeAddress(uint256)": FunctionFragment;
     "legacyBridge()": FunctionFragment;
     "receiveEth(uint256)": FunctionFragment;
-    "setEraFirstPostUpgradeBatch(uint256)": FunctionFragment;
+    "setEraLegacyBridgeLastDepositTime(uint256,uint256)": FunctionFragment;
+    "setEraPostDiamondUpgradeFirstBatch(uint256)": FunctionFragment;
+    "setEraPostLegacyBridgeUpgradeFirstBatch(uint256)": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "bridgehub", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "BRIDGE_HUB",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "L1_WETH_TOKEN",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "bridgehubConfirmL2Transaction",
     values: [BigNumberish, BytesLike, BytesLike]
@@ -117,10 +126,6 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "l1WethAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "l2BridgeAddress",
     values: [BigNumberish]
   ): string;
@@ -133,11 +138,23 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setEraFirstPostUpgradeBatch",
+    functionFragment: "setEraLegacyBridgeLastDepositTime",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setEraPostDiamondUpgradeFirstBatch",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setEraPostLegacyBridgeUpgradeFirstBatch",
     values: [BigNumberish]
   ): string;
 
-  decodeFunctionResult(functionFragment: "bridgehub", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "BRIDGE_HUB", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "L1_WETH_TOKEN",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "bridgehubConfirmL2Transaction",
     data: BytesLike
@@ -179,10 +196,6 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "l1WethAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "l2BridgeAddress",
     data: BytesLike
   ): Result;
@@ -192,7 +205,15 @@ interface Il1SharedBridgeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "receiveEth", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setEraFirstPostUpgradeBatch",
+    functionFragment: "setEraLegacyBridgeLastDepositTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEraPostDiamondUpgradeFirstBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEraPostLegacyBridgeUpgradeFirstBatch",
     data: BytesLike
   ): Result;
 
@@ -233,11 +254,19 @@ export class Il1SharedBridge extends Contract {
   interface: Il1SharedBridgeInterface;
 
   functions: {
-    bridgehub(overrides?: CallOverrides): Promise<{
+    BRIDGE_HUB(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<{
+    "BRIDGE_HUB()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    L1_WETH_TOKEN(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "L1_WETH_TOKEN()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
@@ -431,14 +460,6 @@ export class Il1SharedBridge extends Contract {
       0: boolean;
     }>;
 
-    l1WethAddress(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "l1WethAddress()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -471,20 +492,46 @@ export class Il1SharedBridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    setEraFirstPostUpgradeBatch(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    setEraLegacyBridgeLastDepositTime(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "setEraFirstPostUpgradeBatch(uint256)"(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    "setEraLegacyBridgeLastDepositTime(uint256,uint256)"(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setEraPostDiamondUpgradeFirstBatch(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setEraPostDiamondUpgradeFirstBatch(uint256)"(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setEraPostLegacyBridgeUpgradeFirstBatch(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setEraPostLegacyBridgeUpgradeFirstBatch(uint256)"(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
   };
 
-  bridgehub(overrides?: CallOverrides): Promise<string>;
+  BRIDGE_HUB(overrides?: CallOverrides): Promise<string>;
 
-  "bridgehub()"(overrides?: CallOverrides): Promise<string>;
+  "BRIDGE_HUB()"(overrides?: CallOverrides): Promise<string>;
+
+  L1_WETH_TOKEN(overrides?: CallOverrides): Promise<string>;
+
+  "L1_WETH_TOKEN()"(overrides?: CallOverrides): Promise<string>;
 
   bridgehubConfirmL2Transaction(
     _chainId: BigNumberish,
@@ -668,10 +715,6 @@ export class Il1SharedBridge extends Contract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  l1WethAddress(overrides?: CallOverrides): Promise<string>;
-
-  "l1WethAddress()"(overrides?: CallOverrides): Promise<string>;
-
   l2BridgeAddress(
     _chainId: BigNumberish,
     overrides?: CallOverrides
@@ -696,20 +739,46 @@ export class Il1SharedBridge extends Contract {
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  setEraFirstPostUpgradeBatch(
-    _eraFirstPostUpgradeBatch: BigNumberish,
+  setEraLegacyBridgeLastDepositTime(
+    _eraLegacyBridgeLastDepositBatch: BigNumberish,
+    _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "setEraFirstPostUpgradeBatch(uint256)"(
-    _eraFirstPostUpgradeBatch: BigNumberish,
+  "setEraLegacyBridgeLastDepositTime(uint256,uint256)"(
+    _eraLegacyBridgeLastDepositBatch: BigNumberish,
+    _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setEraPostDiamondUpgradeFirstBatch(
+    _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setEraPostDiamondUpgradeFirstBatch(uint256)"(
+    _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setEraPostLegacyBridgeUpgradeFirstBatch(
+    _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setEraPostLegacyBridgeUpgradeFirstBatch(uint256)"(
+    _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    bridgehub(overrides?: CallOverrides): Promise<string>;
+    BRIDGE_HUB(overrides?: CallOverrides): Promise<string>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<string>;
+    "BRIDGE_HUB()"(overrides?: CallOverrides): Promise<string>;
+
+    L1_WETH_TOKEN(overrides?: CallOverrides): Promise<string>;
+
+    "L1_WETH_TOKEN()"(overrides?: CallOverrides): Promise<string>;
 
     bridgehubConfirmL2Transaction(
       _chainId: BigNumberish,
@@ -929,10 +998,6 @@ export class Il1SharedBridge extends Contract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    l1WethAddress(overrides?: CallOverrides): Promise<string>;
-
-    "l1WethAddress()"(overrides?: CallOverrides): Promise<string>;
-
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -957,13 +1022,35 @@ export class Il1SharedBridge extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setEraFirstPostUpgradeBatch(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    setEraLegacyBridgeLastDepositTime(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "setEraFirstPostUpgradeBatch(uint256)"(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    "setEraLegacyBridgeLastDepositTime(uint256,uint256)"(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setEraPostDiamondUpgradeFirstBatch(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setEraPostDiamondUpgradeFirstBatch(uint256)"(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setEraPostLegacyBridgeUpgradeFirstBatch(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setEraPostLegacyBridgeUpgradeFirstBatch(uint256)"(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -1016,9 +1103,13 @@ export class Il1SharedBridge extends Contract {
   };
 
   estimateGas: {
-    bridgehub(overrides?: CallOverrides): Promise<BigNumber>;
+    BRIDGE_HUB(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "BRIDGE_HUB()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    L1_WETH_TOKEN(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "L1_WETH_TOKEN()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     bridgehubConfirmL2Transaction(
       _chainId: BigNumberish,
@@ -1201,10 +1292,6 @@ export class Il1SharedBridge extends Contract {
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    l1WethAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "l1WethAddress()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     l2BridgeAddress(
       _chainId: BigNumberish,
@@ -1230,21 +1317,47 @@ export class Il1SharedBridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    setEraFirstPostUpgradeBatch(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    setEraLegacyBridgeLastDepositTime(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "setEraFirstPostUpgradeBatch(uint256)"(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    "setEraLegacyBridgeLastDepositTime(uint256,uint256)"(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setEraPostDiamondUpgradeFirstBatch(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setEraPostDiamondUpgradeFirstBatch(uint256)"(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setEraPostLegacyBridgeUpgradeFirstBatch(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setEraPostLegacyBridgeUpgradeFirstBatch(uint256)"(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    bridgehub(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    BRIDGE_HUB(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "bridgehub()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "BRIDGE_HUB()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    L1_WETH_TOKEN(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "L1_WETH_TOKEN()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     bridgehubConfirmL2Transaction(
       _chainId: BigNumberish,
@@ -1428,10 +1541,6 @@ export class Il1SharedBridge extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    l1WethAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "l1WethAddress()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     l2BridgeAddress(
       _chainId: BigNumberish,
       overrides?: CallOverrides
@@ -1456,13 +1565,35 @@ export class Il1SharedBridge extends Contract {
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    setEraFirstPostUpgradeBatch(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    setEraLegacyBridgeLastDepositTime(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "setEraFirstPostUpgradeBatch(uint256)"(
-      _eraFirstPostUpgradeBatch: BigNumberish,
+    "setEraLegacyBridgeLastDepositTime(uint256,uint256)"(
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setEraPostDiamondUpgradeFirstBatch(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setEraPostDiamondUpgradeFirstBatch(uint256)"(
+      _eraPostDiamondUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setEraPostLegacyBridgeUpgradeFirstBatch(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setEraPostLegacyBridgeUpgradeFirstBatch(uint256)"(
+      _eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
   };

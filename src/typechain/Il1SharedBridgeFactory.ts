@@ -223,10 +223,23 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "bridgehub",
+    name: "BRIDGE_HUB",
     outputs: [
       {
         internalType: "contract IBridgehub",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "L1_WETH_TOKEN",
+    outputs: [
+      {
+        internalType: "address",
         name: "",
         type: "address",
       },
@@ -637,19 +650,6 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "l1WethAddress",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "uint256",
@@ -698,11 +698,42 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_eraFirstPostUpgradeBatch",
+        name: "_eraLegacyBridgeLastDepositBatch",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_eraLegacyBridgeLastDepositTxNumber",
         type: "uint256",
       },
     ],
-    name: "setEraFirstPostUpgradeBatch",
+    name: "setEraLegacyBridgeLastDepositTime",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_eraPostDiamondUpgradeFirstBatch",
+        type: "uint256",
+      },
+    ],
+    name: "setEraPostDiamondUpgradeFirstBatch",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_eraPostLegacyBridgeUpgradeFirstBatch",
+        type: "uint256",
+      },
+    ],
+    name: "setEraPostLegacyBridgeUpgradeFirstBatch",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

@@ -19,7 +19,7 @@ export * from './paymaster-utils';
 export * from './smart-account-utils';
 export {EIP712_TYPES} from './signer';
 
-import IZkSyncABI from '../abi/IZkSyncStateTransition.json';
+import IZkSyncABI from '../abi/IZkSyncHyperchain.json';
 import IBridgehubABI from '../abi/IBridgehub.json';
 import IContractDeployerABI from '../abi/IContractDeployer.json';
 import IL1MessengerABI from '../abi/IL1Messenger.json';

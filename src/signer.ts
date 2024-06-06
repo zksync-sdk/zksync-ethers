@@ -32,7 +32,7 @@ import {AdapterL1, AdapterL2} from './adapters';
 import {Il2Bridge as IL2Bridge} from './typechain/Il2Bridge';
 import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
-import {IZkSyncStateTransition} from './typechain/IZkSyncStateTransition';
+import {IZkSyncHyperchain} from './typechain/IZkSyncHyperchain';
 import {IBridgehub} from './typechain/IBridgehub';
 
 /**
@@ -634,7 +634,7 @@ export class L1Signer extends AdapterL1(ethers.providers.JsonRpcSigner) {
    *
    * const mainContract = await signer.getMainContract();
    */
-  override async getMainContract(): Promise<IZkSyncStateTransition> {
+  override async getMainContract(): Promise<IZkSyncHyperchain> {
     return super.getMainContract();
   }
 

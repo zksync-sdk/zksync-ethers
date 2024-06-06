@@ -23,6 +23,7 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface Il1Erc20BridgeInterface extends ethers.utils.Interface {
   functions: {
+    "SHARED_BRIDGE()": FunctionFragment;
     "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])": FunctionFragment;
     "deposit(address,address,uint256,uint256,uint256)": FunctionFragment;
     "depositAmount(address,address,bytes32)": FunctionFragment;
@@ -31,10 +32,13 @@ interface Il1Erc20BridgeInterface extends ethers.utils.Interface {
     "l2Bridge()": FunctionFragment;
     "l2TokenAddress(address)": FunctionFragment;
     "l2TokenBeacon()": FunctionFragment;
-    "sharedBridge()": FunctionFragment;
-    "transferTokenToSharedBridge(address,uint256)": FunctionFragment;
+    "transferTokenToSharedBridge(address)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "SHARED_BRIDGE",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "claimFailedDeposit",
     values: [
@@ -73,14 +77,14 @@ interface Il1Erc20BridgeInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "sharedBridge",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "transferTokenToSharedBridge",
-    values: [string, BigNumberish]
+    values: [string]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "SHARED_BRIDGE",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "claimFailedDeposit",
     data: BytesLike
@@ -105,10 +109,6 @@ interface Il1Erc20BridgeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "l2TokenBeacon",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "sharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -141,6 +141,14 @@ export class Il1Erc20Bridge extends Contract {
   interface: Il1Erc20BridgeInterface;
 
   functions: {
+    SHARED_BRIDGE(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "SHARED_BRIDGE()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
     claimFailedDeposit(
       _depositSender: string,
       _l1Token: string,
@@ -260,26 +268,20 @@ export class Il1Erc20Bridge extends Contract {
       0: string;
     }>;
 
-    sharedBridge(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "sharedBridge()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
     transferTokenToSharedBridge(
       _token: string,
-      _amount: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "transferTokenToSharedBridge(address,uint256)"(
+    "transferTokenToSharedBridge(address)"(
       _token: string,
-      _amount: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
   };
+
+  SHARED_BRIDGE(overrides?: CallOverrides): Promise<string>;
+
+  "SHARED_BRIDGE()"(overrides?: CallOverrides): Promise<string>;
 
   claimFailedDeposit(
     _depositSender: string,
@@ -381,23 +383,21 @@ export class Il1Erc20Bridge extends Contract {
 
   "l2TokenBeacon()"(overrides?: CallOverrides): Promise<string>;
 
-  sharedBridge(overrides?: CallOverrides): Promise<string>;
-
-  "sharedBridge()"(overrides?: CallOverrides): Promise<string>;
-
   transferTokenToSharedBridge(
     _token: string,
-    _amount: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "transferTokenToSharedBridge(address,uint256)"(
+  "transferTokenToSharedBridge(address)"(
     _token: string,
-    _amount: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    SHARED_BRIDGE(overrides?: CallOverrides): Promise<string>;
+
+    "SHARED_BRIDGE()"(overrides?: CallOverrides): Promise<string>;
+
     claimFailedDeposit(
       _depositSender: string,
       _l1Token: string,
@@ -501,19 +501,13 @@ export class Il1Erc20Bridge extends Contract {
 
     "l2TokenBeacon()"(overrides?: CallOverrides): Promise<string>;
 
-    sharedBridge(overrides?: CallOverrides): Promise<string>;
-
-    "sharedBridge()"(overrides?: CallOverrides): Promise<string>;
-
     transferTokenToSharedBridge(
       _token: string,
-      _amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "transferTokenToSharedBridge(address,uint256)"(
+    "transferTokenToSharedBridge(address)"(
       _token: string,
-      _amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -541,6 +535,10 @@ export class Il1Erc20Bridge extends Contract {
   };
 
   estimateGas: {
+    SHARED_BRIDGE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "SHARED_BRIDGE()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     claimFailedDeposit(
       _depositSender: string,
       _l1Token: string,
@@ -644,24 +642,22 @@ export class Il1Erc20Bridge extends Contract {
 
     "l2TokenBeacon()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    sharedBridge(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "sharedBridge()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferTokenToSharedBridge(
       _token: string,
-      _amount: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "transferTokenToSharedBridge(address,uint256)"(
+    "transferTokenToSharedBridge(address)"(
       _token: string,
-      _amount: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    SHARED_BRIDGE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "SHARED_BRIDGE()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     claimFailedDeposit(
       _depositSender: string,
       _l1Token: string,
@@ -765,19 +761,13 @@ export class Il1Erc20Bridge extends Contract {
 
     "l2TokenBeacon()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    sharedBridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "sharedBridge()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     transferTokenToSharedBridge(
       _token: string,
-      _amount: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "transferTokenToSharedBridge(address,uint256)"(
+    "transferTokenToSharedBridge(address)"(
       _token: string,
-      _amount: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
   };

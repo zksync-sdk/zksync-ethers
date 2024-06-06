@@ -5,18 +5,80 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { Il2Bridge } from "./Il2Bridge";
+import type { Il2SharedBridge } from "./Il2SharedBridge";
 
-export class Il2BridgeFactory {
+export class Il2SharedBridgeFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): Il2Bridge {
-    return new Contract(address, _abi, signerOrProvider) as Il2Bridge;
+  ): Il2SharedBridge {
+    return new Contract(address, _abi, signerOrProvider) as Il2SharedBridge;
   }
 }
 
 const _abi = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l1Sender",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Receiver",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "FinalizeDeposit",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Sender",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l1Receiver",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "WithdrawalInitiated",
+    type: "event",
+  },
   {
     inputs: [
       {
@@ -53,6 +115,19 @@ const _abi = [
   {
     inputs: [],
     name: "l1Bridge",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "l1SharedBridge",
     outputs: [
       {
         internalType: "address",

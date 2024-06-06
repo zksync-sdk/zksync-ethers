@@ -21,7 +21,7 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
+interface IZkSyncHyperchainInterface extends ethers.utils.Interface {
   functions: {
     "acceptAdmin()": FunctionFragment;
     "baseTokenGasPriceMultiplierDenominator()": FunctionFragment;
@@ -54,6 +54,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     "getPriorityTxMaxGasLimit()": FunctionFragment;
     "getProtocolVersion()": FunctionFragment;
     "getPubdataPricingMode()": FunctionFragment;
+    "getSemverProtocolVersion()": FunctionFragment;
     "getStateTransitionManager()": FunctionFragment;
     "getTotalBatchesCommitted()": FunctionFragment;
     "getTotalBatchesExecuted()": FunctionFragment;
@@ -80,10 +81,10 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     "setPendingAdmin(address)": FunctionFragment;
     "setPorterAvailability(bool)": FunctionFragment;
     "setPriorityTxMaxGasLimit(uint256)": FunctionFragment;
+    "setPubdataPricingMode(uint8)": FunctionFragment;
     "setTokenMultiplier(uint128,uint128)": FunctionFragment;
     "setTransactionFilterer(address)": FunctionFragment;
     "setValidator(address,bool)": FunctionFragment;
-    "setValidiumMode(uint8)": FunctionFragment;
     "storedBatchHash(uint256)": FunctionFragment;
     "transferEthToSharedBridge()": FunctionFragment;
     "unfreezeDiamond()": FunctionFragment;
@@ -308,6 +309,10 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getSemverProtocolVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getStateTransitionManager",
     values?: undefined
   ): string;
@@ -492,6 +497,10 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setPubdataPricingMode",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setTokenMultiplier",
     values: [BigNumberish, BigNumberish]
   ): string;
@@ -502,10 +511,6 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "setValidator",
     values: [string, boolean]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setValidiumMode",
-    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "storedBatchHash",
@@ -652,6 +657,10 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getSemverProtocolVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getStateTransitionManager",
     data: BytesLike
   ): Result;
@@ -756,6 +765,10 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setPubdataPricingMode",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setTokenMultiplier",
     data: BytesLike
   ): Result;
@@ -765,10 +778,6 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setValidator",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setValidiumMode",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -793,7 +802,6 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
     "BlockExecution(uint256,bytes32,bytes32)": EventFragment;
     "BlocksRevert(uint256,uint256,uint256)": EventFragment;
     "BlocksVerification(uint256,uint256)": EventFragment;
-    "EthWithdrawalFinalized(address,uint256)": EventFragment;
     "ExecuteUpgrade(tuple)": EventFragment;
     "Freeze()": EventFragment;
     "IsPorterAvailableStatusUpdate(bool)": EventFragment;
@@ -814,7 +822,6 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "BlockExecution"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BlocksRevert"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BlocksVerification"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EthWithdrawalFinalized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ExecuteUpgrade"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Freeze"): EventFragment;
   getEvent(
@@ -833,7 +840,7 @@ interface IZkSyncStateTransitionInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ValidiumModeStatusUpdate"): EventFragment;
 }
 
-export class IZkSyncStateTransition extends Contract {
+export class IZkSyncHyperchain extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -844,7 +851,7 @@ export class IZkSyncStateTransition extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: IZkSyncStateTransitionInterface;
+  interface: IZkSyncHyperchainInterface;
 
   functions: {
     acceptAdmin(overrides?: Overrides): Promise<ContractTransaction>;
@@ -883,7 +890,7 @@ export class IZkSyncStateTransition extends Contract {
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     "bridgehubRequestL2Transaction(tuple)"(
@@ -898,7 +905,7 @@ export class IZkSyncStateTransition extends Contract {
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     changeFeeParams(
@@ -1307,6 +1314,18 @@ export class IZkSyncStateTransition extends Contract {
 
     "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<{
       0: number;
+    }>;
+
+    getSemverProtocolVersion(overrides?: CallOverrides): Promise<{
+      0: number;
+      1: number;
+      2: number;
+    }>;
+
+    "getSemverProtocolVersion()"(overrides?: CallOverrides): Promise<{
+      0: number;
+      1: number;
+      2: number;
     }>;
 
     getStateTransitionManager(overrides?: CallOverrides): Promise<{
@@ -1777,6 +1796,16 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    setPubdataPricingMode(
+      _pricingMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setPubdataPricingMode(uint8)"(
+      _pricingMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     setTokenMultiplier(
       _nominator: BigNumberish,
       _denominator: BigNumberish,
@@ -1808,16 +1837,6 @@ export class IZkSyncStateTransition extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    setValidiumMode(
-      _validiumMode: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "setValidiumMode(uint8)"(
-      _validiumMode: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -1910,7 +1929,7 @@ export class IZkSyncStateTransition extends Contract {
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
-    overrides?: PayableOverrides
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   "bridgehubRequestL2Transaction(tuple)"(
@@ -1925,7 +1944,7 @@ export class IZkSyncStateTransition extends Contract {
       factoryDeps: BytesLike[];
       refundRecipient: string;
     },
-    overrides?: PayableOverrides
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   changeFeeParams(
@@ -2267,6 +2286,18 @@ export class IZkSyncStateTransition extends Contract {
   getPubdataPricingMode(overrides?: CallOverrides): Promise<number>;
 
   "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<number>;
+
+  getSemverProtocolVersion(overrides?: CallOverrides): Promise<{
+    0: number;
+    1: number;
+    2: number;
+  }>;
+
+  "getSemverProtocolVersion()"(overrides?: CallOverrides): Promise<{
+    0: number;
+    1: number;
+    2: number;
+  }>;
 
   getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
 
@@ -2662,6 +2693,16 @@ export class IZkSyncStateTransition extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  setPubdataPricingMode(
+    _pricingMode: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setPubdataPricingMode(uint8)"(
+    _pricingMode: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   setTokenMultiplier(
     _nominator: BigNumberish,
     _denominator: BigNumberish,
@@ -2693,16 +2734,6 @@ export class IZkSyncStateTransition extends Contract {
   "setValidator(address,bool)"(
     _validator: string,
     _active: boolean,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  setValidiumMode(
-    _validiumMode: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "setValidiumMode(uint8)"(
-    _validiumMode: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -3153,6 +3184,18 @@ export class IZkSyncStateTransition extends Contract {
 
     "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<number>;
 
+    getSemverProtocolVersion(overrides?: CallOverrides): Promise<{
+      0: number;
+      1: number;
+      2: number;
+    }>;
+
+    "getSemverProtocolVersion()"(overrides?: CallOverrides): Promise<{
+      0: number;
+      1: number;
+      2: number;
+    }>;
+
     getStateTransitionManager(overrides?: CallOverrides): Promise<string>;
 
     "getStateTransitionManager()"(overrides?: CallOverrides): Promise<string>;
@@ -3550,6 +3593,16 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setPubdataPricingMode(
+      _pricingMode: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setPubdataPricingMode(uint8)"(
+      _pricingMode: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setTokenMultiplier(
       _nominator: BigNumberish,
       _denominator: BigNumberish,
@@ -3581,16 +3634,6 @@ export class IZkSyncStateTransition extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setValidiumMode(
-      _validiumMode: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "setValidiumMode(uint8)"(
-      _validiumMode: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -3666,8 +3709,6 @@ export class IZkSyncStateTransition extends Contract {
       previousLastVerifiedBatch: BigNumberish | null,
       currentLastVerifiedBatch: BigNumberish | null
     ): EventFilter;
-
-    EthWithdrawalFinalized(to: string | null, amount: null): EventFilter;
 
     ExecuteUpgrade(diamondCut: null): EventFilter;
 
@@ -3758,7 +3799,7 @@ export class IZkSyncStateTransition extends Contract {
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     "bridgehubRequestL2Transaction(tuple)"(
@@ -3773,7 +3814,7 @@ export class IZkSyncStateTransition extends Contract {
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     changeFeeParams(
@@ -4119,6 +4160,10 @@ export class IZkSyncStateTransition extends Contract {
     getPubdataPricingMode(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getPubdataPricingMode()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getSemverProtocolVersion(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getSemverProtocolVersion()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getStateTransitionManager(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -4488,6 +4533,16 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    setPubdataPricingMode(
+      _pricingMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setPubdataPricingMode(uint8)"(
+      _pricingMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     setTokenMultiplier(
       _nominator: BigNumberish,
       _denominator: BigNumberish,
@@ -4519,16 +4574,6 @@ export class IZkSyncStateTransition extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    setValidiumMode(
-      _validiumMode: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setValidiumMode(uint8)"(
-      _validiumMode: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -4614,7 +4659,7 @@ export class IZkSyncStateTransition extends Contract {
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     "bridgehubRequestL2Transaction(tuple)"(
@@ -4629,7 +4674,7 @@ export class IZkSyncStateTransition extends Contract {
         factoryDeps: BytesLike[];
         refundRecipient: string;
       },
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     changeFeeParams(
@@ -4999,6 +5044,14 @@ export class IZkSyncStateTransition extends Contract {
     ): Promise<PopulatedTransaction>;
 
     "getPubdataPricingMode()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getSemverProtocolVersion(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getSemverProtocolVersion()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -5396,6 +5449,16 @@ export class IZkSyncStateTransition extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    setPubdataPricingMode(
+      _pricingMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setPubdataPricingMode(uint8)"(
+      _pricingMode: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     setTokenMultiplier(
       _nominator: BigNumberish,
       _denominator: BigNumberish,
@@ -5427,16 +5490,6 @@ export class IZkSyncStateTransition extends Contract {
     "setValidator(address,bool)"(
       _validator: string,
       _active: boolean,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    setValidiumMode(
-      _validiumMode: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "setValidiumMode(uint8)"(
-      _validiumMode: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 

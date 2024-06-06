@@ -105,6 +105,19 @@ const _abi = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "SHARED_BRIDGE",
+    outputs: [
+      {
+        internalType: "contract IL1SharedBridge",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -362,29 +375,11 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "sharedBridge",
-    outputs: [
-      {
-        internalType: "contract IL1SharedBridge",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "address",
         name: "_token",
         type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
       },
     ],
     name: "transferTokenToSharedBridge",
