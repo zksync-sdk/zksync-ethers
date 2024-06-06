@@ -44,7 +44,6 @@ import {
   StorageProof,
 } from './types';
 import {
-  isETH,
   getL2HashFromPriorityOp,
   CONTRACT_DEPLOYER_ADDRESS,
   CONTRACT_DEPLOYER,
@@ -193,7 +192,16 @@ export function JsonRpcApiProvider<
       blockTag?: BlockTag,
       tokenAddress?: Address
     ): Promise<bigint> {
-      if (!tokenAddress || (await this.isBaseToken(tokenAddress))) {
+      if (!tokenAddress) {
+        tokenAddress = L2_BASE_TOKEN_ADDRESS;
+      } else if (
+        isAddressEq(tokenAddress, LEGACY_ETH_ADDRESS) ||
+        isAddressEq(tokenAddress, ETH_ADDRESS_IN_CONTRACTS)
+      ) {
+        tokenAddress = await this.l2TokenAddress(tokenAddress);
+      }
+
+      if (isAddressEq(tokenAddress, L2_BASE_TOKEN_ADDRESS)) {
         return await super.getBalance(address, blockTag);
       } else {
         try {
@@ -571,14 +579,11 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
-      const isEthBasedChain = await this.isEthBasedChain();
-
-      // In case of Ether on non Ether based chain it should get l2 Ether address,
-      // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
-      if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) && !isEthBasedChain) {
+      if (
+        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+        isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)
+      ) {
         tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
-      } else if (await this.isBaseToken(tx.token)) {
-        tx.token = L2_BASE_TOKEN_ADDRESS;
       }
 
       if (
@@ -592,7 +597,7 @@ export function JsonRpcApiProvider<
       tx.overrides ??= {};
       tx.overrides.from ??= tx.from;
 
-      if (isETH(tx.token)) {
+      if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
         if (!tx.overrides.value) {
           tx.overrides.value = tx.amount;
         }
@@ -691,24 +696,19 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
-      const isEthBasedChain = await this.isEthBasedChain();
-
-      // In case of Ether on non Ether based chain it should get l2 Ether address,
-      // and in case of base token it should use L2_BASE_TOKEN_ADDRESS
-      if (
-        tx.token &&
-        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) &&
-        !isEthBasedChain
+      if (!tx.token) {
+        tx.token = L2_BASE_TOKEN_ADDRESS;
+      } else if (
+        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+        isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)
       ) {
         tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
-      } else if (!tx.token || (await this.isBaseToken(tx.token))) {
-        tx.token = L2_BASE_TOKEN_ADDRESS;
       }
 
       tx.overrides ??= {};
       tx.overrides.from ??= tx.from;
 
-      if (isETH(tx.token)) {
+      if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
         if (tx.paymasterParams) {
           return {
             ...tx.overrides,
