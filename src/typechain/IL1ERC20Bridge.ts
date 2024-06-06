@@ -26,6 +26,7 @@ import type {
 export interface IL1ERC20BridgeInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "SHARED_BRIDGE"
       | "claimFailedDeposit"
       | "deposit(address,address,uint256,uint256,uint256)"
       | "deposit(address,address,uint256,uint256,uint256,address)"
@@ -35,7 +36,6 @@ export interface IL1ERC20BridgeInterface extends Interface {
       | "l2Bridge"
       | "l2TokenAddress"
       | "l2TokenBeacon"
-      | "sharedBridge"
       | "transferTokenToSharedBridge"
   ): FunctionFragment;
 
@@ -46,6 +46,10 @@ export interface IL1ERC20BridgeInterface extends Interface {
       | "WithdrawalFinalized"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "SHARED_BRIDGE",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "claimFailedDeposit",
     values: [
@@ -95,14 +99,14 @@ export interface IL1ERC20BridgeInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "sharedBridge",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "transferTokenToSharedBridge",
-    values: [AddressLike, BigNumberish]
+    values: [AddressLike]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "SHARED_BRIDGE",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "claimFailedDeposit",
     data: BytesLike
@@ -134,10 +138,6 @@ export interface IL1ERC20BridgeInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "l2TokenBeacon",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "sharedBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -253,6 +253,8 @@ export interface IL1ERC20Bridge extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  SHARED_BRIDGE: TypedContractMethod<[], [string], "view">;
+
   claimFailedDeposit: TypedContractMethod<
     [
       _depositSender: AddressLike,
@@ -326,10 +328,8 @@ export interface IL1ERC20Bridge extends BaseContract {
 
   l2TokenBeacon: TypedContractMethod<[], [string], "view">;
 
-  sharedBridge: TypedContractMethod<[], [string], "view">;
-
   transferTokenToSharedBridge: TypedContractMethod<
-    [_token: AddressLike, _amount: BigNumberish],
+    [_token: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -338,6 +338,9 @@ export interface IL1ERC20Bridge extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "SHARED_BRIDGE"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "claimFailedDeposit"
   ): TypedContractMethod<
@@ -417,15 +420,8 @@ export interface IL1ERC20Bridge extends BaseContract {
     nameOrSignature: "l2TokenBeacon"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "sharedBridge"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
     nameOrSignature: "transferTokenToSharedBridge"
-  ): TypedContractMethod<
-    [_token: AddressLike, _amount: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
+  ): TypedContractMethod<[_token: AddressLike], [void], "nonpayable">;
 
   getEvent(
     key: "ClaimedFailedDeposit"

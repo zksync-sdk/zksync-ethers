@@ -136,7 +136,7 @@ export interface IBridgehubInterface extends Interface {
       | "addToken"
       | "baseToken"
       | "createNewChain"
-      | "getStateTransition"
+      | "getHyperchain"
       | "l2TransactionBaseCost"
       | "proveL1ToL2TransactionStatus"
       | "proveL2LogInclusion"
@@ -184,7 +184,7 @@ export interface IBridgehubInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "getStateTransition",
+    functionFragment: "getHyperchain",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -269,7 +269,7 @@ export interface IBridgehubInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getStateTransition",
+    functionFragment: "getHyperchain",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -445,7 +445,7 @@ export interface IBridgehub extends BaseContract {
     "nonpayable"
   >;
 
-  getStateTransition: TypedContractMethod<
+  getHyperchain: TypedContractMethod<
     [_chainId: BigNumberish],
     [string],
     "view"
@@ -585,7 +585,7 @@ export interface IBridgehub extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "getStateTransition"
+    nameOrSignature: "getHyperchain"
   ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
   getFunction(
     nameOrSignature: "l2TransactionBaseCost"

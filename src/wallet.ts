@@ -27,7 +27,7 @@ import {
   IL1ERC20Bridge,
   IL1SharedBridge,
   IL2Bridge,
-  IZkSyncStateTransition,
+  IZkSyncHyperchain,
 } from './typechain';
 
 /**
@@ -77,7 +77,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * const mainContract = await wallet.getMainContract();
    */
-  override async getMainContract(): Promise<IZkSyncStateTransition> {
+  override async getMainContract(): Promise<IZkSyncHyperchain> {
     return super.getMainContract();
   }
 

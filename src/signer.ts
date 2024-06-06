@@ -32,7 +32,7 @@ import {
   IL1ERC20Bridge,
   IL1SharedBridge,
   IL2Bridge,
-  IZkSyncStateTransition,
+  IZkSyncHyperchain,
 } from './typechain';
 
 /**
@@ -660,7 +660,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * const mainContract = await signer.getMainContract();
    */
-  override async getMainContract(): Promise<IZkSyncStateTransition> {
+  override async getMainContract(): Promise<IZkSyncHyperchain> {
     return super.getMainContract();
   }
 

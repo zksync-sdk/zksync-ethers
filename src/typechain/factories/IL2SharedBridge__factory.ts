@@ -3,9 +3,74 @@
 /* eslint-disable */
 
 import { Contract, Interface, type ContractRunner } from "ethers";
-import type { IL2Bridge, IL2BridgeInterface } from "../IL2Bridge";
+import type {
+  IL2SharedBridge,
+  IL2SharedBridgeInterface,
+} from "../IL2SharedBridge";
 
 const _abi = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l1Sender",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Receiver",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "FinalizeDeposit",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Sender",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l1Receiver",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "l2Token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "WithdrawalInitiated",
+    type: "event",
+  },
   {
     inputs: [
       {
@@ -42,6 +107,19 @@ const _abi = [
   {
     inputs: [],
     name: "l1Bridge",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "l1SharedBridge",
     outputs: [
       {
         internalType: "address",
@@ -115,12 +193,15 @@ const _abi = [
   },
 ] as const;
 
-export class IL2Bridge__factory {
+export class IL2SharedBridge__factory {
   static readonly abi = _abi;
-  static createInterface(): IL2BridgeInterface {
-    return new Interface(_abi) as IL2BridgeInterface;
+  static createInterface(): IL2SharedBridgeInterface {
+    return new Interface(_abi) as IL2SharedBridgeInterface;
   }
-  static connect(address: string, runner?: ContractRunner | null): IL2Bridge {
-    return new Contract(address, _abi, runner) as unknown as IL2Bridge;
+  static connect(
+    address: string,
+    runner?: ContractRunner | null
+  ): IL2SharedBridge {
+    return new Contract(address, _abi, runner) as unknown as IL2SharedBridge;
   }
 }
