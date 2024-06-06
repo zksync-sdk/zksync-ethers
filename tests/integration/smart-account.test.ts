@@ -762,7 +762,7 @@ describe('SmartAccount', async () => {
         const amount = 7_000_000_000n;
         const l2BalanceBeforeWithdrawal = await account.getBalance();
         const withdrawTx = await account.withdraw({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: await account.getAddress(),
           amount: amount,
         });
@@ -795,7 +795,7 @@ describe('SmartAccount', async () => {
           await account.getBalance(APPROVAL_TOKEN);
 
         const withdrawTx = await account.withdraw({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: await account.getAddress(),
           amount: amount,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
@@ -1562,7 +1562,7 @@ describe('MultisigECDSASmartAccount', async () => {
         const amount = 7_000_000_000n;
         const l2BalanceBeforeWithdrawal = await account.getBalance();
         const withdrawTx = await account.withdraw({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: await wallet.getAddress(), // send to L1 EOA since AA does not exit on L1
           amount: amount,
         });
@@ -1595,7 +1595,7 @@ describe('MultisigECDSASmartAccount', async () => {
           await account.getBalance(APPROVAL_TOKEN);
 
         const withdrawTx = await account.withdraw({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: await wallet.getAddress(), // send to L1 EOA since AA does not exit on L1
           amount: amount,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
