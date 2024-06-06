@@ -42,8 +42,9 @@ import {
   INonceHolder__factory,
   IZkSyncHyperchain,
   IZkSyncHyperchain__factory,
-  IL2SharedBridge__factory, IL2SharedBridge
-} from "./typechain";
+  IL2SharedBridge__factory,
+  IL2SharedBridge,
+} from './typechain';
 import {
   Address,
   BalancesMap,
