@@ -40,8 +40,9 @@ import {
   IL2Bridge,
   IL2Bridge__factory,
   INonceHolder__factory,
-  IZkSyncStateTransition,
-  IZkSyncStateTransition__factory,
+  IZkSyncHyperchain,
+  IZkSyncHyperchain__factory,
+  IL2SharedBridge__factory,
 } from './typechain';
 import {
   Address,
@@ -90,9 +91,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     /**
      * Returns `Contract` wrapper of the zkSync Era smart contract.
      */
-    async getMainContract(): Promise<IZkSyncStateTransition> {
+    async getMainContract(): Promise<IZkSyncHyperchain> {
       const address = await this._providerL2().getMainContractAddress();
-      return IZkSyncStateTransition__factory.connect(address, this._signerL1());
+      return IZkSyncHyperchain__factory.connect(address, this._signerL1());
     }
 
     /**
@@ -1478,6 +1479,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         withdrawalHash,
         index
       );
+      const sender = ethers.dataSlice(log.topics[1], 12);
       // `getLogProof` is called not to get proof but
       // to get the index of the corresponding L2->L1 log,
       // which is returned as `proof.id`.
@@ -1490,7 +1492,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
 
       const chainId = (await this._providerL2().getNetwork()).chainId;
-      const l1Bridge = (await this.getL1BridgeContracts()).shared;
+
+      let l1Bridge: IL1SharedBridge;
+
+      if (await this._providerL2().isBaseToken(sender)) {
+        l1Bridge = (await this.getL1BridgeContracts()).shared;
+      } else {
+        const l2Bridge = IL2SharedBridge__factory.connect(
+          sender,
+          this._providerL2()
+        );
+        l1Bridge = IL1SharedBridge__factory.connect(
+          await l2Bridge.l1SharedBridge(),
+          this._providerL1()
+        );
+      }
 
       return await l1Bridge.isWithdrawalFinalized(
         chainId,

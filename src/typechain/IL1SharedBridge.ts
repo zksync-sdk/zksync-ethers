@@ -48,7 +48,8 @@ export type L2TransactionRequestTwoBridgesInnerStructOutput = [
 export interface IL1SharedBridgeInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "bridgehub"
+      | "BRIDGE_HUB"
+      | "L1_WETH_TOKEN"
       | "bridgehubConfirmL2Transaction"
       | "bridgehubDeposit"
       | "bridgehubDepositBaseToken"
@@ -59,11 +60,12 @@ export interface IL1SharedBridgeInterface extends Interface {
       | "finalizeWithdrawal"
       | "finalizeWithdrawalLegacyErc20Bridge"
       | "isWithdrawalFinalized"
-      | "l1WethAddress"
       | "l2BridgeAddress"
       | "legacyBridge"
       | "receiveEth"
-      | "setEraFirstPostUpgradeBatch"
+      | "setEraLegacyBridgeLastDepositTime"
+      | "setEraPostDiamondUpgradeFirstBatch"
+      | "setEraPostLegacyBridgeUpgradeFirstBatch"
   ): FunctionFragment;
 
   getEvent(
@@ -76,7 +78,14 @@ export interface IL1SharedBridgeInterface extends Interface {
       | "WithdrawalFinalizedSharedBridge"
   ): EventFragment;
 
-  encodeFunctionData(functionFragment: "bridgehub", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "BRIDGE_HUB",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "L1_WETH_TOKEN",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "bridgehubConfirmL2Transaction",
     values: [BigNumberish, BytesLike, BytesLike]
@@ -152,10 +161,6 @@ export interface IL1SharedBridgeInterface extends Interface {
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "l1WethAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "l2BridgeAddress",
     values: [BigNumberish]
   ): string;
@@ -168,11 +173,23 @@ export interface IL1SharedBridgeInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setEraFirstPostUpgradeBatch",
+    functionFragment: "setEraLegacyBridgeLastDepositTime",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setEraPostDiamondUpgradeFirstBatch",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setEraPostLegacyBridgeUpgradeFirstBatch",
     values: [BigNumberish]
   ): string;
 
-  decodeFunctionResult(functionFragment: "bridgehub", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "BRIDGE_HUB", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "L1_WETH_TOKEN",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "bridgehubConfirmL2Transaction",
     data: BytesLike
@@ -214,10 +231,6 @@ export interface IL1SharedBridgeInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "l1WethAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "l2BridgeAddress",
     data: BytesLike
   ): Result;
@@ -227,7 +240,15 @@ export interface IL1SharedBridgeInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "receiveEth", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setEraFirstPostUpgradeBatch",
+    functionFragment: "setEraLegacyBridgeLastDepositTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEraPostDiamondUpgradeFirstBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEraPostLegacyBridgeUpgradeFirstBatch",
     data: BytesLike
   ): Result;
 }
@@ -434,7 +455,9 @@ export interface IL1SharedBridge extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  bridgehub: TypedContractMethod<[], [string], "view">;
+  BRIDGE_HUB: TypedContractMethod<[], [string], "view">;
+
+  L1_WETH_TOKEN: TypedContractMethod<[], [string], "view">;
 
   bridgehubConfirmL2Transaction: TypedContractMethod<
     [_chainId: BigNumberish, _txDataHash: BytesLike, _txHash: BytesLike],
@@ -556,8 +579,6 @@ export interface IL1SharedBridge extends BaseContract {
     "view"
   >;
 
-  l1WethAddress: TypedContractMethod<[], [string], "view">;
-
   l2BridgeAddress: TypedContractMethod<
     [_chainId: BigNumberish],
     [string],
@@ -568,8 +589,23 @@ export interface IL1SharedBridge extends BaseContract {
 
   receiveEth: TypedContractMethod<[_chainId: BigNumberish], [void], "payable">;
 
-  setEraFirstPostUpgradeBatch: TypedContractMethod<
-    [_eraFirstPostUpgradeBatch: BigNumberish],
+  setEraLegacyBridgeLastDepositTime: TypedContractMethod<
+    [
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  setEraPostDiamondUpgradeFirstBatch: TypedContractMethod<
+    [_eraPostDiamondUpgradeFirstBatch: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  setEraPostLegacyBridgeUpgradeFirstBatch: TypedContractMethod<
+    [_eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -579,7 +615,10 @@ export interface IL1SharedBridge extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "bridgehub"
+    nameOrSignature: "BRIDGE_HUB"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "L1_WETH_TOKEN"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "bridgehubConfirmL2Transaction"
@@ -712,9 +751,6 @@ export interface IL1SharedBridge extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "l1WethAddress"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
     nameOrSignature: "l2BridgeAddress"
   ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
   getFunction(
@@ -724,9 +760,26 @@ export interface IL1SharedBridge extends BaseContract {
     nameOrSignature: "receiveEth"
   ): TypedContractMethod<[_chainId: BigNumberish], [void], "payable">;
   getFunction(
-    nameOrSignature: "setEraFirstPostUpgradeBatch"
+    nameOrSignature: "setEraLegacyBridgeLastDepositTime"
   ): TypedContractMethod<
-    [_eraFirstPostUpgradeBatch: BigNumberish],
+    [
+      _eraLegacyBridgeLastDepositBatch: BigNumberish,
+      _eraLegacyBridgeLastDepositTxNumber: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setEraPostDiamondUpgradeFirstBatch"
+  ): TypedContractMethod<
+    [_eraPostDiamondUpgradeFirstBatch: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setEraPostLegacyBridgeUpgradeFirstBatch"
+  ): TypedContractMethod<
+    [_eraPostLegacyBridgeUpgradeFirstBatch: BigNumberish],
     [void],
     "nonpayable"
   >;

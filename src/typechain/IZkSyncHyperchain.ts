@@ -328,7 +328,7 @@ export declare namespace IGetters {
   };
 }
 
-export interface IZkSyncStateTransitionInterface extends Interface {
+export interface IZkSyncHyperchainInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "acceptAdmin"
@@ -362,6 +362,7 @@ export interface IZkSyncStateTransitionInterface extends Interface {
       | "getPriorityTxMaxGasLimit"
       | "getProtocolVersion"
       | "getPubdataPricingMode"
+      | "getSemverProtocolVersion"
       | "getStateTransitionManager"
       | "getTotalBatchesCommitted"
       | "getTotalBatchesExecuted"
@@ -388,10 +389,10 @@ export interface IZkSyncStateTransitionInterface extends Interface {
       | "setPendingAdmin"
       | "setPorterAvailability"
       | "setPriorityTxMaxGasLimit"
+      | "setPubdataPricingMode"
       | "setTokenMultiplier"
       | "setTransactionFilterer"
       | "setValidator"
-      | "setValidiumMode"
       | "storedBatchHash"
       | "transferEthToSharedBridge"
       | "unfreezeDiamond"
@@ -404,7 +405,6 @@ export interface IZkSyncStateTransitionInterface extends Interface {
       | "BlockExecution"
       | "BlocksRevert"
       | "BlocksVerification"
-      | "EthWithdrawalFinalized"
       | "ExecuteUpgrade"
       | "Freeze"
       | "IsPorterAvailableStatusUpdate"
@@ -541,6 +541,10 @@ export interface IZkSyncStateTransitionInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getSemverProtocolVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getStateTransitionManager",
     values?: undefined
   ): string;
@@ -669,6 +673,10 @@ export interface IZkSyncStateTransitionInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setPubdataPricingMode",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setTokenMultiplier",
     values: [BigNumberish, BigNumberish]
   ): string;
@@ -679,10 +687,6 @@ export interface IZkSyncStateTransitionInterface extends Interface {
   encodeFunctionData(
     functionFragment: "setValidator",
     values: [AddressLike, boolean]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setValidiumMode",
-    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "storedBatchHash",
@@ -817,6 +821,10 @@ export interface IZkSyncStateTransitionInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getSemverProtocolVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getStateTransitionManager",
     data: BytesLike
   ): Result;
@@ -921,6 +929,10 @@ export interface IZkSyncStateTransitionInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setPubdataPricingMode",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setTokenMultiplier",
     data: BytesLike
   ): Result;
@@ -930,10 +942,6 @@ export interface IZkSyncStateTransitionInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setValidator",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setValidiumMode",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -1032,19 +1040,6 @@ export namespace BlocksVerificationEvent {
   export interface OutputObject {
     previousLastVerifiedBatch: bigint;
     currentLastVerifiedBatch: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace EthWithdrawalFinalizedEvent {
-  export type InputTuple = [to: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [to: string, amount: bigint];
-  export interface OutputObject {
-    to: string;
-    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -1282,11 +1277,11 @@ export namespace ValidiumModeStatusUpdateEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface IZkSyncStateTransition extends BaseContract {
-  connect(runner?: ContractRunner | null): IZkSyncStateTransition;
+export interface IZkSyncHyperchain extends BaseContract {
+  connect(runner?: ContractRunner | null): IZkSyncHyperchain;
   waitForDeployment(): Promise<this>;
 
-  interface: IZkSyncStateTransitionInterface;
+  interface: IZkSyncHyperchainInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -1342,7 +1337,7 @@ export interface IZkSyncStateTransition extends BaseContract {
   bridgehubRequestL2Transaction: TypedContractMethod<
     [_request: BridgehubL2TransactionRequestStruct],
     [string],
-    "payable"
+    "nonpayable"
   >;
 
   changeFeeParams: TypedContractMethod<
@@ -1447,6 +1442,12 @@ export interface IZkSyncStateTransition extends BaseContract {
   getProtocolVersion: TypedContractMethod<[], [bigint], "view">;
 
   getPubdataPricingMode: TypedContractMethod<[], [bigint], "view">;
+
+  getSemverProtocolVersion: TypedContractMethod<
+    [],
+    [[bigint, bigint, bigint]],
+    "view"
+  >;
 
   getStateTransitionManager: TypedContractMethod<[], [string], "view">;
 
@@ -1610,6 +1611,12 @@ export interface IZkSyncStateTransition extends BaseContract {
     "nonpayable"
   >;
 
+  setPubdataPricingMode: TypedContractMethod<
+    [_pricingMode: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   setTokenMultiplier: TypedContractMethod<
     [_nominator: BigNumberish, _denominator: BigNumberish],
     [void],
@@ -1624,12 +1631,6 @@ export interface IZkSyncStateTransition extends BaseContract {
 
   setValidator: TypedContractMethod<
     [_validator: AddressLike, _active: boolean],
-    [void],
-    "nonpayable"
-  >;
-
-  setValidiumMode: TypedContractMethod<
-    [_validiumMode: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -1668,7 +1669,7 @@ export interface IZkSyncStateTransition extends BaseContract {
   ): TypedContractMethod<
     [_request: BridgehubL2TransactionRequestStruct],
     [string],
-    "payable"
+    "nonpayable"
   >;
   getFunction(
     nameOrSignature: "changeFeeParams"
@@ -1792,6 +1793,9 @@ export interface IZkSyncStateTransition extends BaseContract {
   getFunction(
     nameOrSignature: "getPubdataPricingMode"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getSemverProtocolVersion"
+  ): TypedContractMethod<[], [[bigint, bigint, bigint]], "view">;
   getFunction(
     nameOrSignature: "getStateTransitionManager"
   ): TypedContractMethod<[], [string], "view">;
@@ -1949,6 +1953,9 @@ export interface IZkSyncStateTransition extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "setPubdataPricingMode"
+  ): TypedContractMethod<[_pricingMode: BigNumberish], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "setTokenMultiplier"
   ): TypedContractMethod<
     [_nominator: BigNumberish, _denominator: BigNumberish],
@@ -1969,9 +1976,6 @@ export interface IZkSyncStateTransition extends BaseContract {
     [void],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "setValidiumMode"
-  ): TypedContractMethod<[_validiumMode: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "storedBatchHash"
   ): TypedContractMethod<[_batchNumber: BigNumberish], [string], "view">;
@@ -2016,13 +2020,6 @@ export interface IZkSyncStateTransition extends BaseContract {
     BlocksVerificationEvent.InputTuple,
     BlocksVerificationEvent.OutputTuple,
     BlocksVerificationEvent.OutputObject
-  >;
-  getEvent(
-    key: "EthWithdrawalFinalized"
-  ): TypedContractEvent<
-    EthWithdrawalFinalizedEvent.InputTuple,
-    EthWithdrawalFinalizedEvent.OutputTuple,
-    EthWithdrawalFinalizedEvent.OutputObject
   >;
   getEvent(
     key: "ExecuteUpgrade"
@@ -2166,17 +2163,6 @@ export interface IZkSyncStateTransition extends BaseContract {
       BlocksVerificationEvent.InputTuple,
       BlocksVerificationEvent.OutputTuple,
       BlocksVerificationEvent.OutputObject
-    >;
-
-    "EthWithdrawalFinalized(address,uint256)": TypedContractEvent<
-      EthWithdrawalFinalizedEvent.InputTuple,
-      EthWithdrawalFinalizedEvent.OutputTuple,
-      EthWithdrawalFinalizedEvent.OutputObject
-    >;
-    EthWithdrawalFinalized: TypedContractEvent<
-      EthWithdrawalFinalizedEvent.InputTuple,
-      EthWithdrawalFinalizedEvent.OutputTuple,
-      EthWithdrawalFinalizedEvent.OutputObject
     >;
 
     "ExecuteUpgrade(tuple)": TypedContractEvent<

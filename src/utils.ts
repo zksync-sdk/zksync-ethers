@@ -14,7 +14,7 @@ import {
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
 import {IERC20__factory} from './typechain';
-import IZkSyncABI from '../abi/IZkSyncStateTransition.json';
+import IZkSyncABI from '../abi/IZkSyncHyperchain.json';
 import IBridgehubABI from '../abi/IBridgehub.json';
 import IContractDeployerABI from '../abi/IContractDeployer.json';
 import IL1MessengerABI from '../abi/IL1Messenger.json';
