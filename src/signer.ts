@@ -34,7 +34,7 @@ import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {IZkSyncHyperchain} from './typechain/IZkSyncHyperchain';
 import {IBridgehub} from './typechain/IBridgehub';
-import { Il2SharedBridge } from "./typechain/Il2SharedBridge";
+import {Il2SharedBridge} from './typechain/Il2SharedBridge';
 
 /**
  * All typed data conforming to the EIP712 standard within zkSync Era.

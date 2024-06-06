@@ -29,7 +29,7 @@ import {Il1Erc20Bridge as IL1ERC20Bridge} from './typechain/Il1Erc20Bridge';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
 import {Il2Bridge as IL2Bridge} from './typechain/Il2Bridge';
 import {IBridgehub} from './typechain/IBridgehub';
-import { Il2SharedBridge } from "./typechain/Il2SharedBridge";
+import {Il2SharedBridge} from './typechain/Il2SharedBridge';
 
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
