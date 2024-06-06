@@ -598,7 +598,7 @@ describe('SmartAccount', async () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -638,7 +638,7 @@ describe('SmartAccount', async () => {
           }),
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -692,7 +692,7 @@ describe('SmartAccount', async () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -735,7 +735,7 @@ describe('SmartAccount', async () => {
           }),
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -785,7 +785,7 @@ describe('SmartAccount', async () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -825,7 +825,7 @@ describe('SmartAccount', async () => {
           }),
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -879,7 +879,7 @@ describe('SmartAccount', async () => {
         amount: amount,
       });
       await withdrawTx.waitFinalize();
-      // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
       const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
         withdrawTx.hash
@@ -924,7 +924,7 @@ describe('SmartAccount', async () => {
         }),
       });
       await withdrawTx.waitFinalize();
-      // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
       const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
         withdrawTx.hash
@@ -1431,7 +1431,7 @@ describe('MultisigECDSASmartAccount', async () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1471,7 +1471,7 @@ describe('MultisigECDSASmartAccount', async () => {
           }),
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1525,7 +1525,7 @@ describe('MultisigECDSASmartAccount', async () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1568,7 +1568,7 @@ describe('MultisigECDSASmartAccount', async () => {
           }),
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1618,7 +1618,7 @@ describe('MultisigECDSASmartAccount', async () => {
           amount: amount,
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1658,7 +1658,7 @@ describe('MultisigECDSASmartAccount', async () => {
           }),
         });
         await withdrawTx.waitFinalize();
-        // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
@@ -1712,7 +1712,7 @@ describe('MultisigECDSASmartAccount', async () => {
         amount: amount,
       });
       await withdrawTx.waitFinalize();
-      // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
       const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
         withdrawTx.hash
@@ -1758,7 +1758,7 @@ describe('MultisigECDSASmartAccount', async () => {
         }),
       });
       await withdrawTx.waitFinalize();
-      // expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
       const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
         withdrawTx.hash
