@@ -1293,12 +1293,11 @@ describe('Wallet', () => {
 
       it('should withdraw base token to L1 network', async () => {
         const amount = 7_000_000_000;
-        const baseToken = await wallet.getBaseToken();
 
         const l2BalanceBeforeWithdrawal = await wallet.getBalance();
 
         const withdrawTx = await wallet.withdraw({
-          token: baseToken,
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: await wallet.getAddress(),
           amount: amount,
         });
@@ -1739,7 +1738,7 @@ describe('Wallet', () => {
         const amount = 7_000_000_000;
         const balanceBeforeTransfer = await provider.getBalance(ADDRESS2);
         const tx = await wallet.transfer({
-          token: await wallet.getBaseToken(),
+          token: utils.L2_BASE_TOKEN_ADDRESS,
           to: ADDRESS2,
           amount: amount,
         });
