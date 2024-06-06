@@ -1,3 +1,26 @@
+# [6.8.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.7.1...v6.8.0) (2024-06-06)
+
+
+### Bug Fixes
+
+* **adapter:** fix correct `recommendedL1GasLimit` in `getFullRequiredDepositFee` ([8e92981](https://github.com/zksync-sdk/zksync-ethers/commit/8e929811a47d61c2aa6be53599b2ec2943a56a9a))
+* **provider:** `getTransferTx` and `getWithdrawTx` non-eth-based chain ([fc19131](https://github.com/zksync-sdk/zksync-ethers/commit/fc19131660dd52fa24ee03508d134186b407fe34))
+* **types:** change types in `FullDepositFee` from `BigInt` to `bigint` ([8707879](https://github.com/zksync-sdk/zksync-ethers/commit/87078790bdd6675f887a1637d69a10893571dec8))
+* **types:** ensure `Block.l1BatchTimestamp` has accurate value ([cbbb84e](https://github.com/zksync-sdk/zksync-ethers/commit/cbbb84ea8d1b24c2a00211e1f6d2da63b5ece78c))
+* **types:** update `RawBlockTransaction` ([183fa57](https://github.com/zksync-sdk/zksync-ethers/commit/183fa577484bed5a1104ecac5254e5545d0eda9b))
+
+
+### Features
+
+* provide support for Bridgehub ([acfeadd](https://github.com/zksync-sdk/zksync-ethers/commit/acfeadd75036afde8ecc277a9fc3dd3bcae5d07d))
+* **provider:** `getTransactionReceipt()` returns `null` if transaction is not mined or found ([17f131d](https://github.com/zksync-sdk/zksync-ethers/commit/17f131d606513b212d405365fb98394653fd396e))
+
+
+### BREAKING CHANGES
+
+* **provider:** `Provider.getTransactionReceipt()` and `BrowserProvider.getTransactionReceipt()`
+return `null` if transaction is not mined, discarded or not found.
+
 ## [6.7.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.7.0...v6.7.1) (2024-05-09)
 
 
