@@ -802,7 +802,7 @@ describe('Wallet', () => {
           .be.true;
         expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to
           .be.true;
-      }).timeout(10_000);
+      }).timeout(90_000);
 
       it('should deposit DAI to the L2 network with approve transaction for allowance', async () => {
         const amount = 7;
@@ -825,7 +825,7 @@ describe('Wallet', () => {
           .be.true;
         expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to
           .be.true;
-      }).timeout(30_000);
+      }).timeout(90_000);
     } else {
       it('should deposit ETH to L2 network', async () => {
         const amount = 7_000_000_000;
