@@ -1171,7 +1171,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         transaction.bridgeAddress!,
         this._signerL1()
       );
-      const l2Address = await bridge.l2Bridge();
+      const chainId = (await this._providerL2().getNetwork()).chainId;
+      const l2Address = await bridge.l2BridgeAddress(chainId);
       return await estimateCustomBridgeDepositL2Gas(
         this._providerL2(),
         transaction.bridgeAddress!,
