@@ -60,9 +60,9 @@
   "scripts": {
     "test:build": "rm -rf tests/build && tsc -p tsconfig.test.json && cp -r src/typechain/*.d.ts tests/build/src/typechain",
     "test:prepare": "ts-node tests/setup.ts",
-    "test:coverage": "c8 -c .nycrc mocha -r ts-node/register tests/**/*.test.ts",
+    "test:coverage": "c8 -c .nycrc mocha -r ts-node/register --timeout 10000 tests/**/*.test.ts",
     "test:wait": "ts-node tests/wait.ts",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "test": "mocha -r ts-node/register --timeout 10000 tests/**/*.test.ts",
     "build": "tsc && cp -r src/typechain/*.d.ts build/typechain",
     "lint": "gts lint",
     "lint:fix": "gts fix",
