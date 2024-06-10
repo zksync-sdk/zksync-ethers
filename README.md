@@ -16,7 +16,7 @@ like account abstraction, requires providing additional fields to those that Eth
 The library is made in such a way that after replacing `ethers` with `zksync-ethers` most client apps will work out of
 box.
 
-🔗 For a detailed walkthrough, refer to the [official documentation](https://era.zksync.io/docs/api/js/).
+🔗 For a detailed walkthrough, refer to the [official documentation](https://docs.zksync.io/sdk/js/ethers/v5/getting-started).
 
 ## 📌 Overview
 
