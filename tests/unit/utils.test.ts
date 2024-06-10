@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {types, utils} from '../../src';
 import {ethers} from 'ethers';
-import {ADDRESS1, ADDRESS2} from '../utils';
+import {ADDRESS1, ADDRESS2, APPROVAL_TOKEN, PAYMASTER} from '../utils';
 
 describe('utils', () => {
   describe('#getHashedL2ToL1Msg()', () => {
@@ -157,6 +157,38 @@ describe('utils', () => {
       expect(result).to.be.equal(tx);
     });
 
+    it('should return a serialized unsigned transaction', async () => {
+      const tx =
+        '0x71f8418080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0';
+      const result = utils.serializeEip712({
+        chainId: 270,
+        from: ADDRESS1,
+        to: ADDRESS2,
+        value: 1_000_000,
+      });
+      expect(result).to.be.equal(tx);
+    });
+
+    it('should return a serialized unsigned transaction with paymaster', async () => {
+      const tx =
+        '0x71f8dd8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080f89b94a222f0c183afa73a8bc1afb48d34c88c9bf7a174b884949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000';
+      const result = utils.serializeEip712({
+        chainId: 270,
+        from: ADDRESS1,
+        to: ADDRESS2,
+        value: 1_000_000,
+        customData: {
+          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
+            type: 'ApprovalBased',
+            token: APPROVAL_TOKEN,
+            minimalAllowance: 1n,
+            innerInput: new Uint8Array(),
+          }),
+        },
+      });
+      expect(result).to.be.equal(tx);
+    });
+
     it('should return a serialized transaction with provided signature', async () => {
       const tx =
         '0x71f87f8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0';
@@ -282,6 +314,40 @@ describe('utils', () => {
 
       const serializedTx =
         '0x71f83e8080808094a61464658afeaf65cccaafd3a512b69a83b77618808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0';
+
+      const result = utils.parseEip712(serializedTx);
+      expect(result).to.be.deep.equal(tx);
+    });
+
+    it('should parse a transaction a custom signature and paymaster', async () => {
+      const tx: types.TransactionLike = {
+        type: 113,
+        nonce: 0,
+        maxPriorityFeePerGas: 0n,
+        maxFeePerGas: 0n,
+        gasLimit: 0n,
+        to: ADDRESS2,
+        value: 1_000_000n,
+        data: '0x',
+        chainId: 270n,
+        from: ADDRESS1,
+        customData: {
+          gasPerPubdata: 50_000n,
+          factoryDeps: [],
+          customSignature:
+            '0x307837373262396162343735386435636630386637643732303161646332653534383933616532376263666562323162396337643666643430393766346464653063303166376630353332323866346636643838653662663334333436343931343135363761633930363632306661653832633239333339393062353563613336363162',
+          paymasterParams: {
+            paymaster: '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174',
+            paymasterInput: ethers.getBytes(
+              '0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000'
+            ),
+          },
+        },
+        hash: '0xc0ba55587423e1ef281b06a9d684b481365897f37a6ad611d7619b1b7e0bc908',
+      };
+
+      const serializedTx =
+        '0x71f901628080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c0b884307837373262396162343735386435636630386637643732303161646332653534383933616532376263666562323162396337643666643430393766346464653063303166376630353332323866346636643838653662663334333436343931343135363761633930363632306661653832633239333339393062353563613336363162f89b94a222f0c183afa73a8bc1afb48d34c88c9bf7a174b884949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000';
 
       const result = utils.parseEip712(serializedTx);
       expect(result).to.be.deep.equal(tx);
