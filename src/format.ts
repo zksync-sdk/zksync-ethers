@@ -347,3 +347,22 @@ export function formatTransactionResponse(
 
   return result;
 }
+
+const _formatFee = object(
+  {
+    gasLimit: getBigInt,
+    gasPerPubdataLimit: getBigInt,
+    maxPriorityFeePerGas: getBigInt,
+    maxFeePerGas: getBigInt,
+  },
+  {
+    gasLimit: ['gas_limit'],
+    gasPerPubdataLimit: ['gas_per_pubdata_limit'],
+    maxPriorityFeePerGas: ['max_priority_fee_per_gas'],
+    maxFeePerGas: ['max_fee_per_gas'],
+  }
+);
+
+export function formatFee(value: any) {
+  return _formatFee(value);
+}

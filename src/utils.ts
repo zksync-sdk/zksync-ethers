@@ -29,7 +29,7 @@ export * from './smart-account-utils';
 export {EIP712_TYPES} from './signer';
 
 /**
- * The ABI for the `ZkSync` interface.
+ * The ABI for the `ZKsync` interface.
  * @constant
  */
 export const ZKSYNC_MAIN_ABI = new ethers.Interface(IZkSyncABI);
@@ -243,6 +243,8 @@ export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
  *
  * @example
  *
+ * import { utils } from "zksync-ethers";
+ *
  * const isL1ETH = utils.isETH(utils.ETH_ADDRESS); // true
  * const isL2ETH = utils.isETH(utils.ETH_ADDRESS_IN_CONTRACTS); // true
  */
@@ -261,7 +263,9 @@ export function isETH(token: Address) {
  *
  * @example
  *
- * await sleep(1_000);
+ * import { utils } from "zksync-ethers";
+ *
+ * await utils.sleep(1_000);
  */
 export function sleep(millis: number): Promise<unknown> {
   return new Promise(resolve => setTimeout(resolve, millis));
@@ -289,6 +293,8 @@ export function layer1TxDefaults(): {
  * @returns The hashed `L2->L1` message.
  *
  * @example
+ *
+ * import { utils } from "zksync-ethers";
  *
  * const withdrawETHMessage = "0x6c0960f936615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000000000000000000000000000000000001a13b8600";
  * const withdrawETHMessageHash = utils.getHashedL2ToL1Msg("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", withdrawETHMessage, 0);
@@ -318,7 +324,13 @@ export function getHashedL2ToL1Msg(
  *
  * @example
  *
+ * import { Provider, types, utils } from "zksync-ethers";
  *
+ * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+ *
+ * const deployTx = "<DEPLOY TRANSACTION>";
+ * const receipt = await provider.getTransactionReceipt(deployTx);
+ * const deploymentInfo = utils.getDeployedContracts(receipt as ethers.TransactionReceipt);
  */
 export function getDeployedContracts(
   receipt: ethers.TransactionReceipt
@@ -358,9 +370,11 @@ export function getDeployedContracts(
  * @param salt A randomization element used to create the contract address.
  * @param input The ABI-encoded constructor arguments, if any.
  *
- * @remarks The implementation of `create2Address` in zkSync Era may differ slightly from Ethereum.
+ * @remarks The implementation of `create2Address` in ZKsync Era may differ slightly from Ethereum.
  *
  * @example
+ *
+ * import { utils } from "zksync-ethers";
  *
  * const address = utils.create2Address("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", "0x010001cb6a6e8d5f6829522f19fa9568660e0a9cd53b2e8be4deb0a679452e41", "0x01", "0x01");
  * // address = "0x29bac3E5E8FFE7415F97C956BFA106D70316ad50"
@@ -395,6 +409,8 @@ export function create2Address(
  *
  * @example
  *
+ * import { utils } from "zksync-ethers";
+ *
  * const address = utils.createAddress("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049", 1);
  * // address = "0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021"
  */
@@ -425,6 +441,8 @@ export function createAddress(
  *
  * @example
  *
+ * import { utils } from "zksync-ethers";
+ *
  * const baseCost = 100;
  * const value = 99;
  * try {
@@ -449,7 +467,7 @@ export async function checkBaseCost(
  * Serializes an EIP712 transaction and includes a signature if provided.
  *
  * @param transaction The transaction that needs to be serialized.
- * @param signature Ethers signature to be included in the transaction.
+ * @param [signature] Ethers signature to be included in the transaction.
  * @throws {Error} Throws an error if:
  * - `transaction.customData.customSignature` is an empty string. The transaction should be signed, and the `transaction.customData.customSignature` field should be populated with the signature. It should not be specified if the transaction is not signed.
  * - `transaction.chainId` is not provided.
@@ -457,11 +475,16 @@ export async function checkBaseCost(
  *
  * @example Serialize EIP712 transaction without signature.
  *
+ * import { utils } from "zksync-ethers";
+ *
  * const serializedTx = utils.serializeEip712({ chainId: 270, from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049" }, null);
  *
  * // serializedTx = "0x71ea8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0"
  *
  * @example Serialize EIP712 transaction with signature.
+ *
+ * import { utils } from "zksync-ethers";
+ * import { ethers } from "ethers";
  *
  * const signature = ethers.Signature.from("0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a");
  *
@@ -553,6 +576,8 @@ export function serializeEip712(
  *
  * @example
  *
+ * import { utils } from "zksync-ethers";
+ *
  * const bytecode =
  *   "0x000200000000000200010000000103550000006001100270000000130010019d0000008001000039000000400010043f0000000101200190000000290000c13d0000000001000031000000040110008c000000420000413d0000000101000367000000000101043b000000e001100270000000150210009c000000310000613d000000160110009c000000420000c13d0000000001000416000000000110004c000000420000c13d000000040100008a00000000011000310000001702000041000000200310008c000000000300001900000000030240190000001701100197000000000410004c000000000200a019000000170110009c00000000010300190000000001026019000000000110004c000000420000c13d00000004010000390000000101100367000000000101043b000000000010041b0000000001000019000000490001042e0000000001000416000000000110004c000000420000c13d0000002001000039000001000010044300000120000004430000001401000041000000490001042e0000000001000416000000000110004c000000420000c13d000000040100008a00000000011000310000001702000041000000000310004c000000000300001900000000030240190000001701100197000000000410004c000000000200a019000000170110009c00000000010300190000000001026019000000000110004c000000440000613d00000000010000190000004a00010430000000000100041a000000800010043f0000001801000041000000490001042e0000004800000432000000490001042e0000004a00010430000000000000000000000000000000000000000000000000000000000000000000000000ffffffff0000000200000000000000000000000000000040000001000000000000000000000000000000000000000000000000000000000000000000000000006d4ce63c0000000000000000000000000000000000000000000000000000000060fe47b18000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000080000000000000000000000000000000000000000000000000000000000000000000000000000000009c8c8fa789967eb514f3ec9def748480945cc9b10fcbd1a19597d924eb201083";
  * const hashedBytecode = utils.hashBytecode(bytecode);
@@ -610,7 +635,7 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
  *
  * @example
  *
- * import { types } from "zksync-ethers";
+ * import { utils, types } from "zksync-ethers";
  *
  * const serializedTx =
  *   "0x71f87f8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0";
@@ -721,6 +746,59 @@ export function parseEip712(payload: ethers.BytesLike): TransactionLike {
   return transaction;
 }
 
+/**
+ * Returns the custom signature from EIP712 transaction if provided,
+ * otherwise returns the Ethereum signature in bytes representation.
+ *
+ * @param transaction The EIP712 transaction that may contain a custom signature.
+ * If a custom signature is not present in the transaction, the `ethSignature` parameter will be used.
+ * @param [ethSignature] The Ethereum transaction signature. This parameter is ignored if the transaction
+ * object contains a custom signature.
+ *
+ * @example Get custom signature from the EIP712 transaction.
+ *
+ * import { utils, types } from "zksync-ethers";
+ *
+ * const tx: types.TransactionLike = {
+ *   type: 113,
+ *   nonce: 0,
+ *   maxPriorityFeePerGas: 0n,
+ *   maxFeePerGas: 0n,
+ *   gasLimit: 0n,
+ *   to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+ *   value: 1_000_000n,
+ *   data: '0x',
+ *   chainId: 270n,
+ *   from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+ *   customData: {
+ *     gasPerPubdata: 50_000n,
+ *     factoryDeps: [],
+ *     customSignature:
+ *       '0x307837373262396162343735386435636630386637643732303161646332653534383933616532376263666562323162396337643666643430393766346464653063303166376630353332323866346636643838653662663334333436343931343135363761633930363632306661653832633239333339393062353563613336363162',
+ *     paymasterParams: {
+ *       paymaster: '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174',
+ *       paymasterInput: ethers.getBytes(
+ *         '0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000'
+ *       ),
+ *     },
+ *   },
+ *   hash: '0xc0ba55587423e1ef281b06a9d684b481365897f37a6ad611d7619b1b7e0bc908',
+ * };
+ *
+ * const signature = utils.getSignature(tx);
+ * // signature = '0x307837373262396162343735386435636630386637643732303161646332653534383933616532376263666562323162396337643666643430393766346464653063303166376630353332323866346636643838653662663334333436343931343135363761633930363632306661653832633239333339393062353563613336363162'
+ *
+ * @example Get Ethereum transaction signature.
+ *
+ * import { utils } from "zksync-ethers";
+ * import { ethers } from "ethers";
+ *
+ * const ethSignature = ethers.Signature.from(
+ *   '0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a'
+ * );
+ * const signature =  utils.getSignature(undefined, ethSignature);
+ * // signature = '0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a'
+ */
 function getSignature(
   transaction: any,
   ethSignature?: EthereumSignature
@@ -744,14 +822,63 @@ function getSignature(
 }
 
 /**
- * Returns the hash of an EIP712 transaction.
+ * Returns the hash of an EIP712 transaction. If a custom signature is provided in the transaction,
+ * it will be used to form the transaction hash. Otherwise, the Ethereum signature specified in the
+ * `ethSignature` parameter will be used.
  *
- * @param transaction The EIP-712 transaction.
- * @param ethSignature The ECDSA signature of the transaction.
+ * @param transaction The EIP712 transaction that may contain a custom signature.
+ * If a custom signature is not present in the transaction, the `ethSignature` parameter will be used.
+ * @param [ethSignature] The Ethereum transaction signature. This parameter is ignored if the transaction
+ * object contains a custom signature.
  *
- * @example
+ * @example Get transaction hash using custom signature from the transaction.
  *
+ * import { utils } from "zksync-ethers";
  *
+ * const tx: types.TransactionRequest = {
+ *   type: 113,
+ *   nonce: 0,
+ *   maxPriorityFeePerGas: 0n,
+ *   maxFeePerGas: 0n,
+ *   gasLimit: 0n,
+ *   to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+ *   value: 1_000_000n,
+ *   data: '0x',
+ *   chainId: 270n,
+ *   from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+ *   customData: {
+ *     gasPerPubdata: 50_000n,
+ *     factoryDeps: [],
+ *     customSignature:
+ *       '0x307837373262396162343735386435636630386637643732303161646332653534383933616532376263666562323162396337643666643430393766346464653063303166376630353332323866346636643838653662663334333436343931343135363761633930363632306661653832633239333339393062353563613336363162',
+ *     paymasterParams: {
+ *       paymaster: '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174',
+ *       paymasterInput: ethers.getBytes(
+ *         '0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000'
+ *       ),
+ *     },
+ *   },
+ * };
+ *
+ * const hash = utils.eip712TxHash(tx);
+ * // hash = '0xc0ba55587423e1ef281b06a9d684b481365897f37a6ad611d7619b1b7e0bc908'
+ *
+ * @example Get transaction hash using Ethereum signature.
+ *
+ * import { utils } from "zksync-ethers";
+ * import { ethers } from "ethers";
+ *
+ * const tx: types.TransactionRequest = {
+ *   chainId: 270n,
+ *   from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
+ *   to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+ *   value: 1_000_000n,
+ * };
+ * const signature = ethers.Signature.from(
+ *   '0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a'
+ * );
+ * const hash = utils.eip712TxHash(tx, signature);
+ * // hash = '0x8efdc7ce5f5a75ab945976c3e2b0c2a45e9f8e15ff940d05625ac5545cd9f870'
  */
 export function eip712TxHash(
   transaction: Transaction | TransactionRequest,
@@ -769,9 +896,23 @@ export function eip712TxHash(
  * Returns the hash of the L2 priority operation from a given transaction receipt and L2 address.
  *
  * @param txReceipt The receipt of the L1 transaction.
- * @param zkSyncAddress The address of the zkSync Era main contract.
+ * @param zkSyncAddress The address of the ZKsync Era main contract.
  *
  * @example
+ *
+ * import { Provider, types, utils } from "zksync-ethers";
+ * import { ethers } from "ethers";
+ *
+ * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+ * const ethProvider = ethers.getDefaultProvider("sepolia");
+ * const l1Tx = "0xcca5411f3e514052f4a4ae1c2020badec6e0998adb52c09959c5f5ff15fba3a8";
+ * const l1TxReceipt = await ethProvider.getTransactionReceipt(l1Tx);
+ * if (l1TxReceipt) {
+ *   const l2Hash = getL2HashFromPriorityOp(
+ *     receipt as ethers.TransactionReceipt,
+ *     await provider.getMainContractAddress()
+ *   );
+ * }
  */
 export function getL2HashFromPriorityOp(
   txReceipt: ethers.TransactionReceipt,
@@ -821,10 +962,11 @@ const ADDRESS_MODULO = 2n ** 160n;
  *
  * @example
  *
+ * import { utils } from "zksync-ethers";
+ *
  * const l1ContractAddress = "0x702942B8205E5dEdCD3374E5f4419843adA76Eeb";
  * const l2ContractAddress = utils.applyL1ToL2Alias(l1ContractAddress);
  * // l2ContractAddress = "0x813A42B8205E5DedCd3374e5f4419843ADa77FFC"
- *
  */
 export function applyL1ToL2Alias(address: string): string {
   return ethers.toBeHex(
@@ -842,6 +984,8 @@ export function applyL1ToL2Alias(address: string): string {
  * {@link applyL1ToL2Alias}.
  *
  * @example
+ *
+ * import { utils } from "zksync-ethers";
  *
  * const l2ContractAddress = "0x813A42B8205E5DedCd3374e5f4419843ADa77FFC";
  * const l1ContractAddress = utils.undoL1ToL2Alias(l2ContractAddress);
@@ -861,6 +1005,16 @@ export function undoL1ToL2Alias(address: string): string {
  * @param l1TokenAddress The token address on L1.
  * @param provider The client that is able to work with contracts on a read-write basis.
  * @returns The encoded bytes which contains token name, symbol and decimals.
+ *
+ * @example
+ *
+ * import { utils, types } from "zksync-ethers";
+ * import { ethers } from "ethers";
+ *
+ * const ethProvider = ethers.getDefaultProvider("sepolia");
+ * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+ *
+ * const calldata = await utils.getERC20DefaultBridgeData(tokenL1, ethProvider);
  */
 export async function getERC20DefaultBridgeData(
   l1TokenAddress: string,
@@ -904,7 +1058,30 @@ export async function getERC20DefaultBridgeData(
  *
  * @example
  *
+ * import { Provider, utils, types } from "zksync-ethers";
  *
+ * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+ *
+ * const l1TokenAddress = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+ * const l1Sender = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const l2Receiver = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const amount = 5;
+ * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
+ * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
+ * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
+ * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
+ * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
+ * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
+ * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
+ * 00000000000000000000000000000000012";
+ *
+ * const calldata = await utils.getERC20BridgeCalldata(
+ *   l1TokenAddress,
+ *   l1Sender,
+ *   l2Receiver,
+ *   amount,
+ *   bridgeData
+ * );
  */
 export async function getERC20BridgeCalldata(
   l1TokenAddress: string,
@@ -936,6 +1113,7 @@ export async function getERC20BridgeCalldata(
  * @example
  *
  * import { Wallet, utils } from "zksync-ethers";
+ * import { ethers } from "ethers";
  *
  * const ADDRESS = "<WALLET_ADDRESS>";
  * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -977,6 +1155,24 @@ function isECDSASignatureCorrect(
  *
  * @example
  *
+ * import { MultisigECDSASmartAccount, Provider, utils } from "zksync-ethers";
+ * import { ethers } from "ethers";
+ *
+ * const ADDRESS = "<MULTISIG ACCOUNT ADDRESS>";
+ * const PRIVATE_KEY1 = "<FIRST PRIVATE KEY>;
+ * const PRIVATE_KEY2 = "<SECOND PRIVATE KEY>;
+ * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+ *
+ * const account = MultisigECDSASmartAccount.create(
+ *   ADDRESS,
+ *   [PRIVATE_KEY1, PRIVATE_KEY2],
+ *   provider
+ * );
+ *
+ * const message = "Hello World";
+ * const signature = await account.signMessage(message);
+ * const magicValue = await utils.isEIP1271SignatureCorrect(provider, ADDRESS, msgHash, signature);
+ * // magicValue = "0x1626ba7e"
  */
 async function isEIP1271SignatureCorrect(
   provider: Provider,
@@ -1007,6 +1203,23 @@ async function isEIP1271SignatureCorrect(
  * @param address The sender address.
  * @param msgHash The hash of the message.
  * @param signature The Ethers signature.
+ *
+ * @example
+ *
+ * import { Provider, utils } from "zksync-ethers";
+ * import { ethers } from "ethers";
+ *
+ * const ADDRESS = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const MSG_HASH = "<WALLET_PRIVATE_KEY>";
+ * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+ *
+ * const isCorrect = await utils.isSignatureCorrect(
+ *   provider,
+ *   "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+ *   "0xb453bd4e271eed985cbab8231da609c4ce0a9cf1f763b6c1594e76315510e0f1",
+ *   "0xb04f825363596418c630425916f73447d636094a75e47b45e2eb59d8a6c7d5035355f03b903b84700376f0efa23f3b095815776c5c6daf2b371a0a61b5f703451b"
+ * );
+ * // isCorrect = true
  */
 async function isSignatureCorrect(
   provider: Provider,
@@ -1041,6 +1254,7 @@ async function isSignatureCorrect(
  * @example
  *
  * import { Wallet, utils, Provider } from "zksync-ethers";
+ * import { ethers } from "ethers";
  *
  * const ADDRESS = "<WALLET_ADDRESS>";
  * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -1077,6 +1291,7 @@ export async function isMessageSignatureCorrect(
  * @example
  *
  * import { Wallet, utils, Provider, EIP712Signer } from "zksync-ethers";
+ * import { ethers } from "ethers";
  *
  * const ADDRESS = "<WALLET_ADDRESS>";
  * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
@@ -1097,7 +1312,14 @@ export async function isMessageSignatureCorrect(
  *
  * const signature = await eip712Signer.sign(tx);
  *
- * const isValidSignature = await utils.isTypedDataSignatureCorrect(provider, ADDRESS, await eip712Signer.getDomain(), utils.EIP712_TYPES, EIP712Signer.getSignInput(tx), signature);
+ * const isValidSignature = await utils.isTypedDataSignatureCorrect(
+ *  provider,
+ *  ADDRESS,
+ *  await eip712Signer.getDomain(),
+ *  utils.EIP712_TYPES,
+ *  EIP712Signer.getSignInput(tx),
+ *  signature
+ * );
  * // isValidSignature = true
  */
 export async function isTypedDataSignatureCorrect(
@@ -1116,7 +1338,7 @@ export async function isTypedDataSignatureCorrect(
  * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
  *
  * @param providerL1 The Ethers provider for the L1 network.
- * @param providerL2 The zkSync provider for the L2 network.
+ * @param providerL2 The ZKsync provider for the L2 network.
  * @param token The address of the token to be bridged.
  * @param amount The deposit amount.
  * @param to The recipient address on the L2 network.
@@ -1128,7 +1350,28 @@ export async function isTypedDataSignatureCorrect(
  *
  * @example
  *
+ * import { Provider, utils, types } from "zksync-ethers";
+ * import { ethers } from "ethers";
  *
+ * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+ * const ethProvider = ethers.getDefaultProvider("sepolia");
+ *
+ * const token = "0x0000000000000000000000000000000000000001";
+ * const amount = 5;
+ * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+ *
+ * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+ *   ethProvider,
+ *   provider,
+ *   token,
+ *   amount,
+ *   to,
+ *   from,
+ *   gasPerPubdataByte
+ * );
+ * // gas = 355_704
  */
 export async function estimateDefaultBridgeDepositL2Gas(
   providerL1: ethers.Provider,
@@ -1184,6 +1427,8 @@ export async function estimateDefaultBridgeDepositL2Gas(
  *
  * @example
  *
+ * import { utils } from "zksync-ethers";
+ *
  * const scaledGasLimit = utils.scaleGasLimit(10_000);
  * // scaledGasLimit = 12_000
  */
@@ -1197,7 +1442,7 @@ export function scaleGasLimit(gasLimit: bigint): bigint {
 /**
  * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
  *
- * @param providerL2 The zkSync provider for the L2 network.
+ * @param providerL2 The ZKsync provider for the L2 network.
  * @param l1BridgeAddress The address of the custom L1 bridge.
  * @param l2BridgeAddress The address of the custom L2 bridge.
  * @param token The address of the token to be bridged.
@@ -1213,7 +1458,40 @@ export function scaleGasLimit(gasLimit: bigint): bigint {
  *
  * @example
  *
+ * import { Provider, utils, types } from "zksync-ethers";
  *
+ * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+ *
+ * const l1BridgeAddress = "0x3e8b2fe58675126ed30d0d12dea2a9bda72d18ae";
+ * const l2BridgeAddress = "0x681a1afdc2e06776816386500d2d461a6c96cb45";
+ * const token = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+ * const amount = 5;
+ * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
+ * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
+ * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
+ * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
+ * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
+ * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
+ * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
+ * 00000000000000000000000000000000012";
+ * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+ * const l2Value = 0;
+ *
+ * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+ *   provider,
+ *   l1BridgeAddress,
+ *   l2BridgeAddress,
+ *   token,
+ *   amount,
+ *   to,
+ *   bridgeData,
+ *   from,
+ *   gasPerPubdataByte,
+ *   l2Value
+ * );
+ * // gas = 683_830
  */
 export async function estimateCustomBridgeDepositL2Gas(
   providerL2: Provider,
@@ -1247,6 +1525,13 @@ export async function estimateCustomBridgeDepositL2Gas(
  * Creates a JSON string from an object, including support for serializing bigint types.
  *
  * @param object The object to serialize to JSON.
+ *
+ * @example
+ *
+ * import { utils } from "zksync-ethers";
+ *
+ * const json = utils.toJSON({gasLimit: 1_000n})
+ * // {"gasLimit": 1000}
  */
 export function toJSON(object: any): string {
   return JSON.stringify(
@@ -1268,6 +1553,15 @@ export function toJSON(object: any): string {
  * @param a - The first address to compare.
  * @param b - The second address to compare.
  * @returns A boolean indicating whether the addresses are equal.
+ *
+ * @example
+ *
+ * import { utils } from "zksync-ethers";
+ *
+ * const address1 = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+ * const address2 = "0x36615cf349d7f6344891b1e7ca7c72883f5dc049";
+ * const isEqual = utils.isAddressEq(address1, address2);
+ * // true
  */
 export function isAddressEq(a: Address, b: Address): boolean {
   return a.toLowerCase() === b.toLowerCase();
