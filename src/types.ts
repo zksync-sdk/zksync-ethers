@@ -106,35 +106,55 @@ export type DeploymentType =
 
 /** Bridged token. */
 export interface Token {
+  /** Token address on L1. */
   l1Address: Address;
+  /** Token address on L2. */
   l2Address: Address;
+  /** Token name. */
   name: string;
+  /** Token symbol. */
   symbol: string;
+  /** Token decimals. */
   decimals: number;
 }
 
 /** Represents the transaction fee parameters. */
 export interface Fee {
-  /** The maximum amount of gas allowed for the transaction. */
+  /** The maximum amount of gas that can be used. */
   gasLimit: bigint;
-  /** The maximum amount of gas the user is willing to pay for a single byte of pubdata. */
+  /** The gas limit per unit of public data. */
   gasPerPubdataLimit: bigint;
-  /** The EIP1559 tip per gas. */
+  /** The maximum priority fee per unit of gas to incentivize miners. */
   maxPriorityFeePerGas: bigint;
-  /** The EIP1559 fee cap per gas. */
+  /** The maximum fee per unit of gas that the sender is willing to pay. */
   maxFeePerGas: bigint;
 }
 
-/** Represents a message proof. */
+/** Represents a message proof.
+ *  @deprecated In favor of {@link LogProof}.
+ */
 export interface MessageProof {
+  /** Identifier of the log within the transaction. */
   id: number;
+  /** Each element represents a piece of the proof for the specified log. */
   proof: string[];
+  /** Root hash of the proof, anchoring it to a specific state in the blockchain. */
+  root: string;
+}
+
+/** Represents a log proof for an L2 to L1 transaction. */
+export interface LogProof {
+  /** Identifier of the log within the transaction. */
+  id: number;
+  /** Each element represents a piece of the proof for the specified log. */
+  proof: string[];
+  /** Root hash of the proof, anchoring it to a specific state in the blockchain. */
   root: string;
 }
 
 /**
  * A `TransactionResponse` is an extension of {@link ethers.TransactionResponse} with additional features for
- * interacting with zkSync Era.
+ * interacting with ZKsync Era.
  */
 export class TransactionResponse extends ethers.TransactionResponse {
   /** The batch number on the L1 network. */
@@ -216,7 +236,7 @@ export class TransactionResponse extends ethers.TransactionResponse {
 
 /**
  * A `TransactionReceipt` is an extension of {@link ethers.TransactionReceipt} with additional features for
- * interacting with zkSync Era.
+ * interacting with ZKsync Era.
  */
 export class TransactionReceipt extends ethers.TransactionReceipt {
   /** The batch number on the L1 network. */
@@ -266,7 +286,7 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
   }
 }
 
-/** A `Block` is an extension of {@link ethers.Block} with additional features for interacting with zkSync Era. */
+/** A `Block` is an extension of {@link ethers.Block} with additional features for interacting with ZKsync Era. */
 export class Block extends ethers.Block {
   /** The batch number on L1. */
   readonly l1BatchNumber!: null | number;
@@ -358,13 +378,13 @@ export class Block extends ethers.Block {
   }
 }
 
-/** A `LogParams` is an extension of {@link ethers.LogParams} with additional features for interacting with zkSync Era. */
+/** A `LogParams` is an extension of {@link ethers.LogParams} with additional features for interacting with ZKsync Era. */
 export interface LogParams extends ethers.LogParams {
   /** The batch number on L1. */
   readonly l1BatchNumber: null | number;
 }
 
-/** A `Log` is an extension of {@link ethers.Log} with additional features for interacting with zkSync Era. */
+/** A `Log` is an extension of {@link ethers.Log} with additional features for interacting with ZKsync Era. */
 export class Log extends ethers.Log {
   /** The batch number on L1. */
   readonly l1BatchNumber: null | number;
@@ -397,7 +417,7 @@ export class Log extends ethers.Log {
 
 /**
  * A `TransactionLike` is an extension of {@link ethers.TransactionLike} with additional features for interacting
- * with zkSync Era.
+ * with ZKsync Era.
  */
 export interface TransactionLike extends ethers.TransactionLike {
   /** The custom data for EIP712 transaction metadata. */
@@ -406,7 +426,7 @@ export interface TransactionLike extends ethers.TransactionLike {
 
 /**
  * A `Transaction` is an extension of {@link ethers.Transaction} with additional features for interacting
- * with zkSync Era.
+ * with ZKsync Era.
  */
 export class Transaction extends ethers.Transaction {
   /** The custom data for EIP712 transaction metadata. */
@@ -549,22 +569,36 @@ export class Transaction extends ethers.Transaction {
  * Represents a L2 to L1 transaction log.
  */
 export interface L2ToL1Log {
+  /** The block number. */
   blockNumber: number;
+  /** The block hash. */
   blockHash: string;
+  /** The batch number on L1. */
   l1BatchNumber: number;
+  /** The L2 transaction number in a block, in which the log was sent. */
   transactionIndex: number;
+  /** The shard identifier, 0 - rollup, 1 - porter. */
   shardId: number;
+  /**
+   *  A boolean flag that is part of the log along with `key`, `value`, and `sender` address.
+   *  This field is required formally but does not have any special meaning.
+   */
   isService: boolean;
+  /** The L2 address which sent the log. */
   sender: string;
+  /** The 32 bytes of information that was sent in the log. */
   key: string;
+  /** The 32 bytes of information that was sent in the log. */
   value: string;
+  /** The transaction hash. */
   transactionHash: string;
+  /** The log index. */
   logIndex: number;
 }
 
 /**
  * A `TransactionRequest` is an extension of {@link ethers.TransactionRequest} with additional features for interacting
- * with zkSync Era.
+ * with ZKsync Era.
  */
 export interface TransactionRequest extends EthersTransactionRequest {
   /** The custom data for EIP712 transaction metadata. */
@@ -584,7 +618,10 @@ export interface PriorityOpResponse extends TransactionResponse {
   waitL1Commit(confirmation?: number): Promise<ethers.TransactionReceipt>;
 }
 
-/** A map containing accounts and their balances. */
+/**
+ * A map  with token addresses as keys and their corresponding balances as values.
+ * Each key-value pair represents the balance of a specific token held by the account.
+ */
 export type BalancesMap = {[key: string]: bigint};
 
 /** Represents deployment information. */
@@ -643,9 +680,9 @@ export type PaymasterInput =
 
 /** Enumerated list of account abstraction versions. */
 export enum AccountAbstractionVersion {
-  /** Used for contracts that are not accounts */
+  /** Used for contracts that are not accounts. */
   None = 0,
-  /** Used for contracts that are accounts */
+  /** Used for contracts that are accounts. */
   Version1 = 1,
 }
 
@@ -674,50 +711,105 @@ export interface ContractAccountInfo {
   nonceOrdering: AccountNonceOrdering;
 }
 
-/** Contains batch information. */
+/** Contains L1 batch details. */
 export interface BatchDetails {
+  /** L1 batch number. */
   number: number;
+  /** Unix timestamp when the batch was processed. */
   timestamp: number;
+  /** Number of L1 transactions included in the batch. */
   l1TxCount: number;
+  /** Number of L2 transactions associated with this batch. */
   l2TxCount: number;
+  /** Root hash of the state after processing the batch. */
   rootHash?: string;
+  /** Current status of the batch (e.g., verified). */
   status: string;
+  /** Transaction hash of the commit operation on L1. */
   commitTxHash?: string;
+  /** Timestamp when the block was committed on L1. */
   committedAt?: Date;
+  /** Transaction hash of the proof submission on L1. */
   proveTxHash?: string;
+  /** Timestamp when the proof was submitted on L1. */
   provenAt?: Date;
+  /** Transaction hash of the execution on L1. */
   executeTxHash?: string;
+  /** Timestamp when the block execution was completed on L1. */
   executedAt?: Date;
+  /** L1 gas price at the time of the block's execution. */
   l1GasPrice: number;
+  /** Fair gas price on L2 at the time of the block's execution. */
   l2FairGasPrice: number;
+  /** Hashes of the base system contracts involved in the batch. */
+  baseSystemContractsHashes: {
+    bootloader: string;
+    default_aa: string;
+  };
 }
 
 /** Contains block information. */
 export interface BlockDetails {
+  /** Number of the block. */
   number: number;
+  /** Unix timestamp when the block was committed. */
   timestamp: number;
+  /** Corresponding L1 batch number. */
   l1BatchNumber: number;
+  /** Number of L1 transactions included in the block. */
   l1TxCount: number;
+  /** Number of L2 transactions included in the block. */
   l2TxCount: number;
+  /** Root hash of the block's state after execution. */
   rootHash?: string;
+  /** Current status of the block (e.g., verified, executed). */
   status: string;
+  /** Transaction hash of the commit operation on L1. */
   commitTxHash?: string;
+  /** Timestamp when the block was committed on L1. */
   committedAt?: Date;
+  /** Transaction hash of the proof submission on L1. */
   proveTxHash?: string;
+  /** Timestamp when the proof was submitted on L1. */
   provenAt?: Date;
+  /** Transaction hash of the execution on L1. */
   executeTxHash?: string;
+  /** Timestamp when the block execution was completed on L1. */
   executedAt?: Date;
+  /** L1 gas price at the time of the block's execution. */
+  l1GasPrice: number;
+  /** Fair gas price on L2 at the time of the block's execution. */
+  l2FairGasPrice: number;
+  /** A collection of hashes for the base system contracts involved in the block. */
+  baseSystemContractsHashes: {
+    bootloader: string;
+    default_aa: string;
+  };
+  /** Address of the operator who committed the block. */
+  operatorAddress: string;
+  /** version of the ZKsync protocol the block was committed under. */
+  protocolVersion: string;
 }
 
 /** Contains transaction details information. */
 export interface TransactionDetails {
+  /** Indicates whether the transaction originated on Layer 1. */
   isL1Originated: boolean;
+  /** Current status of the transaction (e.g., verified). */
   status: string;
+  /** Transaction fee. */
   fee: BigNumberish;
+  /** Gas amount per unit of public data for this transaction. */
+  gasPerPubdata: BigNumberish;
+  /** Address of the transaction initiator. */
   initiatorAddress: Address;
+  /** Timestamp when the transaction was received. */
   receivedAt: Date;
+  /** Transaction hash of the commit operation. */
   ethCommitTxHash?: string;
+  /** Transaction hash of the proof submission. */
   ethProveTxHash?: string;
+  /** Transaction hash of the execution. */
   ethExecuteTxHash?: string;
 }
 
@@ -739,52 +831,77 @@ export interface FullDepositFee {
 
 /** Represents a raw block transaction. */
 export interface RawBlockTransaction {
+  /** General information about the L2 transaction */
   common_data: {
-    L1: {
-      canonicalTxHash: string;
-      deadlineBlock: number;
-      ethBlock: number;
-      ethHash: string;
-      fullFee: bigint;
-      gasLimit: bigint;
-      gasPerPubdataLimit: bigint;
-      layer2TipFee: bigint;
-      maxFeePerGas: bigint;
-      opProcessingType: string;
-      priorityQueueType: string;
-      refundRecipient: Address;
-      sender: Address;
-      serialId: number;
-      toMint: string;
+    L2: {
+      nonce: number;
+      fee: {
+        gas_limit: bigint;
+        max_fee_per_gas: bigint;
+        max_priority_fee_per_gas: bigint;
+        gas_per_pubdata_limit: bigint;
+      };
+      initiatorAddress: Address;
+      signature: BytesLike[];
+      transactionType: string;
+      input: {
+        hash: string;
+        data: BytesLike[];
+      };
+      paymasterParams: {
+        paymaster: Address;
+        paymasterInput: BytesLike[];
+      };
     };
   };
+  /** Details regarding the execution of the transaction. */
   execute: {
     calldata: string;
     contractAddress: Address;
-    factoryDeps: BytesLike[];
+    factoryDeps: BytesLike[] | null;
     value: bigint;
   };
+  /** Timestamp when the transaction was received, in milliseconds. */
   received_timestamp_ms: number;
+  /** Raw bytes of the transaction as a hexadecimal string. */
   raw_bytes: string | null;
 }
 
 /** Contains parameters for finalizing the withdrawal transaction. */
 export interface FinalizeWithdrawalParams {
+  /** The L2 batch number where the withdrawal was processed. */
   l1BatchNumber: number | null;
+  /** The position in the L2 logs Merkle tree of the l2Log that was sent with the message. */
   l2MessageIndex: number;
+  /** The L2 transaction number in the batch, in which the log was sent. */
   l2TxNumberInBlock: number | null;
+  /** The L2 withdraw data, stored in an L2 -> L1 message. */
   message: any;
+  /** The L2 address which sent the log. */
   sender: string;
+  /** The Merkle proof of the inclusion L2 -> L1 message about withdrawal initialization. */
   proof: string[];
 }
 
-/** Represents storage proof */
+/** Represents storage proof. */
 export interface StorageProof {
+  /** Account address associated with the storage proofs. */
   address: string;
+  /** Array of objects, each representing a storage proof for the requested keys. */
   storageProof: {
+    /** Storage key for which the proof is provided. */
     key: string;
+    /** Value stored in the specified storage key at the time of the specified l1BatchNumber. */
     value: string;
+    /**
+     * A 1-based index representing the position of the tree entry within the Merkle tree.
+     * This index is used to help reconstruct the Merkle path during verification.
+     */
     index: number;
+    /**
+     * An array of 32-byte hashes that constitute the Merkle path from the leaf node
+     * (representing the storage key-value pair) to the root of the Merkle tree.
+     */
     proof: string[];
   }[];
 }

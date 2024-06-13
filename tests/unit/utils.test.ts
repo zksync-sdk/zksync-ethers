@@ -353,4 +353,56 @@ describe('utils', () => {
       expect(result).to.be.deep.equal(tx);
     });
   });
+
+  describe('#eip712TxHash()', () => {
+    it('should create a hash by using Ethereum signature', async () => {
+      const tx: types.TransactionRequest = {
+        chainId: 270n,
+        from: ADDRESS1,
+        to: ADDRESS2,
+        value: 1_000_000n,
+      };
+      const signature = ethers.Signature.from(
+        '0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a'
+      );
+      const hash =
+        '0x8efdc7ce5f5a75ab945976c3e2b0c2a45e9f8e15ff940d05625ac5545cd9f870';
+
+      const result = utils.eip712TxHash(tx, signature);
+      expect(result).to.be.equal(hash);
+    });
+
+    it('should create a hash by using custom signature in the transaction', async () => {
+      const tx: types.TransactionRequest = {
+        type: 113,
+        nonce: 0,
+        maxPriorityFeePerGas: 0n,
+        maxFeePerGas: 0n,
+        gasLimit: 0n,
+        to: ADDRESS2,
+        value: 1_000_000n,
+        data: '0x',
+        chainId: 270n,
+        from: ADDRESS1,
+        customData: {
+          gasPerPubdata: 50_000n,
+          factoryDeps: [],
+          customSignature:
+            '0x307837373262396162343735386435636630386637643732303161646332653534383933616532376263666562323162396337643666643430393766346464653063303166376630353332323866346636643838653662663334333436343931343135363761633930363632306661653832633239333339393062353563613336363162',
+          paymasterParams: {
+            paymaster: '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174',
+            paymasterInput: ethers.getBytes(
+              '0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000'
+            ),
+          },
+        },
+      };
+
+      const hash =
+        '0xc0ba55587423e1ef281b06a9d684b481365897f37a6ad611d7619b1b7e0bc908';
+
+      const result = utils.eip712TxHash(tx);
+      expect(result).to.be.equal(hash);
+    });
+  });
 });

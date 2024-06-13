@@ -42,6 +42,7 @@ import {
   RawBlockTransaction,
   PaymasterParams,
   StorageProof,
+  LogProof,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -85,7 +86,7 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns the addresses of the main contract and default zkSync Era bridge contracts on both L1 and L2.
+     * Returns the addresses of the main contract and default ZKsync Era bridge contracts on both L1 and L2.
      */
     contractAddresses(): {
       bridgehubContract?: Address;
@@ -217,7 +218,7 @@ export function JsonRpcApiProvider<
      * Returns the L2 token address equivalent for a L1 token address as they are not equal.
      * ETH address is set to zero address.
      *
-     * @remarks Only works for tokens bridged on default zkSync Era bridges.
+     * @remarks Only works for tokens bridged on default ZKsync Era bridges.
      *
      * @param token The address of the token on L1.
      */
@@ -243,7 +244,7 @@ export function JsonRpcApiProvider<
      * Returns the L1 token address equivalent for a L2 token address as they are not equal.
      * ETH address is set to zero address.
      *
-     * @remarks Only works for tokens bridged on default zkSync Era bridges.
+     * @remarks Only works for tokens bridged on default ZKsync Era bridges.
      *
      * @param token The address of the token on L2.
      */
@@ -302,7 +303,7 @@ export function JsonRpcApiProvider<
     async getLogProof(
       txHash: BytesLike,
       index?: number
-    ): Promise<MessageProof | null> {
+    ): Promise<LogProof | null> {
       return await this.send('zks_getL2ToL1LogProof', [
         ethers.hexlify(txHash),
         index,
@@ -344,7 +345,7 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns the main zkSync Era smart contract address.
+     * Returns the main ZKsync Era smart contract address.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getmaincontract zks_getMainContract} JSON-RPC method.
      */
@@ -404,7 +405,7 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns the addresses of the default zkSync Era bridge contracts on both L1 and L2.
+     * Returns the addresses of the default ZKsync Era bridge contracts on both L1 and L2.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getbridgecontracts zks_getBridgeContracts} JSON-RPC method.
      */
@@ -980,7 +981,6 @@ export function JsonRpcApiProvider<
      * @param [transaction.gasPerPubdataByte] The current gas per byte value.
      * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
      */
-    // TODO (EVM-3): support refundRecipient for fee estimation
     async estimateL1ToL2Execute(transaction: {
       contractAddress: Address;
       calldata: string;
@@ -1840,6 +1840,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const ethProvider = ethers.getDefaultProvider("sepolia");
@@ -1861,6 +1862,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const ethProvider = ethers.getDefaultProvider("sepolia");
@@ -1967,7 +1969,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   /**
    * Creates a new `Provider` from provided URL or network name.
    *
-   * @param zksyncNetwork The type of zkSync network.
+   * @param zksyncNetwork The type of ZKsync network.
    *
    * @example
    *
@@ -1995,7 +1997,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
 /* c8 ignore start */
 /**
- * A `BrowserProvider` extends {@link ethers.BrowserProvider} and includes additional features for interacting with zkSync Era.
+ * A `BrowserProvider` extends {@link ethers.BrowserProvider} and includes additional features for interacting with ZKsync Era.
  * It supports RPC endpoints within the `zks` namespace.
  * This provider is designed for frontend use in a browser environment and integration for browser wallets
  * (e.g., MetaMask, WalletConnect).
@@ -2949,6 +2951,13 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * Resolves whether the provider manages the `address`.
    *
    * @param address The address to check.
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const hasSigner = await provider.hasSigner(0);
    */
   override async hasSigner(address: number | string): Promise<boolean> {
     if (!address) {
@@ -2974,6 +2983,13 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * @param address The address or index of the account to retrieve the signer for.
    *
    * @throws {Error} If the account doesn't exist.
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const signer = await provider.getSigner();
    */
   override async getSigner(address?: number | string): Promise<Signer> {
     if (!address) {
@@ -2995,6 +3011,21 @@ export class BrowserProvider extends JsonRpcApiProvider(
     );
   }
 
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const gas = await provider.estimate({
+   *   value: 7_000_000_000,
+   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+   * });
+   * console.log(`Gas: ${gas}`);
+   */
   override async estimateGas(transaction: TransactionRequest): Promise<bigint> {
     const gas = await super.estimateGas(transaction);
     const metamaskMinimum = 21_000n;
