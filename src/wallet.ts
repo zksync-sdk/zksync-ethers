@@ -32,7 +32,7 @@ import {
 } from './typechain';
 
 /**
- * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
+ * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with ZKsync Era.
  * It facilitates bridging assets between different networks.
  * All transactions must originate from the address corresponding to the provided private key.
  */
@@ -1078,6 +1078,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * @example Transfer ETH.
    *
    * import { Wallet, Provider, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
    *

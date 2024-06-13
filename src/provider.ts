@@ -19,7 +19,10 @@ import {
 import {
   IERC20__factory,
   IEthToken__factory,
+  IL2Bridge,
   IL2Bridge__factory,
+  IL2SharedBridge,
+  IL2SharedBridge__factory,
 } from './typechain';
 import {
   Address,
@@ -28,7 +31,6 @@ import {
   TransactionStatus,
   PriorityOpResponse,
   BalancesMap,
-  MessageProof,
   TransactionReceipt,
   Block,
   Log,
@@ -42,6 +44,11 @@ import {
   RawBlockTransaction,
   PaymasterParams,
   StorageProof,
+  LogProof,
+  Token,
+  ProtocolVersion,
+  FeeParams,
+  TransactionWithDetailedOutput,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -62,7 +69,7 @@ import {
   formatLog,
   formatBlock,
   formatTransactionResponse,
-  formatTransactionReceipt,
+  formatTransactionReceipt, formatFee,
 } from './format';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -85,7 +92,7 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns the addresses of the main contract and default zkSync Era bridge contracts on both L1 and L2.
+     * Returns the addresses of the main contract and default ZKsync Era bridge contracts on both L1 and L2.
      */
     contractAddresses(): {
       bridgehubContract?: Address;
@@ -217,11 +224,15 @@ export function JsonRpcApiProvider<
      * Returns the L2 token address equivalent for a L1 token address as they are not equal.
      * ETH address is set to zero address.
      *
-     * @remarks Only works for tokens bridged on default zkSync Era bridges.
+     * @remarks Only works for tokens bridged on default ZKsync Era bridges.
      *
      * @param token The address of the token on L1.
+     * @param bridgeAddress The address of custom bridge, which will be used to get l2 token address.
      */
-    async l2TokenAddress(token: Address): Promise<string> {
+    async l2TokenAddress(
+      token: Address,
+      bridgeAddress?: Address
+    ): Promise<string> {
       if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         token = ETH_ADDRESS_IN_CONTRACTS;
       }
@@ -231,19 +242,18 @@ export function JsonRpcApiProvider<
         return L2_BASE_TOKEN_ADDRESS;
       }
 
-      const bridgeAddresses = await this.getDefaultBridgeAddresses();
-      const l2SharedBridge = IL2Bridge__factory.connect(
-        bridgeAddresses.sharedL2,
-        this
-      );
-      return await l2SharedBridge.l2TokenAddress(token);
+      bridgeAddress ??= (await this.getDefaultBridgeAddresses()).sharedL2;
+
+      return await (
+        await this.connectL2Bridge(bridgeAddress)
+      ).l2TokenAddress(token);
     }
 
     /**
      * Returns the L1 token address equivalent for a L2 token address as they are not equal.
      * ETH address is set to zero address.
      *
-     * @remarks Only works for tokens bridged on default zkSync Era bridges.
+     * @remarks Only works for tokens bridged on default ZKsync Era bridges.
      *
      * @param token The address of the token on L2.
      */
@@ -259,6 +269,17 @@ export function JsonRpcApiProvider<
         this
       );
       return await sharedBridge.l1TokenAddress(token);
+    }
+
+    /**
+     * Return the protocol version
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
+     *
+     * @param [id] Specific version ID.
+     */
+    async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+      return await this.send('zks_getProtocolVersion', [id]);
     }
 
     /**
@@ -280,7 +301,17 @@ export function JsonRpcApiProvider<
      * @param transaction The transaction request.
      */
     async estimateFee(transaction: TransactionRequest): Promise<Fee> {
-      return await this.send('zks_estimateFee', [transaction]);
+      const fee =  await this.send('zks_estimateFee', [transaction]);
+      return formatFee(fee);
+    }
+
+    /**
+     * Returns the current fee parameters.
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getFeeParams zks_getFeeParams} JSON-RPC method.
+     */
+    async getFeeParams(): Promise<FeeParams> {
+      return await this.send('zks_getFeeParams', []);
     }
 
     /**
@@ -302,7 +333,7 @@ export function JsonRpcApiProvider<
     async getLogProof(
       txHash: BytesLike,
       index?: number
-    ): Promise<MessageProof | null> {
+    ): Promise<LogProof | null> {
       return await this.send('zks_getL2ToL1LogProof', [
         ethers.hexlify(txHash),
         index,
@@ -344,7 +375,7 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns the main zkSync Era smart contract address.
+     * Returns the main ZKsync Era smart contract address.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getmaincontract zks_getMainContract} JSON-RPC method.
      */
@@ -404,7 +435,7 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns the addresses of the default zkSync Era bridge contracts on both L1 and L2.
+     * Returns the addresses of the default ZKsync Era bridge contracts on both L1 and L2.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getbridgecontracts zks_getBridgeContracts} JSON-RPC method.
      */
@@ -446,6 +477,52 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
+     **
+     * @param address The bridge address.
+     *
+     * @example
+     *
+     * import { Provider, types, utils } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const l2Bridge = await provider.connectL2Bridge("<L2_BRIDGE_ADDRESS>");
+     */
+    async connectL2Bridge(
+      address: Address
+    ): Promise<IL2SharedBridge | IL2Bridge> {
+      if (await this.isL2BridgeLegacy(address)) {
+        return IL2Bridge__factory.connect(address, this);
+      }
+      return IL2SharedBridge__factory.connect(address, this);
+    }
+
+    /**
+     * Returns true if passed bridge address is legacy and false if its shared bridge.
+     **
+     * @param address The bridge address.
+     *
+     * @example
+     *
+     * import { Provider, types, utils } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const isBridgeLegacy = await provider.isL2BridgeLegacy("<L2_BRIDGE_ADDRESS>");
+     * console.log(isBridgeLegacy);
+     */
+    async isL2BridgeLegacy(address: Address): Promise<boolean> {
+      const bridge = IL2SharedBridge__factory.connect(address, this);
+      try {
+        await bridge.l1SharedBridge();
+        return false;
+      } catch (e) {
+        // skip
+      }
+
+      return true;
+    }
+
+    /**
      * Returns all balances for confirmed tokens given by an account address.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
@@ -458,6 +535,22 @@ export function JsonRpcApiProvider<
         balances[token] = BigInt(balances[token]);
       }
       return balances;
+    }
+
+    /**
+     * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
+     *
+     * @param start The token id from which to start.
+     * @param limit The maximum number of tokens to list.
+     */
+    async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
+      const tokens: Token[] = await this.send('zks_getConfirmedTokens', [
+        start,
+        limit,
+      ]);
+      return tokens.map(token => ({address: token.l2Address, ...token}));
     }
 
     /**
@@ -558,6 +651,29 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
+     * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
+     * but with some extra data returned from it.
+     *
+     * With this API Consumer apps can apply "optimistic" events in their applications instantly without having to
+     * wait for ZKsync block confirmation time.
+     *
+     * It’s expected that the optimistic logs of two uncommitted transactions that modify the same state will not
+     * have causal relationships between each other.
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks_sendRawTransactionWithDetailedOutput zks_sendRawTransactionWithDetailedOutput} JSON-RPC method.
+     *
+     * @param signedTx The signed transaction that needs to be broadcasted.
+     */
+    async sendRawTransactionWithDetailedOutput(
+      signedTx: string
+    ): Promise<TransactionWithDetailedOutput> {
+      return await this.send('zks_sendRawTransactionWithDetailedOutput', [
+        signedTx,
+      ]);
+    }
+
+    /**
      * Returns the populated withdrawal transaction.
      *
      * @param transaction The transaction details.
@@ -634,7 +750,7 @@ export function JsonRpcApiProvider<
         tx.bridgeAddress = bridgeAddresses.sharedL2;
       }
 
-      const bridge = IL2Bridge__factory.connect(tx.bridgeAddress!, this);
+      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
       const populatedTx = await bridge.withdraw.populateTransaction(
         tx.to!,
         tx.token,
@@ -980,7 +1096,6 @@ export function JsonRpcApiProvider<
      * @param [transaction.gasPerPubdataByte] The current gas per byte value.
      * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
      */
-    // TODO (EVM-3): support refundRecipient for fee estimation
     async estimateL1ToL2Execute(transaction: {
       contractAddress: Address;
       calldata: string;
@@ -1051,7 +1166,7 @@ export function JsonRpcApiProvider<
 }
 
 /**
- * A `Provider` extends {@link ethers.JsonRpcProvider} and includes additional features for interacting with zkSync Era.
+ * A `Provider` extends {@link ethers.JsonRpcProvider} and includes additional features for interacting with ZKsync Era.
  * It supports RPC endpoints within the `zks` namespace.
  */
 export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
@@ -1233,6 +1348,20 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
+   */
+  override async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+    return super.getProtocolVersion(id);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const gasL1 = await provider.estimateGasL1({
    *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
    *   to: await provider.getMainContractAddress(),
@@ -1273,6 +1402,21 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * @example
    *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const feeParams = await provider.getFeeParams();
+   * console.log(`Fee: ${utils.toJSON(feeParams)}`);
+   */
+  override async getFeeParams(): Promise<FeeParams> {
+    return super.getFeeParams();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -1298,7 +1442,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   override async getLogProof(
     txHash: BytesLike,
     index?: number
-  ): Promise<MessageProof | null> {
+  ): Promise<LogProof | null> {
     return super.getLogProof(txHash, index);
   }
 
@@ -1437,6 +1581,21 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getAllAccountBalances(address: Address): Promise<BalancesMap> {
     return super.getAllAccountBalances(address);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const tokens = await provider.getConfirmedTokens();
+   * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
+   */
+  override async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
+    return super.getConfirmedTokens(start, limit);
   }
 
   /**
@@ -1589,6 +1748,33 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     l1BatchNumber: number
   ): Promise<StorageProof> {
     return super.getProof(address, keys, l1BatchNumber);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, Wallet, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<PRIVATE_KEY>";
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const wallet = new Wallet(PRIVATE_KEY, provider);
+   *
+   * const txWithOutputs = await provider.sendRawTransactionWithDetailedOutput(
+   *  await wallet.signTransaction({
+   *    to: Wallet.createRandom().address,
+   *    value: ethers.parseEther("0.01"),
+   *  })
+   * );
+   *
+   * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
+   */
+  override async sendRawTransactionWithDetailedOutput(
+    signedTx: string
+  ): Promise<TransactionWithDetailedOutput> {
+    return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 
   /**
@@ -1840,6 +2026,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const ethProvider = ethers.getDefaultProvider("sepolia");
@@ -1861,6 +2048,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const ethProvider = ethers.getDefaultProvider("sepolia");
@@ -1967,7 +2155,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   /**
    * Creates a new `Provider` from provided URL or network name.
    *
-   * @param zksyncNetwork The type of zkSync network.
+   * @param zksyncNetwork The type of ZKsync network.
    *
    * @example
    *
@@ -1995,7 +2183,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
 /* c8 ignore start */
 /**
- * A `BrowserProvider` extends {@link ethers.BrowserProvider} and includes additional features for interacting with zkSync Era.
+ * A `BrowserProvider` extends {@link ethers.BrowserProvider} and includes additional features for interacting with ZKsync Era.
  * It supports RPC endpoints within the `zks` namespace.
  * This provider is designed for frontend use in a browser environment and integration for browser wallets
  * (e.g., MetaMask, WalletConnect).
@@ -2189,6 +2377,20 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
+   */
+  override async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+    return super.getProtocolVersion(id);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
    * const gasL1 = await provider.estimateGasL1({
    *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
    *   to: await provider.getMainContractAddress(),
@@ -2229,6 +2431,21 @@ export class BrowserProvider extends JsonRpcApiProvider(
    *
    * @example
    *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const feeParams = await provider.getFeeParams();
+   * console.log(`Fee: ${utils.toJSON(feeParams)}`);
+   */
+  override async getFeeParams(): Promise<FeeParams> {
+    return super.getFeeParams();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
    * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
@@ -2254,7 +2471,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
   override async getLogProof(
     txHash: BytesLike,
     index?: number
-  ): Promise<MessageProof | null> {
+  ): Promise<LogProof | null> {
     return super.getLogProof(txHash, index);
   }
 
@@ -2391,6 +2608,21 @@ export class BrowserProvider extends JsonRpcApiProvider(
    */
   override async getAllAccountBalances(address: Address): Promise<BalancesMap> {
     return super.getAllAccountBalances(address);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const tokens = await provider.getConfirmedTokens();
+   * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
+   */
+  override async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
+    return super.getConfirmedTokens(start, limit);
   }
 
   /**
@@ -2543,6 +2775,34 @@ export class BrowserProvider extends JsonRpcApiProvider(
     l1BatchNumber: number
   ): Promise<StorageProof> {
     return super.getProof(address, keys, l1BatchNumber);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider, Wallet, Provider, utils, types } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await provider.getSigner(),
+   *     Number((await provider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * const txWithOutputs = await provider.sendRawTransactionWithDetailedOutput(
+   *   await signer.signTransaction({
+   *     Wallet.createRandom().address,
+   *     amount: ethers.parseEther("0.01"),
+   *   })
+   * );
+   * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
+   */
+  override async sendRawTransactionWithDetailedOutput(
+    signedTx: string
+  ): Promise<TransactionWithDetailedOutput> {
+    return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 
   /**
@@ -2949,6 +3209,13 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * Resolves whether the provider manages the `address`.
    *
    * @param address The address to check.
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const hasSigner = await provider.hasSigner(0);
    */
   override async hasSigner(address: number | string): Promise<boolean> {
     if (!address) {
@@ -2974,6 +3241,13 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * @param address The address or index of the account to retrieve the signer for.
    *
    * @throws {Error} If the account doesn't exist.
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const signer = await provider.getSigner();
    */
   override async getSigner(address?: number | string): Promise<Signer> {
     if (!address) {
@@ -2995,6 +3269,21 @@ export class BrowserProvider extends JsonRpcApiProvider(
     );
   }
 
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const gas = await provider.estimate({
+   *   value: 7_000_000_000,
+   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+   * });
+   * console.log(`Gas: ${gas}`);
+   */
   override async estimateGas(transaction: TransactionRequest): Promise<bigint> {
     const gas = await super.estimateGas(transaction);
     const metamaskMinimum = 21_000n;
