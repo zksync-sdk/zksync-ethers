@@ -53,6 +53,9 @@ import {
 } from './utils';
 import {Signer} from './signer';
 import Formatter = providers.Formatter;
+import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
+import {Il2Bridge} from '../typechain/Il2Bridge';
+import {Il2SharedBridge} from '../typechain/Il2SharedBridge';
 
 let defaultFormatter: Formatter | null = null;
 
@@ -527,6 +530,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * @remarks Only works for tokens bridged on default zkSync Era bridges.
    *
    * @param token The address of the token on L1.
+   * @param bridgeAddress The address of custom bridge, which will be used to get l2 token address.
    *
    * @example
    *
@@ -535,7 +539,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * console.log(`L2 token address: ${await provider.l2TokenAddress("0x5C221E77624690fff6dd741493D735a17716c26B")}`);
    */
-  async l2TokenAddress(token: Address): Promise<string> {
+  async l2TokenAddress(
+    token: Address,
+    bridgeAddress?: Address
+  ): Promise<string> {
     if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
       token = ETH_ADDRESS_IN_CONTRACTS;
     }
@@ -545,12 +552,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       return L2_BASE_TOKEN_ADDRESS;
     }
 
-    const bridgeAddresses = await this.getDefaultBridgeAddresses();
-    const l2SharedBridge = IL2BridgeFactory.connect(
-      bridgeAddresses.sharedL2,
-      this
-    );
-    return await l2SharedBridge.l2TokenAddress(token);
+    bridgeAddress ??= (await this.getDefaultBridgeAddresses()).sharedL2;
+
+    return await (
+      await this.connectL2Bridge(bridgeAddress)
+    ).l2TokenAddress(token);
   }
 
   /**
@@ -994,6 +1000,52 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   /**
+   * Returns contract wrapper. If given address is shared bridge addres it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
+   **
+   * @param address The bridge address.
+   *
+   * @example
+   *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const l2Bridge = await provider.isL2BridgeLegacy("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049");
+   */
+  async connectL2Bridge(
+    address: Address
+  ): Promise<Il2SharedBridge | Il2Bridge> {
+    if (await this.isL2BridgeLegacy(address)) {
+      return IL2BridgeFactory.connect(address, this);
+    }
+    return Il2SharedBridgeFactory.connect(address, this);
+  }
+
+  /**
+   * Returns true if passed bridge address is legacy and false if its shared bridge.
+   **
+   * @param address The bridge address.
+   *
+   * @example
+   *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const isBridgeLegacy = await provider.isL2BridgeLegacy("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049");
+   * console.log(isBridgeLegacy);
+   */
+  async isL2BridgeLegacy(address: Address): Promise<boolean> {
+    const bridge = Il2SharedBridgeFactory.connect(address, this);
+    try {
+      await bridge.l1SharedBridge();
+      return false;
+    } catch (e) {
+      // skip
+    }
+
+    return true;
+  }
+
+  /**
    * Returns all balances for confirmed tokens given by an account address.
    *
    * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
@@ -1307,7 +1359,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       tx.bridgeAddress = bridgeAddresses.sharedL2;
     }
 
-    const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
+    const bridge = await this.connectL2Bridge(tx.bridgeAddress);
     const populatedTx = await bridge.populateTransaction.withdraw(
       tx.to!,
       tx.token,
