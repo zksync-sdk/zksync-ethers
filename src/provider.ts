@@ -1009,7 +1009,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * import { Provider, types, utils } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const l2Bridge = await provider.isL2BridgeLegacy("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049");
+   * const l2Bridge = await provider.connectL2Bridge("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049");
    */
   async connectL2Bridge(
     address: Address
