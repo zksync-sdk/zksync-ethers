@@ -19,7 +19,10 @@ import {
 import {
   IERC20__factory,
   IEthToken__factory,
+  IL2Bridge,
   IL2Bridge__factory,
+  IL2SharedBridge,
+  IL2SharedBridge__factory,
 } from './typechain';
 import {
   Address,
@@ -225,23 +228,21 @@ export function JsonRpcApiProvider<
      * @remarks Only works for tokens bridged on default ZKsync Era bridges.
      *
      * @param token The address of the token on L1.
+     * @param bridgeAddress The address of custom bridge, which will be used to get l2 token address.
      */
-    async l2TokenAddress(token: Address): Promise<string> {
+    async l2TokenAddress(
+      token: Address,
+      bridgeAddress?: Address
+    ): Promise<string> {
       if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         token = ETH_ADDRESS_IN_CONTRACTS;
       }
 
-      const baseToken = await this.getBaseTokenContractAddress();
-      if (isAddressEq(token, baseToken)) {
-        return L2_BASE_TOKEN_ADDRESS;
-      }
+      bridgeAddress ??= (await this.getDefaultBridgeAddresses()).sharedL2;
 
-      const bridgeAddresses = await this.getDefaultBridgeAddresses();
-      const l2SharedBridge = IL2Bridge__factory.connect(
-        bridgeAddresses.sharedL2,
-        this
-      );
-      return await l2SharedBridge.l2TokenAddress(token);
+      return await (
+        await this.connectL2Bridge(bridgeAddress)
+      ).l2TokenAddress(token);
     }
 
     /**
@@ -468,6 +469,52 @@ export function JsonRpcApiProvider<
         sharedL1: this.contractAddresses().sharedBridgeL1!,
         sharedL2: this.contractAddresses().sharedBridgeL2!,
       };
+    }
+
+    /**
+     * Returns contract wrapper. If given address is shared bridge addres it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
+     **
+     * @param address The bridge address.
+     *
+     * @example
+     *
+     * import { Provider, types, utils } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const l2Bridge = await provider.connectL2Bridge("<L2_BRIDGE_ADDRESS>");
+     */
+    async connectL2Bridge(
+      address: Address
+    ): Promise<IL2SharedBridge | IL2Bridge> {
+      if (await this.isL2BridgeLegacy(address)) {
+        return IL2Bridge__factory.connect(address, this);
+      }
+      return IL2SharedBridge__factory.connect(address, this);
+    }
+
+    /**
+     * Returns true if passed bridge address is legacy and false if its shared bridge.
+     **
+     * @param address The bridge address.
+     *
+     * @example
+     *
+     * import { Provider, types, utils } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const isBridgeLegacy = await provider.isL2BridgeLegacy("<L2_BRIDGE_ADDRESS>");
+     * console.log(isBridgeLegacy);
+     */
+    async isL2BridgeLegacy(address: Address): Promise<boolean> {
+      const bridge = IL2SharedBridge__factory.connect(address, this);
+      try {
+        await bridge.l1SharedBridge();
+        return false;
+      } catch (e) {
+        // skip
+      }
+
+      return true;
     }
 
     /**
@@ -698,7 +745,7 @@ export function JsonRpcApiProvider<
         tx.bridgeAddress = bridgeAddresses.sharedL2;
       }
 
-      const bridge = IL2Bridge__factory.connect(tx.bridgeAddress!, this);
+      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
       const populatedTx = await bridge.withdraw.populateTransaction(
         tx.to!,
         tx.token,
