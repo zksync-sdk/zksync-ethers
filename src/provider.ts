@@ -238,6 +238,11 @@ export function JsonRpcApiProvider<
         token = ETH_ADDRESS_IN_CONTRACTS;
       }
 
+      const baseToken = await this.getBaseTokenContractAddress();
+      if (isAddressEq(token, baseToken)) {
+        return L2_BASE_TOKEN_ADDRESS;
+      }
+
       bridgeAddress ??= (await this.getDefaultBridgeAddresses()).sharedL2;
 
       return await (
