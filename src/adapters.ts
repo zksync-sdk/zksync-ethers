@@ -27,6 +27,7 @@ import {
   ETH_ADDRESS_IN_CONTRACTS,
   LEGACY_ETH_ADDRESS,
   isAddressEq,
+  L2_BASE_TOKEN_ADDRESS,
 } from './utils';
 import {
   IBridgehub,
@@ -44,6 +45,7 @@ import {
   IZkSyncHyperchain__factory,
   IL2SharedBridge__factory,
   IL2SharedBridge,
+  IL1Bridge,
 } from './typechain';
 import {
   Address,
@@ -847,7 +849,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             l2GasLimit: l2GasLimit,
             l2GasPerPubdataByteLimit: gasPerPubdataByte,
             refundRecipient: refundRecipient ?? ethers.ZeroAddress,
-            secondBridgeAddress: await bridgeContracts.shared.getAddress(),
+            secondBridgeAddress:
+              tx.bridgeAddress ?? (await bridgeContracts.shared.getAddress()),
             secondBridgeValue: 0,
             secondBridgeCalldata: ethers.AbiCoder.defaultAbiCoder().encode(
               ['address', 'uint256', 'address'],
@@ -961,7 +964,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             l2GasLimit: l2GasLimit,
             l2GasPerPubdataByteLimit: gasPerPubdataByte,
             refundRecipient: refundRecipient ?? ethers.ZeroAddress,
-            secondBridgeAddress: sharedBridge,
+            secondBridgeAddress: tx.bridgeAddress ?? sharedBridge,
             secondBridgeValue: amount,
             secondBridgeCalldata: ethers.AbiCoder.defaultAbiCoder().encode(
               ['address', 'uint256', 'address'],
@@ -1015,23 +1018,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides.value ??= mintValue;
       await checkBaseCost(baseCost, mintValue);
 
-      let secondBridgeAddress: string;
-      let secondBridgeCalldata: BytesLike;
-      if (tx.bridgeAddress) {
-        secondBridgeAddress = tx.bridgeAddress;
-        secondBridgeCalldata = await getERC20DefaultBridgeData(
-          transaction.token,
-          this._providerL1()
-        );
-      } else {
-        secondBridgeAddress = await (
-          await this.getL1BridgeContracts()
-        ).shared.getAddress();
-        secondBridgeCalldata = ethers.AbiCoder.defaultAbiCoder().encode(
-          ['address', 'uint256', 'address'],
-          [token, amount, to]
-        );
-      }
+      const secondBridgeAddress =
+        tx.bridgeAddress ??
+        (await (await this.getL1BridgeContracts()).shared.getAddress());
+      const secondBridgeCalldata = ethers.AbiCoder.defaultAbiCoder().encode(
+        ['address', 'uint256', 'address'],
+        [token, amount, to]
+      );
 
       return await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
         {
@@ -1445,14 +1438,35 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       index = 0,
       overrides?: ethers.Overrides
     ): Promise<ethers.ContractTransactionResponse> {
-      const {l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, proof} =
-        await this.finalizeWithdrawalParams(withdrawalHash, index);
+      const {
+        l1BatchNumber,
+        l2MessageIndex,
+        l2TxNumberInBlock,
+        message,
+        sender,
+        proof,
+      } = await this.finalizeWithdrawalParams(withdrawalHash, index);
 
-      const l1SharedBridge = IL1SharedBridge__factory.connect(
-        await (await this.getL1BridgeContracts()).shared.getAddress(),
-        this._signerL1()
-      );
-      return await l1SharedBridge.finalizeWithdrawal(
+      let l1Bridge: IL1Bridge | IL1SharedBridge;
+      if (isAddressEq(sender, L2_BASE_TOKEN_ADDRESS)) {
+        l1Bridge = (await this.getL1BridgeContracts()).shared;
+      } else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
+        const l2Bridge = IL2SharedBridge__factory.connect(
+          sender,
+          this._providerL2()
+        );
+        const bridgeAddress = await l2Bridge.l1SharedBridge();
+        l1Bridge = IL1SharedBridge__factory.connect(
+          bridgeAddress,
+          this._signerL1()
+        );
+      } else {
+        const l2Bridge = IL2Bridge__factory.connect(sender, this._providerL2());
+        const bridgeAddress = await l2Bridge.l1Bridge();
+        l1Bridge = IL1Bridge__factory.connect(bridgeAddress, this._signerL1());
+      }
+
+      return await l1Bridge.finalizeWithdrawal(
         (await this._providerL2().getNetwork()).chainId as BigNumberish,
         l1BatchNumber as BigNumberish,
         l2MessageIndex as BigNumberish,
