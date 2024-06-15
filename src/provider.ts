@@ -42,7 +42,11 @@ import {
   RawBlockTransaction,
   PaymasterParams,
   StorageProof,
-  LogProof, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput,
+  LogProof,
+  Token,
+  ProtocolVersion,
+  FeeParams,
+  TransactionWithDetailedOutput,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -489,9 +493,12 @@ export function JsonRpcApiProvider<
      * @param start The token id from which to start.
      * @param limit The maximum number of tokens to list.
      */
-    async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
-      const tokens: Token[] = await this.send("zks_getConfirmedTokens", [start, limit]);
-      return tokens.map((token) => ({ address: token.l2Address, ...token }));
+    async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
+      const tokens: Token[] = await this.send('zks_getConfirmedTokens', [
+        start,
+        limit,
+      ]);
+      return tokens.map(token => ({address: token.l2Address, ...token}));
     }
 
     /**
@@ -606,8 +613,12 @@ export function JsonRpcApiProvider<
      *
      * @param signedTx The signed transaction that needs to be broadcasted.
      */
-    async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
-      return await this.send('zks_sendRawTransactionWithDetailedOutput', [signedTx]);
+    async sendRawTransactionWithDetailedOutput(
+      signedTx: string
+    ): Promise<TransactionWithDetailedOutput> {
+      return await this.send('zks_sendRawTransactionWithDetailedOutput', [
+        signedTx,
+      ]);
     }
 
     /**
@@ -1531,7 +1542,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * const tokens = await provider.getConfirmedTokens();
    * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
    */
-  override async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
+  override async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
     return super.getConfirmedTokens(start, limit);
   }
 
@@ -1708,7 +1719,9 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
    */
-  override async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
+  override async sendRawTransactionWithDetailedOutput(
+    signedTx: string
+  ): Promise<TransactionWithDetailedOutput> {
     return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 
@@ -2556,7 +2569,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * const tokens = await provider.getConfirmedTokens();
    * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
    */
-  override async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
+  override async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
     return super.getConfirmedTokens(start, limit);
   }
 
@@ -2734,7 +2747,9 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * );
    * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
    */
-  override async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
+  override async sendRawTransactionWithDetailedOutput(
+    signedTx: string
+  ): Promise<TransactionWithDetailedOutput> {
     return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 

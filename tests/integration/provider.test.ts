@@ -126,8 +126,8 @@ describe('Provider', () => {
     }).timeout(5_000);
   });
 
-  describe("#getConfirmedTokens()", () => {
-    it("should return confirmed tokens", async () => {
+  describe('#getConfirmedTokens()', () => {
+    it('should return confirmed tokens', async () => {
       const result = await provider.getConfirmedTokens();
       expect(result).to.have.lengthOf(1);
     });
@@ -919,9 +919,9 @@ describe('Provider', () => {
       const result = await provider.sendRawTransactionWithDetailedOutput(
         await wallet.signTransaction({
           to: ADDRESS2,
-          value: 7_000_000_000n
+          value: 7_000_000_000n,
         })
-      )
+      );
       expect(result).not.to.be.null;
     }).timeout(10_000);
   });
