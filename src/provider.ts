@@ -42,7 +42,7 @@ import {
   RawBlockTransaction,
   PaymasterParams,
   StorageProof,
-  LogProof, Token, ProtocolVersion, FeeParams,
+  LogProof, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -589,6 +589,25 @@ export function JsonRpcApiProvider<
       l1BatchNumber: number
     ): Promise<StorageProof> {
       return await this.send('zks_getProof', [address, keys, l1BatchNumber]);
+    }
+
+    /**
+     * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
+     * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
+     * but with some extra data returned from it.
+     *
+     * With this API Consumer apps can apply "optimistic" events in their applications instantly without having to
+     * wait for ZKsync block confirmation time.
+     *
+     * It’s expected that the optimistic logs of two uncommitted transactions that modify the same state will not
+     * have causal relationships between each other.
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks_sendRawTransactionWithDetailedOutput zks_sendRawTransactionWithDetailedOutput} JSON-RPC method.
+     *
+     * @param signedTx The signed transaction that needs to be broadcasted.
+     */
+    async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
+      return await this.send('zks_sendRawTransactionWithDetailedOutput', [signedTx]);
     }
 
     /**
@@ -1671,6 +1690,31 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   /**
    * @inheritDoc
    *
+   * @example
+   *
+   * import { Provider, Wallet, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<PRIVATE_KEY>";
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const wallet = new Wallet(PRIVATE_KEY, provider);
+   *
+   * const txWithOutputs = await provider.sendRawTransactionWithDetailedOutput(
+   *  await wallet.signTransaction({
+   *    to: Wallet.createRandom().address,
+   *    value: ethers.parseEther("0.01"),
+   *  })
+   * );
+   *
+   * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
+   */
+  override async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
+    return super.sendRawTransactionWithDetailedOutput(signedTx);
+  }
+
+  /**
+   * @inheritDoc
+   *
    * @example Retrieve populated ETH withdrawal transactions.
    *
    * import { Provider, types, utils } from "zksync-ethers";
@@ -2666,6 +2710,32 @@ export class BrowserProvider extends JsonRpcApiProvider(
     l1BatchNumber: number
   ): Promise<StorageProof> {
     return super.getProof(address, keys, l1BatchNumber);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider, Wallet, Provider, utils, types } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const signer = Signer.from(
+   *     await provider.getSigner(),
+   *     Number((await provider.getNetwork()).chainId),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * const txWithOutputs = await provider.sendRawTransactionWithDetailedOutput(
+   *   await signer.signTransaction({
+   *     Wallet.createRandom().address,
+   *     amount: ethers.parseEther("0.01"),
+   *   })
+   * );
+   * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
+   */
+  override async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
+    return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 
   /**
