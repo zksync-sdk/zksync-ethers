@@ -130,7 +130,31 @@ export interface Fee {
   maxFeePerGas: bigint;
 }
 
-
+/** Represents the fee parameters configuration. */
+export interface FeeParams {
+  /** Fee parameter configuration for the current version of the ZKsync protocol. */
+  V2: {
+    /** Settings related to transaction fee computation. */
+    config: {
+      /** Minimal gas price on L2. */
+      minimal_l2_gas_price: bigint,
+      /** Compute overhead part in fee calculation. */
+      compute_overhead_part: bigint,
+      /** Public data overhead part in fee calculation. */
+      pubdata_overhead_part: bigint,
+      /** Overhead in L1 gas for a batch of transactions. */
+      batch_overhead_l1_gas: bigint,
+      /** Maximum gas allowed per batch. */
+      max_gas_per_batch: bigint;
+      /** Maximum amount of public data allowed per batch. */
+      max_pubdata_per_batch: bigint;
+    },
+    /** Current L1 gas price. */
+    l1_gas_price: bigint;
+    /** Price of storing public data on L1. */
+    l1_pubdata_price: bigint;
+  }
+}
 
 /** Represents a message proof.
  *  @deprecated In favor of {@link LogProof}.
