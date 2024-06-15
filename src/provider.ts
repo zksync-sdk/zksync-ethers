@@ -42,7 +42,7 @@ import {
   RawBlockTransaction,
   PaymasterParams,
   StorageProof,
-  LogProof,
+  LogProof, Token,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -459,6 +459,19 @@ export function JsonRpcApiProvider<
         balances[token] = BigInt(balances[token]);
       }
       return balances;
+    }
+
+    /**
+     * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
+     *
+     * @param start The token id from which to start.
+     * @param limit The maximum number of tokens to list.
+     */
+    async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
+      const tokens: Token[] = await this.send("zks_getConfirmedTokens", [start, limit]);
+      return tokens.map((token) => ({ address: token.l2Address, ...token }));
     }
 
     /**
@@ -1444,6 +1457,21 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * @example
    *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const tokens = await provider.getConfirmedTokens();
+   * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
+   */
+  override async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
+    return super.getConfirmedTokens(start, limit);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
    * import { Provider, types} from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -2393,6 +2421,21 @@ export class BrowserProvider extends JsonRpcApiProvider(
    */
   override async getAllAccountBalances(address: Address): Promise<BalancesMap> {
     return super.getAllAccountBalances(address);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider, utils } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const tokens = await provider.getConfirmedTokens();
+   * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
+   */
+  override async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
+    return super.getConfirmedTokens(start, limit);
   }
 
   /**
