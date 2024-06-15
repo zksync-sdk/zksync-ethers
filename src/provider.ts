@@ -42,7 +42,7 @@ import {
   RawBlockTransaction,
   PaymasterParams,
   StorageProof,
-  LogProof, Token,
+  LogProof, Token, ProtocolVersion,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -260,6 +260,17 @@ export function JsonRpcApiProvider<
         this
       );
       return await sharedBridge.l1TokenAddress(token);
+    }
+
+    /**
+     * Return the protocol version
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
+     *
+     * @param [id] Specific version ID.
+     */
+    async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+      return await this.send('zks_getProtocolVersion', [id]);
     }
 
     /**
@@ -1246,6 +1257,20 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
+   */
+  override async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+    return super.getProtocolVersion(id);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const gasL1 = await provider.estimateGasL1({
    *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
    *   to: await provider.getMainContractAddress(),
@@ -2209,6 +2234,20 @@ export class BrowserProvider extends JsonRpcApiProvider(
    */
   override async l1TokenAddress(token: Address): Promise<string> {
     return super.l1TokenAddress(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { BrowserProvider } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
+   */
+  override async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+    return super.getProtocolVersion(id);
   }
 
   /**
