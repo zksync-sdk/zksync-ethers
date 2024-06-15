@@ -112,6 +112,13 @@ describe('Provider', () => {
     }).timeout(5_000);
   });
 
+  describe("#getConfirmedTokens()", () => {
+    it("should return confirmed tokens", async () => {
+      const result = await provider.getConfirmedTokens();
+      expect(result).to.have.lengthOf(1);
+    });
+  });
+
   describe('#getAllAccountBalances()', () => {
     it('should return the all balances of the account at `address`', async () => {
       const result = await provider.getAllAccountBalances(ADDRESS1);
