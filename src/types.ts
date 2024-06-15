@@ -130,6 +130,8 @@ export interface Fee {
   maxFeePerGas: bigint;
 }
 
+
+
 /** Represents a message proof.
  *  @deprecated In favor of {@link LogProof}.
  */
@@ -908,6 +910,30 @@ export interface StorageProof {
      */
     proof: string[];
   }[];
+}
+
+/** Represents the protocol version. */
+export interface ProtocolVersion {
+  /** Protocol version ID. */
+  version_id: number,
+  /** Unix timestamp of the version's activation. */
+  timestamp: number,
+  /** Contains the hashes of various verification keys used in the protocol. */
+   verification_keys_hashes: {
+    params: {
+      recursion_node_level_vk_hash: string;
+      recursion_leaf_level_vk_hash: string;
+      recursion_circuits_set_vks_hash: string;
+    },
+    recursion_scheduler_level_vk_hash: string;
+  },
+  /** Addresses of the base system contracts. */
+  base_system_contracts: {
+    bootloader: string;
+    default_aa: string;
+  },
+  /** Hash of the transaction used for the system upgrade, if any. */
+  l2_system_upgrade_tx_hash: string | null;
 }
 
 /**

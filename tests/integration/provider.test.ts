@@ -46,6 +46,13 @@ describe('Provider', () => {
     });
   });
 
+  describe('#getProtocolVersion()', () => {
+    it('should return the latest protocol version', async () => {
+      const result = await provider.getProtocolVersion();
+      expect(result).not.to.be.null;
+    });
+  });
+
   describe('#getMainContractAddress()', () => {
     it('should return the address of main contract', async () => {
       const result = await provider.getMainContractAddress();
