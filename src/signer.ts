@@ -37,7 +37,7 @@ import {IBridgehub} from './typechain/IBridgehub';
 import {Il2SharedBridge} from './typechain/Il2SharedBridge';
 
 /**
- * All typed data conforming to the EIP712 standard within zkSync Era.
+ * All typed data conforming to the EIP712 standard within ZKsync Era.
  */
 export const EIP712_TYPES = {
   Transaction: [
@@ -58,10 +58,22 @@ export const EIP712_TYPES = {
 };
 
 /**
- * A `EIP712Signer` provides support for signing EIP712-typed zkSync Era transactions.
+ * A `EIP712Signer` provides support for signing EIP712-typed ZKsync Era transactions.
  */
 export class EIP712Signer {
   private eip712Domain: Promise<TypedDataDomain>;
+
+  /**
+   * @example
+   *
+   * import { Provider, types, EIP712Signer } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
+   */
   constructor(
     private ethSigner: ethers.Signer & TypedDataSigner,
     chainId: number | Promise<number>
@@ -80,12 +92,14 @@ export class EIP712Signer {
    *
    * @example
    *
+   * import { EIP712Signer } from "zksync-ethers";
+   *
    * const tx = EIP712Signer.getSignInput({
    *   type: utils.EIP712_TX_TYPE,
    *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
    *   value: BigNumber.from(7_000_000),
    *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   nonce: 0,
+   *   nonce: BigNumber.from(0),
    *   chainId: 270,
    *   gasPrice: BigNumber.from(250_000_000),
    *   gasLimit: BigNumber.from(21_000),
@@ -126,6 +140,25 @@ export class EIP712Signer {
    *
    * @param transaction The transaction request that needs to be signed.
    * @returns A promise that resolves to the signature of the transaction.
+   *
+   * @example
+   *
+   * import { Provider, types, EIP712Signer } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
+   * const signature = signer.sign({
+   *   type: utils.EIP712_TX_TYPE,
+   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+   *   value: BigNumber.from(7_000_000),
+   *   nonce: BigNumber.from(0),
+   *   chainId: 270,
+   *   gasPrice: BigNumber.from(250_000_000),
+   *   gasLimit: BigNumber.from(21_000),
+   * });
    */
   async sign(transaction: TransactionRequest): Promise<Signature> {
     return await this.ethSigner._signTypedData(
@@ -142,6 +175,22 @@ export class EIP712Signer {
    * @returns A hash (digest) of the transaction request.
    *
    * @throws {Error} If `transaction.chainId` is not set.
+   *
+   * @example
+   *
+   * import { EIP712Signer } from "zksync-ethers";
+   *
+   * const hash = EIP712Signer.getSignedDigest({
+   *   type: utils.EIP712_TX_TYPE,
+   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
+   *   value: BigNumber.from(7_000_000),
+   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
+   *   nonce: BigNumber.from(0),
+   *   chainId: 270,
+   *   gasPrice: BigNumber.from(250_000_000),
+   *   gasLimit: BigNumber.from(21_000),
+   *   customData: {},
+   * });
    */
   static getSignedDigest(transaction: TransactionRequest): ethers.BytesLike {
     if (!transaction.chainId) {
@@ -160,7 +209,18 @@ export class EIP712Signer {
   }
 
   /**
-   * Returns zkSync Era EIP712 domain.
+   * Returns ZKsync Era EIP712 domain.
+   *
+   * @example
+   *
+   * import { Provider, types, EIP712Signer } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
+   * const domain = await signer.getDomain();
    */
   async getDomain(): Promise<ethers.TypedDataDomain> {
     return await this.eip712Domain;
