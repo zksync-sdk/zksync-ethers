@@ -35,7 +35,7 @@ import {
   RawBlockTransaction,
   StorageProof,
   PaymasterParams,
-  Eip712Meta, LogProof, Token,
+  Eip712Meta, LogProof, Token, ProtocolVersion,
 } from './types';
 import {
   BOOTLOADER_FORMAL_ADDRESS,
@@ -668,6 +668,24 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     } catch (error) {
       throw new Error(`Bad result from backend (estimateGas): ${result}!`);
     }
+  }
+
+  /**
+   * Return the protocol version
+   *
+   * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
+   *
+   * @param [id] Specific version ID.
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
+   */
+  async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+    return await this.send('zks_getProtocolVersion', [id]);
   }
 
   /**
@@ -2203,6 +2221,20 @@ export class Web3Provider extends Provider {
    */
   override async l1TokenAddress(token: Address): Promise<string> {
     return super.l1TokenAddress(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
+   */
+  override async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
+    return super.getProtocolVersion(id);
   }
 
   /**
