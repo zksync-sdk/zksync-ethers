@@ -114,7 +114,7 @@ describe('Provider', () => {
     it('should return an ETH balance of the account at `address`', async () => {
       const result = await provider.getBalance(ADDRESS1);
       expect(result > 0n).to.be.true;
-    }).timeout(5_000);
+    });
 
     it('should return a DAI balance of the account at `address`', async () => {
       const result = await provider.getBalance(
@@ -123,7 +123,7 @@ describe('Provider', () => {
         await provider.l2TokenAddress(DAI_L1)
       );
       expect(result > 0n).to.be.true;
-    }).timeout(5_000);
+    });
   });
 
   describe('#getConfirmedTokens()', () => {
@@ -138,7 +138,7 @@ describe('Provider', () => {
       const result = await provider.getAllAccountBalances(ADDRESS1);
       const expected = IS_ETH_BASED ? 2 : 3;
       expect(Object.keys(result)).to.have.lengthOf(expected);
-    }).timeout(5_000);
+    });
   });
 
   describe('#getBlockDetails()', () => {
@@ -170,7 +170,7 @@ describe('Provider', () => {
         Array.from(ethers.getBytes(testnetPaymasterBytecode))
       );
     });
-  }).timeout(10_000);
+  });
 
   describe('#getRawBlockTransactions()', () => {
     it('should return a raw transactions', async () => {
@@ -911,7 +911,7 @@ describe('Provider', () => {
       });
       const result = await provider.getFilterChanges(filter);
       expect(result).not.to.be.null;
-    }).timeout(10_000);
+    });
   });
 
   describe('#sendRawTransactionWithDetailedOutput()', () => {
@@ -923,6 +923,6 @@ describe('Provider', () => {
         })
       );
       expect(result).not.to.be.null;
-    }).timeout(10_000);
+    });
   });
 });

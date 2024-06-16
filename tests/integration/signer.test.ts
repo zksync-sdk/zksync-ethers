@@ -275,7 +275,7 @@ describe('L2VoidSigner', () => {
           'VoidSigner cannot sign transactions'
         );
       }
-    }).timeout(10_000);
+    });
   });
 
   describe('#withdraw()', () => {
@@ -421,7 +421,7 @@ describe('L1VoidSigner', async () => {
           "ETH token can't be approved! The address of the token does not exist on L1."
         );
       }
-    }).timeout(10_000);
+    });
   });
 
   describe('#getBaseCost()', () => {
@@ -570,7 +570,7 @@ describe('L1VoidSigner', async () => {
           'VoidSigner cannot sign transactions'
         );
       }
-    }).timeout(10_000);
+    });
   });
 
   describe('#getDepositTx()', () => {
@@ -780,7 +780,7 @@ describe('L1VoidSigner', async () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result > 0n).to.be.true;
-      }).timeout(10_000);
+      });
     } else {
       it('should throw an error for insufficient allowance when estimating gas for ETH deposit transaction', async () => {
         try {
@@ -793,7 +793,7 @@ describe('L1VoidSigner', async () => {
         } catch (e) {
           expect((e as any).reason).to.include('ERC20: insufficient allowance');
         }
-      }).timeout(10_000);
+      });
 
       it('should return gas estimation for ETH deposit transaction', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -819,7 +819,7 @@ describe('L1VoidSigner', async () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result > 0n).to.be.true;
-      }).timeout(10_000);
+      });
 
       it('should return gas estimation for base token deposit transaction', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -845,7 +845,7 @@ describe('L1VoidSigner', async () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result > 0n).to.be.true;
-      }).timeout(10_000);
+      });
 
       it('should return gas estimation for DAI deposit transaction', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -877,7 +877,7 @@ describe('L1VoidSigner', async () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result > 0n).to.be.true;
-      }).timeout(10_000);
+      });
     }
   });
 
@@ -895,7 +895,7 @@ describe('L1VoidSigner', async () => {
           'VoidSigner cannot sign transactions'
         );
       }
-    }).timeout(10_000);
+    });
   });
 
   describe('#claimFailedDeposit()', () => {
@@ -930,7 +930,7 @@ describe('L1VoidSigner', async () => {
         expect(result.l2GasLimit > 0n).to.be.true;
         expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
         expect(result.maxFeePerGas! > 0n).to.be.true;
-      }).timeout(10_000);
+      });
 
       it('should throw an error when there is not enough allowance to cover the deposit', async () => {
         const randomSigner = new L1VoidSigner(
@@ -959,7 +959,7 @@ describe('L1VoidSigner', async () => {
             'Not enough allowance to cover the deposit!'
           );
         }
-      }).timeout(10_000);
+      });
 
       it('should return fee for DAI token deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -975,7 +975,7 @@ describe('L1VoidSigner', async () => {
         expect(result.l2GasLimit > 0n).to.be.true;
         expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
         expect(result.maxFeePerGas! > 0n).to.be.true;
-      }).timeout(10_000);
+      });
 
       it('should throw an error when there is not enough balance for the deposit', async () => {
         try {
@@ -992,7 +992,7 @@ describe('L1VoidSigner', async () => {
             'Not enough balance for deposit!'
           );
         }
-      }).timeout(10_000);
+      });
     } else {
       it('should throw an error when there is not enough base token allowance to cover the deposit', async () => {
         try {
@@ -1009,7 +1009,7 @@ describe('L1VoidSigner', async () => {
             'Not enough base token allowance to cover the deposit!'
           );
         }
-      }).timeout(10_000);
+      });
 
       it('should return fee for ETH token deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -1032,7 +1032,7 @@ describe('L1VoidSigner', async () => {
         expect(result.l2GasLimit > 0n).to.be.true;
         expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
         expect(result.maxFeePerGas! > 0n).to.be.true;
-      }).timeout(10_000);
+      });
 
       it('should return fee for base token deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -1051,7 +1051,7 @@ describe('L1VoidSigner', async () => {
           to: await signer.getAddress(),
         });
         expect(result).not.to.be.null;
-      }).timeout(10_000);
+      });
 
       it('should return fee for DAI token deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -1080,7 +1080,7 @@ describe('L1VoidSigner', async () => {
         expect(result.l2GasLimit > 0n).to.be.true;
         expect(result.maxPriorityFeePerGas! > 0n).to.be.true;
         expect(result.maxFeePerGas! > 0n).to.be.true;
-      }).timeout(10_000);
+      });
 
       it('should throw an error when there is not enough token allowance to cover the deposit', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -1139,7 +1139,7 @@ describe('L1VoidSigner', async () => {
             'Not enough token allowance to cover the deposit!'
           );
         }
-      }).timeout(20_000);
+      });
     }
   });
 
@@ -1193,7 +1193,7 @@ describe('L1VoidSigner', async () => {
             'VoidSigner cannot sign transactions'
           );
         }
-      }).timeout(10_000);
+      });
     } else {
       it('should request transaction execution on L2 network', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -1231,7 +1231,7 @@ describe('L1VoidSigner', async () => {
             'VoidSigner cannot sign transactions'
           );
         }
-      }).timeout(10_000);
+      });
     }
   });
 
@@ -1249,6 +1249,6 @@ describe('L1VoidSigner', async () => {
           'VoidSigner cannot sign transactions'
         );
       }
-    }).timeout(10_000);
+    });
   });
 });
