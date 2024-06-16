@@ -49,8 +49,8 @@ import {
 } from './utils';
 import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
 import {Il2SharedBridge} from './typechain/Il2SharedBridge';
-import {Il1SharedBridge} from '../typechain/Il1SharedBridge';
-import {Il1Bridge} from '../typechain/Il1Bridge';
+import {Il1SharedBridge} from './typechain/Il1SharedBridge';
+import {Il1Bridge} from './typechain/Il1Bridge';
 import {Il1BridgeFactory} from './typechain/Il1BridgeFactory';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
