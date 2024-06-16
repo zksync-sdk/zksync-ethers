@@ -35,7 +35,7 @@ import {
   RawBlockTransaction,
   StorageProof,
   PaymasterParams,
-  Eip712Meta, LogProof, Token, ProtocolVersion,
+  Eip712Meta, LogProof, Token, ProtocolVersion, FeeParams,
 } from './types';
 import {
   BOOTLOADER_FORMAL_ADDRESS,
@@ -764,6 +764,23 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       maxPriorityFeePerGas: BigNumber.from(fee.max_priority_fee_per_gas),
       maxFeePerGas: BigNumber.from(fee.max_fee_per_gas),
     }
+  }
+
+  /**
+   * Returns the current fee parameters.
+   *
+   * Calls the {@link https://docs.zksync.io/build/api.html#zks_getFeeParams zks_getFeeParams} JSON-RPC method.
+   *
+   * @example
+   *
+   * import { Provider, types, utils } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const feeParams = await provider.getFeeParams();
+   * console.log(`Fee: ${utils.toJSON(feeParams)}`);
+   */
+  async getFeeParams(): Promise<FeeParams> {
+    return await this.send('zks_getFeeParams', []);
   }
 
   /**
@@ -2278,6 +2295,21 @@ export class Web3Provider extends Provider {
    */
   override async estimateFee(transaction: TransactionRequest): Promise<Fee> {
     return super.estimateFee(transaction);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Web3Provider, utils } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * const feeParams = await provider.getFeeParams();
+   * console.log(`Fee: ${utils.toJSON(feeParams)}`);
+   */
+  override async getFeeParams(): Promise<FeeParams> {
+    return super.getFeeParams();
   }
 
   /**

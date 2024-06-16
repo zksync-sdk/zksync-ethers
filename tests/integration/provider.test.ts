@@ -97,6 +97,13 @@ describe('Provider', () => {
     });
   });
 
+  describe('#getFeeParams()', () => {
+    it('should return the current fee parameters', async () => {
+      const result = await provider.getFeeParams();
+      expect(result).not.to.be.null;
+    });
+  });
+
   describe('#getMainContractAddress()', () => {
     it('should return the address of main contract', async () => {
       const result = await provider.getMainContractAddress();
