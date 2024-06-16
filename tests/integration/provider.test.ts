@@ -985,4 +985,16 @@ describe('Provider', () => {
       expect(result).not.to.be.null;
     }).timeout(10_000);
   });
+
+  describe('#sendRawTransactionWithDetailedOutput()', () => {
+    it('should return the transaction with detailed output', async () => {
+      const result = await provider.sendRawTransactionWithDetailedOutput(
+        await wallet.signTransaction({
+          to: ADDRESS2,
+          value: BigNumber.from(7_000_000_000)
+        })
+      )
+      expect(result).not.to.be.null;
+    }).timeout(10_000);
+  });
 });

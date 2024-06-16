@@ -140,6 +140,33 @@ export interface FeeParams {
   }
 }
 
+/** Represents the transaction with detailed output. */
+export interface TransactionWithDetailedOutput {
+  /** Transaction hash. */
+  transactionHash: string,
+  /** Storage slots. */
+  storageLogs: Array<{
+    address: string,
+    key: string,
+    writtenValue: string
+  }>;
+  /** Generated events. */
+  events: Array<{
+    address: string;
+    topics: string[];
+    data: string;
+    blockHash: string | null,
+    blockNumber: bigint | null,
+    l1BatchNumber: bigint | null,
+    transactionHash: string;
+    transactionIndex: bigint;
+    logIndex: bigint | null,
+    transactionLogIndex: bigint | null,
+    logType: string | null,
+    removed: boolean
+  }>;
+}
+
 /** Represents a message proof.
  *  @deprecated In favor of {@link LogProof}.
  */
