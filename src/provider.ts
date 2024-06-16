@@ -54,8 +54,8 @@ import {
 import {Signer} from './signer';
 import Formatter = providers.Formatter;
 import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
-import {Il2Bridge} from '../typechain/Il2Bridge';
-import {Il2SharedBridge} from '../typechain/Il2SharedBridge';
+import {Il2Bridge} from './typechain/Il2Bridge';
+import {Il2SharedBridge} from './typechain/Il2SharedBridge';
 
 let defaultFormatter: Formatter | null = null;
 
