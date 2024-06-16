@@ -68,7 +68,7 @@ describe('ContractFactory', () => {
 
       const code = await provider.getCode(await contract.getAddress());
       expect(code).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should deploy a contract with a constructor using CREATE opcode', async () => {
       const abi = Token.abi;
@@ -78,7 +78,7 @@ describe('ContractFactory', () => {
 
       const code = await provider.getCode(await contract.getAddress());
       expect(code).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should deploy a contract with dependencies using CREATE opcode', async () => {
       const abi = Demo.contracts['Demo.sol:Demo'].abi;
@@ -93,7 +93,7 @@ describe('ContractFactory', () => {
 
       const code = await provider.getCode(await contract.getAddress());
       expect(code).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should deploy an account using CREATE opcode', async () => {
       const paymasterAbi = Paymaster.abi;
@@ -110,7 +110,7 @@ describe('ContractFactory', () => {
 
       const code = await provider.getCode(await paymasterContract.getAddress());
       expect(code).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should deploy a contract without a constructor using CREATE2 opcode', async () => {
       const abi = Storage.contracts['Storage.sol:Storage'].abi;
@@ -122,7 +122,7 @@ describe('ContractFactory', () => {
 
       const code = await provider.getCode(await contract.getAddress());
       expect(code).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should deploy a contract with a constructor using CREATE2 opcode', async () => {
       const abi = Token.abi;
@@ -136,7 +136,7 @@ describe('ContractFactory', () => {
       const deploymentTx = contract.deploymentTransaction();
       expect(code).not.to.be.null;
       expect(deploymentTx).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should deploy a contract with dependencies using CREATE2 opcode', async () => {
       const abi = Demo.contracts['Demo.sol:Demo'].abi;
@@ -152,7 +152,7 @@ describe('ContractFactory', () => {
 
       const code = await provider.getCode(await contract.getAddress());
       expect(code).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should deploy an account using CREATE2 opcode', async () => {
       const paymasterAbi = Paymaster.abi;
@@ -170,7 +170,7 @@ describe('ContractFactory', () => {
 
       const code = await provider.getCode(await paymasterContract.getAddress());
       expect(code).not.to.be.null;
-    }).timeout(10_000);
+    });
   });
 
   describe('getDeployTransaction()', () => {
@@ -181,7 +181,7 @@ describe('ContractFactory', () => {
 
       const result = await factory.getDeployTransaction('Ducat', 'Ducat', 18);
       expect(result).not.to.be.null;
-    }).timeout(10_000);
+    });
 
     it('should throw an error when salt is not provided in CRATE2 deployment', async () => {
       const abi = Token.abi;
@@ -195,7 +195,7 @@ describe('ContractFactory', () => {
           'Salt is required for CREATE2 deployment!'
         );
       }
-    }).timeout(10_000);
+    });
 
     it('should throw an error when salt is not provided in hexadecimal format in CRATE2 deployment', async () => {
       const abi = Token.abi;
@@ -209,7 +209,7 @@ describe('ContractFactory', () => {
       } catch (e) {
         expect((e as Error).message).to.be.equal('Invalid salt provided!');
       }
-    }).timeout(10_000);
+    });
 
     it('should throw an error when invalid salt length is provided in CRATE2 deployment', async () => {
       const abi = Token.abi;
@@ -223,7 +223,7 @@ describe('ContractFactory', () => {
       } catch (e) {
         expect((e as Error).message).to.be.equal('Invalid salt provided!');
       }
-    }).timeout(10_000);
+    });
 
     it('should throw an error when invalid factory deps are provided in CRATE2 deployment', async () => {
       const abi = Token.abi;
@@ -255,6 +255,6 @@ describe('ContractFactory', () => {
           "Invalid 'factoryDeps' format! It should be an array of bytecodes."
         );
       }
-    }).timeout(10_000);
+    });
   });
 });
