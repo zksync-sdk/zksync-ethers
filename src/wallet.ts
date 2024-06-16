@@ -32,7 +32,7 @@ import {IBridgehub} from './typechain/IBridgehub';
 import {Il2SharedBridge} from './typechain/Il2SharedBridge';
 
 /**
- * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with zkSync Era.
+ * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with ZKsync Era.
  * It facilitates bridging assets between different networks.
  * All transactions must originate from the address corresponding to the provided private key.
  */
@@ -802,7 +802,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * ];
    * const contractInterface = new ethers.utils.Interface(abi);
    * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
+   * const l2GasLimit = BigNumber.from(1_000);
    *
    * const txCostPrice = await wallet.getBaseCost({
    *   gasPrice,
@@ -870,7 +870,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * ];
    * const contractInterface = new ethers.utils.Interface(abi);
    * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
+   * const l2GasLimit = BigNumber.from(1_000);
    *
    * const txCostPrice = await wallet.getBaseCost({
    *   gasPrice,
@@ -936,7 +936,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * ];
    * const contractInterface = new ethers.utils.Interface(abi);
    * const calldata = contractInterface.encodeFunctionData("increment", []);
-   * const l2GasLimit = 1000n;
+   * const l2GasLimit = BigNumber.from(1_000);
    *
    * const txCostPrice = await wallet.getBaseCost({
    *   gasPrice,

@@ -35,7 +35,7 @@ import {
   RawBlockTransaction,
   StorageProof,
   PaymasterParams,
-  Eip712Meta,
+  Eip712Meta, LogProof,
 } from './types';
 import {
   BOOTLOADER_FORMAL_ADDRESS,
@@ -60,7 +60,7 @@ import {Il2SharedBridge} from './typechain/Il2SharedBridge';
 let defaultFormatter: Formatter | null = null;
 
 /**
- * A `Provider` extends {@link ethers.providers.JsonRpcProvider} and includes additional features for interacting with zkSync Era.
+ * A `Provider` extends {@link ethers.providers.JsonRpcProvider} and includes additional features for interacting with ZKsync Era.
  * It supports RPC endpoints within the `zks` namespace.
  */
 export class Provider extends ethers.providers.JsonRpcProvider {
@@ -527,7 +527,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * Returns the L2 token address equivalent for a L1 token address as they are not equal.
    * ETH address is set to zero address.
    *
-   * @remarks Only works for tokens bridged on default zkSync Era bridges.
+   * @remarks Only works for tokens bridged on default ZKsync Era bridges.
    *
    * @param token The address of the token on L1.
    * @param bridgeAddress The address of custom bridge, which will be used to get l2 token address.
@@ -563,7 +563,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * Returns the L1 token address equivalent for a L2 token address as they are not equal.
    * ETH address is set to zero address.
    *
-   * @remarks Only works for tokens bridged on default zkSync Era bridges.
+   * @remarks Only works for tokens bridged on default ZKsync Era bridges.
    *
    * @param token The address of the token on L2.
    *
@@ -739,7 +739,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * console.log(`Fee: ${utils.toJSON(fee)}`);
    */
   async estimateFee(transaction: TransactionRequest): Promise<Fee> {
-    return await this.send('zks_estimateFee', [transaction]);
+    const fee =  await this.send('zks_estimateFee', [transaction]);
+    return {
+      gasLimit: BigNumber.from(fee.gas_limit),
+      gasPerPubdataLimit: BigNumber.from(fee.gas_per_pubdata_limit),
+      maxPriorityFeePerGas: BigNumber.from(fee.max_priority_fee_per_gas),
+      maxFeePerGas: BigNumber.from(fee.max_fee_per_gas),
+    }
   }
 
   /**
@@ -857,7 +863,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   /**
-   * Returns the main zkSync Era smart contract address.
+   * Returns the main ZKsync Era smart contract address.
    *
    * Calls the {@link https://docs.zksync.io/build/api.html#zks-getmaincontract zks_getMainContract} JSON-RPC method.
    *
@@ -954,7 +960,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   /**
-   * Returns the addresses of the default zkSync Era bridge contracts on both L1 and L2.
+   * Returns the addresses of the default ZKsync Era bridge contracts on both L1 and L2.
    *
    * Calls the {@link https://docs.zksync.io/build/api.html#zks-getbridgecontracts zks_getBridgeContracts} JSON-RPC method.
    *
@@ -1000,7 +1006,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   /**
-   * Returns contract wrapper. If given address is shared bridge addres it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
+   * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
    **
    * @param address The bridge address.
    *
@@ -1557,7 +1563,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   /**
    * Creates a new `Provider` from provided URL or network name.
    *
-   * @param zksyncNetwork The type of zkSync network.
+   * @param zksyncNetwork The type of ZKsync network.
    *
    * @example
    *
@@ -1803,6 +1809,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const ethProvider = ethers.getDefaultProvider("sepolia");
@@ -1838,6 +1845,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const ethProvider = ethers.getDefaultProvider("sepolia");
@@ -1967,7 +1975,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * });
    * console.log(`Gas L1 to L2: ${gasL1ToL2}`);
    */
-  // TODO (EVM-3): support refundRecipient for fee estimation
   async estimateL1ToL2Execute(transaction: {
     contractAddress: Address;
     calldata: BytesLike;
@@ -2003,7 +2010,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
 /* c8 ignore start */
 /**
- * A `Web3Provider` extends {@link ExternalProvider} and includes additional features for interacting with zkSync Era.
+ * A `Web3Provider` extends {@link ExternalProvider} and includes additional features for interacting with ZKsync Era.
  * It supports RPC endpoints within the `zks` namespace.
  * This provider is designed for frontend use in a browser environment and integration for browser wallets
  * (e.g., MetaMask, WalletConnect).
@@ -2250,7 +2257,7 @@ export class Web3Provider extends Provider {
   override async getLogProof(
     txHash: BytesLike,
     index?: number
-  ): Promise<MessageProof | null> {
+  ): Promise<LogProof | null> {
     return super.getLogProof(txHash, index);
   }
 
@@ -2922,6 +2929,13 @@ export class Web3Provider extends Provider {
    * @param addressOrIndex The address or index of the account to retrieve the signer for.
    *
    * @throws {Error} If the account doesn't exist.
+   *
+   * @example
+   *
+   * import { Web3Provider, utils } from "zksync-ethers";
+   *
+   * const provider = new Web3Provider(window.ethereum);
+   * const signer = await provider.getSigner();
    */
   override getSigner(addressOrIndex?: number | string): Signer {
     return Signer.from(super.getSigner(addressOrIndex) as any);
