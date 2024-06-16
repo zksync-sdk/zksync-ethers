@@ -157,7 +157,7 @@ export interface TransactionWithDetailedOutput {
     data: string;
     blockHash: string | null;
     blockNumber: BigNumber | null;
-    l1BatchNumber: BigNumber| null;
+    l1BatchNumber: BigNumber | null;
     transactionHash: string;
     transactionIndex: BigNumber;
     logIndex: BigNumber | null;
@@ -166,6 +166,7 @@ export interface TransactionWithDetailedOutput {
     removed: boolean;
   }>;
 }
+
 
 /** Represents a message proof.
  *  @deprecated In favor of {@link LogProof}.
