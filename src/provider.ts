@@ -35,7 +35,12 @@ import {
   RawBlockTransaction,
   StorageProof,
   PaymasterParams,
-  Eip712Meta, LogProof, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput,
+  Eip712Meta,
+  LogProof,
+  Token,
+  ProtocolVersion,
+  FeeParams,
+  TransactionWithDetailedOutput,
 } from './types';
 import {
   BOOTLOADER_FORMAL_ADDRESS,
@@ -1119,9 +1124,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * const tokens = await provider.getConfirmedTokens();
    * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
    */
-  async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
-    const tokens: Token[] = await this.send("zks_getConfirmedTokens", [start, limit]);
-    return tokens.map((token) => ({ address: token.l2Address, ...token }));
+  async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
+    const tokens: Token[] = await this.send('zks_getConfirmedTokens', [
+      start,
+      limit,
+    ]);
+    return tokens.map(token => ({address: token.l2Address, ...token}));
   }
 
   /**
@@ -1338,8 +1346,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    *
    * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
    */
-  async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
-    return await this.send('zks_sendRawTransactionWithDetailedOutput', [signedTx]);
+  async sendRawTransactionWithDetailedOutput(
+    signedTx: string
+  ): Promise<TransactionWithDetailedOutput> {
+    return await this.send('zks_sendRawTransactionWithDetailedOutput', [
+      signedTx,
+    ]);
   }
 
   /**
@@ -2525,7 +2537,7 @@ export class Web3Provider extends Provider {
    * const tokens = await provider.getConfirmedTokens();
    * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
    */
-  override async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
+  override async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
     return super.getConfirmedTokens(start, limit);
   }
 
@@ -2703,7 +2715,9 @@ export class Web3Provider extends Provider {
    * );
    * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
    */
-  override async sendRawTransactionWithDetailedOutput(signedTx: string): Promise<TransactionWithDetailedOutput> {
+  override async sendRawTransactionWithDetailedOutput(
+    signedTx: string
+  ): Promise<TransactionWithDetailedOutput> {
     return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 

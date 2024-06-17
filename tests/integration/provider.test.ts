@@ -163,8 +163,8 @@ describe('Provider', () => {
     });
   });
 
-  describe("#getConfirmedTokens()", () => {
-    it("should return confirmed tokens", async () => {
+  describe('#getConfirmedTokens()', () => {
+    it('should return confirmed tokens', async () => {
       const result = await provider.getConfirmedTokens();
       expect(result).to.have.lengthOf(1);
     });
@@ -991,9 +991,9 @@ describe('Provider', () => {
       const result = await provider.sendRawTransactionWithDetailedOutput(
         await wallet.signTransaction({
           to: ADDRESS2,
-          value: BigNumber.from(7_000_000_000)
+          value: BigNumber.from(7_000_000_000),
         })
-      )
+      );
       expect(result).not.to.be.null;
     }).timeout(10_000);
   });

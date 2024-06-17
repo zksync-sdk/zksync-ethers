@@ -121,49 +121,49 @@ export interface FeeParams {
     /** Settings related to transaction fee computation. */
     config: {
       /** Minimal gas price on L2. */
-      minimal_l2_gas_price: bigint,
+      minimal_l2_gas_price: bigint;
       /** Compute overhead part in fee calculation. */
-      compute_overhead_part: bigint,
+      compute_overhead_part: bigint;
       /** Public data overhead part in fee calculation. */
-      pubdata_overhead_part: bigint,
+      pubdata_overhead_part: bigint;
       /** Overhead in L1 gas for a batch of transactions. */
-      batch_overhead_l1_gas: bigint,
+      batch_overhead_l1_gas: bigint;
       /** Maximum gas allowed per batch. */
       max_gas_per_batch: bigint;
       /** Maximum amount of public data allowed per batch. */
       max_pubdata_per_batch: bigint;
-    },
+    };
     /** Current L1 gas price. */
     l1_gas_price: bigint;
     /** Price of storing public data on L1. */
     l1_pubdata_price: bigint;
-  }
+  };
 }
 
 /** Represents the transaction with detailed output. */
 export interface TransactionWithDetailedOutput {
   /** Transaction hash. */
-  transactionHash: string,
+  transactionHash: string;
   /** Storage slots. */
   storageLogs: Array<{
-    address: string,
-    key: string,
-    writtenValue: string
+    address: string;
+    key: string;
+    writtenValue: string;
   }>;
   /** Generated events. */
   events: Array<{
     address: string;
     topics: string[];
     data: string;
-    blockHash: string | null,
-    blockNumber: bigint | null,
-    l1BatchNumber: bigint | null,
+    blockHash: string | null;
+    blockNumber: bigint | null;
+    l1BatchNumber: bigint | null;
     transactionHash: string;
     transactionIndex: bigint;
-    logIndex: bigint | null,
-    transactionLogIndex: bigint | null,
-    logType: string | null,
-    removed: boolean
+    logIndex: bigint | null;
+    transactionLogIndex: bigint | null;
+    logType: string | null;
+    removed: boolean;
   }>;
 }
 
@@ -628,23 +628,23 @@ export interface StorageProof {
 /** Represents the protocol version. */
 export interface ProtocolVersion {
   /** Protocol version ID. */
-  version_id: number,
+  version_id: number;
   /** Unix timestamp of the version's activation. */
-  timestamp: number,
+  timestamp: number;
   /** Contains the hashes of various verification keys used in the protocol. */
   verification_keys_hashes: {
     params: {
       recursion_node_level_vk_hash: string;
       recursion_leaf_level_vk_hash: string;
       recursion_circuits_set_vks_hash: string;
-    },
+    };
     recursion_scheduler_level_vk_hash: string;
-  },
+  };
   /** Addresses of the base system contracts. */
   base_system_contracts: {
     bootloader: string;
     default_aa: string;
-  },
+  };
   /** Hash of the transaction used for the system upgrade, if any. */
   l2_system_upgrade_tx_hash: string | null;
 }
