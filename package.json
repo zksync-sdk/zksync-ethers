@@ -1,6 +1,6 @@
 {
   "name": "zksync-ethers",
-  "version": "6.8.0",
+  "version": "6.9.0",
   "main": "build/index.js",
   "module": "build-esm/index.js",
   "types": "build/index.d.ts",
