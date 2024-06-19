@@ -1,3 +1,26 @@
+# [6.9.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.8.0...v6.9.0) (2024-06-19)
+
+
+### Bug Fixes
+
+* **adapter:** fix support for custom bridge ([deb01a4](https://github.com/zksync-sdk/zksync-ethers/commit/deb01a40708ebcce06d83d70bea88b9b4e0ec386))
+* **adapter:** return `IL2SharedBridge` ([bd67567](https://github.com/zksync-sdk/zksync-ethers/commit/bd675672c85f152bdffc7ce5762190d95ef37bec))
+
+
+### Features
+
+* align types and RPC endpoints with version `v24.7.0` of a node ([f7ef615](https://github.com/zksync-sdk/zksync-ethers/commit/f7ef61568c0413b85c6f59994f2515d91b97d27a))
+* **provider:** add `Provider.getConfirmedTokens()` method ([887dc00](https://github.com/zksync-sdk/zksync-ethers/commit/887dc00661db4b68f52f1ad4d0e4046e45d0b280))
+* **provider:** add `Provider.getFeeParams()` method ([f5b9381](https://github.com/zksync-sdk/zksync-ethers/commit/f5b9381ba5bafd8c6b670852ca59dbe8a0830397))
+* **provider:** add `Provider.getProtocolVersion()` method ([864c9d0](https://github.com/zksync-sdk/zksync-ethers/commit/864c9d05669bb3de8a5426639232e7dfe6283808))
+* **provider:** add `Provider.sendRawTransactionWithDetailedOutput()` method ([d41a75d](https://github.com/zksync-sdk/zksync-ethers/commit/d41a75d98495987c5cad20355f56bfed5dfb8531))
+
+
+### BREAKING CHANGES
+
+* Types and RPC endpoints are aligned with version
+`v24.7.0` of a node.
+
 # [6.8.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.7.1...v6.8.0) (2024-06-06)
 
 
