@@ -69,7 +69,8 @@ import {
   formatLog,
   formatBlock,
   formatTransactionResponse,
-  formatTransactionReceipt, formatFee,
+  formatTransactionReceipt,
+  formatFee,
 } from './format';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -301,7 +302,7 @@ export function JsonRpcApiProvider<
      * @param transaction The transaction request.
      */
     async estimateFee(transaction: TransactionRequest): Promise<Fee> {
-      const fee =  await this.send('zks_estimateFee', [transaction]);
+      const fee = await this.send('zks_estimateFee', [transaction]);
       return formatFee(fee);
     }
 
