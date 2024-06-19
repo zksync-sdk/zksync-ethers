@@ -1,6 +1,6 @@
 {
   "name": "zksync-ethers",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "description": "A Web3 library for interacting with the ZkSync Layer 2 scaling solution.",
   "author": {
     "name": "Matter Labs",

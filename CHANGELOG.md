@@ -1,3 +1,28 @@
+# [5.9.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.8.0...v5.9.0) (2024-06-19)
+
+
+### Bug Fixes
+
+* **adapter:** fix support for custom bridge ([82a54aa](https://github.com/zksync-sdk/zksync-ethers/commit/82a54aa7578dee0993c8069be6019ea8491bcf10))
+* **adapter:** replace `l2Bridge` with `l2BridgeAddress` in `_getL2GasLimitFromCustomBridge` ([7a2e611](https://github.com/zksync-sdk/zksync-ethers/commit/7a2e6111d883b47e18460ce81f1b7174756dfd51))
+* **adapter:** return `IL2SharedBridge` ([aae16cd](https://github.com/zksync-sdk/zksync-ethers/commit/aae16cd99f8444411a3eccfa2f05e45898197e6b))
+
+
+### Features
+
+* align types and RPC endpoints with version `v24.7.0` of a node ([a419e45](https://github.com/zksync-sdk/zksync-ethers/commit/a419e450e0bc10aea1b6a0ecbdf9d3e5c1e1644a))
+* **provider:** add `connectL2Bridge` and `isL2BridgeLegacy` ([dd2e3b9](https://github.com/zksync-sdk/zksync-ethers/commit/dd2e3b9c42474e3f6a6c67a2cd887ec262ac5e36))
+* **Provider:** add `Provider.getConfirmedTokens()` method ([034011f](https://github.com/zksync-sdk/zksync-ethers/commit/034011fa014606ecf66106798ea5e6d6ff113375))
+* **provider:** add `Provider.getFeeParams()` method ([770a410](https://github.com/zksync-sdk/zksync-ethers/commit/770a4105214ccc04b257dfb251553799e87a0401))
+* **Provider:** add `Provider.getProtocolVersion()` method ([daa3670](https://github.com/zksync-sdk/zksync-ethers/commit/daa3670cd176cb3eb4a16d5f9868dfee0a3a3daa))
+* **provider:** add `Provider.sendRawTransactionWithDetailedOutput()` method ([2e4761d](https://github.com/zksync-sdk/zksync-ethers/commit/2e4761dfef8a2cd8b2018074666634c361972795))
+
+
+### BREAKING CHANGES
+
+* Types and RPC endpoints are aligned with version
+`v24.7.0` of a node.
+
 # [5.8.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.7.2...v5.8.0) (2024-06-06)
 
 
