@@ -817,7 +817,7 @@ export interface BlockDetails {
   };
   /** Address of the operator who committed the block. */
   operatorAddress: string;
-  /** version of the ZKsync protocol the block was committed under. */
+  /** Version of the ZKsync protocol the block was committed under. */
   protocolVersion: string;
 }
 
@@ -951,7 +951,7 @@ export interface ProtocolVersion {
     };
     recursion_scheduler_level_vk_hash: string;
   };
-  /** Addresses of the base system contracts. */
+  /** Hashes of the base system contracts. */
   base_system_contracts: {
     bootloader: string;
     default_aa: string;

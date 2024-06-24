@@ -273,7 +273,7 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Return the protocol version
+     * Return the protocol version.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
      *
