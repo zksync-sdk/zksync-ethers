@@ -86,7 +86,7 @@ export type Eip712Meta = {
  *   A negative value indicates the block number should be deducted from the most recent block.
  * - A block hash as a string, specifying a specific block by its block hash.
  *   This allows potentially orphaned blocks to be specified without ambiguity, but many backends do not support this for some operations.
- * - Constants representing special blocks such as 'committed', 'finalized', 'latest', 'earliest', or 'pending'.
+ * - Constants representing special blocks such as 'committed', 'finalized', 'latest', 'earliest', 'pending' or 'l1_committed'.
  */
 export type BlockTag =
   | BigNumberish
@@ -95,7 +95,8 @@ export type BlockTag =
   | 'finalized'
   | 'latest'
   | 'earliest'
-  | 'pending';
+  | 'pending'
+  | 'l1_committed';
 
 /** Pipe-delimited choice of deployment types. */
 export type DeploymentType =
