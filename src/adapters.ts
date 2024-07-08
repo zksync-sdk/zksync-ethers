@@ -1906,7 +1906,10 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
         erc20: IL2Bridge__factory.connect(addresses.erc20L2, this._signerL2()),
-        weth: IL2Bridge__factory.connect(addresses.wethL2 || addresses.erc20L2, this._signerL2()),
+        weth: IL2Bridge__factory.connect(
+          addresses.wethL2 || addresses.erc20L2,
+          this._signerL2()
+        ),
         shared: IL2SharedBridge__factory.connect(
           addresses.sharedL2,
           this._signerL2()
