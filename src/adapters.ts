@@ -117,7 +117,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           addresses.erc20L1,
           this._signerL1()
         ),
-        weth: IL1ERC20BridgeFactory.connect(addresses.wethL1, this._signerL1()),
+        weth: IL1ERC20BridgeFactory.connect(
+          addresses.wethL1 || addresses.erc20L1,
+          this._signerL1()
+        ),
         shared: IL1SharedBridgeFactory.connect(
           addresses.sharedL1,
           this._signerL1()
@@ -1876,7 +1879,10 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       const addresses = await this._providerL2().getDefaultBridgeAddresses();
       return {
         erc20: IL2BridgeFactory.connect(addresses.erc20L2, this._signerL2()),
-        weth: IL2BridgeFactory.connect(addresses.wethL2, this._signerL2()),
+        weth: IL2BridgeFactory.connect(
+          addresses.wethL2 || addresses.erc20L2,
+          this._signerL2()
+        ),
         shared: Il2SharedBridgeFactory.connect(
           addresses.sharedL2,
           this._signerL2()
