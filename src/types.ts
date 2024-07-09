@@ -167,7 +167,6 @@ export interface TransactionWithDetailedOutput {
   }>;
 }
 
-
 /** Represents a message proof.
  *  @deprecated In favor of {@link LogProof}.
  */
