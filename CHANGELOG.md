@@ -1,3 +1,10 @@
+## [5.9.1](https://github.com/zksync-sdk/zksync-ethers/compare/v5.9.0...v5.9.1) (2024-07-09)
+
+
+### Bug Fixes
+
+* make weth bridge addresses optional ([#190](https://github.com/zksync-sdk/zksync-ethers/issues/190)) ([ce56b44](https://github.com/zksync-sdk/zksync-ethers/commit/ce56b44476d37f9ef46d886bf4b257db696db768))
+
 # [5.9.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.8.0...v5.9.0) (2024-06-19)
 
 
