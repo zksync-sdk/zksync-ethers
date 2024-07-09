@@ -1405,21 +1405,38 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async populateTransaction(
     tx: TransactionRequest
   ): Promise<TransactionLike> {
-    if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
-      return (await super.populateTransaction(tx)) as TransactionLike;
+    let populated = (await this.populateCall(tx)) as TransactionLike;
+    if (populated.gasPrice && (populated.maxFeePerGas || populated.maxPriorityFeePerGas)) {
+      throw new Error("Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!");
+    }
+    if (!populated.gasLimit ||
+      (!populated.gasPrice && (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))  ) {
+      const fee = await this.provider.estimateFee(populated);
+      populated.gasLimit ??= fee.gasLimit;
+      if (!populated.gasPrice && populated.type === 0) {
+        populated.gasPrice = fee.maxFeePerGas;
+      } else if (!populated.gasPrice && populated.type !== 0) {
+        populated.maxFeePerGas ??= fee.maxFeePerGas;
+        populated.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
+      }
+    }
+    if (
+      tx.type === null ||
+      tx.type === undefined ||
+      tx.type === EIP712_TX_TYPE ||
+      tx.customData
+    ) {
+      populated.type = EIP712_TX_TYPE;
+      populated.value ??= 0;
+      populated.data ??= '0x';
+      populated.customData = this._fillCustomData(tx.customData ?? {});
+      populated.nonce = populated.nonce ?? (await this.getNonce())
+      populated.chainId = populated.chainId ?? (await this.provider.getNetwork()).chainId
+
+      return populated
     }
 
-    tx.type = EIP712_TX_TYPE;
-    const populated = (await super.populateTransaction(tx)) as TransactionLike;
-
-    populated.type = EIP712_TX_TYPE;
-    populated.value ??= 0;
-    populated.data ??= '0x';
-    populated.customData = this._fillCustomData(tx.customData ?? {});
-    if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
-      populated.gasPrice = await this.provider.getGasPrice();
-    }
-    return populated;
+    return super.populateTransaction(populated);
   }
 
   /***

@@ -129,7 +129,8 @@ describe('populateTransaction()', () => {
       value: 7_000_000_000n,
       type: 113,
       data: '0x',
-      gasPrice: 100_000_000n,
+      maxFeePerGas: 100_000_000n,
+      maxPriorityFeePerGas: 0n,
       gasLimit: 156_726n,
       customData: {
         gasPerPubdata: 50_000,
@@ -150,6 +151,65 @@ describe('populateTransaction()', () => {
     expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
   });
 
+  it('should populate tx using gasPrice as fee model', async () => {
+    const tx: TransactionRequest = {
+      chainId: 270,
+      from: ADDRESS1,
+      to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+      value: 7_000_000_000n,
+      type: 113,
+      data: '0x',
+      gasPrice: 100_000_000n,
+      gasLimit: 156_726n,
+      customData: {
+        gasPerPubdata: 50_000,
+        factoryDeps: [],
+      },
+    };
+
+    const result = await populateTransactionECDSA(
+      {
+        chainId: 270,
+        to: ADDRESS2,
+        value: 7_000_000_000,
+        gasPrice: 100_000_000n,
+      },
+      PRIVATE_KEY1,
+      provider
+    );
+    expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
+  });
+
+  it('should populate `tx.maxFeePerGas`', async () => {
+    const tx: TransactionRequest = {
+      chainId: 270,
+      from: ADDRESS1,
+      to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
+      value: 7_000_000_000n,
+      type: 113,
+      data: '0x',
+      maxFeePerGas: 100_000_000n,
+      maxPriorityFeePerGas: 100_000_000n,
+      gasLimit: 156_726n,
+      customData: {
+        gasPerPubdata: 50_000,
+        factoryDeps: [],
+      },
+    };
+
+    const result = await populateTransactionECDSA(
+      {
+        chainId: 270,
+        to: ADDRESS2,
+        value: 7_000_000_000,
+        maxPriorityFeePerGas: 100_000_000n,
+      },
+      PRIVATE_KEY1,
+      provider
+    );
+    expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
+  });
+
   it('should throw an error when provider is not set', async () => {
     const tx: TransactionRequest = {
       chainId: 270,
@@ -159,7 +219,7 @@ describe('populateTransaction()', () => {
     };
 
     try {
-      await populateTransactionECDSA(tx, PRIVATE_KEY1);
+      await populateTransactionECDSA(tx, PRIVATE_KEY1, null);
     } catch (error) {
       expect((error as Error).message).to.be.equal(
         'Provider is required but is not provided!'

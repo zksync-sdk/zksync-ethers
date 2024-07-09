@@ -304,7 +304,9 @@ export function JsonRpcApiProvider<
      * @param transaction The transaction request.
      */
     async estimateFee(transaction: TransactionRequest): Promise<Fee> {
-      const fee = await this.send('zks_estimateFee', [transaction]);
+      const fee = await this.send('zks_estimateFee', [
+        await this.getRpcTransaction(transaction),
+      ]);
       return formatFee(fee);
     }
 

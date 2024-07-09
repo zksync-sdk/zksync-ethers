@@ -1,6 +1,6 @@
 import {ethers, SigningKey} from 'ethers';
 import {EIP712_TX_TYPE, DEFAULT_GAS_PER_PUBDATA_LIMIT} from './utils';
-import {TransactionLike, TransactionBuilder, PayloadSigner} from './types';
+import {TransactionLike, TransactionBuilder, PayloadSigner, Fee} from './types';
 
 /**
  * Signs the `payload` using an ECDSA private key.
@@ -193,26 +193,37 @@ export const populateTransactionECDSA: TransactionBuilder = async (
   populatedTx.chainId ??= (await provider.getNetwork()).chainId;
   populatedTx.value = populatedTx.value ? BigInt(populatedTx.value) : 0n;
   populatedTx.data ??= '0x';
-  populatedTx.gasPrice ??= await provider.getGasPrice();
   populatedTx.customData = tx.customData ?? {};
   populatedTx.customData.gasPerPubdata ??= DEFAULT_GAS_PER_PUBDATA_LIMIT;
   populatedTx.customData.factoryDeps ??= [];
 
-  if (populatedTx.from) {
+  populatedTx.from ??= new ethers.Wallet(secret).address;
+
+  if (populatedTx.gasPrice && (populatedTx.maxFeePerGas || populatedTx.maxPriorityFeePerGas)) {
+    throw new Error("Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!");
+  }
+  if (!populatedTx.gasLimit ||
+    (!populatedTx.gasPrice && (!populatedTx.maxFeePerGas || !populatedTx.maxPriorityFeePerGas))  ) {
+    let fromToUse = populatedTx.from
     const isContractAccount =
       ethers.getBytes(await provider.getCode(populatedTx.from)).length !== 0;
     if (isContractAccount) {
       // Gas estimation does not work when initiator is contract account (works only with EOA).
       // In order to estimation gas, the transaction's from value is replaced with signer's address.
-      populatedTx.gasLimit ??= await provider.estimateGas({
+      fromToUse = new ethers.Wallet(secret).address
+    }
+    let fee = await provider.estimateFee({
         ...populatedTx,
-        from: new ethers.Wallet(secret).address,
+        from: fromToUse,
       });
+
+    populatedTx.gasLimit ??= fee.gasLimit;
+    if (!populatedTx.gasPrice) {
+      populatedTx.maxFeePerGas ??= fee.maxFeePerGas;
+      populatedTx.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
     }
   }
 
-  populatedTx.from ??= new ethers.Wallet(secret).address;
-  populatedTx.gasLimit ??= await provider.estimateGas(populatedTx);
   populatedTx.nonce ??= await provider.getTransactionCount(
     populatedTx.from,
     'pending'

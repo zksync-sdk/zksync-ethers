@@ -184,7 +184,6 @@ describe('types', () => {
     before('setup', async function () {
       this.timeout(25_000);
       const signedEip712Tx = await wallet.signTransaction({
-        type: utils.EIP712_TX_TYPE,
         to: ADDRESS2,
         value: 1_000_000,
         nonce: 1,
@@ -192,6 +191,7 @@ describe('types', () => {
       eip712Tx = types.Transaction.from(signedEip712Tx);
 
       const signedLegacyTx = await wallet.signTransaction({
+        type: 2,
         to: ADDRESS2,
         value: 1_000_000,
         nonce: 1,
