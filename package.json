@@ -33,7 +33,8 @@
     "build-esm/",
     "abi/",
     "src/",
-    "typechain"
+    "typechain",
+    "logo.svg"
   ],
   "dependencies": {},
   "devDependencies": {
