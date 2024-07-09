@@ -147,7 +147,8 @@ describe('SmartAccount', async () => {
         chainId: 270n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
-        gasPrice: 100_000_000n,
+        maxFeePerGas: 100_000_000n,
+        maxPriorityFeePerGas: 0n,
       };
 
       const result = await account.populateTransaction({
@@ -157,7 +158,6 @@ describe('SmartAccount', async () => {
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
-      expect(BigInt(result.gasPrice!) > 0n).to.be.true;
     }).timeout(25_000);
 
     it('should return a populated transaction with default values if are omitted', async () => {
@@ -168,7 +168,8 @@ describe('SmartAccount', async () => {
         from: ADDRESS1,
         nonce: await account.getNonce('pending'),
         chainId: 270n,
-        gasPrice: 100_000_000n,
+        maxFeePerGas: 100_000_000n,
+        maxPriorityFeePerGas: 0n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
       };
