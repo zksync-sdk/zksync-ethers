@@ -223,7 +223,8 @@ describe('Wallet', () => {
         chainId: 270n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
-        gasPrice: 100_000_000n,
+        maxPriorityFeePerGas: 0n,
+        maxFeePerGas: 100_000_000n,
       };
 
       const result = await wallet.populateTransaction({
@@ -234,21 +235,21 @@ describe('Wallet', () => {
       expect(result).to.be.deepEqualExcluding(tx, [
         'gasLimit',
         'chainId',
-        'gasPrice',
         'chainId',
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
-      expect(BigInt(result.gasPrice!) > 0n).to.be.true;
     }).timeout(25_000);
 
     it('should return a populated transaction with default values if are omitted', async () => {
       const tx = {
         to: ADDRESS2,
         value: 7_000_000n,
-        type: 2,
+        type: 113,
+        data: '0x',
         from: ADDRESS1,
         nonce: await wallet.getNonce('pending'),
         chainId: 270n,
+        customData: {gasPerPubdata: 50_000, factoryDeps: []},
         maxFeePerGas: 1_200_000_000n,
         maxPriorityFeePerGas: 1_000_000_000n,
       };
@@ -265,7 +266,7 @@ describe('Wallet', () => {
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
       expect(BigInt(result.maxFeePerGas!) > 0n).to.be.true;
-      expect(BigInt(result.maxPriorityFeePerGas!) > 0n).to.be.true;
+      expect(BigInt(result.maxPriorityFeePerGas!) >= 0n).to.be.true;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -321,8 +322,13 @@ describe('Wallet', () => {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'chainId',
+        'maxFeePerGas',
+      ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
+      expect(BigInt(result.maxFeePerGas!) > 0n).to.be.true;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `customData` are provided', async () => {
@@ -348,8 +354,13 @@ describe('Wallet', () => {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
+      expect(result).to.be.deepEqualExcluding(tx, [
+        'gasLimit',
+        'chainId',
+        'maxPriorityFeePerGas',
+      ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
+      expect(BigInt(result.maxPriorityFeePerGas!) >= 0n).to.be.true;
     });
 
     it('should return populated EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided', async () => {
@@ -365,6 +376,7 @@ describe('Wallet', () => {
       };
       const result = await wallet.populateTransaction({
         to: ADDRESS2,
+        type: 2,
         value: 7_000_000,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 2_000_000_000n,
@@ -382,12 +394,13 @@ describe('Wallet', () => {
         nonce: await wallet.getNonce('pending'),
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
-        maxPriorityFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 0n,
       };
       const result = await wallet.populateTransaction({
         to: ADDRESS2,
+        type: 2,
         value: 7_000_000,
-        gasPrice: 3_500_000_000n,
+        maxFeePerGas: 3_500_000_000n,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -434,7 +447,7 @@ describe('Wallet', () => {
       expect(result).not.to.be.null;
     });
 
-    it('should send EIP1559 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided', async () => {
+    it('should send EIP712 transaction when `maxFeePerGas` and `maxPriorityFeePerGas` are provided and type is empty', async () => {
       const tx = await wallet.sendTransaction({
         to: ADDRESS2,
         value: 7_000_000,
@@ -443,10 +456,10 @@ describe('Wallet', () => {
       });
       const result = await tx.wait();
       expect(result).not.to.be.null;
-      expect(result.type).to.be.equal(2);
+      expect(result.type).to.be.equal(113);
     });
 
-    it('should send already populated EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas`', async () => {
+    it('should send already populated EIP712 transaction with `maxFeePerGas` and `maxPriorityFeePerGas`', async () => {
       const populatedTx = await wallet.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
@@ -457,10 +470,10 @@ describe('Wallet', () => {
       const tx = await wallet.sendTransaction(populatedTx);
       const result = await tx.wait();
       expect(result).not.to.be.null;
-      expect(result.type).to.be.equal(2);
+      expect(result.type).to.be.equal(113);
     });
 
-    it('should send EIP1559 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`', async () => {
+    it('should send EIP712 transaction with `maxFeePerGas` and `maxPriorityFeePerGas` same as provided `gasPrice`', async () => {
       const tx = await wallet.sendTransaction({
         to: ADDRESS2,
         value: 7_000_000,
@@ -468,7 +481,7 @@ describe('Wallet', () => {
       });
       const result = await tx.wait();
       expect(result).not.to.be.null;
-      expect(result.type).to.be.equal(2);
+      expect(result.type).to.be.equal(113);
     });
 
     it('should send legacy transaction when `type = 0`', async () => {

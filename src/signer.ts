@@ -5,6 +5,7 @@ import {
   ContractTransactionResponse,
   ethers,
   Overrides,
+  copyRequest,
 } from 'ethers';
 import {Provider} from './provider';
 import {
@@ -646,41 +647,66 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   override async sendTransaction(
     transaction: TransactionRequest
   ): Promise<TransactionResponse> {
-    if (!transaction.customData && !transaction.type) {
-      // use legacy txs by default
-      transaction.type = 0;
-    }
-    if (!transaction.customData && transaction.type !== EIP712_TX_TYPE) {
-      return (await super.sendTransaction(transaction)) as TransactionResponse;
-    } else {
+    const tx = await this.populateFeeData(transaction);
+
+    if (tx.type === null ||
+      tx.type === undefined ||
+      tx.type === EIP712_TX_TYPE ||
+      tx.customData) {
       const address = await this.getAddress();
-      const from = !transaction.from
+      const from = !tx.from
         ? address
-        : await ethers.resolveAddress(transaction.from);
+        : await ethers.resolveAddress(tx.from);
       if (!isAddressEq(from, address)) {
         throw new Error('Transaction `from` address mismatch!');
       }
-      const tx: TransactionLike = {
-        type: transaction.type ?? EIP712_TX_TYPE,
-        value: transaction.value ?? 0,
-        data: transaction.data ?? '0x',
-        nonce: transaction.nonce ?? (await this.getNonce()),
-        gasPrice: transaction.gasPrice ?? (await this.provider.getGasPrice()),
-        gasLimit:
-          transaction.gasLimit ??
-          (await this.provider.estimateGas(transaction)),
+      const zkTx: TransactionLike = {
+        type: tx.type ?? EIP712_TX_TYPE,
+        value: tx.value ?? 0,
+        data: tx.data ?? '0x',
+        nonce: tx.nonce ?? (await this.getNonce()),
+        maxFeePerGas: tx.gasPrice ?? tx.maxFeePerGas,
+        maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+        gasLimit: tx.gasLimit,
         chainId:
-          transaction.chainId ?? (await this.provider.getNetwork()).chainId,
-        to: await ethers.resolveAddress(transaction.to!),
-        customData: this._fillCustomData(transaction.customData ?? {}),
+          tx.chainId ?? (await this.provider.getNetwork()).chainId,
+        to: await ethers.resolveAddress(tx.to!),
+        customData: this._fillCustomData(tx.customData ?? {}),
         from,
       };
-      tx.customData ??= {};
-      tx.customData.customSignature = await this.eip712.sign(tx);
+      zkTx.customData ??= {};
+      zkTx.customData.customSignature = await this.eip712.sign(zkTx);
 
-      const txBytes = serializeEip712(tx);
+      const txBytes = serializeEip712(zkTx);
       return await this.provider.broadcastTransaction(txBytes);
     }
+    return (await super.sendTransaction(tx)) as TransactionResponse;
+  }
+
+  protected async populateFeeData(transaction: TransactionRequest): Promise<ethers.PreparedTransactionRequest> {
+    const tx = copyRequest(transaction)
+
+    // { type: null, gasLimit: null, gasPrice: 5, maxPriorityFeePerGas: null, maxFeePerGas: null} => true -> set gasLimit and use zksync tx
+    // { type: null, gasLimit: 5, gasPrice: null, maxPriorityFeePerGas: null, maxFeePerGas: null} => true -> set maxFeePerGas and priority and use zksync tx
+    // { type: null, gasLimit: 5, gasPrice: 10, maxPriorityFeePerGas: null, maxFeePerGas: null} => false -> use zksync tx
+    // { type: null, gasLimit: 5, gasPrice: null, maxPriorityFeePerGas: null, maxFeePerGas: 10} => true -> use zksync tx
+    // { type: null, gasLimit: 5, gasPrice: null, maxPriorityFeePerGas: 1, maxFeePerGas: 10} => false -> use zksync tx
+    // { type: null, gasLimit: 5, gasPrice: 5, maxPriorityFeePerGas: 1, maxFeePerGas: 10} => throw error
+    if (tx.gasPrice && (tx.maxFeePerGas || tx.maxPriorityFeePerGas)) {
+      throw new Error("Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!");
+    }
+    if (!tx.gasLimit ||
+      (!tx.gasPrice && (!tx.maxFeePerGas || !tx.maxPriorityFeePerGas))  ) {
+      const fee = await this.provider.estimateFee(tx);
+      tx.gasLimit ??= fee.gasLimit;
+      if (!tx.gasPrice && tx.type === 0) {
+        tx.gasPrice = fee.maxFeePerGas;
+      } else if (!tx.gasPrice && tx.type !== 0) {
+        tx.maxFeePerGas ??= fee.maxFeePerGas;
+        tx.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
+      }
+    }
+    return tx;
   }
 }
 
