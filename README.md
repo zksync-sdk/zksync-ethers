@@ -7,7 +7,7 @@
 [![X (formerly Twitter) Follow](https://badgen.net/badge/twitter/@zksyncDevs/1DA1F2?icon&label)](https://x.com/zksyncDevs)
 [![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts)
 
-![Era Logo](https://github.com/matter-labs/era-contracts/raw/main/eraLogo.svg)
+[![ZKsync Era Logo](logo.svg)](https://zksync.io/)
 
 In order to provide easy access to all the features of ZKsync Era, the `zksync-ethers` JavaScript SDK was created,
 which is made in a way that has an interface very similar to those of [ethers](https://docs.ethers.io/v6/). In
