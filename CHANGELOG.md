@@ -1,3 +1,15 @@
+# [6.10.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.9.0...v6.10.0) (2024-07-09)
+
+
+### Bug Fixes
+
+* make weth bridge addresses optional ([ad3cff8](https://github.com/zksync-sdk/zksync-ethers/commit/ad3cff876c0ac2b7319d62d1d79fc5b121b8a7c4))
+
+
+### Features
+
+* **types:** add ` l1_committed` type into type `BlockTag` ([89e7f69](https://github.com/zksync-sdk/zksync-ethers/commit/89e7f69a090b0e9139942bb32d08ba6ac829aeba))
+
 # [6.9.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.8.0...v6.9.0) (2024-06-19)
 
 
