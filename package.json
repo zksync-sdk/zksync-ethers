@@ -31,7 +31,8 @@
     "build/",
     "abi/",
     "src/",
-    "typechain"
+    "typechain",
+    "logo.svg"
   ],
   "dependencies": {
     "ethers": "~5.7.0"
