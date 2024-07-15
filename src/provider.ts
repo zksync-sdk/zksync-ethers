@@ -112,6 +112,8 @@ export function JsonRpcApiProvider<
     override _getBlockTag(blockTag?: BlockTag): string | Promise<string> {
       if (blockTag === 'committed') {
         return 'committed';
+      } else if (blockTag === 'l1_committed') {
+        return 'l1_committed';
       }
       return super._getBlockTag(blockTag);
     }
