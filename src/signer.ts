@@ -686,18 +686,15 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   protected async populateFeeData(transaction: TransactionRequest): Promise<ethers.PreparedTransactionRequest> {
     const tx = copyRequest(transaction)
 
-    // { type: null, gasLimit: null, gasPrice: 5, maxPriorityFeePerGas: null, maxFeePerGas: null} => true -> set gasLimit and use zksync tx
-    // { type: null, gasLimit: 5, gasPrice: null, maxPriorityFeePerGas: null, maxFeePerGas: null} => true -> set maxFeePerGas and priority and use zksync tx
-    // { type: null, gasLimit: 5, gasPrice: 10, maxPriorityFeePerGas: null, maxFeePerGas: null} => false -> use zksync tx
-    // { type: null, gasLimit: 5, gasPrice: null, maxPriorityFeePerGas: null, maxFeePerGas: 10} => true -> use zksync tx
-    // { type: null, gasLimit: 5, gasPrice: null, maxPriorityFeePerGas: 1, maxFeePerGas: 10} => false -> use zksync tx
-    // { type: null, gasLimit: 5, gasPrice: 5, maxPriorityFeePerGas: 1, maxFeePerGas: 10} => throw error
     if (tx.gasPrice && (tx.maxFeePerGas || tx.maxPriorityFeePerGas)) {
       throw new Error("Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!");
     }
+    if (this.providerL2){
+      throw new Error("Initialize provider L2")
+    }
     if (!tx.gasLimit ||
       (!tx.gasPrice && (!tx.maxFeePerGas || !tx.maxPriorityFeePerGas))  ) {
-      const fee = await this.provider.estimateFee(tx);
+      const fee = await this.providerL2.estimateFee(tx);
       tx.gasLimit ??= fee.gasLimit;
       if (!tx.gasPrice && tx.type === 0) {
         tx.gasPrice = fee.maxFeePerGas;
