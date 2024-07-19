@@ -1929,8 +1929,8 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
      * from the associated account on L2 network to the target account on L1 network.
      *
      * @param transaction Withdrawal transaction request.
-     * @param transaction.token The address of the token. Defaults to ETH.
      * @param transaction.amount The amount of the token to withdraw.
+     * @param transaction.token The address of the token. Defaults to ETH.
      * @param [transaction.to] The address of the recipient on L1.
      * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
      * @param [transaction.paymasterParams] Paymaster parameters.
@@ -1938,8 +1938,8 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @returns A Promise resolving to a withdrawal transaction response.
      */
     async withdraw(transaction: {
-      token: Address;
       amount: BigNumberish;
+      token?: Address;
       to?: Address;
       bridgeAddress?: Address;
       paymasterParams?: PaymasterParams;
