@@ -12,6 +12,7 @@ import {
   PAYMASTER,
   L2_CHAIN_URL,
 } from '../utils';
+import { EIP712_TX_TYPE } from "../../src/utils";
 
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -450,6 +451,7 @@ describe('Provider', () => {
         const tx = {
           from: ADDRESS1,
           to: (await provider.getDefaultBridgeAddresses()).sharedL2,
+          type: EIP712_TX_TYPE,
           data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049000000000000000000000000540dff1797971fe12ba19e45c8e0568fe886b32000000000000000000000000000000000000000000000000000000001a13b8600',
           customData: {
             paymasterParams: {
@@ -479,6 +481,7 @@ describe('Provider', () => {
           from: ADDRESS1,
           value: 7_000_000_000n,
           to: utils.L2_BASE_TOKEN_ADDRESS,
+          type: EIP712_TX_TYPE,
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
         };
         const result = await provider.getWithdrawTx({
@@ -495,6 +498,7 @@ describe('Provider', () => {
           from: ADDRESS1,
           value: 7_000_000_000n,
           to: utils.L2_BASE_TOKEN_ADDRESS,
+          type: EIP712_TX_TYPE,
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
           customData: {
             paymasterParams: {
@@ -658,6 +662,7 @@ describe('Provider', () => {
         const tx = {
           from: ADDRESS1,
           to: await provider.l2TokenAddress(utils.ETH_ADDRESS_IN_CONTRACTS),
+          type: EIP712_TX_TYPE,
           data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b7761800000000000000000000000000000000000000000000000000000001a13b8600',
         };
         const result = await provider.getTransferTx({
@@ -687,6 +692,7 @@ describe('Provider', () => {
           amount: 7_000_000_000,
           to: ADDRESS2,
           from: ADDRESS1,
+          type: EIP712_TX_TYPE,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
             type: 'ApprovalBased',
             token: APPROVAL_TOKEN,
