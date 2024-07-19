@@ -717,6 +717,7 @@ export function JsonRpcApiProvider<
       tx.to ??= tx.from;
       tx.overrides ??= {};
       tx.overrides.from ??= tx.from;
+      tx.overrides.type ??= EIP712_TX_TYPE;
 
       if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
         if (!tx.overrides.value) {
@@ -828,6 +829,7 @@ export function JsonRpcApiProvider<
 
       tx.overrides ??= {};
       tx.overrides.from ??= tx.from;
+      tx.overrides.type ??= EIP712_TX_TYPE;
 
       if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
         if (tx.paymasterParams) {
