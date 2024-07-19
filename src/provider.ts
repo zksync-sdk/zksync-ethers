@@ -682,8 +682,8 @@ export function JsonRpcApiProvider<
      * Returns the populated withdrawal transaction.
      *
      * @param transaction The transaction details.
-     * @param transaction.token The token address.
      * @param transaction.amount The amount of token.
+     * @param transaction.token The token address.
      * @param [transaction.from] The sender's address.
      * @param [transaction.to] The recipient's address.
      * @param [transaction.bridgeAddress] The bridge address.
@@ -691,8 +691,8 @@ export function JsonRpcApiProvider<
      * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
      */
     async getWithdrawTx(transaction: {
-      token: Address;
       amount: BigNumberish;
+      token?: Address;
       from?: Address;
       to?: Address;
       bridgeAddress?: Address;
@@ -700,6 +700,7 @@ export function JsonRpcApiProvider<
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
+      tx.token ??= L2_BASE_TOKEN_ADDRESS;
       if (
         isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
         isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)
