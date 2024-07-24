@@ -699,7 +699,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
       !tx.gasLimit ||
       (!tx.gasPrice && (!tx.maxFeePerGas || !tx.maxPriorityFeePerGas))
     ) {
-      const fee = await this.providerL2.estimateFee(tx);
+      const fee = await this.providerL2!.estimateFee(tx);
       tx.gasLimit ??= fee.gasLimit;
       if (!tx.gasPrice && tx.type === 0) {
         tx.gasPrice = fee.maxFeePerGas;
