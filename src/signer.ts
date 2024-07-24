@@ -649,14 +649,14 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   ): Promise<TransactionResponse> {
     const tx = await this.populateFeeData(transaction);
 
-    if (tx.type === null ||
+    if (
+      tx.type === null ||
       tx.type === undefined ||
       tx.type === EIP712_TX_TYPE ||
-      tx.customData) {
+      tx.customData
+    ) {
       const address = await this.getAddress();
-      const from = !tx.from
-        ? address
-        : await ethers.resolveAddress(tx.from);
+      const from = !tx.from ? address : await ethers.resolveAddress(tx.from);
       if (!isAddressEq(from, address)) {
         throw new Error('Transaction `from` address mismatch!');
       }
@@ -668,8 +668,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         maxFeePerGas: tx.gasPrice ?? tx.maxFeePerGas,
         maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
         gasLimit: tx.gasLimit,
-        chainId:
-          tx.chainId ?? (await this.provider.getNetwork()).chainId,
+        chainId: tx.chainId ?? (await this.provider.getNetwork()).chainId,
         to: await ethers.resolveAddress(tx.to!),
         customData: this._fillCustomData(tx.customData ?? {}),
         from,
@@ -683,17 +682,23 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     return (await super.sendTransaction(tx)) as TransactionResponse;
   }
 
-  protected async populateFeeData(transaction: TransactionRequest): Promise<ethers.PreparedTransactionRequest> {
-    const tx = copyRequest(transaction)
+  protected async populateFeeData(
+    transaction: TransactionRequest
+  ): Promise<ethers.PreparedTransactionRequest> {
+    const tx = copyRequest(transaction);
 
     if (tx.gasPrice && (tx.maxFeePerGas || tx.maxPriorityFeePerGas)) {
-      throw new Error("Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!");
+      throw new Error(
+        'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
+      );
     }
-    if (this.providerL2){
-      throw new Error("Initialize provider L2")
+    if (this.providerL2) {
+      throw new Error('Initialize provider L2');
     }
-    if (!tx.gasLimit ||
-      (!tx.gasPrice && (!tx.maxFeePerGas || !tx.maxPriorityFeePerGas))  ) {
+    if (
+      !tx.gasLimit ||
+      (!tx.gasPrice && (!tx.maxFeePerGas || !tx.maxPriorityFeePerGas))
+    ) {
       const fee = await this.providerL2.estimateFee(tx);
       tx.gasLimit ??= fee.gasLimit;
       if (!tx.gasPrice && tx.type === 0) {
