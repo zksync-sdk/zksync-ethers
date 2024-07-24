@@ -1405,12 +1405,20 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async populateTransaction(
     tx: TransactionRequest
   ): Promise<TransactionLike> {
-    let populated = (await this.populateCall(tx)) as TransactionLike;
-    if (populated.gasPrice && (populated.maxFeePerGas || populated.maxPriorityFeePerGas)) {
-      throw new Error("Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!");
+    const populated = (await this.populateCall(tx)) as TransactionLike;
+    if (
+      populated.gasPrice &&
+      (populated.maxFeePerGas || populated.maxPriorityFeePerGas)
+    ) {
+      throw new Error(
+        'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
+      );
     }
-    if (!populated.gasLimit ||
-      (!populated.gasPrice && (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))  ) {
+    if (
+      !populated.gasLimit ||
+      (!populated.gasPrice &&
+        (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))
+    ) {
       const fee = await this.provider.estimateFee(populated);
       populated.gasLimit ??= fee.gasLimit;
       if (!populated.gasPrice && populated.type === 0) {
@@ -1430,10 +1438,11 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       populated.value ??= 0;
       populated.data ??= '0x';
       populated.customData = this._fillCustomData(tx.customData ?? {});
-      populated.nonce = populated.nonce ?? (await this.getNonce())
-      populated.chainId = populated.chainId ?? (await this.provider.getNetwork()).chainId
+      populated.nonce = populated.nonce ?? (await this.getNonce());
+      populated.chainId =
+        populated.chainId ?? (await this.provider.getNetwork()).chainId;
 
-      return populated
+      return populated;
     }
 
     return super.populateTransaction(populated);
