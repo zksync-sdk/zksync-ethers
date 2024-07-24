@@ -1,3 +1,12 @@
+# [6.11.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.10.0...v6.11.0) (2024-07-24)
+
+
+### Features
+
+* prioratize `EIP712` and utilize `zks_estimateFee` ([4c58829](https://github.com/zksync-sdk/zksync-ethers/commit/4c5882959e353ec0a56f3aa1cc4e5685614cc0ae))
+* prioratize `EIP712` and utilize `zks_estimateFee` ([527a74f](https://github.com/zksync-sdk/zksync-ethers/commit/527a74f4ea2dd200acf9b8d1d93e2ae98f10df81))
+* **provider:** add support for `l1_committed` block tag ([011db1f](https://github.com/zksync-sdk/zksync-ethers/commit/011db1ff7b3a922f3e2809e9630a91a1654772f6))
+
 # [6.10.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.9.0...v6.10.0) (2024-07-09)
 
 
