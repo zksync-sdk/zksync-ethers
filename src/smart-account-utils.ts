@@ -193,7 +193,6 @@ export const populateTransactionECDSA: TransactionBuilder = async (
   populatedTx.chainId ??= (await provider.getNetwork()).chainId;
   populatedTx.value = populatedTx.value ? BigInt(populatedTx.value) : 0n;
   populatedTx.data ??= '0x';
-  populatedTx.gasPrice ??= await provider.getGasPrice();
   populatedTx.customData = tx.customData ?? {};
   populatedTx.customData.gasPerPubdata ??= DEFAULT_GAS_PER_PUBDATA_LIMIT;
   populatedTx.customData.factoryDeps ??= [];
