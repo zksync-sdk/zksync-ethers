@@ -662,7 +662,6 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
  * };
  * *\/
  */
-// TODO: extend ethers.Transaction and add custom fields
 export function parseEip712(payload: ethers.BytesLike): TransactionLike {
   function handleAddress(value: string): string | null {
     if (value === '0x') {
