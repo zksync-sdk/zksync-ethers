@@ -1,3 +1,10 @@
+## [6.11.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.11.0...v6.11.1) (2024-08-01)
+
+
+### Bug Fixes
+
+* **provider:** switch localhost to ip ([dc284de](https://github.com/zksync-sdk/zksync-ethers/commit/dc284dea88cec26d9c5bd60577c08c17962b25e5))
+
 # [6.11.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.10.0...v6.11.0) (2024-07-24)
 
 
