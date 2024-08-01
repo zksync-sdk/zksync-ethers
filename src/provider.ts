@@ -1681,15 +1681,15 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   ): Provider {
     switch (zksyncNetwork) {
       case ZkSyncNetwork.Localhost:
-        return new Provider('http://localhost:3050');
+        return new Provider('http://127.0.0.1:3050');
       case ZkSyncNetwork.Sepolia:
         return new Provider('https://sepolia.era.zksync.dev');
       case ZkSyncNetwork.Mainnet:
         return new Provider('https://mainnet.era.zksync.io');
       case ZkSyncNetwork.EraTestNode:
-        return new Provider('http://localhost:8011');
+        return new Provider('http://127.0.0.1:8011');
       default:
-        return new Provider('http://localhost:3050');
+        return new Provider('http://127.0.0.1:3050');
     }
   }
 
