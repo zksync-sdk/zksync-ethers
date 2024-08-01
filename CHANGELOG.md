@@ -1,3 +1,10 @@
+## [5.9.2](https://github.com/zksync-sdk/zksync-ethers/compare/v5.9.1...v5.9.2) (2024-08-01)
+
+
+### Bug Fixes
+
+* **provider:** switch localhost to ip ([a11ab17](https://github.com/zksync-sdk/zksync-ethers/commit/a11ab17b942a24205e4904df6e55d730b932c137))
+
 ## [5.9.1](https://github.com/zksync-sdk/zksync-ethers/compare/v5.9.0...v5.9.1) (2024-07-09)
 
 
