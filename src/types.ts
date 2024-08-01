@@ -78,6 +78,8 @@ export type Eip712Meta = {
   customSignature?: BytesLike;
   /** Parameters for configuring the custom paymaster for the transaction. */
   paymasterParams?: PaymasterParams;
+  /** Merkle proof for xL2 transactions */
+  merkleProof?: BytesLike[];
 };
 
 /**
