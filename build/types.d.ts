@@ -55,6 +55,8 @@ export type Eip712Meta = {
     paymasterParams?: PaymasterParams;
     /** Merkle proof for xL2 transactions */
     merkleProof?: BytesLike[];
+    /** Full fee for xL2 transactions */
+    fullFee?: BigNumberish;
 };
 /**
  * Specifies a specific block. This can be represented by:

@@ -482,11 +482,11 @@ function serializeEip712(transaction, signature) {
     if (meta.merkleProof) {
         fields.push(meta.merkleProof);
     }
+    if (meta.fullFee) {
+        fields.push(meta.fullFee);
+    }
     const txType = transaction.type || exports.EIP712_TX_TYPE;
-    return ethers_1.ethers.concat([
-        new Uint8Array([txType]),
-        ethers_1.ethers.encodeRlp(fields),
-    ]);
+    return ethers_1.ethers.concat([new Uint8Array([txType]), ethers_1.ethers.encodeRlp(fields)]);
 }
 exports.serializeEip712 = serializeEip712;
 /**
