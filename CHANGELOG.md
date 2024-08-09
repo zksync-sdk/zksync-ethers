@@ -1,3 +1,10 @@
+## [6.11.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.11.1...v6.11.2) (2024-08-09)
+
+
+### Bug Fixes
+
+* **signer:** `sendTransaction` populate from ([a9db811](https://github.com/zksync-sdk/zksync-ethers/commit/a9db8117bca8af5cee762cccc8359b985a5392d2))
+
 ## [6.11.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.11.0...v6.11.1) (2024-08-01)
 
 
