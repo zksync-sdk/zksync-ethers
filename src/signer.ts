@@ -656,8 +656,8 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
       tx.customData
     ) {
       const address = await this.getAddress();
-      const from = !tx.from ? address : await ethers.resolveAddress(tx.from);
-      if (!isAddressEq(from, address)) {
+      tx.from ??= address;
+      if (!isAddressEq(await ethers.resolveAddress(tx.from), address)) {
         throw new Error('Transaction `from` address mismatch!');
       }
       const zkTx: TransactionLike = {
