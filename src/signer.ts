@@ -671,7 +671,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         chainId: tx.chainId ?? (await this.provider.getNetwork()).chainId,
         to: await ethers.resolveAddress(tx.to!),
         customData: this._fillCustomData(tx.customData ?? {}),
-        from,
+        from: address,
       };
       zkTx.customData ??= {};
       zkTx.customData.customSignature = await this.eip712.sign(zkTx);
