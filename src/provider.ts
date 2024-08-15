@@ -1096,7 +1096,7 @@ export function JsonRpcApiProvider<
      * @param transaction.contractAddress The address of the contract.
      * @param transaction.calldata The transaction call data.
      * @param [transaction.caller] The caller's address.
-     * @param [transaction.l2Value] The current L2 gas value.
+     * @param [transaction.l2Value] The deposit amount.
      * @param [transaction.factoryDeps] An array of bytes containing contract bytecode.
      * @param [transaction.gasPerPubdataByte] The current gas per byte value.
      * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
