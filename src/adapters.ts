@@ -57,6 +57,7 @@ import {
   PriorityOpResponse,
   TransactionResponse,
 } from './types';
+import { deprecate } from "node:util";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -1379,6 +1380,50 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         l2ToL1Log,
       };
     }
+    /**
+     * @deprecated In favor of {@link getFinalizeWithdrawalParams}.
+     *
+     * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
+     * withdrawal transaction's log on the L1 network.
+     *
+     * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
+     * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
+     * withdrawal you want to finalize.
+     * @throws {Error} If log proof can not be found.
+     */
+    async finalizeWithdrawalParams(
+      withdrawalHash: BytesLike,
+      index = 0
+    ): Promise<FinalizeWithdrawalParams> {
+      const {log, l1BatchTxId} = await this._getWithdrawalLog(
+        withdrawalHash,
+        index
+      );
+      const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
+        withdrawalHash,
+        index
+      );
+      const sender = ethers.dataSlice(log.topics[1], 12);
+      const proof = await this._providerL2().getLogProof(
+        withdrawalHash,
+        l2ToL1LogIndex
+      );
+      if (!proof) {
+        throw new Error('Log proof not found!');
+      }
+      const message = ethers.AbiCoder.defaultAbiCoder().decode(
+        ['bytes'],
+        log.data
+      )[0];
+      return {
+        l1BatchNumber: log.l1BatchNumber,
+        l2MessageIndex: proof.id,
+        l2TxNumberInBlock: l1BatchTxId,
+        message,
+        sender,
+        proof: proof.proof,
+      };
+    }
 
     /**
      * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
@@ -1389,7 +1434,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * withdrawal you want to finalize.
      * @throws {Error} If log proof can not be found.
      */
-    async finalizeWithdrawalParams(
+    async getFinalizeWithdrawalParams(
       withdrawalHash: BytesLike,
       index = 0
     ): Promise<FinalizeWithdrawalParams> {
@@ -1445,7 +1490,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         message,
         sender,
         proof,
-      } = await this.finalizeWithdrawalParams(withdrawalHash, index);
+      } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
       let l1Bridge: IL1Bridge | IL1SharedBridge;
       if (isAddressEq(sender, L2_BASE_TOKEN_ADDRESS)) {
