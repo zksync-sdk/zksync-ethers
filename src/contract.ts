@@ -51,7 +51,7 @@ export class ContractFactory<
     this.deploymentType = deploymentType || 'create';
   }
 
-  private encodeCalldata(
+  protected encodeCalldata(
     salt: BytesLike,
     bytecodeHash: BytesLike,
     constructorCalldata: BytesLike
