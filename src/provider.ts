@@ -62,6 +62,9 @@ import {
   L2_BASE_TOKEN_ADDRESS,
   LEGACY_ETH_ADDRESS,
   isAddressEq,
+  getERC20DefaultBridgeData,
+  getERC20BridgeCalldata,
+  applyL1ToL2Alias,
 } from './utils';
 import {Signer} from './signer';
 
@@ -1102,6 +1105,170 @@ export function JsonRpcApiProvider<
         supportedAAVersion: Number(data.supportedAAVersion),
         nonceOrdering: Number(data.nonceOrdering),
       };
+    }
+
+    /**
+     * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
+     *
+     * @param providerL1 The Ethers provider for the L1 network.
+     * @param providerL2 The ZKsync provider for the L2 network.
+     * @param token The address of the token to be bridged.
+     * @param amount The deposit amount.
+     * @param to The recipient address on the L2 network.
+     * @param from The sender address on the L1 network.
+     * @param gasPerPubdataByte The current gas per byte of pubdata.
+     *
+     * @see
+     * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
+     *
+     * @example
+     *
+     * import { Provider, utils, types } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const ethProvider = ethers.getDefaultProvider("sepolia");
+     *
+     * const token = "0x0000000000000000000000000000000000000001";
+     * const amount = 5;
+     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+     *
+     * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+     *   ethProvider,
+     *   provider,
+     *   token,
+     *   amount,
+     *   to,
+     *   from,
+     *   gasPerPubdataByte
+     * );
+     * // gas = 355_704
+     */
+    async estimateDefaultBridgeDepositL2Gas(
+      providerL1: ethers.Provider,
+      token: Address,
+      amount: BigNumberish,
+      to: Address,
+      from?: Address,
+      gasPerPubdataByte?: BigNumberish
+    ): Promise<bigint> {
+      // If the `from` address is not provided, we use a random address, because
+      // due to storage slot aggregation, the gas estimation will depend on the address
+      // and so estimation for the zero address may be smaller than for the sender.
+      from ??= ethers.Wallet.createRandom().address;
+      if (await this.isBaseToken(token)) {
+        return await this.estimateL1ToL2Execute({
+          contractAddress: to,
+          gasPerPubdataByte: gasPerPubdataByte,
+          caller: from,
+          calldata: '0x',
+          l2Value: amount,
+        });
+      } else {
+        const bridgeAddresses = await this.getDefaultBridgeAddresses();
+
+        const value = 0;
+        const l1BridgeAddress = bridgeAddresses.sharedL1;
+        const l2BridgeAddress = bridgeAddresses.sharedL2;
+        const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
+
+        return await this.estimateCustomBridgeDepositL2Gas(
+          l1BridgeAddress,
+          l2BridgeAddress,
+          isAddressEq(token, LEGACY_ETH_ADDRESS)
+            ? ETH_ADDRESS_IN_CONTRACTS
+            : token,
+          amount,
+          to,
+          bridgeData,
+          from,
+          gasPerPubdataByte,
+          value
+        );
+      }
+    }
+
+    /**
+     * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
+     *
+     * @param providerL2 The ZKsync provider for the L2 network.
+     * @param l1BridgeAddress The address of the custom L1 bridge.
+     * @param l2BridgeAddress The address of the custom L2 bridge.
+     * @param token The address of the token to be bridged.
+     * @param amount The deposit amount.
+     * @param to The recipient address on the L2 network.
+     * @param bridgeData Additional bridge data.
+     * @param from The sender address on the L1 network.
+     * @param gasPerPubdataByte The current gas per byte of pubdata.
+     * @param l2Value The `msg.value` of L2 transaction.
+     *
+     * @see
+     * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
+     *
+     * @example
+     *
+     * import { Provider, utils, types } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     *
+     * const l1BridgeAddress = "0x3e8b2fe58675126ed30d0d12dea2a9bda72d18ae";
+     * const l2BridgeAddress = "0x681a1afdc2e06776816386500d2d461a6c96cb45";
+     * const token = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+     * const amount = 5;
+     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
+     * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
+     * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
+     * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
+     * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
+     * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
+     * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
+     * 00000000000000000000000000000000012";
+     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+     * const l2Value = 0;
+     *
+     * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+     *   provider,
+     *   l1BridgeAddress,
+     *   l2BridgeAddress,
+     *   token,
+     *   amount,
+     *   to,
+     *   bridgeData,
+     *   from,
+     *   gasPerPubdataByte,
+     *   l2Value
+     * );
+     * // gas = 683_830
+     */
+    async estimateCustomBridgeDepositL2Gas(
+      l1BridgeAddress: Address,
+      l2BridgeAddress: Address,
+      token: Address,
+      amount: BigNumberish,
+      to: Address,
+      bridgeData: BytesLike,
+      from: Address,
+      gasPerPubdataByte?: BigNumberish,
+      l2Value?: BigNumberish
+    ): Promise<bigint> {
+      const calldata = await getERC20BridgeCalldata(
+        token,
+        from,
+        to,
+        amount,
+        bridgeData
+      );
+      return await this.estimateL1ToL2Execute({
+        caller: applyL1ToL2Alias(l1BridgeAddress),
+        contractAddress: l2BridgeAddress,
+        gasPerPubdataByte: gasPerPubdataByte,
+        calldata: calldata,
+        l2Value: l2Value,
+      });
     }
 
     /**
