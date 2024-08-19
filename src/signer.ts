@@ -1331,6 +1331,30 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    * );
    *
    * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+   * const params = await signer.getFinalizeWithdrawalParams(WITHDRAWAL_HASH);
+   */
+  override async getFinalizeWithdrawalParams(
+    withdrawalHash: BytesLike,
+    index = 0
+  ): Promise<FinalizeWithdrawalParams> {
+    return super.getFinalizeWithdrawalParams(withdrawalHash, index);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, L1Signer, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+   * const signer = L1Signer.from(
+   *     await browserProvider.getSigner(),
+   *     Provider.getDefaultProvider(types.Network.Sepolia)
+   * );
+   *
+   * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
    * const finalizeWithdrawTx = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
    */
   override async finalizeWithdrawal(
