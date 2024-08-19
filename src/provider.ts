@@ -559,11 +559,23 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated In favor of {@link getL1ChainId}
+     *
      * Returns the L1 chain ID.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-l1chainid zks_L1ChainId} JSON-RPC method.
      */
     async l1ChainId(): Promise<number> {
+      const res = await this.send('zks_L1ChainId', []);
+      return Number(res);
+    }
+
+    /**
+     * Returns the L1 chain ID.
+     *
+     * Calls the {@link https://docs.zksync.io/build/api.html#zks-l1chainid zks_L1ChainId} JSON-RPC method.
+     */
+    async getL1ChainId(): Promise<number> {
       const res = await this.send('zks_L1ChainId', []);
       return Number(res);
     }
@@ -1619,6 +1631,21 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async l1ChainId(): Promise<number> {
     return super.l1ChainId();
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types} from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const l1ChainId = await provider.l1ChainId();
+   * console.log(`All balances: ${l1ChainId}`);
+   */
+  override async getL1ChainId(): Promise<number> {
+    return super.getL1ChainId();
   }
 
   /**
