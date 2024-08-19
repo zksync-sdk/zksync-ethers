@@ -1120,31 +1120,6 @@ export function JsonRpcApiProvider<
      *
      * @see
      * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
-     *
-     * @example
-     *
-     * import { Provider, utils, types } from "zksync-ethers";
-     * import { ethers } from "ethers";
-     *
-     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-     * const ethProvider = ethers.getDefaultProvider("sepolia");
-     *
-     * const token = "0x0000000000000000000000000000000000000001";
-     * const amount = 5;
-     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-     *
-     * const gas = await utils.estimateCustomBridgeDepositL2Gas(
-     *   ethProvider,
-     *   provider,
-     *   token,
-     *   amount,
-     *   to,
-     *   from,
-     *   gasPerPubdataByte
-     * );
-     * // gas = 355_704
      */
     async estimateDefaultBridgeDepositL2Gas(
       providerL1: ethers.Provider,
@@ -1206,43 +1181,6 @@ export function JsonRpcApiProvider<
      *
      * @see
      * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
-     *
-     * @example
-     *
-     * import { Provider, utils, types } from "zksync-ethers";
-     *
-     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-     *
-     * const l1BridgeAddress = "0x3e8b2fe58675126ed30d0d12dea2a9bda72d18ae";
-     * const l2BridgeAddress = "0x681a1afdc2e06776816386500d2d461a6c96cb45";
-     * const token = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-     * const amount = 5;
-     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-     * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
-     * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
-     * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
-     * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
-     * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
-     * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
-     * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
-     * 00000000000000000000000000000000012";
-     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-     * const l2Value = 0;
-     *
-     * const gas = await utils.estimateCustomBridgeDepositL2Gas(
-     *   provider,
-     *   l1BridgeAddress,
-     *   l2BridgeAddress,
-     *   token,
-     *   amount,
-     *   to,
-     *   bridgeData,
-     *   from,
-     *   gasPerPubdataByte,
-     *   l2Value
-     * );
-     * // gas = 683_830
      */
     async estimateCustomBridgeDepositL2Gas(
       l1BridgeAddress: Address,
@@ -2313,6 +2251,114 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * @example
    *
+   * import { Provider, utils, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   *
+   * const token = "0x0000000000000000000000000000000000000001";
+   * const amount = 5;
+   * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+   *
+   * const gas = await provider.estimateCustomBridgeDepositL2Gas(
+   *   ethProvider,
+   *   token,
+   *   amount,
+   *   to,
+   *   from,
+   *   gasPerPubdataByte
+   * );
+   * // gas = 355_704
+   */
+  override async estimateDefaultBridgeDepositL2Gas(
+    providerL1: ethers.Provider,
+    token: Address,
+    amount: BigNumberish,
+    to: Address,
+    from?: Address,
+    gasPerPubdataByte?: BigNumberish
+  ): Promise<bigint> {
+    return super.estimateDefaultBridgeDepositL2Gas(
+      providerL1,
+      token,
+      amount,
+      to,
+      from,
+      gasPerPubdataByte
+    );
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const l1BridgeAddress = "0x3e8b2fe58675126ed30d0d12dea2a9bda72d18ae";
+   * const l2BridgeAddress = "0x681a1afdc2e06776816386500d2d461a6c96cb45";
+   * const token = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+   * const amount = 5;
+   * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
+   * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
+   * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
+   * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
+   * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
+   * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
+   * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
+   * 00000000000000000000000000000000012";
+   * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+   * const l2Value = 0;
+   *
+   * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+   *   provider,
+   *   l1BridgeAddress,
+   *   l2BridgeAddress,
+   *   token,
+   *   amount,
+   *   to,
+   *   bridgeData,
+   *   from,
+   *   gasPerPubdataByte,
+   *   l2Value
+   * );
+   * // gas = 683_830
+   */
+  override async estimateCustomBridgeDepositL2Gas(
+    l1BridgeAddress: Address,
+    l2BridgeAddress: Address,
+    token: Address,
+    amount: BigNumberish,
+    to: Address,
+    bridgeData: BytesLike,
+    from: Address,
+    gasPerPubdataByte?: BigNumberish,
+    l2Value?: BigNumberish
+  ): Promise<bigint> {
+    return super.estimateCustomBridgeDepositL2Gas(
+      l1BridgeAddress,
+      l2BridgeAddress,
+      token,
+      amount,
+      to,
+      bridgeData,
+      from,
+      gasPerPubdataByte,
+      l2Value
+    );
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -3331,6 +3377,114 @@ export class BrowserProvider extends JsonRpcApiProvider(
     address: Address
   ): Promise<ContractAccountInfo> {
     return super.getContractAccountInfo(address);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, utils, types } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   *
+   * const token = "0x0000000000000000000000000000000000000001";
+   * const amount = 5;
+   * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+   *
+   * const gas = await provider.estimateCustomBridgeDepositL2Gas(
+   *   ethProvider,
+   *   token,
+   *   amount,
+   *   to,
+   *   from,
+   *   gasPerPubdataByte
+   * );
+   * // gas = 355_704
+   */
+  override async estimateDefaultBridgeDepositL2Gas(
+    providerL1: ethers.Provider,
+    token: Address,
+    amount: BigNumberish,
+    to: Address,
+    from?: Address,
+    gasPerPubdataByte?: BigNumberish
+  ): Promise<bigint> {
+    return super.estimateDefaultBridgeDepositL2Gas(
+      providerL1,
+      token,
+      amount,
+      to,
+      from,
+      gasPerPubdataByte
+    );
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Provider, types } from "zksync-ethers";
+   *
+   * const provider = new BrowserProvider(window.ethereum);
+   * const l1BridgeAddress = "0x3e8b2fe58675126ed30d0d12dea2a9bda72d18ae";
+   * const l2BridgeAddress = "0x681a1afdc2e06776816386500d2d461a6c96cb45";
+   * const token = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+   * const amount = 5;
+   * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
+   * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
+   * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
+   * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
+   * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
+   * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
+   * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
+   * 00000000000000000000000000000000012";
+   * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+   * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+   * const l2Value = 0;
+   *
+   * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+   *   provider,
+   *   l1BridgeAddress,
+   *   l2BridgeAddress,
+   *   token,
+   *   amount,
+   *   to,
+   *   bridgeData,
+   *   from,
+   *   gasPerPubdataByte,
+   *   l2Value
+   * );
+   * // gas = 683_830
+   */
+  override async estimateCustomBridgeDepositL2Gas(
+    l1BridgeAddress: Address,
+    l2BridgeAddress: Address,
+    token: Address,
+    amount: BigNumberish,
+    to: Address,
+    bridgeData: BytesLike,
+    from: Address,
+    gasPerPubdataByte?: BigNumberish,
+    l2Value?: BigNumberish
+  ): Promise<bigint> {
+    return super.estimateCustomBridgeDepositL2Gas(
+      l1BridgeAddress,
+      l2BridgeAddress,
+      token,
+      amount,
+      to,
+      bridgeData,
+      from,
+      gasPerPubdataByte,
+      l2Value
+    );
   }
 
   /**
