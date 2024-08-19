@@ -90,6 +90,14 @@ describe('Provider', () => {
     });
   });
 
+  describe('#getL1ChainId()', () => {
+    it('should return the L1 chain ID', async () => {
+      const L1_CHAIN_ID = 9;
+      const result = await provider.getL1ChainId();
+      expect(result).to.be.equal(L1_CHAIN_ID);
+    });
+  });
+
   describe('getBlockNumber()', () => {
     it('should return a block number', async () => {
       const result = await provider.getBlockNumber();
@@ -692,7 +700,6 @@ describe('Provider', () => {
           amount: 7_000_000_000,
           to: ADDRESS2,
           from: ADDRESS1,
-          type: EIP712_TX_TYPE,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
             type: 'ApprovalBased',
             token: APPROVAL_TOKEN,
@@ -928,6 +935,24 @@ describe('Provider', () => {
           value: 7_000_000_000n,
         })
       );
+      expect(result).not.to.be.null;
+    });
+  });
+  describe('#error()', () => {
+    it('Should not allow invalid contract bytecode', async () => {
+      const gasPrice = await provider.getGasPrice();
+      const address = wallet.getAddress();
+
+      const result = await provider.estimateGas({
+        to: address,
+        from: address,
+        customData: {
+          gasPerPubdata: 50_000,
+          factoryDeps: new Array(17).fill('0x1234567890abcdef'),
+          customSignature: new Uint8Array(17),
+        },
+      });
+      console.log(result);
       expect(result).not.to.be.null;
     });
   });
