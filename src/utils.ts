@@ -1334,6 +1334,8 @@ export async function isTypedDataSignatureCorrect(
 }
 
 /**
+ * @deprecated In favor of {@link provider.estimateDefaultBridgeDepositL2Gas}
+ *
  * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
  *
  * @param providerL1 The Ethers provider for the L1 network.
@@ -1361,7 +1363,7 @@ export async function isTypedDataSignatureCorrect(
  * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
  * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
  *
- * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+ * const gas = await utils.estimateDefaultBridgeDepositL2Gas(
  *   ethProvider,
  *   provider,
  *   token,
@@ -1439,6 +1441,8 @@ export function scaleGasLimit(gasLimit: bigint): bigint {
 }
 
 /**
+ * @deprecated In favor of {@link provider.estimateCustomBridgeDepositL2Gas}
+ *
  * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
  *
  * @param providerL2 The ZKsync provider for the L2 network.

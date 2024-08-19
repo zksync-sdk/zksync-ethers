@@ -1984,7 +1984,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
      */
     async withdraw(transaction: {
       amount: BigNumberish;
-      token?: Address;
+      token: Address;
       to?: Address;
       bridgeAddress?: Address;
       paymasterParams?: PaymasterParams;
