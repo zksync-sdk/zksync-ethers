@@ -1712,7 +1712,7 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
       return (await super.populateTransaction(tx)) as TransactionLike;
     }
 
-    tx.type = EIP712_TX_TYPE;
+    tx.type = 2;
     const populated = (await super.populateTransaction(tx)) as TransactionLike;
 
     populated.type = EIP712_TX_TYPE;
@@ -1723,6 +1723,16 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
       populated.gasPrice = await this.provider.getGasPrice();
     }
     return populated;
+  }
+
+  override async sendTransaction(
+    tx: TransactionRequest
+  ): Promise<TransactionResponse> {
+    const populated = await this.populateTransaction(tx);
+
+    return this.provider.broadcastTransaction(
+      await this.signTransaction(populated)
+    );
   }
 }
 
