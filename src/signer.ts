@@ -1647,6 +1647,8 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
 /* c8 ignore stop */
 
 /**
+ * @deprecated In favor of {@link VoidSigner}
+ *
  * A `L2VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
  *
  * @see {@link L1VoidSigner} for L1 operations.
@@ -1737,9 +1739,99 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
 }
 
 /**
+ * A `VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
+ *
+ * @see {@link L1VoidSigner} for L1 operations.
+ */
+export class VoidSigner extends AdapterL2(ethers.VoidSigner) {
+  public override provider!: Provider;
+
+  override _signerL2() {
+    return this;
+  }
+
+  override _providerL2(): Provider {
+    return this.provider;
+  }
+
+  /**
+   * Connects to the L2 network using the `provider`.
+   *
+   * @param provider The provider instance for connecting to a L2 network.
+   *
+   * @example
+   *
+   * import { Provider, L2VoidSigner, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   *
+   * let signer = new VoidSigner("<ADDRESS>");
+   * signer = signer.connect(provider);
+   */
+  override connect(provider: Provider): VoidSigner {
+    return new VoidSigner(this.address, provider);
+  }
+
+  /**
+   * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
+   * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
+   * Any other fields that are not set will be prepared by this method.
+   *
+   * @param tx The transaction request that needs to be populated.
+   *
+   * @example
+   *
+   * import { Provider, VoidSigner, Wallet, types } from "zksync-ethers";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const signer = new VoidSigner("<ADDRESS>", provider);
+   *
+   * const populatedTx = await signer.populateTransaction({
+   *   to: Wallet.createRandom().address,
+   *   value: 7_000_000n,
+   *   maxFeePerGas: 3_500_000_000n,
+   *   maxPriorityFeePerGas: 2_000_000_000n,
+   *   customData: {
+   *     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+   *     factoryDeps: [],
+   *   },
+   * });
+   */
+  override async populateTransaction(
+    tx: TransactionRequest
+  ): Promise<TransactionLike> {
+    if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
+      return (await super.populateTransaction(tx)) as TransactionLike;
+    }
+
+    tx.type = 2;
+    const populated = (await super.populateTransaction(tx)) as TransactionLike;
+
+    populated.type = EIP712_TX_TYPE;
+    populated.value ??= 0;
+    populated.data ??= '0x';
+    populated.customData = this._fillCustomData(tx.customData ?? {});
+    if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
+      populated.gasPrice = await this.provider.getGasPrice();
+    }
+    return populated;
+  }
+
+  override async sendTransaction(
+    tx: TransactionRequest
+  ): Promise<TransactionResponse> {
+    const populated = await this.populateTransaction(tx);
+
+    return this.provider.broadcastTransaction(
+      await this.signTransaction(populated)
+    );
+  }
+}
+
+/**
  * A `L1VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L1 operations.
  *
- * @see {@link L2VoidSigner} for L2 operations.
+ * @see {@link VoidSigner} for L2 operations.
  */
 export class L1VoidSigner extends AdapterL1(ethers.VoidSigner) {
   public providerL2?: Provider;
