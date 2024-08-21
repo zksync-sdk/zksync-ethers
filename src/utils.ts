@@ -9,8 +9,9 @@ import {
   PriorityQueueType,
   Transaction,
   TransactionLike,
+  TransactionReceipt,
   TransactionRequest,
-} from './types';
+} from "./types";
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
 import {IERC20__factory} from './typechain';
@@ -333,7 +334,7 @@ export function getHashedL2ToL1Msg(
  * const deploymentInfo = utils.getDeployedContracts(receipt as ethers.TransactionReceipt);
  */
 export function getDeployedContracts(
-  receipt: ethers.TransactionReceipt
+  receipt: TransactionReceipt
 ): DeploymentInfo[] {
   const addressBytesLen = 40;
   return (
