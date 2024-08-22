@@ -75,6 +75,7 @@ import {
   formatTransactionReceipt,
   formatFee,
 } from './format';
+import {makeError} from 'ethers';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -2380,6 +2381,16 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     overrides?: ethers.Overrides;
   }): Promise<bigint> {
     return super.estimateL1ToL2Execute(transaction);
+  }
+
+  override getRpcError(payload: JsonRpcPayload, _error: JsonRpcError): Error {
+    const message = _error.error.message ?? 'Execution reverted';
+    const code = _error.error.code ?? 0;
+    // @ts-ignore
+    return makeError(message, code, {
+      transaction: (<any>payload).params[0],
+      info: {payload, _error},
+    });
   }
 
   override async _send(
