@@ -17,7 +17,7 @@ import {
   getDeployedContracts,
   hashBytecode,
 } from './utils';
-import {AccountAbstractionVersion, DeploymentType} from './types';
+import { AccountAbstractionVersion, DeploymentType, TransactionReceipt } from "./types";
 
 /* c8 ignore next */
 export {Contract} from 'ethers';
@@ -219,9 +219,9 @@ export class ContractFactory<
   > {
     const contract = await (await super.deploy(...args)).waitForDeployment();
 
-    const deployTxReceipt = await this.runner?.provider?.getTransactionReceipt(
+    const deployTxReceipt = (await this.runner?.provider?.getTransactionReceipt(
       contract.deploymentTransaction()!.hash
-    );
+    )) as TransactionReceipt;
 
     const deployedAddresses = getDeployedContracts(deployTxReceipt!).map(
       info => info.deployedAddress
