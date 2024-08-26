@@ -692,7 +692,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
       );
     }
-    if (this.providerL2) {
+    if (!this.providerL2) {
       throw new Error('Initialize provider L2');
     }
     if (
