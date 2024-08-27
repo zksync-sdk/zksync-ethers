@@ -10,9 +10,10 @@ import {
   DAI_L1,
   APPROVAL_TOKEN,
   PAYMASTER,
-  L2_CHAIN_URL, L1_CHAIN_URL
-} from "../utils";
-import { EIP712_TX_TYPE } from "../../src/utils";
+  L2_CHAIN_URL,
+  L1_CHAIN_URL,
+} from '../utils';
+import {EIP712_TX_TYPE} from '../../src/utils';
 
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
