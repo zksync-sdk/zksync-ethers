@@ -57,7 +57,6 @@ import {
   PriorityOpResponse,
   TransactionResponse,
 } from './types';
-import { deprecate } from "node:util";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 

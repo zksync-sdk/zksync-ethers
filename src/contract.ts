@@ -17,7 +17,11 @@ import {
   getDeployedContracts,
   hashBytecode,
 } from './utils';
-import { AccountAbstractionVersion, DeploymentType, TransactionReceipt } from "./types";
+import {
+  AccountAbstractionVersion,
+  DeploymentType,
+  TransactionReceipt,
+} from './types';
 
 /* c8 ignore next */
 export {Contract} from 'ethers';

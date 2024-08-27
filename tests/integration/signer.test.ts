@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, utils, Wallet, L2VoidSigner, L1VoidSigner} from '../../src';
-import { ethers } from "ethers";
+import {ethers} from 'ethers';
 import {
   IS_ETH_BASED,
   ADDRESS1,

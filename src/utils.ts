@@ -11,7 +11,7 @@ import {
   TransactionLike,
   TransactionReceipt,
   TransactionRequest,
-} from "./types";
+} from './types';
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
 import {IERC20__factory} from './typechain';
