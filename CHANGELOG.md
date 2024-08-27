@@ -1,3 +1,21 @@
+# [6.12.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.11.2...v6.12.0) (2024-08-27)
+
+
+### Bug Fixes
+
+* **signer:** fix `populateFeeData` provider check ([b89429b](https://github.com/zksync-sdk/zksync-ethers/commit/b89429b26392e3d077723cf9962bdc62485763a2))
+
+
+### Features
+
+* `getTransfer` and `getWithdraw` return `EIP712` type ([f92d344](https://github.com/zksync-sdk/zksync-ethers/commit/f92d3444bef761e28c669f4f2743778151aa8140))
+* **provider:** add `estimateDefaultBridgeDepositL2Gas` and `estimateCustomBridgeDepositL2Gas` ([1ffd39a](https://github.com/zksync-sdk/zksync-ethers/commit/1ffd39aeda718746142231c9775964f5c0148216))
+* **provider:** add `getL1ChainId` ([0f8d58f](https://github.com/zksync-sdk/zksync-ethers/commit/0f8d58f8131f84af34dada409dd347dcc7e04b16))
+* **signer:** add `finalizeWithdrawalParams` ([30fb918](https://github.com/zksync-sdk/zksync-ethers/commit/30fb9181e3ac5ff3f19398a5d638bc7cf8292a96))
+* **signer:** add `VoidSigner` for l2 operations ([358f733](https://github.com/zksync-sdk/zksync-ethers/commit/358f733dc4f7e21863ee2b9e0bc4963464ededc9))
+* **types:** add `timeout` parameter to transaction `wait()` ([2e55d0b](https://github.com/zksync-sdk/zksync-ethers/commit/2e55d0b2a545d25a6cc043ddebd6d82446ec4a65))
+* **wallet:** add `getFinalizeWithdrawalParams` ([87f6081](https://github.com/zksync-sdk/zksync-ethers/commit/87f60812354248aa52f0abc7339ab18e716775b8))
+
 ## [6.11.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.11.1...v6.11.2) (2024-08-09)
 
 
