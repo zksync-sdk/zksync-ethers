@@ -157,6 +157,7 @@ describe('VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxPriorityFeePerGas: 2_000_000_000n,
+        maxFeePerGas: 1_200_000_000n,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -184,6 +185,7 @@ describe('VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 1_000_000_000n,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -468,6 +470,7 @@ describe('L2VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxPriorityFeePerGas: 2_000_000_000n,
+        maxFeePerGas: 1_200_000_000n,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -495,6 +498,7 @@ describe('L2VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 1_000_000_000n,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
