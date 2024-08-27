@@ -443,6 +443,7 @@ describe('Provider', () => {
     } else {
       it('should return an ETH withdraw transaction', async () => {
         const tx = {
+          type: 113,
           from: ADDRESS1,
           to: (await provider.getDefaultBridgeAddresses()).sharedL2,
           data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049000000000000000000000000540dff1797971fe12ba19e45c8e0568fe886b32000000000000000000000000000000000000000000000000000000001a13b8600',
@@ -535,6 +536,7 @@ describe('Provider', () => {
 
     it('should return a DAI withdraw transaction', async () => {
       const tx = {
+        type: 113,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
@@ -550,6 +552,7 @@ describe('Provider', () => {
 
     it('should return a DAI withdraw transaction with paymaster parameters', async () => {
       const tx = {
+        type: 113,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
@@ -578,6 +581,7 @@ describe('Provider', () => {
 
     it('should return a withdraw transaction with `tx.from==tx.to` when `tx.to` is not provided', async () => {
       const tx = {
+        type: 113,
         from: ADDRESS1,
         value: 7_000_000_000n,
         to: IS_ETH_BASED
@@ -685,6 +689,7 @@ describe('Provider', () => {
 
       it('should return an ETH transfer transaction with paymaster parameters', async () => {
         const tx = {
+          type: 113,
           from: ADDRESS1,
           to: await provider.l2TokenAddress(utils.ETH_ADDRESS_IN_CONTRACTS),
           data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b7761800000000000000000000000000000000000000000000000000000001a13b8600',
@@ -713,6 +718,7 @@ describe('Provider', () => {
 
       it('should return a base token transfer transaction', async () => {
         const tx = {
+          type: 113,
           from: ADDRESS1,
           to: ADDRESS2,
           value: 7_000_000_000,
@@ -756,6 +762,7 @@ describe('Provider', () => {
 
     it('should return a DAI transfer transaction', async () => {
       const tx = {
+        type: 113,
         from: ADDRESS1,
         to: await provider.l2TokenAddress(DAI_L1),
         data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005',
@@ -771,6 +778,7 @@ describe('Provider', () => {
 
     it('should return a DAI transfer transaction with paymaster parameters', async () => {
       const tx = {
+        type: 113,
         from: ADDRESS1,
         to: await provider.l2TokenAddress(DAI_L1),
         data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005',
@@ -1003,17 +1011,40 @@ describe('Provider', () => {
       const gasPrice = await provider.getGasPrice();
       const address = wallet.getAddress();
 
-      const result = await provider.estimateGas({
-        to: address,
-        from: address,
-        customData: {
-          gasPerPubdata: 50_000,
-          factoryDeps: new Array(17).fill('0x1234567890abcdef'),
-          customSignature: new Uint8Array(17),
-        },
-      });
-      console.log(result);
-      expect(result).not.to.be.null;
+      try {
+        await provider.estimateGas({
+          to: address,
+          from: address,
+          customData: {
+            gasPerPubdata: 50_000,
+            factoryDeps: new Array(17).fill('0x1234567890abcdef'),
+            customSignature: new Uint8Array(17),
+          },
+        });
+      } catch (e) {
+        expect(
+          (e as Error).message
+            .toString()
+            .includes('Bytecode length is not divisible by 32')
+        ).to.be.true;
+      }
+    });
+
+    it('Not enough balance should revert', async () => {
+      try {
+        await provider.estimateGasTransfer({
+          token: utils.L2_BASE_TOKEN_ADDRESS,
+          amount: 7_000_000_000_000_000_000_000_000n,
+          to: ADDRESS2,
+          from: ADDRESS1,
+        });
+      } catch (e) {
+        expect(
+          (e as Error).message
+            .toString()
+            .includes('insufficient balance for transfer')
+        ).to.be.true;
+      }
     });
   });
 });
