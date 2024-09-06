@@ -1,3 +1,10 @@
+## [6.12.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.12.0...v6.12.1) (2024-09-06)
+
+
+### Bug Fixes
+
+* **provider:** fix `getRpcError` issue with chai matchers ([a66a876](https://github.com/zksync-sdk/zksync-ethers/commit/a66a8764845500793e0a79ff23c6cb7f618f9688))
+
 # [6.12.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.11.2...v6.12.0) (2024-08-27)
 
 
