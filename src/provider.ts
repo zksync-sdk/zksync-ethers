@@ -2384,13 +2384,11 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   }
 
   override getRpcError(payload: JsonRpcPayload, _error: JsonRpcError): Error {
+    const {error} = _error;
     const message = _error.error.message ?? 'Execution reverted';
     const code = _error.error.code ?? 0;
     // @ts-ignore
-    return makeError(message, code, {
-      transaction: (<any>payload).params[0],
-      info: {payload, _error},
-    });
+    return makeError(message, code, {payload, error});
   }
 
   override async _send(
