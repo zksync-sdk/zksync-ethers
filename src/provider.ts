@@ -19,10 +19,16 @@ import {
 import {
   IERC20__factory,
   IEthToken__factory,
+  IL2AssetRouter,
+  IL2AssetRouter__factory,
   IL2Bridge,
   IL2Bridge__factory,
+  IL2NativeTokenVault,
+  IL2NativeTokenVault__factory,
   IL2SharedBridge,
   IL2SharedBridge__factory,
+  IBridgedStandardToken,
+  IBridgedStandardToken__factory,
 } from './typechain';
 import {
   Address,
@@ -65,6 +71,8 @@ import {
   getERC20DefaultBridgeData,
   getERC20BridgeCalldata,
   applyL1ToL2Alias,
+  L2_ASSET_ROUTER_ADDRESS,
+  L2_NATIVE_TOKEN_VAULT_ADDRESS,
 } from './utils';
 import {Signer} from './signer';
 
@@ -506,6 +514,18 @@ export function JsonRpcApiProvider<
       return IL2SharedBridge__factory.connect(address, this);
     }
 
+    async connectL2NTV() : Promise<IL2NativeTokenVault> {
+      return IL2NativeTokenVault__factory.connect(L2_NATIVE_TOKEN_VAULT_ADDRESS, this);
+    }
+
+    async connectBridgedToken(token: Address): Promise<IBridgedStandardToken> {
+      return IBridgedStandardToken__factory.connect(token, this);
+    }
+
+    async connectL2AssetRouter(): Promise<IL2AssetRouter> {
+      return IL2AssetRouter__factory.connect(L2_ASSET_ROUTER_ADDRESS, this);
+    }
+
     /**
      * Returns true if passed bridge address is legacy and false if its shared bridge.
      **
@@ -767,19 +787,44 @@ export function JsonRpcApiProvider<
         }
         return populatedTx;
       }
+      const ntv = await this.connectL2NTV();
+      const assetId = await ntv.assetId(tx.token);
+      const originChainId = await ntv.originChainId(assetId);
+      console.log("originChainId", originChainId);
+      const l1ChainId = await this.getL1ChainId();
 
+      const isTokenL1Native =  originChainId == BigInt(l1ChainId) || tx.token == ETH_ADDRESS_IN_CONTRACTS;
       if (!tx.bridgeAddress) {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        tx.bridgeAddress = bridgeAddresses.sharedL2;
+        console.log(bridgeAddresses)
+        tx.bridgeAddress = isTokenL1Native ? bridgeAddresses.sharedL2 : L2_ASSET_ROUTER_ADDRESS;
       }
+    console.log("bridgeAddress 2", tx.bridgeAddress);
 
-      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-      const populatedTx = await bridge.withdraw.populateTransaction(
-        tx.to!,
-        tx.token,
-        tx.amount,
-        tx.overrides
-      );
+    let populatedTx;
+    if (!isTokenL1Native) {
+      let bridge = await this.connectL2AssetRouter();
+      const token = await this.connectBridgedToken(tx.token);
+      const assetId = await token.assetId();
+      const assetData = ethers.AbiCoder.defaultAbiCoder().encode(
+        ['uint256', 'address'],
+        [tx.amount, tx.to]
+        )
+        
+        populatedTx = await bridge.withdraw.populateTransaction(
+          assetId,
+          assetData,
+          tx.overrides
+          );
+      } else {
+        let bridge = await this.connectL2Bridge(tx.bridgeAddress!);
+        populatedTx = await bridge.withdraw.populateTransaction(
+          tx.to!,
+          tx.token,
+          tx.amount,
+          tx.overrides
+        );
+      }
       if (tx.paymasterParams) {
         return {
           ...populatedTx,
