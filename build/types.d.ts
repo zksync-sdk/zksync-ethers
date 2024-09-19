@@ -57,6 +57,10 @@ export type Eip712Meta = {
     merkleProof?: BytesLike[];
     /** Full fee for xL2 transactions */
     fullFee?: BigNumberish;
+    /** to mint value */
+    toMint?: BigNumberish;
+    /** refund recipient */
+    refundRecipient?: BigNumberish;
 };
 /**
  * Specifies a specific block. This can be represented by:

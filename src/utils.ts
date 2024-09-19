@@ -569,6 +569,12 @@ export function serializeEip712(
   if (meta.fullFee) {
     fields.push(meta.fullFee);
   }
+  if (meta.toMint) {
+      fields.push(meta.toMint);
+  }
+  if (meta.refundRecipient) {
+      fields.push(meta.refundRecipient);
+  }
 
   const txType = transaction.type || EIP712_TX_TYPE;
   return ethers.concat([new Uint8Array([txType]), ethers.encodeRlp(fields)]);
