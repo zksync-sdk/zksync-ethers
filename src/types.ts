@@ -79,7 +79,7 @@ export type Eip712Meta = {
   /** Parameters for configuring the custom paymaster for the transaction. */
   paymasterParams?: PaymasterParams;
   /** Merkle proof for xL2 transactions */
-  merkleProof?: BytesLike[];
+  merkleProof?: BytesLike;
   /** Full fee for xL2 transactions */
   fullFee?: BigNumberish;
   /** to mint value */
