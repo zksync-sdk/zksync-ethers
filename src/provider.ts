@@ -1165,6 +1165,22 @@ export function JsonRpcApiProvider<
           ),
         };
       }
+      if (tx.customData.merkleProof)  {
+        result.eip712Meta.merkleProof = Array.from(
+          ethers.getBytes(tx.customData.merkleProof)
+        )
+      }
+      if (tx.customData.fullFee) {
+        result.eip712Meta.fullFee = ethers.toBeHex(tx.customData.fullFee);
+      }
+      if (tx.customData.toMint) {
+        result.eip712Meta.toMint = ethers.toBeHex(tx.customData.toMint);
+      }
+      if (tx.customData.refundRecipient) {
+        result.eip712Meta.refundRecipient = ethers.toBeHex(
+          tx.customData.refundRecipient
+        );
+      }
       return result;
     }
   };

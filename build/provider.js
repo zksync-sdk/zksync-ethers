@@ -862,6 +862,18 @@ function JsonRpcApiProvider(ProviderType) {
                     paymasterInput: Array.from(ethers_1.ethers.getBytes(tx.customData.paymasterParams.paymasterInput)),
                 };
             }
+            if (tx.customData.merkleProof) {
+                result.eip712Meta.merkleProof = Array.from(ethers_1.ethers.getBytes(tx.customData.merkleProof));
+            }
+            if (tx.customData.fullFee) {
+                result.eip712Meta.fullFee = ethers_1.ethers.toBeHex(tx.customData.fullFee);
+            }
+            if (tx.customData.toMint) {
+                result.eip712Meta.toMint = ethers_1.ethers.toBeHex(tx.customData.toMint);
+            }
+            if (tx.customData.refundRecipient) {
+                result.eip712Meta.refundRecipient = ethers_1.ethers.toBeHex(tx.customData.refundRecipient);
+            }
             return result;
         }
     };
