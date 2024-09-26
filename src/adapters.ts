@@ -676,7 +676,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       customBridgeData?: BytesLike;
     }): Promise<PriorityOpResponse> {
       const tx = await this._getDepositETHOnETHBasedChainTx(transaction);
-
+      
       const baseGasLimit = await this.estimateGasRequestExecute(tx);
       const gasLimit = scaleGasLimit(baseGasLimit);
 
