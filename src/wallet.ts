@@ -12,15 +12,15 @@ import {
 } from 'ethers';
 import {
   Address,
-  BalancesMap,
+  BalancesMap, Fee,
   FinalizeWithdrawalParams,
   FullDepositFee,
   PaymasterParams,
   PriorityOpResponse,
   TransactionLike,
   TransactionRequest,
-  TransactionResponse,
-} from './types';
+  TransactionResponse
+} from "./types";
 import {AdapterL1, AdapterL2} from './adapters';
 import {
   IBridgehub,
@@ -1438,12 +1438,14 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
       );
     }
+    let fee: Fee;
     if (
       !populated.gasLimit ||
+      (!tx.customData || !tx.customData.gasPerPubdata) ||
       (!populated.gasPrice &&
         (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))
     ) {
-      const fee = await this.provider.estimateFee(populated);
+      fee = await this.provider.estimateFee(populated);
       populated.gasLimit ??= fee.gasLimit;
       if (!populated.gasPrice && populated.type === 0) {
         populated.gasPrice = fee.maxFeePerGas;
@@ -1458,10 +1460,12 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       tx.type === EIP712_TX_TYPE ||
       tx.customData
     ) {
+      tx.customData ??= {};
+      tx.customData.gasPerPubdata ??= fee!.gasPerPubdataLimit;
       populated.type = EIP712_TX_TYPE;
       populated.value ??= 0;
       populated.data ??= '0x';
-      populated.customData = this._fillCustomData(tx.customData ?? {});
+      populated.customData = this._fillCustomData(tx.customData);
       populated.nonce = populated.nonce ?? (await this.getNonce());
       populated.chainId =
         populated.chainId ?? (await this.provider.getNetwork()).chainId;

@@ -194,7 +194,6 @@ export const populateTransactionECDSA: TransactionBuilder = async (
   populatedTx.value = populatedTx.value ? BigInt(populatedTx.value) : 0n;
   populatedTx.data ??= '0x';
   populatedTx.customData = tx.customData ?? {};
-  populatedTx.customData.gasPerPubdata ??= DEFAULT_GAS_PER_PUBDATA_LIMIT;
   populatedTx.customData.factoryDeps ??= [];
 
   populatedTx.from ??= new ethers.Wallet(secret).address;
@@ -226,6 +225,7 @@ export const populateTransactionECDSA: TransactionBuilder = async (
     });
 
     populatedTx.gasLimit ??= fee.gasLimit;
+    populatedTx.customData.gasPerPubdata ??= fee.gasPerPubdataLimit;
     if (!populatedTx.gasPrice) {
       populatedTx.maxFeePerGas ??= fee.maxFeePerGas;
       populatedTx.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;

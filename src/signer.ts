@@ -707,6 +707,15 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         tx.maxFeePerGas ??= fee.maxFeePerGas;
         tx.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
       }
+      if (
+        tx.type === null ||
+        tx.type === undefined ||
+        tx.type === EIP712_TX_TYPE ||
+        tx.customData
+      ){
+        tx.customData ??= {};
+        tx.customData.gasPerPubdata = fee.gasPerPubdataLimit
+      }
     }
     return tx;
   }

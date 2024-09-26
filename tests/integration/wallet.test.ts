@@ -236,6 +236,7 @@ describe('Wallet', () => {
         'gasLimit',
         'chainId',
         'chainId',
+        'customData',
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     }).timeout(25_000);
@@ -263,6 +264,7 @@ describe('Wallet', () => {
         'maxFeePerGas',
         'maxPriorityFeePerGas',
         'chainId',
+        'customData',
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
       expect(BigInt(result.maxFeePerGas!) > 0n).to.be.true;
