@@ -1012,7 +1012,6 @@ describe('Provider', () => {
   });
   describe('#error()', () => {
     it('Should not allow invalid contract bytecode', async () => {
-      const gasPrice = await provider.getGasPrice();
       const address = wallet.getAddress();
 
       try {

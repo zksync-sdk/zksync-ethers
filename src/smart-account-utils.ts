@@ -1,5 +1,5 @@
 import {ethers, SigningKey} from 'ethers';
-import {EIP712_TX_TYPE, DEFAULT_GAS_PER_PUBDATA_LIMIT} from './utils';
+import {EIP712_TX_TYPE} from './utils';
 import {TransactionLike, TransactionBuilder, PayloadSigner} from './types';
 
 /**
