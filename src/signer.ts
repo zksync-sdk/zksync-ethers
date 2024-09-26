@@ -712,9 +712,9 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         tx.type === undefined ||
         tx.type === EIP712_TX_TYPE ||
         tx.customData
-      ){
+      ) {
         tx.customData ??= {};
-        tx.customData.gasPerPubdata = fee.gasPerPubdataLimit
+        tx.customData.gasPerPubdata = fee.gasPerPubdataLimit;
       }
     }
     return tx;

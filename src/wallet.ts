@@ -12,15 +12,16 @@ import {
 } from 'ethers';
 import {
   Address,
-  BalancesMap, Fee,
+  BalancesMap,
+  Fee,
   FinalizeWithdrawalParams,
   FullDepositFee,
   PaymasterParams,
   PriorityOpResponse,
   TransactionLike,
   TransactionRequest,
-  TransactionResponse
-} from "./types";
+  TransactionResponse,
+} from './types';
 import {AdapterL1, AdapterL2} from './adapters';
 import {
   IBridgehub,
@@ -1441,7 +1442,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     let fee: Fee;
     if (
       !populated.gasLimit ||
-      (!tx.customData || !tx.customData.gasPerPubdata) ||
+      !tx.customData ||
+      !tx.customData.gasPerPubdata ||
       (!populated.gasPrice &&
         (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))
     ) {
