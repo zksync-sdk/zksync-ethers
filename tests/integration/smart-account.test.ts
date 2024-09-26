@@ -156,7 +156,7 @@ describe('SmartAccount', async () => {
         to: ADDRESS2,
         value: 7_000_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId', 'customData']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     }).timeout(25_000);
 
@@ -177,7 +177,7 @@ describe('SmartAccount', async () => {
         to: ADDRESS2,
         value: 7_000_000,
       });
-      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
+      expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId', 'customData']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
   });

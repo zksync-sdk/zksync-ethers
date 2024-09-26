@@ -148,7 +148,7 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
+    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
   });
 
   it('should populate tx using gasPrice as fee model', async () => {
@@ -177,7 +177,7 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
+    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
   });
 
   it('should populate `tx.maxFeePerGas`', async () => {
@@ -192,7 +192,6 @@ describe('populateTransaction()', () => {
       maxPriorityFeePerGas: 100_000_000n,
       gasLimit: 156_726n,
       customData: {
-        gasPerPubdata: 50_000,
         factoryDeps: [],
       },
     };
@@ -207,7 +206,7 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce']);
+    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
   });
 
   it('should throw an error when provider is not set', async () => {

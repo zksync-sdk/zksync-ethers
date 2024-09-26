@@ -399,6 +399,7 @@ describe('Provider', () => {
     if (IS_ETH_BASED) {
       it('should return an ETH withdraw transaction', async () => {
         const tx = {
+          type: 113,
           from: ADDRESS1,
           value: 7_000_000_000n,
           to: utils.L2_BASE_TOKEN_ADDRESS,
@@ -419,6 +420,7 @@ describe('Provider', () => {
           value: 7_000_000_000n,
           to: utils.L2_BASE_TOKEN_ADDRESS,
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
+          type: 113,
           customData: {
             paymasterParams: {
               paymaster: '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174',
@@ -630,6 +632,7 @@ describe('Provider', () => {
     if (IS_ETH_BASED) {
       it('should return an ETH transfer transaction', async () => {
         const tx = {
+          type: 113,
           from: ADDRESS1,
           to: ADDRESS2,
           value: 7_000_000_000,
