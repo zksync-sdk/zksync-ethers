@@ -1,3 +1,15 @@
+# [6.13.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.12.1...v6.13.0) (2024-09-26)
+
+
+### Bug Fixes
+
+* **tyoes:** add missing field for `FeeParams` ([456c73a](https://github.com/zksync-sdk/zksync-ethers/commit/456c73a00f1d97a0811eceba47575a33d40aacb2))
+
+
+### Features
+
+* utilize estimated `gasPerPubData` ([9f98f75](https://github.com/zksync-sdk/zksync-ethers/commit/9f98f7575e8592c1bd6cc20bc5e5a6ac735211b8))
+
 ## [6.12.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.12.0...v6.12.1) (2024-09-06)
 
 
