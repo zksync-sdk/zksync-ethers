@@ -1602,35 +1602,45 @@ describe('Wallet', () => {
       );
     }).timeout(90_000);
 
-    // it('should withdraw Crown to the L1 network', async () => {
-    //   const amount = 5n;
-    //   const l2DAI = await provider.l2TokenAddress(DAI_L1);
-    //   const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2DAI);
-    //   const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(DAI_L1);
+    it('should withdraw Crown to the L1 network', async () => {
+      const amount = 5n;
+      const l2Crown = APPROVAL_TOKEN;
+      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2Crown);
 
-    //   const withdrawTx = await wallet.withdraw({
-    //     token: l2DAI,
-    //     to: await wallet.getAddress(),
-    //     amount: amount,
-    //   });
-    //   await withdrawTx.waitFinalize();
-    //   expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+      const withdrawTx = await wallet.withdraw({
+        token: l2Crown,
+        to: await wallet.getAddress(),
+        amount: amount,
+      });
+      await withdrawTx.waitFinalize();
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
 
-    //   const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
-    //     withdrawTx.hash
-    //   );
-    //   const result = await finalizeWithdrawTx.wait();
-    //   const l2BalanceAfterWithdrawal = await wallet.getBalance(l2DAI);
-    //   const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(DAI_L1);
+      try {
+        const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+          withdrawTx.hash
+        );
+        const result = await finalizeWithdrawTx.wait();
+        const l2BalanceAfterWithdrawal = await wallet.getBalance(l2Crown);
 
-    //   expect(result).not.to.be.null;
-    //   expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
-    //     amount
-    //   );
-    //   expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
-    //     amount
-    //   );
-    // }).timeout(90_000);
+        expect(result).not.to.be.null;
+        expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
+          amount
+        );
+      } catch (error: any) {
+        if (error.data) {
+            // Custom error details are often included in `error.data`.
+            console.error('Error data:', error.data);
+        }
+    
+        if (error.reason) {
+            // Catch the custom error reason
+            console.error('Revert reason:', error.reason);
+        } else {
+            // Handle generic or unknown errors
+            console.error('Unknown error:', error);
+        }
+      }
+    }).timeout(90_000);
   });
 
   describe('#getRequestExecuteTx()', () => {

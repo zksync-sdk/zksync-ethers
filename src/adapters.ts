@@ -46,9 +46,14 @@ import {
   IL2SharedBridge__factory,
   IL2SharedBridge,
   IL1Bridge,
+  IL1Nullifier,
+  IL1AssetRouter,
+  IL1AssetRouter__factory,
+  IL1Nullifier__factory,
 } from './typechain';
 import {
   Address,
+  FinalizeL1DepositParamsStruct,
   BalancesMap,
   Eip712Meta,
   FinalizeWithdrawalParams,
@@ -1491,7 +1496,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         proof,
       } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
-      let l1Bridge: IL1Bridge | IL1SharedBridge;
+      let l1Bridge: IL1Bridge | IL1SharedBridge | IL1AssetRouter;
+      let l1Nullifier: IL1Nullifier | undefined;
       if (isAddressEq(sender, L2_BASE_TOKEN_ADDRESS)) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
       } else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
@@ -1507,18 +1513,43 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       } else {
         const l2Bridge = IL2Bridge__factory.connect(sender, this._providerL2());
         const bridgeAddress = await l2Bridge.l1Bridge();
-        l1Bridge = IL1Bridge__factory.connect(bridgeAddress, this._signerL1());
+        l1Bridge = IL1AssetRouter__factory.connect(
+          bridgeAddress,
+          this._signerL1()
+        );
+        const l1NullifierAddress = await l1Bridge.L1_NULLIFIER();
+        l1Nullifier = IL1Nullifier__factory.connect(
+          l1NullifierAddress,
+          this._signerL1()
+        );
       }
 
-      return await l1Bridge.finalizeWithdrawal(
-        (await this._providerL2().getNetwork()).chainId as BigNumberish,
-        l1BatchNumber as BigNumberish,
-        l2MessageIndex as BigNumberish,
-        l2TxNumberInBlock as BigNumberish,
-        message,
-        proof,
-        overrides ?? {}
-      );
+      if (l1Nullifier == undefined) {
+        return await l1Bridge.finalizeWithdrawal(
+          (await this._providerL2().getNetwork()).chainId as BigNumberish,
+          l1BatchNumber as BigNumberish,
+          l2MessageIndex as BigNumberish,
+          l2TxNumberInBlock as BigNumberish,
+          message,
+          proof,
+          overrides ?? {}
+        );
+      } else {
+        const finalizeL1DepositParams: FinalizeL1DepositParamsStruct = {
+          chainId: (await this._providerL2().getNetwork())
+            .chainId as BigNumberish,
+          l2BatchNumber: l1BatchNumber as BigNumberish,
+          l2MessageIndex: l2MessageIndex as BigNumberish,
+          l2Sender: sender,
+          l2TxNumberInBatch: l2TxNumberInBlock as BigNumberish,
+          message: message,
+          merkleProof: proof,
+        };
+        return await l1Nullifier.finalizeDeposit(
+          finalizeL1DepositParams,
+          overrides ?? {}
+        );
+      }
     }
 
     /**
@@ -1552,20 +1583,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       const chainId = (await this._providerL2().getNetwork()).chainId;
 
-      let l1Bridge: IL1SharedBridge;
-
-      if (await this._providerL2().isBaseToken(sender)) {
-        l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else {
-        const l2Bridge = IL2SharedBridge__factory.connect(
-          sender,
-          this._providerL2()
-        );
-        l1Bridge = IL1SharedBridge__factory.connect(
-          await l2Bridge.l1SharedBridge(),
-          this._providerL1()
-        );
-      }
+      let l1Bridge: IL1SharedBridge = (await this.getL1BridgeContracts()).shared;
 
       return await l1Bridge.isWithdrawalFinalized(
         chainId,

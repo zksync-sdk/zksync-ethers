@@ -143,7 +143,7 @@ describe('SmartAccount', async () => {
         type: utils.EIP712_TX_TYPE,
         from: ADDRESS1,
         nonce: await account.getNonce('pending'),
-        gasLimit: 156_726n,
+        gasLimit: 155_974n,
         chainId: 270n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
@@ -584,13 +584,12 @@ describe('SmartAccount', async () => {
         const amount = 7_000_000_000n;
         const l2BalanceBeforeWithdrawal = await account.getBalance();
         const withdrawTx = await account.withdraw({
-          token: utils.ETH_ADDRESS,
+          token: utils.ETH_ADDRESS_IN_CONTRACTS,
           to: await account.getAddress(),
           amount: amount,
         });
         await withdrawTx.waitFinalize();
         expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
-
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
         );
@@ -617,7 +616,7 @@ describe('SmartAccount', async () => {
           await account.getBalance(APPROVAL_TOKEN);
 
         const withdrawTx = await account.withdraw({
-          token: utils.ETH_ADDRESS,
+          token: utils.ETH_ADDRESS_IN_CONTRACTS,
           to: await account.getAddress(),
           amount: amount,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
@@ -674,7 +673,7 @@ describe('SmartAccount', async () => {
 
         const l2BalanceBeforeWithdrawal = await account.getBalance(token);
         const withdrawTx = await account.withdraw({
-          token: utils.ETH_ADDRESS,
+          token: utils.ETH_ADDRESS_IN_CONTRACTS,
           to: await account.getAddress(),
           amount: amount,
         });
@@ -1384,7 +1383,7 @@ describe('MultisigECDSASmartAccount', async () => {
         const amount = 7_000_000_000n;
         const l2BalanceBeforeWithdrawal = await account.getBalance();
         const withdrawTx = await account.withdraw({
-          token: utils.ETH_ADDRESS,
+          token: utils.ETH_ADDRESS_IN_CONTRACTS,
           to: await wallet.getAddress(), // send to L1 EOA since AA does not exit on L1
           amount: amount,
         });
@@ -1417,7 +1416,7 @@ describe('MultisigECDSASmartAccount', async () => {
           await account.getBalance(APPROVAL_TOKEN);
 
         const withdrawTx = await account.withdraw({
-          token: utils.ETH_ADDRESS,
+          token: utils.ETH_ADDRESS_IN_CONTRACTS,
           to: await wallet.getAddress(), // send to L1 EOA since AA does not exit on L1
           amount: amount,
           paymasterParams: utils.getPaymasterParams(PAYMASTER, {
