@@ -113,7 +113,7 @@ describe('utils', () => {
         const result = await utils.estimateDefaultBridgeDepositL2Gas(
           ethProvider,
           provider,
-          utils.ETH_ADDRESS_IN_CONTRACTS,
+          utils.ETH_ADDRESS,
           ethers.parseEther('1'),
           ADDRESS2,
           ADDRESS1

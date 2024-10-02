@@ -30,6 +30,7 @@ import {
   L2_BASE_TOKEN_ADDRESS,
 } from './utils';
 import {
+  IAssetRouterBase,
   IBridgehub,
   IBridgehub__factory,
   IERC20__factory,
@@ -50,6 +51,7 @@ import {
   IL1AssetRouter,
   IL1AssetRouter__factory,
   IL1Nullifier__factory,
+  IAssetRouterBase__factory,
 } from './typechain';
 import {
   Address,
@@ -1583,7 +1585,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       const chainId = (await this._providerL2().getNetwork()).chainId;
 
-      let l1Bridge: IL1SharedBridge = (await this.getL1BridgeContracts()).shared;
+      const l1Bridge: IL1SharedBridge = (await this.getL1BridgeContracts())
+        .shared;
 
       return await l1Bridge.isWithdrawalFinalized(
         chainId,
@@ -1637,35 +1640,76 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         l1BridgeAddress,
         this._signerL1()
       );
+      const l1AR = IL1AssetRouter__factory.connect(
+        l1BridgeAddress,
+        this._signerL1()
+      );
       const l2Bridge = IL2Bridge__factory.connect(
         l2BridgeAddress,
         this._providerL2()
       );
+      const l2ARInterface = IAssetRouterBase__factory.createInterface();
+      try {
+        const calldata = l2Bridge.interface.decodeFunctionData(
+          'finalizeDeposit',
+          tx.data
+        );
 
-      const calldata = l2Bridge.interface.decodeFunctionData(
-        'finalizeDeposit',
-        tx.data
-      );
-
-      const proof = await this._providerL2().getLogProof(
-        depositHash,
-        successL2ToL1LogIndex
-      );
-      if (!proof) {
-        throw new Error('Log proof not found!');
+        const proof = await this._providerL2().getLogProof(
+          depositHash,
+          successL2ToL1LogIndex
+        );
+        if (!proof) {
+          throw new Error('Log proof not found!');
+        }
+        return await l1Bridge.claimFailedDeposit(
+          (await this._providerL2().getNetwork()).chainId as BigNumberish,
+          calldata['_l1Sender'],
+          calldata['_l1Token'],
+          calldata['_amount'],
+          depositHash,
+          receipt.l1BatchNumber!,
+          proof.id,
+          receipt.l1BatchTxIndex!,
+          proof.proof,
+          overrides ?? {}
+        );
+      } catch {
+        const calldata = l2ARInterface.decodeFunctionData(
+          'finalizeDeposit',
+          tx.data
+        );
+        const transferData = calldata['_transferData'];
+        const transferDataDecoded = ethers.AbiCoder.defaultAbiCoder().decode(
+          ['address', 'address', 'address', 'uint256', 'bytes'],
+          transferData
+        );
+        const assetData = ethers.AbiCoder.defaultAbiCoder().encode(
+          ['uint256', 'address'],
+          [transferDataDecoded[3], transferDataDecoded[1]]
+        );
+        const proof = await this._providerL2().getLogProof(
+          depositHash,
+          successL2ToL1LogIndex
+        );
+        if (!proof) {
+          throw new Error('Log proof not found!');
+        }
+        return await l1AR[
+          'bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])'
+        ](
+          (await this._providerL2().getNetwork()).chainId as BigNumberish,
+          transferDataDecoded[0], // depositSender
+          calldata['_assetId'], // asset id
+          assetData,
+          depositHash,
+          receipt.l1BatchNumber!,
+          proof.id,
+          receipt.l1BatchTxIndex!,
+          proof.proof,
+          overrides ?? {}
+        );
       }
-      return await l1Bridge.claimFailedDeposit(
-        (await this._providerL2().getNetwork()).chainId as BigNumberish,
-        calldata['_l1Sender'],
-        calldata['_l1Token'],
-        calldata['_amount'],
-        depositHash,
-        receipt.l1BatchNumber!,
-        proof.id,
-        receipt.l1BatchTxIndex!,
-        proof.proof,
-        overrides ?? {}
-      );
     }
 
     /**

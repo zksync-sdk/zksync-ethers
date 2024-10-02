@@ -950,7 +950,7 @@ describe('Provider', () => {
       it('should return estimation for ETH token', async () => {
         const result = await provider.estimateDefaultBridgeDepositL2Gas(
           ethProvider,
-          utils.ETH_ADDRESS_IN_CONTRACTS,
+          utils.LEGACY_ETH_ADDRESS,
           ethers.parseEther('1'),
           ADDRESS2,
           ADDRESS1

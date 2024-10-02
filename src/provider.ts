@@ -1185,6 +1185,9 @@ export function JsonRpcApiProvider<
       // due to storage slot aggregation, the gas estimation will depend on the address
       // and so estimation for the zero address may be smaller than for the sender.
       from ??= ethers.Wallet.createRandom().address;
+      token = isAddressEq(token, LEGACY_ETH_ADDRESS)
+        ? ETH_ADDRESS_IN_CONTRACTS
+        : token;
       if (await this.isBaseToken(token)) {
         return await this.estimateL1ToL2Execute({
           contractAddress: to,
@@ -1204,9 +1207,7 @@ export function JsonRpcApiProvider<
         return await this.estimateCustomBridgeDepositL2Gas(
           l1BridgeAddress,
           l2BridgeAddress,
-          isAddressEq(token, LEGACY_ETH_ADDRESS)
-            ? ETH_ADDRESS_IN_CONTRACTS
-            : token,
+          token,
           amount,
           to,
           bridgeData,
