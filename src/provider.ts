@@ -808,9 +808,8 @@ export function JsonRpcApiProvider<
       let populatedTx;
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
-        const token = await this.connectBridgedToken(tx.token);
         const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_BASE_TOKEN_ADDRESS, token]));
+        const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
         const assetData = ethers.AbiCoder.defaultAbiCoder().encode(
           ['uint256', 'address'],
           [tx.amount, tx.to]
