@@ -1,3 +1,10 @@
+## [6.13.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.13.0...v6.13.1) (2024-10-07)
+
+
+### Bug Fixes
+
+* **provider:** `estimateDefaultBridgeDepositL2Gas` use `ETH_ADDRESS_IN_CONTRACTS` for base token ([4116460](https://github.com/zksync-sdk/zksync-ethers/commit/411646077c7f252625170350d6aff3d8b8a56792))
+
 # [6.13.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.12.1...v6.13.0) (2024-09-26)
 
 
