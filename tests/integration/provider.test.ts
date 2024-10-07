@@ -401,6 +401,7 @@ describe('Provider', () => {
         const tx = {
           from: ADDRESS1,
           value: 7_000_000_000n,
+          type: 113,
           to: utils.L2_BASE_TOKEN_ADDRESS,
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
         };
@@ -417,6 +418,7 @@ describe('Provider', () => {
         const tx = {
           from: ADDRESS1,
           value: 7_000_000_000n,
+          type: 113,
           to: utils.L2_BASE_TOKEN_ADDRESS,
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
           customData: {
@@ -588,7 +590,7 @@ describe('Provider', () => {
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
       };
       const result = await provider.getWithdrawTx({
-        token: await provider.l2TokenAddress(APPROVAL_TOKEN),
+        token: APPROVAL_TOKEN,
         amount: 5,
         to: ADDRESS1,
         from: ADDRESS1,
@@ -648,6 +650,7 @@ describe('Provider', () => {
         const tx = {
           from: ADDRESS1,
           to: ADDRESS2,
+          type: 113,
           value: 7_000_000_000,
         };
         const result = await provider.getTransferTx({

@@ -1,6 +1,7 @@
 import {
   assert,
   assertArgument,
+  AddressLike,
   BigNumberish,
   BytesLike,
   defineProperties,
@@ -1033,3 +1034,13 @@ export interface SmartAccountSigner {
   /** Custom method for populating transaction requests. */
   transactionBuilder?: TransactionBuilder;
 }
+
+export type FinalizeL1DepositParamsStruct = {
+  chainId: BigNumberish;
+  l2BatchNumber: BigNumberish;
+  l2MessageIndex: BigNumberish;
+  l2Sender: AddressLike;
+  l2TxNumberInBatch: BigNumberish;
+  message: BytesLike;
+  merkleProof: BytesLike[];
+};

@@ -131,7 +131,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 0n,
-      gasLimit: 156_726n,
+      gasLimit: 155_974n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -160,7 +160,7 @@ describe('populateTransaction()', () => {
       type: 113,
       data: '0x',
       gasPrice: 100_000_000n,
-      gasLimit: 156_726n,
+      gasLimit: 155_974n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -190,7 +190,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 100_000_000n,
-      gasLimit: 156_726n,
+      gasLimit: 155_974n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
