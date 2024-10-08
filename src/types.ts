@@ -11,6 +11,7 @@ import {
 } from 'ethers';
 import {
   EIP712_TX_TYPE,
+  INTEROP_TX_TYPE,
   parseEip712,
   serializeEip712,
   sleep,
@@ -494,7 +495,7 @@ export class Transaction extends ethers.Transaction {
   static override from(tx: string | TransactionLike): Transaction {
     if (typeof tx === 'string') {
       const payload = ethers.getBytes(tx);
-      if (payload[0] !== EIP712_TX_TYPE) {
+      if (payload[0] !== EIP712_TX_TYPE && payload[0] !== INTEROP_TX_TYPE) {
         return Transaction.from(ethers.Transaction.from(tx));
       } else {
         return Transaction.from(parseEip712(payload));

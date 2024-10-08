@@ -283,7 +283,7 @@ class Transaction extends ethers_1.ethers.Transaction {
     static from(tx) {
         if (typeof tx === 'string') {
             const payload = ethers_1.ethers.getBytes(tx);
-            if (payload[0] !== utils_1.EIP712_TX_TYPE) {
+            if (payload[0] !== utils_1.EIP712_TX_TYPE && payload[0] !== utils_1.INTEROP_TX_TYPE) {
                 return Transaction.from(ethers_1.ethers.Transaction.from(tx));
             }
             else {
