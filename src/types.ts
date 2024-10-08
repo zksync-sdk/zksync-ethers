@@ -478,7 +478,7 @@ export class Transaction extends ethers.Transaction {
   #from?: null | string;
 
   override get type(): number | null {
-    return this.#type === EIP712_TX_TYPE ? this.#type : super.type;
+    return this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE ? this.#type : super.type;
   }
 
   override set type(value: number | string | null) {
@@ -525,14 +525,16 @@ export class Transaction extends ethers.Transaction {
       result.accessList = null;
 
       if (tx.from) {
+        if (tx.type === INTEROP_TX_TYPE) {
+          assertArgument(
+            result.isSigned(),
+            'unsigned transaction cannot define from',
+            'tx',
+            tx
+            );
+        }
         assertArgument(
-          result.isSigned(),
-          'unsigned transaction cannot define from',
-          'tx',
-          tx
-        );
-        assertArgument(
-          isAddressEq(result.from, tx.from),
+          isAddressEq(result.from!, tx.from),
           'from mismatch',
           'tx',
           tx
@@ -540,13 +542,15 @@ export class Transaction extends ethers.Transaction {
       }
 
       if (tx.hash) {
-        assertArgument(
-          result.isSigned(),
-          'unsigned transaction cannot define hash',
-          'tx',
-          tx
-        );
-        assertArgument(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
+        if (tx.type === INTEROP_TX_TYPE) {
+          assertArgument(
+            result.isSigned(),
+            'unsigned transaction cannot define hash',
+            'tx',
+            tx
+          );
+          assertArgument(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
+        } 
       }
 
       return result;
@@ -602,7 +606,7 @@ export class Transaction extends ethers.Transaction {
   }
 
   override get from(): string | null {
-    return this.#type === EIP712_TX_TYPE ? this.#from! : super.from;
+    return this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE ? this.#from! : super.from;
   }
   override set from(value: string | null) {
     this.#from = value;

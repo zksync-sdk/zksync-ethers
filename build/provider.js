@@ -768,6 +768,22 @@ function JsonRpcApiProvider(ProviderType) {
             }
             return this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
         }
+        async broadcastTransaction2(signedTx) {
+            const { blockNumber, hash } = await (0, ethers_1.resolveProperties)({
+                blockNumber: this.getBlockNumber(),
+                hash: this._perform({
+                    method: 'broadcastTransaction',
+                    signedTransaction: signedTx,
+                }),
+                network: this.getNetwork(),
+            });
+            const tx = types_1.Transaction.from(signedTx);
+            if (tx.hash !== hash && tx.type !== utils_1.INTEROP_TX_TYPE) {
+                throw new Error('@TODO: the returned hash did not match!');
+            }
+            // return '0x00';
+            return this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
+        }
         /**
          * Returns a L2 transaction response from L1 transaction response.
          *
