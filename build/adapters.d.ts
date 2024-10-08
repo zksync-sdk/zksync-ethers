@@ -500,6 +500,8 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         /**
+         * @deprecated In favor of {@link getFinalizeWithdrawalParams}.
+         *
          * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
          * withdrawal transaction's log on the L1 network.
          *
@@ -509,6 +511,16 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * @throws {Error} If log proof can not be found.
          */
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        /**
+         * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
+         * withdrawal transaction's log on the L1 network.
+         *
+         * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
+         * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
+         * withdrawal you want to finalize.
+         * @throws {Error} If log proof can not be found.
+         */
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         /**
          * Proves the inclusion of the `L2->L1` withdrawal message.
          *
@@ -694,8 +706,8 @@ export declare function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBa
          * from the associated account on L2 network to the target account on L1 network.
          *
          * @param transaction Withdrawal transaction request.
-         * @param transaction.token The address of the token. Defaults to ETH.
          * @param transaction.amount The amount of the token to withdraw.
+         * @param transaction.token The address of the token. Defaults to ETH.
          * @param [transaction.to] The address of the recipient on L1.
          * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
          * @param [transaction.paymasterParams] Paymaster parameters.
@@ -703,8 +715,8 @@ export declare function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBa
          * @returns A Promise resolving to a withdrawal transaction response.
          */
         withdraw(transaction: {
-            token: Address;
             amount: BigNumberish;
+            token: Address;
             to?: Address;
             bridgeAddress?: Address;
             paymasterParams?: PaymasterParams;

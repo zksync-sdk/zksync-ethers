@@ -146,8 +146,8 @@ declare const Signer_base: {
         }>;
         _fillCustomData(data: import("./types").Eip712Meta): import("./types").Eip712Meta;
         withdraw(transaction: {
-            token: string;
             amount: BigNumberish;
+            token: string;
             to?: string | undefined;
             bridgeAddress?: string | undefined;
             paymasterParams?: PaymasterParams | undefined;
@@ -816,23 +816,7 @@ declare const L1Signer_base: {
         _getL2GasLimit(transaction: {
             token: string;
             amount: BigNumberish;
-            to?: string | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const isFinalized = await signer.isWithdrawalFinalized(WITHDRAWAL_HASH);
-             */
+            to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
@@ -876,6 +860,7 @@ declare const L1Signer_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
         claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
@@ -1476,6 +1461,24 @@ export declare class L1Signer extends L1Signer_base {
      * );
      *
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+     * const params = await signer.getFinalizeWithdrawalParams(WITHDRAWAL_HASH);
+     */
+    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Provider, L1Signer, types } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+     * const signer = L1Signer.from(
+     *     await browserProvider.getSigner(),
+     *     Provider.getDefaultProvider(types.Network.Sepolia)
+     * );
+     *
+     * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const finalizeWithdrawTx = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
      */
     finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: Overrides): Promise<ContractTransactionResponse>;
@@ -1731,8 +1734,8 @@ declare const L2VoidSigner_base: {
         }>;
         _fillCustomData(data: import("./types").Eip712Meta): import("./types").Eip712Meta;
         withdraw(transaction: {
-            token: string;
             amount: BigNumberish;
+            token: string;
             to?: string | undefined;
             bridgeAddress?: string | undefined;
             paymasterParams?: PaymasterParams | undefined;
@@ -1750,6 +1753,8 @@ declare const L2VoidSigner_base: {
     };
 } & typeof ethers.VoidSigner;
 /**
+ * @deprecated In favor of {@link VoidSigner}
+ *
  * A `L2VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
  *
  * @see {@link L1VoidSigner} for L1 operations.
@@ -1799,6 +1804,91 @@ export declare class L2VoidSigner extends L2VoidSigner_base {
      * });
      */
     populateTransaction(tx: TransactionRequest): Promise<TransactionLike>;
+    sendTransaction(tx: TransactionRequest): Promise<TransactionResponse>;
+}
+declare const VoidSigner_base: {
+    new (...args: any[]): {
+        _providerL2(): Provider;
+        _signerL2(): ethers.Signer;
+        getBalance(token?: string | undefined, blockTag?: BlockTag): Promise<bigint>;
+        getAllBalances(): Promise<BalancesMap>;
+        getDeploymentNonce(): Promise<bigint>;
+        getL2BridgeContracts(): Promise<{
+            erc20: IL2Bridge;
+            weth: IL2Bridge;
+            shared: IL2SharedBridge;
+        }>;
+        _fillCustomData(data: import("./types").Eip712Meta): import("./types").Eip712Meta;
+        withdraw(transaction: {
+            amount: BigNumberish;
+            token: string;
+            to?: string | undefined;
+            bridgeAddress?: string | undefined;
+            paymasterParams?: PaymasterParams | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<TransactionResponse>;
+        transfer(transaction: {
+            to: string;
+            amount: BigNumberish;
+            token?: string | undefined;
+            paymasterParams?: PaymasterParams | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<TransactionResponse>;
+        sendTransaction(tx: ethers.TransactionRequest): Promise<ethers.TransactionResponse>;
+        getAddress(): Promise<string>;
+    };
+} & typeof ethers.VoidSigner;
+/**
+ * A `VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
+ *
+ * @see {@link L1VoidSigner} for L1 operations.
+ */
+export declare class VoidSigner extends VoidSigner_base {
+    provider: Provider;
+    _signerL2(): this;
+    _providerL2(): Provider;
+    /**
+     * Connects to the L2 network using the `provider`.
+     *
+     * @param provider The provider instance for connecting to a L2 network.
+     *
+     * @example
+     *
+     * import { Provider, L2VoidSigner, types } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     *
+     * let signer = new VoidSigner("<ADDRESS>");
+     * signer = signer.connect(provider);
+     */
+    connect(provider: Provider): VoidSigner;
+    /**
+     * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
+     * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
+     * Any other fields that are not set will be prepared by this method.
+     *
+     * @param tx The transaction request that needs to be populated.
+     *
+     * @example
+     *
+     * import { Provider, VoidSigner, Wallet, types } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const signer = new VoidSigner("<ADDRESS>", provider);
+     *
+     * const populatedTx = await signer.populateTransaction({
+     *   to: Wallet.createRandom().address,
+     *   value: 7_000_000n,
+     *   maxFeePerGas: 3_500_000_000n,
+     *   maxPriorityFeePerGas: 2_000_000_000n,
+     *   customData: {
+     *     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+     *     factoryDeps: [],
+     *   },
+     * });
+     */
+    populateTransaction(tx: TransactionRequest): Promise<TransactionLike>;
+    sendTransaction(tx: TransactionRequest): Promise<TransactionResponse>;
 }
 declare const L1VoidSigner_base: {
     new (...args: any[]): {
@@ -2074,23 +2164,7 @@ declare const L1VoidSigner_base: {
         _getL2GasLimit(transaction: {
             token: string;
             amount: BigNumberish;
-            to?: string | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const isFinalized = await signer.isWithdrawalFinalized(WITHDRAWAL_HASH);
-             */
+            to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
@@ -2134,6 +2208,7 @@ declare const L1VoidSigner_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
         claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
@@ -2194,7 +2269,7 @@ declare const L1VoidSigner_base: {
 /**
  * A `L1VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L1 operations.
  *
- * @see {@link L2VoidSigner} for L2 operations.
+ * @see {@link VoidSigner} for L2 operations.
  */
 export declare class L1VoidSigner extends L1VoidSigner_base {
     providerL2?: Provider;

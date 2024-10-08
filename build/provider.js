@@ -19,6 +19,7 @@ const types_1 = require("./types");
 const utils_1 = require("./utils");
 const signer_1 = require("./signer");
 const format_1 = require("./format");
+const ethers_2 = require("ethers");
 function JsonRpcApiProvider(ProviderType) {
     return class Provider extends ProviderType {
         /**
@@ -343,6 +344,15 @@ function JsonRpcApiProvider(ProviderType) {
             }
             return typechain_1.IL2SharedBridge__factory.connect(address, this);
         }
+        async connectL2NTV() {
+            return typechain_1.IL2NativeTokenVault__factory.connect(utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, this);
+        }
+        async connectBridgedToken(token) {
+            return typechain_1.IBridgedStandardToken__factory.connect(token, this);
+        }
+        async connectL2AssetRouter() {
+            return typechain_1.IL2AssetRouter__factory.connect(utils_1.L2_ASSET_ROUTER_ADDRESS, this);
+        }
         /**
          * Returns true if passed bridge address is legacy and false if its shared bridge.
          **
@@ -397,11 +407,22 @@ function JsonRpcApiProvider(ProviderType) {
             return tokens.map(token => ({ address: token.l2Address, ...token }));
         }
         /**
+         * @deprecated In favor of {@link getL1ChainId}
+         *
          * Returns the L1 chain ID.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks-l1chainid zks_L1ChainId} JSON-RPC method.
          */
         async l1ChainId() {
+            const res = await this.send('zks_L1ChainId', []);
+            return Number(res);
+        }
+        /**
+         * Returns the L1 chain ID.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-l1chainid zks_L1ChainId} JSON-RPC method.
+         */
+        async getL1ChainId() {
             const res = await this.send('zks_L1ChainId', []);
             return Number(res);
         }
@@ -501,8 +522,8 @@ function JsonRpcApiProvider(ProviderType) {
          * Returns the populated withdrawal transaction.
          *
          * @param transaction The transaction details.
-         * @param transaction.token The token address.
          * @param transaction.amount The amount of token.
+         * @param transaction.token The token address.
          * @param [transaction.from] The sender's address.
          * @param [transaction.to] The recipient's address.
          * @param [transaction.bridgeAddress] The bridge address.
@@ -510,8 +531,9 @@ function JsonRpcApiProvider(ProviderType) {
          * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
          */
         async getWithdrawTx(transaction) {
-            var _a;
+            var _a, _b;
             const { ...tx } = transaction;
+            tx.token ?? (tx.token = utils_1.L2_BASE_TOKEN_ADDRESS);
             if ((0, utils_1.isAddressEq)(tx.token, utils_1.LEGACY_ETH_ADDRESS) ||
                 (0, utils_1.isAddressEq)(tx.token, utils_1.ETH_ADDRESS_IN_CONTRACTS)) {
                 tx.token = await this.l2TokenAddress(utils_1.ETH_ADDRESS_IN_CONTRACTS);
@@ -523,6 +545,7 @@ function JsonRpcApiProvider(ProviderType) {
             tx.to ?? (tx.to = tx.from);
             tx.overrides ?? (tx.overrides = {});
             (_a = tx.overrides).from ?? (_a.from = tx.from);
+            (_b = tx.overrides).type ?? (_b.type = utils_1.EIP712_TX_TYPE);
             if ((0, utils_1.isAddressEq)(tx.token, utils_1.L2_BASE_TOKEN_ADDRESS)) {
                 if (!tx.overrides.value) {
                     tx.overrides.value = tx.amount;
@@ -545,12 +568,30 @@ function JsonRpcApiProvider(ProviderType) {
                 }
                 return populatedTx;
             }
+            const ntv = await this.connectL2NTV();
+            const assetId = await ntv.assetId(tx.token);
+            const originChainId = await ntv.originChainId(assetId);
+            const l1ChainId = await this.getL1ChainId();
+            const isTokenL1Native = originChainId == BigInt(l1ChainId) ||
+                tx.token == utils_1.ETH_ADDRESS_IN_CONTRACTS;
             if (!tx.bridgeAddress) {
                 const bridgeAddresses = await this.getDefaultBridgeAddresses();
-                tx.bridgeAddress = bridgeAddresses.sharedL2;
+                tx.bridgeAddress = isTokenL1Native
+                    ? bridgeAddresses.sharedL2
+                    : utils_1.L2_ASSET_ROUTER_ADDRESS;
             }
-            const bridge = await this.connectL2Bridge(tx.bridgeAddress);
-            const populatedTx = await bridge.withdraw.populateTransaction(tx.to, tx.token, tx.amount, tx.overrides);
+            let populatedTx;
+            if (!isTokenL1Native) {
+                const bridge = await this.connectL2AssetRouter();
+                const chainId = Number((await this.getNetwork()).chainId);
+                const assetId = ethers_1.ethers.keccak256(ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
+                const assetData = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address'], [tx.amount, tx.to]);
+                populatedTx = await bridge.withdraw.populateTransaction(assetId, assetData, tx.overrides);
+            }
+            else {
+                const bridge = await this.connectL2Bridge(tx.bridgeAddress);
+                populatedTx = await bridge.withdraw.populateTransaction(tx.to, tx.token, tx.amount, tx.overrides);
+            }
             if (tx.paymasterParams) {
                 return {
                     ...populatedTx,
@@ -588,7 +629,7 @@ function JsonRpcApiProvider(ProviderType) {
          * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
          */
         async getTransferTx(transaction) {
-            var _a;
+            var _a, _b;
             const { ...tx } = transaction;
             if (!tx.token) {
                 tx.token = utils_1.L2_BASE_TOKEN_ADDRESS;
@@ -599,6 +640,7 @@ function JsonRpcApiProvider(ProviderType) {
             }
             tx.overrides ?? (tx.overrides = {});
             (_a = tx.overrides).from ?? (_a.from = tx.from);
+            (_b = tx.overrides).type ?? (_b.type = utils_1.EIP712_TX_TYPE);
             if ((0, utils_1.isAddressEq)(tx.token, utils_1.L2_BASE_TOKEN_ADDRESS)) {
                 if (tx.paymasterParams) {
                     return {
@@ -805,13 +847,80 @@ function JsonRpcApiProvider(ProviderType) {
             };
         }
         /**
+         * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
+         *
+         * @param providerL1 The Ethers provider for the L1 network.
+         * @param providerL2 The ZKsync provider for the L2 network.
+         * @param token The address of the token to be bridged.
+         * @param amount The deposit amount.
+         * @param to The recipient address on the L2 network.
+         * @param from The sender address on the L1 network.
+         * @param gasPerPubdataByte The current gas per byte of pubdata.
+         *
+         * @see
+         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
+         */
+        async estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte) {
+            // If the `from` address is not provided, we use a random address, because
+            // due to storage slot aggregation, the gas estimation will depend on the address
+            // and so estimation for the zero address may be smaller than for the sender.
+            from ?? (from = ethers_1.ethers.Wallet.createRandom().address);
+            token = (0, utils_1.isAddressEq)(token, utils_1.LEGACY_ETH_ADDRESS)
+                ? utils_1.ETH_ADDRESS_IN_CONTRACTS
+                : token;
+            if (await this.isBaseToken(token)) {
+                return await this.estimateL1ToL2Execute({
+                    contractAddress: to,
+                    gasPerPubdataByte: gasPerPubdataByte,
+                    caller: from,
+                    calldata: '0x',
+                    l2Value: amount,
+                });
+            }
+            else {
+                const bridgeAddresses = await this.getDefaultBridgeAddresses();
+                const value = 0;
+                const l1BridgeAddress = bridgeAddresses.sharedL1;
+                const l2BridgeAddress = bridgeAddresses.sharedL2;
+                const bridgeData = await (0, utils_1.getERC20DefaultBridgeData)(token, providerL1);
+                return await this.estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, value);
+            }
+        }
+        /**
+         * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
+         *
+         * @param providerL2 The ZKsync provider for the L2 network.
+         * @param l1BridgeAddress The address of the custom L1 bridge.
+         * @param l2BridgeAddress The address of the custom L2 bridge.
+         * @param token The address of the token to be bridged.
+         * @param amount The deposit amount.
+         * @param to The recipient address on the L2 network.
+         * @param bridgeData Additional bridge data.
+         * @param from The sender address on the L1 network.
+         * @param gasPerPubdataByte The current gas per byte of pubdata.
+         * @param l2Value The `msg.value` of L2 transaction.
+         *
+         * @see
+         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
+         */
+        async estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value) {
+            const calldata = await (0, utils_1.getERC20BridgeCalldata)(token, from, to, amount, bridgeData);
+            return await this.estimateL1ToL2Execute({
+                caller: (0, utils_1.applyL1ToL2Alias)(l1BridgeAddress),
+                contractAddress: l2BridgeAddress,
+                gasPerPubdataByte: gasPerPubdataByte,
+                calldata: calldata,
+                l2Value: l2Value,
+            });
+        }
+        /**
          * Returns gas estimation for an L1 to L2 execute operation.
          *
          * @param transaction The transaction details.
          * @param transaction.contractAddress The address of the contract.
          * @param transaction.calldata The transaction call data.
          * @param [transaction.caller] The caller's address.
-         * @param [transaction.l2Value] The current L2 gas value.
+         * @param [transaction.l2Value] The deposit amount.
          * @param [transaction.factoryDeps] An array of bytes containing contract bytecode.
          * @param [transaction.gasPerPubdataByte] The current gas per byte value.
          * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
@@ -862,18 +971,6 @@ function JsonRpcApiProvider(ProviderType) {
                     paymasterInput: Array.from(ethers_1.ethers.getBytes(tx.customData.paymasterParams.paymasterInput)),
                 };
             }
-            if (tx.customData.merkleProof) {
-                result.eip712Meta.merkleProof = Array.from(ethers_1.ethers.getBytes(tx.customData.merkleProof));
-            }
-            if (tx.customData.fullFee) {
-                result.eip712Meta.fullFee = ethers_1.ethers.toBeHex(tx.customData.fullFee);
-            }
-            if (tx.customData.toMint) {
-                result.eip712Meta.toMint = ethers_1.ethers.toBeHex(tx.customData.toMint);
-            }
-            if (tx.customData.refundRecipient) {
-                result.eip712Meta.refundRecipient = ethers_1.ethers.toBeHex(tx.customData.refundRecipient);
-            }
             return result;
         }
     };
@@ -896,7 +993,7 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
      */
     constructor(url, network, options) {
         if (!url) {
-            url = 'http://localhost:3050';
+            url = 'http://127.0.0.1:3050';
         }
         const isLocalNetwork = typeof url === 'string'
             ? url.includes('localhost') || url.includes('127.0.0.1')
@@ -1255,6 +1352,20 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
      */
     async l1ChainId() {
         return super.l1ChainId();
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Provider, types} from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const l1ChainId = await provider.l1ChainId();
+     * console.log(`All balances: ${l1ChainId}`);
+     */
+    async getL1ChainId() {
+        return super.getL1ChainId();
     }
     /**
      * @inheritDoc
@@ -1673,6 +1784,78 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
      *
      * @example
      *
+     * import { Provider, utils, types } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const ethProvider = ethers.getDefaultProvider("sepolia");
+     *
+     * const token = "0x0000000000000000000000000000000000000001";
+     * const amount = 5;
+     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+     *
+     * const gas = await provider.estimateCustomBridgeDepositL2Gas(
+     *   ethProvider,
+     *   token,
+     *   amount,
+     *   to,
+     *   from,
+     *   gasPerPubdataByte
+     * );
+     * // gas = 355_704
+     */
+    async estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte) {
+        return super.estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte);
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Provider, types } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const l1BridgeAddress = "0x3e8b2fe58675126ed30d0d12dea2a9bda72d18ae";
+     * const l2BridgeAddress = "0x681a1afdc2e06776816386500d2d461a6c96cb45";
+     * const token = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+     * const amount = 5;
+     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
+     * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
+     * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
+     * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
+     * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
+     * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
+     * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
+     * 00000000000000000000000000000000012";
+     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+     * const l2Value = 0;
+     *
+     * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+     *   provider,
+     *   l1BridgeAddress,
+     *   l2BridgeAddress,
+     *   token,
+     *   amount,
+     *   to,
+     *   bridgeData,
+     *   from,
+     *   gasPerPubdataByte,
+     *   l2Value
+     * );
+     * // gas = 683_830
+     */
+    async estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value) {
+        return super.estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value);
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
      * import { Provider, types } from "zksync-ethers";
      *
      * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -1686,6 +1869,13 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
      */
     async estimateL1ToL2Execute(transaction) {
         return super.estimateL1ToL2Execute(transaction);
+    }
+    getRpcError(payload, _error) {
+        const { error } = _error;
+        const message = _error.error.message ?? 'Execution reverted';
+        const code = _error.error.code ?? 0;
+        // @ts-ignore
+        return (0, ethers_2.makeError)(message, code, { payload, error });
     }
     async _send(payload) {
         const request = this._getConnection();
@@ -1713,15 +1903,15 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
     static getDefaultProvider(zksyncNetwork = types_1.Network.Localhost) {
         switch (zksyncNetwork) {
             case types_1.Network.Localhost:
-                return new Provider('http://localhost:3050');
+                return new Provider('http://127.0.0.1:3050');
             case types_1.Network.Sepolia:
                 return new Provider('https://sepolia.era.zksync.dev');
             case types_1.Network.Mainnet:
                 return new Provider('https://mainnet.era.zksync.io');
             case types_1.Network.EraTestNode:
-                return new Provider('http://localhost:8011');
+                return new Provider('http://127.0.0.1:8011');
             default:
-                return new Provider('http://localhost:3050');
+                return new Provider('http://127.0.0.1:3050');
         }
     }
 }
@@ -2523,6 +2713,78 @@ class BrowserProvider extends JsonRpcApiProvider(ethers_1.ethers.BrowserProvider
      */
     async getContractAccountInfo(address) {
         return super.getContractAccountInfo(address);
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Provider, utils, types } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const provider = new BrowserProvider(window.ethereum);
+     * const ethProvider = ethers.getDefaultProvider("sepolia");
+     *
+     * const token = "0x0000000000000000000000000000000000000001";
+     * const amount = 5;
+     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+     *
+     * const gas = await provider.estimateCustomBridgeDepositL2Gas(
+     *   ethProvider,
+     *   token,
+     *   amount,
+     *   to,
+     *   from,
+     *   gasPerPubdataByte
+     * );
+     * // gas = 355_704
+     */
+    async estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte) {
+        return super.estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte);
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Provider, types } from "zksync-ethers";
+     *
+     * const provider = new BrowserProvider(window.ethereum);
+     * const l1BridgeAddress = "0x3e8b2fe58675126ed30d0d12dea2a9bda72d18ae";
+     * const l2BridgeAddress = "0x681a1afdc2e06776816386500d2d461a6c96cb45";
+     * const token = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+     * const amount = 5;
+     * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const bridgeData = "0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000
+     * 0000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000016000000000000000000000
+     * 000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000020000000000
+     * 000000000000000000000000000000000000000000000000000000543726f776e0000000000000000000000000000000000000000000000000000
+     * 000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000
+     * 0000000000020000000000000000000000000000000000000000000000000000000000000000543726f776e000000000000000000000000000000
+     * 000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000
+     * 00000000000000000000000000000000012";
+     * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
+     * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+     * const l2Value = 0;
+     *
+     * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+     *   provider,
+     *   l1BridgeAddress,
+     *   l2BridgeAddress,
+     *   token,
+     *   amount,
+     *   to,
+     *   bridgeData,
+     *   from,
+     *   gasPerPubdataByte,
+     *   l2Value
+     * );
+     * // gas = 683_830
+     */
+    async estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value) {
+        return super.estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value);
     }
     /**
      * @inheritDoc

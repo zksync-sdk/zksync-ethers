@@ -17,8 +17,8 @@ declare const Wallet_base: {
         }>;
         _fillCustomData(data: import("./types").Eip712Meta): import("./types").Eip712Meta;
         withdraw(transaction: {
-            token: string;
             amount: BigNumberish;
+            token: string;
             to?: string | undefined;
             bridgeAddress?: string | undefined;
             paymasterParams?: PaymasterParams | undefined;
@@ -116,11 +116,6 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            bridgeAddress?: string | undefined;
-            approveERC20?: boolean | undefined;
-            approveBaseERC20?: boolean | undefined;
-            l2GasLimit?: BigNumberish | undefined;
-            gasPerPubdataByte?: BigNumberish | undefined;
             /**
              * @inheritDoc
              *
@@ -136,8 +131,13 @@ declare const Wallet_base: {
              * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
              *
              * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const finalizeWithdrawTx = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
+             * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
              */
+            bridgeAddress?: string | undefined;
+            approveERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
             approveOverrides?: ethers.Overrides | undefined;
@@ -158,7 +158,23 @@ declare const Wallet_base: {
             overrides?: ethers.Overrides | undefined;
             approveOverrides?: ethers.Overrides | undefined;
             approveBaseOverrides?: ethers.Overrides | undefined;
-            customBridgeData?: BytesLike | undefined;
+            customBridgeData?: BytesLike | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
+             * const claimFailedDepositTx = await wallet.claimFailedDeposit(FAILED_DEPOSIT_HASH);
+             */
         }): Promise<PriorityOpResponse>;
         _depositETHToETHBasedChain(transaction: {
             token: string;
@@ -281,22 +297,6 @@ declare const Wallet_base: {
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
-            /**
-             * Returns `ethers.Wallet` object with the same private key.
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const ethWallet = wallet.ethWallet();
-             */
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
         }): Promise<{
@@ -385,6 +385,7 @@ declare const Wallet_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
         claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
@@ -983,6 +984,24 @@ export declare class Wallet extends Wallet_base {
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
     finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Wallet, Provider, types, utils } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const ethProvider = ethers.getDefaultProvider("sepolia");
+     * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+     *
+     * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+     * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
+     */
+    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
     /**
      * @inheritDoc
      *

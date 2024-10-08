@@ -544,6 +544,26 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
      *
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+     * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
+     */
+    async getFinalizeWithdrawalParams(withdrawalHash, index = 0) {
+        return super.getFinalizeWithdrawalParams(withdrawalHash, index);
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Wallet, Provider, types, utils } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const ethProvider = ethers.getDefaultProvider("sepolia");
+     * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+     *
+     * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const finalizeWithdrawTx = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
      */
     async finalizeWithdrawal(withdrawalHash, index = 0, overrides) {

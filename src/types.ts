@@ -1,6 +1,7 @@
 import {
   assert,
   assertArgument,
+  AddressLike,
   BigNumberish,
   BytesLike,
   defineProperties,
@@ -214,14 +215,18 @@ export class TransactionResponse extends ethers.TransactionResponse {
    * @param confirmations The number of confirmation blocks. Defaults to 1.
    * @returns A promise that resolves to the transaction receipt.
    */
-  override async wait(confirmations?: number): Promise<TransactionReceipt> {
+  override async wait(
+    confirmations?: number,
+    timeout?: number
+  ): Promise<TransactionReceipt> {
+    timeout ??= 500;
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const receipt = (await super.wait(confirmations)) as TransactionReceipt;
       if (receipt && receipt.blockNumber) {
         return receipt;
       }
-      await sleep(500);
+      await sleep(timeout);
     }
   }
 
@@ -1037,3 +1042,13 @@ export interface SmartAccountSigner {
   /** Custom method for populating transaction requests. */
   transactionBuilder?: TransactionBuilder;
 }
+
+export type FinalizeL1DepositParamsStruct = {
+  chainId: BigNumberish;
+  l2BatchNumber: BigNumberish;
+  l2MessageIndex: BigNumberish;
+  l2Sender: AddressLike;
+  l2TxNumberInBatch: BigNumberish;
+  message: BytesLike;
+  merkleProof: BytesLike[];
+};

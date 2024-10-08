@@ -9,6 +9,7 @@ import {
   PriorityQueueType,
   Transaction,
   TransactionLike,
+  TransactionReceipt,
   TransactionRequest,
 } from './types';
 import {Provider} from './provider';
@@ -152,6 +153,12 @@ export const NONCE_HOLDER_ADDRESS: Address =
  */
 export const L1_TO_L2_ALIAS_OFFSET: Address =
   '0x1111000000000000000000000000000000001111';
+
+export const L2_ASSET_ROUTER_ADDRESS: Address =
+  '0x0000000000000000000000000000000000010003';
+
+export const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address =
+  '0x0000000000000000000000000000000000010004';
 
 /**
  * The EIP1271 magic value used for signature validation in smart contracts.
@@ -333,7 +340,7 @@ export function getHashedL2ToL1Msg(
  * const deploymentInfo = utils.getDeployedContracts(receipt as ethers.TransactionReceipt);
  */
 export function getDeployedContracts(
-  receipt: ethers.TransactionReceipt
+  receipt: TransactionReceipt
 ): DeploymentInfo[] {
   const addressBytesLen = 40;
   return (
@@ -1345,6 +1352,8 @@ export async function isTypedDataSignatureCorrect(
 }
 
 /**
+ * @deprecated In favor of {@link provider.estimateDefaultBridgeDepositL2Gas}
+ *
  * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
  *
  * @param providerL1 The Ethers provider for the L1 network.
@@ -1372,7 +1381,7 @@ export async function isTypedDataSignatureCorrect(
  * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
  * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
  *
- * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+ * const gas = await utils.estimateDefaultBridgeDepositL2Gas(
  *   ethProvider,
  *   provider,
  *   token,
@@ -1396,6 +1405,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
   // due to storage slot aggregation, the gas estimation will depend on the address
   // and so estimation for the zero address may be smaller than for the sender.
   from ??= ethers.Wallet.createRandom().address;
+  token = isAddressEq(token, LEGACY_ETH_ADDRESS) ? ETH_ADDRESS_IN_CONTRACTS : token;
   if (await providerL2.isBaseToken(token)) {
     return await providerL2.estimateL1ToL2Execute({
       contractAddress: to,
@@ -1416,7 +1426,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
       providerL2,
       l1BridgeAddress,
       l2BridgeAddress,
-      isAddressEq(token, LEGACY_ETH_ADDRESS) ? ETH_ADDRESS_IN_CONTRACTS : token,
+      token,
       amount,
       to,
       bridgeData,
@@ -1450,6 +1460,8 @@ export function scaleGasLimit(gasLimit: bigint): bigint {
 }
 
 /**
+ * @deprecated In favor of {@link provider.estimateCustomBridgeDepositL2Gas}
+ *
  * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
  *
  * @param providerL2 The ZKsync provider for the L2 network.

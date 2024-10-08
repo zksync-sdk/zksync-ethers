@@ -160,7 +160,7 @@ class ContractFactory extends ethers_1.ethers.ContractFactory {
      */
     async deploy(...args) {
         const contract = await (await super.deploy(...args)).waitForDeployment();
-        const deployTxReceipt = await this.runner?.provider?.getTransactionReceipt(contract.deploymentTransaction().hash);
+        const deployTxReceipt = (await this.runner?.provider?.getTransactionReceipt(contract.deploymentTransaction().hash));
         const deployedAddresses = (0, utils_1.getDeployedContracts)(deployTxReceipt).map(info => info.deployedAddress);
         const contractWithCorrectAddress = new ethers_1.ethers.Contract(deployedAddresses[deployedAddresses.length - 1], contract.interface.fragments, contract.runner);
         contractWithCorrectAddress.deploymentTransaction = () => contract.deploymentTransaction();

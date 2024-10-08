@@ -1,5 +1,5 @@
 import { BigNumberish, BytesLike, ethers, SignatureLike } from 'ethers';
-import { Address, DeploymentInfo, EthereumSignature, PriorityOpTree, PriorityQueueType, Transaction, TransactionLike, TransactionRequest } from './types';
+import { Address, DeploymentInfo, EthereumSignature, PriorityOpTree, PriorityQueueType, Transaction, TransactionLike, TransactionReceipt, TransactionRequest } from './types';
 import { Provider } from './provider';
 export * from './paymaster-utils';
 export * from './smart-account-utils';
@@ -100,6 +100,8 @@ export declare const NONCE_HOLDER_ADDRESS: Address;
  * @constant
  */
 export declare const L1_TO_L2_ALIAS_OFFSET: Address;
+export declare const L2_ASSET_ROUTER_ADDRESS: Address;
+export declare const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address;
 /**
  * The EIP1271 magic value used for signature validation in smart contracts.
  * This predefined constant serves as a standardized indicator to signal successful
@@ -236,7 +238,7 @@ export declare function getHashedL2ToL1Msg(sender: Address, msg: BytesLike, txNu
  * const receipt = await provider.getTransactionReceipt(deployTx);
  * const deploymentInfo = utils.getDeployedContracts(receipt as ethers.TransactionReceipt);
  */
-export declare function getDeployedContracts(receipt: ethers.TransactionReceipt): DeploymentInfo[];
+export declare function getDeployedContracts(receipt: TransactionReceipt): DeploymentInfo[];
 /**
  * Generates a future-proof contract address using a salt plus bytecode, allowing the determination of an address before deployment.
  *
@@ -634,6 +636,8 @@ export declare function isMessageSignatureCorrect(provider: Provider, address: s
  */
 export declare function isTypedDataSignatureCorrect(provider: Provider, address: string, domain: ethers.TypedDataDomain, types: Record<string, Array<ethers.TypedDataField>>, value: Record<string, any>, signature: SignatureLike): Promise<boolean>;
 /**
+ * @deprecated In favor of {@link provider.estimateDefaultBridgeDepositL2Gas}
+ *
  * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
  *
  * @param providerL1 The Ethers provider for the L1 network.
@@ -661,7 +665,7 @@ export declare function isTypedDataSignatureCorrect(provider: Provider, address:
  * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
  * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
  *
- * const gas = await utils.estimateCustomBridgeDepositL2Gas(
+ * const gas = await utils.estimateDefaultBridgeDepositL2Gas(
  *   ethProvider,
  *   provider,
  *   token,
@@ -690,6 +694,8 @@ export declare function estimateDefaultBridgeDepositL2Gas(providerL1: ethers.Pro
  */
 export declare function scaleGasLimit(gasLimit: bigint): bigint;
 /**
+ * @deprecated In favor of {@link provider.estimateCustomBridgeDepositL2Gas}
+ *
  * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
  *
  * @param providerL2 The ZKsync provider for the L2 network.

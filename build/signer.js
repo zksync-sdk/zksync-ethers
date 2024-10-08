@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.L1VoidSigner = exports.L2VoidSigner = exports.L1Signer = exports.Signer = exports.EIP712Signer = exports.EIP712_TYPES = void 0;
+exports.L1VoidSigner = exports.VoidSigner = exports.L2VoidSigner = exports.L1Signer = exports.Signer = exports.EIP712Signer = exports.EIP712_TYPES = void 0;
 const ethers_1 = require("ethers");
 const utils_1 = require("./utils");
 const adapters_1 = require("./adapters");
@@ -556,8 +556,8 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
             tx.type === utils_1.EIP712_TX_TYPE ||
             tx.customData) {
             const address = await this.getAddress();
-            const from = !tx.from ? address : await ethers_1.ethers.resolveAddress(tx.from);
-            if (!(0, utils_1.isAddressEq)(from, address)) {
+            tx.from ?? (tx.from = address);
+            if (!(0, utils_1.isAddressEq)(await ethers_1.ethers.resolveAddress(tx.from), address)) {
                 throw new Error('Transaction `from` address mismatch!');
             }
             const zkTx = {
@@ -571,7 +571,7 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
                 chainId: tx.chainId ?? (await this.provider.getNetwork()).chainId,
                 to: await ethers_1.ethers.resolveAddress(tx.to),
                 customData: this._fillCustomData(tx.customData ?? {}),
-                from,
+                from: address,
             };
             zkTx.customData ?? (zkTx.customData = {});
             zkTx.customData.customSignature = await this.eip712.sign(zkTx);
@@ -585,7 +585,7 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
         if (tx.gasPrice && (tx.maxFeePerGas || tx.maxPriorityFeePerGas)) {
             throw new Error('Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!');
         }
-        if (this.providerL2) {
+        if (!this.providerL2) {
             throw new Error('Initialize provider L2');
         }
         if (!tx.gasLimit ||
@@ -1127,6 +1127,26 @@ class L1Signer extends (0, adapters_1.AdapterL1)(ethers_1.ethers.JsonRpcSigner) 
      * );
      *
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+     * const params = await signer.getFinalizeWithdrawalParams(WITHDRAWAL_HASH);
+     */
+    async getFinalizeWithdrawalParams(withdrawalHash, index = 0) {
+        return super.getFinalizeWithdrawalParams(withdrawalHash, index);
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Provider, L1Signer, types } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+     * const signer = L1Signer.from(
+     *     await browserProvider.getSigner(),
+     *     Provider.getDefaultProvider(types.Network.Sepolia)
+     * );
+     *
+     * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const finalizeWithdrawTx = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
      */
     async finalizeWithdrawal(withdrawalHash, index = 0, overrides) {
@@ -1343,6 +1363,8 @@ class L1Signer extends (0, adapters_1.AdapterL1)(ethers_1.ethers.JsonRpcSigner) 
 exports.L1Signer = L1Signer;
 /* c8 ignore stop */
 /**
+ * @deprecated In favor of {@link VoidSigner}
+ *
  * A `L2VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
  *
  * @see {@link L1VoidSigner} for L1 operations.
@@ -1400,7 +1422,7 @@ class L2VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner)
         if ((!tx.type || tx.type !== utils_1.EIP712_TX_TYPE) && !tx.customData) {
             return (await super.populateTransaction(tx));
         }
-        tx.type = utils_1.EIP712_TX_TYPE;
+        tx.type = 2;
         const populated = (await super.populateTransaction(tx));
         populated.type = utils_1.EIP712_TX_TYPE;
         populated.value ?? (populated.value = 0);
@@ -1411,12 +1433,91 @@ class L2VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner)
         }
         return populated;
     }
+    async sendTransaction(tx) {
+        const populated = await this.populateTransaction(tx);
+        return this.provider.broadcastTransaction(await this.signTransaction(populated));
+    }
 }
 exports.L2VoidSigner = L2VoidSigner;
 /**
+ * A `VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
+ *
+ * @see {@link L1VoidSigner} for L1 operations.
+ */
+class VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner) {
+    _signerL2() {
+        return this;
+    }
+    _providerL2() {
+        return this.provider;
+    }
+    /**
+     * Connects to the L2 network using the `provider`.
+     *
+     * @param provider The provider instance for connecting to a L2 network.
+     *
+     * @example
+     *
+     * import { Provider, L2VoidSigner, types } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     *
+     * let signer = new VoidSigner("<ADDRESS>");
+     * signer = signer.connect(provider);
+     */
+    connect(provider) {
+        return new VoidSigner(this.address, provider);
+    }
+    /**
+     * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
+     * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
+     * Any other fields that are not set will be prepared by this method.
+     *
+     * @param tx The transaction request that needs to be populated.
+     *
+     * @example
+     *
+     * import { Provider, VoidSigner, Wallet, types } from "zksync-ethers";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const signer = new VoidSigner("<ADDRESS>", provider);
+     *
+     * const populatedTx = await signer.populateTransaction({
+     *   to: Wallet.createRandom().address,
+     *   value: 7_000_000n,
+     *   maxFeePerGas: 3_500_000_000n,
+     *   maxPriorityFeePerGas: 2_000_000_000n,
+     *   customData: {
+     *     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+     *     factoryDeps: [],
+     *   },
+     * });
+     */
+    async populateTransaction(tx) {
+        if ((!tx.type || tx.type !== utils_1.EIP712_TX_TYPE) && !tx.customData) {
+            return (await super.populateTransaction(tx));
+        }
+        tx.type = 2;
+        const populated = (await super.populateTransaction(tx));
+        populated.type = utils_1.EIP712_TX_TYPE;
+        populated.value ?? (populated.value = 0);
+        populated.data ?? (populated.data = '0x');
+        populated.customData = this._fillCustomData(tx.customData ?? {});
+        if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
+            populated.gasPrice = await this.provider.getGasPrice();
+        }
+        return populated;
+    }
+    async sendTransaction(tx) {
+        const populated = await this.populateTransaction(tx);
+        return this.provider.broadcastTransaction(await this.signTransaction(populated));
+    }
+}
+exports.VoidSigner = VoidSigner;
+/**
  * A `L1VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L1 operations.
  *
- * @see {@link L2VoidSigner} for L2 operations.
+ * @see {@link VoidSigner} for L2 operations.
  */
 class L1VoidSigner extends (0, adapters_1.AdapterL1)(ethers_1.ethers.VoidSigner) {
     _providerL2() {

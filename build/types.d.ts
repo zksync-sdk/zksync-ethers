@@ -1,4 +1,4 @@
-import { BigNumberish, BytesLike, ethers, TransactionRequest as EthersTransactionRequest } from 'ethers';
+import { AddressLike, BigNumberish, BytesLike, ethers, TransactionRequest as EthersTransactionRequest } from 'ethers';
 import { Provider } from './provider';
 /** 0x-prefixed, hex encoded, ethereum account address. */
 export type Address = string;
@@ -53,14 +53,6 @@ export type Eip712Meta = {
     customSignature?: BytesLike;
     /** Parameters for configuring the custom paymaster for the transaction. */
     paymasterParams?: PaymasterParams;
-    /** Merkle proof for xL2 transactions */
-    merkleProof?: BytesLike;
-    /** Full fee for xL2 transactions */
-    fullFee?: BigNumberish;
-    /** to mint value */
-    toMint?: BigNumberish;
-    /** refund recipient */
-    refundRecipient?: BigNumberish;
 };
 /**
  * Specifies a specific block. This can be represented by:
@@ -161,7 +153,7 @@ export declare class TransactionResponse extends ethers.TransactionResponse {
      * @param confirmations The number of confirmation blocks. Defaults to 1.
      * @returns A promise that resolves to the transaction receipt.
      */
-    wait(confirmations?: number): Promise<TransactionReceipt>;
+    wait(confirmations?: number, timeout?: number): Promise<TransactionReceipt>;
     getTransaction(): Promise<TransactionResponse>;
     replaceableTransaction(startBlock: number): TransactionResponse;
     getBlock(): Promise<Block>;
@@ -653,3 +645,12 @@ export interface SmartAccountSigner {
     /** Custom method for populating transaction requests. */
     transactionBuilder?: TransactionBuilder;
 }
+export type FinalizeL1DepositParamsStruct = {
+    chainId: BigNumberish;
+    l2BatchNumber: BigNumberish;
+    l2MessageIndex: BigNumberish;
+    l2Sender: AddressLike;
+    l2TxNumberInBatch: BigNumberish;
+    message: BytesLike;
+    merkleProof: BytesLike[];
+};

@@ -1,4 +1,4 @@
-import { BaseContract, ContractDeployTransaction, ContractMethodArgs, ContractRunner, ContractTransactionResponse, ethers, Interface, InterfaceAbi } from 'ethers';
+import { BaseContract, BytesLike, ContractDeployTransaction, ContractMethodArgs, ContractRunner, ContractTransactionResponse, ethers, Interface, InterfaceAbi } from 'ethers';
 import { DeploymentType } from './types';
 export { Contract } from 'ethers';
 /**
@@ -17,7 +17,7 @@ export declare class ContractFactory<A extends Array<any> = Array<any>, I = Base
      * @param [deploymentType] The deployment type, defaults to 'create'.
      */
     constructor(abi: Interface | InterfaceAbi, bytecode: ethers.BytesLike, runner?: ContractRunner, deploymentType?: DeploymentType);
-    private encodeCalldata;
+    protected encodeCalldata(salt: BytesLike, bytecodeHash: BytesLike, constructorCalldata: BytesLike): string;
     /**
      * Checks if the provided overrides are appropriately configured for a specific deployment type.
      * @param overrides The overrides to be checked.

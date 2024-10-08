@@ -72,14 +72,15 @@ class TransactionResponse extends ethers_1.ethers.TransactionResponse {
      * @param confirmations The number of confirmation blocks. Defaults to 1.
      * @returns A promise that resolves to the transaction receipt.
      */
-    async wait(confirmations) {
+    async wait(confirmations, timeout) {
+        timeout ?? (timeout = 500);
         // eslint-disable-next-line no-constant-condition
         while (true) {
             const receipt = (await super.wait(confirmations));
             if (receipt && receipt.blockNumber) {
                 return receipt;
             }
-            await (0, utils_1.sleep)(500);
+            await (0, utils_1.sleep)(timeout);
         }
     }
     async getTransaction() {
