@@ -324,13 +324,13 @@ class Transaction extends ethers_1.ethers.Transaction {
                 result.signature = ethers_1.Signature.from(tx.signature);
             result.accessList = null;
             if (tx.from) {
-                if (tx.type === utils_1.INTEROP_TX_TYPE) {
+                if (tx.type !== utils_1.INTEROP_TX_TYPE) {
                     (0, ethers_1.assertArgument)(result.isSigned(), 'unsigned transaction cannot define from', 'tx', tx);
                 }
                 (0, ethers_1.assertArgument)((0, utils_1.isAddressEq)(result.from, tx.from), 'from mismatch', 'tx', tx);
             }
             if (tx.hash) {
-                if (tx.type === utils_1.INTEROP_TX_TYPE) {
+                if (tx.type !== utils_1.INTEROP_TX_TYPE) {
                     (0, ethers_1.assertArgument)(result.isSigned(), 'unsigned transaction cannot define hash', 'tx', tx);
                     (0, ethers_1.assertArgument)(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
                 }

@@ -525,7 +525,7 @@ export class Transaction extends ethers.Transaction {
       result.accessList = null;
 
       if (tx.from) {
-        if (tx.type === INTEROP_TX_TYPE) {
+        if (tx.type !== INTEROP_TX_TYPE) {
           assertArgument(
             result.isSigned(),
             'unsigned transaction cannot define from',
@@ -542,7 +542,7 @@ export class Transaction extends ethers.Transaction {
       }
 
       if (tx.hash) {
-        if (tx.type === INTEROP_TX_TYPE) {
+        if (tx.type !== INTEROP_TX_TYPE) {
           assertArgument(
             result.isSigned(),
             'unsigned transaction cannot define hash',
