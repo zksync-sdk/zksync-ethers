@@ -481,10 +481,20 @@ function serializeEip712(transaction, signature) {
     else {
         fields.push([]);
     }
-    return ethers_1.ethers.concat([
-        new Uint8Array([exports.EIP712_TX_TYPE]),
-        ethers_1.ethers.encodeRlp(fields),
-    ]);
+    if (meta.merkleProof) {
+        fields.push(meta.merkleProof);
+    }
+    if (meta.fullFee) {
+        fields.push(meta.fullFee);
+    }
+    if (meta.toMint) {
+        fields.push(meta.toMint);
+    }
+    if (meta.refundRecipient) {
+        fields.push(meta.refundRecipient);
+    }
+    const txType = transaction.type || exports.EIP712_TX_TYPE;
+    return ethers_1.ethers.concat([new Uint8Array([txType]), ethers_1.ethers.encodeRlp(fields)]);
 }
 exports.serializeEip712 = serializeEip712;
 /**

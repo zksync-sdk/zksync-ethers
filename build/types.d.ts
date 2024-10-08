@@ -53,6 +53,14 @@ export type Eip712Meta = {
     customSignature?: BytesLike;
     /** Parameters for configuring the custom paymaster for the transaction. */
     paymasterParams?: PaymasterParams;
+    /** Merkle proof for xL2 transactions */
+    merkleProof?: BytesLike;
+    /** Full fee for xL2 transactions */
+    fullFee?: BigNumberish;
+    /** to mint value */
+    toMint?: BigNumberish;
+    /** refund recipient */
+    refundRecipient?: BigNumberish;
 };
 /**
  * Specifies a specific block. This can be represented by:
