@@ -177,6 +177,13 @@ export const EIP1271_MAGIC_VALUE = '0x1626ba7e';
 export const EIP712_TX_TYPE = 0x71;
 
 /**
+ * Represents an interoperability transaction type.
+ *
+ * @constant
+ */
+export const INTEROP_TX_TYPE = 0xFD;
+
+/**
  * Represents a priority transaction operation on L2.
  *
  * @constant

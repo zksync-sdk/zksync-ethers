@@ -116,23 +116,6 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
-             */
             bridgeAddress?: string | undefined;
             approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
@@ -158,23 +141,7 @@ declare const Wallet_base: {
             overrides?: ethers.Overrides | undefined;
             approveOverrides?: ethers.Overrides | undefined;
             approveBaseOverrides?: ethers.Overrides | undefined;
-            customBridgeData?: BytesLike | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-             * const claimFailedDepositTx = await wallet.claimFailedDeposit(FAILED_DEPOSIT_HASH);
-             */
+            customBridgeData?: BytesLike | undefined;
         }): Promise<PriorityOpResponse>;
         _depositETHToETHBasedChain(transaction: {
             token: string;
@@ -215,22 +182,7 @@ declare const Wallet_base: {
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
-        }): Promise<any>; /**
-         * @inheritDoc
-         *
-         * @example
-         *
-         * import { Wallet, Provider, types, utils } from "zksync-ethers";
-         * import { ethers } from "ethers";
-         *
-         * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-         *
-         * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-         * const ethProvider = ethers.getDefaultProvider("sepolia");
-         * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-         *
-         * const l2BridgeContracts = await wallet.getL2BridgeContracts();
-         */
+        }): Promise<any>;
         _getDepositNonBaseTokenToNonETHBasedChainTx(transaction: {
             token: string;
             amount: BigNumberish;
@@ -382,7 +334,30 @@ declare const Wallet_base: {
             to?: string | undefined;
             bridgeAddress?: string | undefined;
             customBridgeData?: BytesLike | undefined;
-            gasPerPubdataByte?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined; /**
+             * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
+             * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
+             * Any other fields that are not set will be prepared by this method.
+             *
+             * @param tx The transaction request that needs to be populated.
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const populatedTx = await wallet.populateTransaction({
+             *   type: utils.EIP712_TX_TYPE,
+             *   to: RECEIVER,
+             *   value: 7_000_000_000n,
+             * });
+             */
             overrides?: ethers.Overrides | undefined;
         }): Promise<FullDepositFee>;
         getPriorityOpConfirmation(txHash: string, index?: number): Promise<{

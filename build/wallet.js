@@ -1234,7 +1234,10 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      */
     async signTransaction(tx) {
         const populated = await this.populateTransaction(tx);
-        if (populated.type !== utils_1.EIP712_TX_TYPE) {
+        if (populated.type === utils_1.INTEROP_TX_TYPE) {
+            return (0, utils_1.serializeEip712)(populated);
+        }
+        else if (populated.type !== utils_1.EIP712_TX_TYPE) {
             return await super.signTransaction(populated);
         }
         populated.customData.customSignature = await this.eip712.sign(populated);
