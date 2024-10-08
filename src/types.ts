@@ -558,14 +558,14 @@ export class Transaction extends ethers.Transaction {
   }
 
   override get serialized(): string {
-    if (!this.customData && this.#type !== EIP712_TX_TYPE) {
+    if (!this.customData && this.#type !== EIP712_TX_TYPE && this.#type !== INTEROP_TX_TYPE) {
       return super.serialized;
     }
     return serializeEip712(this, this.signature!);
   }
 
   override get unsignedSerialized(): string {
-    if (!this.customData && this.type !== EIP712_TX_TYPE) {
+    if (!this.customData && this.type !== EIP712_TX_TYPE && this.type !== INTEROP_TX_TYPE) {
       return super.unsignedSerialized;
     }
     return serializeEip712(this);
@@ -590,13 +590,13 @@ export class Transaction extends ethers.Transaction {
     from: string;
     signature: Signature;
   } {
-    return this.#type === EIP712_TX_TYPE
+    return this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE
       ? this.customData?.customSignature !== null
       : super.isSigned();
   }
 
   override get hash(): string | null {
-    if (this.#type === EIP712_TX_TYPE) {
+    if (this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE) {
       return this.customData?.customSignature !== null
         ? eip712TxHash(this)
         : null;
