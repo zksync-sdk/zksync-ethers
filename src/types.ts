@@ -502,8 +502,8 @@ export class Transaction extends ethers.Transaction {
       }
     } else {
       const result = new Transaction();
-      if (tx.type === EIP712_TX_TYPE) {
-        result.type = EIP712_TX_TYPE;
+      if (tx.type === EIP712_TX_TYPE || tx.type === INTEROP_TX_TYPE) {
+        result.type = tx.type;
         result.customData = tx.customData;
         result.from = tx.from!;
       }
