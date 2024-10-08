@@ -276,6 +276,9 @@ class Transaction extends ethers_1.ethers.Transaction {
             case 'eip-712':
                 __classPrivateFieldSet(this, _Transaction_type, utils_1.EIP712_TX_TYPE, "f");
                 break;
+            case utils_1.INTEROP_TX_TYPE:
+                __classPrivateFieldSet(this, _Transaction_type, utils_1.INTEROP_TX_TYPE, "f");
+                break;
             default:
                 super.type = value;
         }

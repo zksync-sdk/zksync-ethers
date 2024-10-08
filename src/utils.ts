@@ -721,7 +721,7 @@ export function parseEip712(payload: ethers.BytesLike): TransactionLike {
   const bytes = ethers.getBytes(payload);
   const raw = ethers.decodeRlp(bytes.slice(1)) as string[];
   const transaction: TransactionLike = {
-    type: EIP712_TX_TYPE,
+    type: bytes[0] === INTEROP_TX_TYPE ? INTEROP_TX_TYPE : EIP712_TX_TYPE,
     nonce: Number(handleNumber(raw[0])),
     maxPriorityFeePerGas: handleNumber(raw[1]),
     maxFeePerGas: handleNumber(raw[2]),

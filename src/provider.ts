@@ -62,6 +62,7 @@ import {
   CONTRACT_DEPLOYER,
   sleep,
   EIP712_TX_TYPE,
+  INTEROP_TX_TYPE,
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   BOOTLOADER_FORMAL_ADDRESS,
   ETH_ADDRESS_IN_CONTRACTS,
@@ -1041,7 +1042,7 @@ export function JsonRpcApiProvider<
       });
 
       const tx = Transaction.from(signedTx);
-      if (tx.hash !== hash) {
+      if (tx.hash !== hash && tx.type !== INTEROP_TX_TYPE) {
         throw new Error('@TODO: the returned hash did not match!');
       }
 

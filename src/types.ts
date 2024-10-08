@@ -487,6 +487,9 @@ export class Transaction extends ethers.Transaction {
       case 'eip-712':
         this.#type = EIP712_TX_TYPE;
         break;
+      case INTEROP_TX_TYPE:
+        this.#type = INTEROP_TX_TYPE;
+        break;
       default:
         super.type = value;
     }

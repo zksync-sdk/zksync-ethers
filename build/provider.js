@@ -763,7 +763,7 @@ function JsonRpcApiProvider(ProviderType) {
                 network: this.getNetwork(),
             });
             const tx = types_1.Transaction.from(signedTx);
-            if (tx.hash !== hash) {
+            if (tx.hash !== hash && tx.type !== utils_1.INTEROP_TX_TYPE) {
                 throw new Error('@TODO: the returned hash did not match!');
             }
             return this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);

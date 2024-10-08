@@ -555,6 +555,9 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
         disableCcipRead: boolean;
         ccipReadFetch(tx: ethers.PerformActionTransaction, calldata: string, urls: string[]): Promise<string | null>;
         getBlockNumber(): Promise<number>;
+        /**
+         * Returns an estimate (best guess) of the gas price to use in a transaction.
+         */
         _getAddress(address: ethers.AddressLike): string | Promise<string>;
         _getFilter(filter: ethers.Filter | ethers.FilterByBlockHash): ethers.PerformActionFilter | Promise<ethers.PerformActionFilter>;
         _getTransactionRequest(_request: ethers.TransactionRequest): ethers.PerformActionTransaction | Promise<ethers.PerformActionTransaction>;
@@ -1144,6 +1147,9 @@ declare const Provider_base: {
         disableCcipRead: boolean;
         ccipReadFetch(tx: ethers.PerformActionTransaction, calldata: string, urls: string[]): Promise<string | null>;
         getBlockNumber(): Promise<number>;
+        /**
+         * Returns an estimate (best guess) of the gas price to use in a transaction.
+         */
         _getAddress(address: ethers.AddressLike): string | Promise<string>;
         _getFilter(filter: ethers.Filter | ethers.FilterByBlockHash): ethers.PerformActionFilter | Promise<ethers.PerformActionFilter>;
         _getTransactionRequest(_request: ethers.TransactionRequest): ethers.PerformActionTransaction | Promise<ethers.PerformActionTransaction>;
@@ -2589,6 +2595,9 @@ declare const BrowserProvider_base: {
         disableCcipRead: boolean;
         ccipReadFetch(tx: ethers.PerformActionTransaction, calldata: string, urls: string[]): Promise<string | null>;
         getBlockNumber(): Promise<number>;
+        /**
+         * Returns an estimate (best guess) of the gas price to use in a transaction.
+         */
         _getAddress(address: ethers.AddressLike): string | Promise<string>;
         _getFilter(filter: ethers.Filter | ethers.FilterByBlockHash): ethers.PerformActionFilter | Promise<ethers.PerformActionFilter>;
         _getTransactionRequest(_request: ethers.TransactionRequest): ethers.PerformActionTransaction | Promise<ethers.PerformActionTransaction>;
