@@ -1051,28 +1051,6 @@ export function JsonRpcApiProvider<
       );
     }
 
-    async broadcastTransaction2(
-      signedTx: string
-    ): Promise<TransactionResponse> {
-      const {blockNumber, hash} = await resolveProperties({
-        blockNumber: this.getBlockNumber(),
-        hash: this._perform({
-          method: 'broadcastTransaction',
-          signedTransaction: signedTx,
-        }),
-        network: this.getNetwork(),
-      });
-
-      const tx = Transaction.from(signedTx);
-      if (tx.hash !== hash && tx.type !== INTEROP_TX_TYPE) {
-        throw new Error('@TODO: the returned hash did not match!');
-      }
-      // return '0x00';
-      return this._wrapTransactionResponse(<any>tx).replaceableTransaction(
-        blockNumber
-      );
-    }
-
     /**
      * Returns a L2 transaction response from L1 transaction response.
      *

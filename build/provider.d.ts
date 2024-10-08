@@ -431,7 +431,6 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * @returns A promise that resolves with the transaction response.
          */
         broadcastTransaction(signedTx: string): Promise<TransactionResponse>;
-        broadcastTransaction2(signedTx: string): Promise<TransactionResponse>;
         /**
          * Returns a L2 transaction response from L1 transaction response.
          *
@@ -1024,7 +1023,6 @@ declare const Provider_base: {
          * @returns A promise that resolves with the transaction response.
          */
         broadcastTransaction(signedTx: string): Promise<TransactionResponse>;
-        broadcastTransaction2(signedTx: string): Promise<TransactionResponse>;
         /**
          * Returns a L2 transaction response from L1 transaction response.
          *
@@ -2473,7 +2471,6 @@ declare const BrowserProvider_base: {
          * @returns A promise that resolves with the transaction response.
          */
         broadcastTransaction(signedTx: string): Promise<TransactionResponse>;
-        broadcastTransaction2(signedTx: string): Promise<TransactionResponse>;
         /**
          * Returns a L2 transaction response from L1 transaction response.
          *
