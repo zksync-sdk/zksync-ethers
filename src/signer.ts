@@ -895,6 +895,28 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    *
    * @example
    *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const tokenL2 = "0xe1134444211593Cfda9fc9eCc7B43208615556E2";
+   *
+   * console.log(`Token L1 address: ${await wallet.l1TokenAddress(tokenL1)}`);
+   */
+  override async l1TokenAddress(token: Address): Promise<string> {
+    return super.l1TokenAddress(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
    * import { Provider, L1Signer, types } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
