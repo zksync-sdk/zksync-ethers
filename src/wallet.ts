@@ -213,6 +213,28 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * const ethProvider = ethers.getDefaultProvider("sepolia");
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
    *
+   * const tokenL2 = "0xe1134444211593Cfda9fc9eCc7B43208615556E2";
+   *
+   * console.log(`Token L1 address: ${await wallet.l1TokenAddress(tokenL1)}`);
+   */
+  override async l1TokenAddress(token: Address): Promise<string> {
+    return super.l1TokenAddress(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
    * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
    * const tx = await wallet.approveERC20(tokenL1, "10000000");
    *

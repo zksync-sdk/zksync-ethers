@@ -15,6 +15,8 @@ import {
   PAYMASTER,
   L1_CHAIN_URL,
   L2_CHAIN_URL,
+  NON_ETH_BASED_ETH_L2_ADDRESS,
+  DAI_L2,
 } from '../utils';
 
 const {expect} = chai;
@@ -108,6 +110,32 @@ describe('Wallet', () => {
 
     it('should return the L2 DAI address', async () => {
       const result = await wallet.l2TokenAddress(DAI_L1);
+      expect(result).not.to.be.null;
+    });
+  });
+
+  describe('#l1TokenAddress()', () => {
+    if (IS_ETH_BASED) {
+      it('should return the L1 ETH address', async () => {
+        const result = await wallet.l1TokenAddress(utils.L2_BASE_TOKEN_ADDRESS);
+        expect(result).to.be.equal(utils.LEGACY_ETH_ADDRESS);
+      });
+    } else {
+      it('should return the L1 BASE address', async () => {
+        const result = await wallet.l1TokenAddress(utils.L2_BASE_TOKEN_ADDRESS);
+        expect(result).not.to.be.null;
+      });
+
+      it('should return the L1 ETH address', async () => {
+        const result = await wallet.l1TokenAddress(
+          NON_ETH_BASED_ETH_L2_ADDRESS
+        );
+        expect(result).to.be.equal(utils.LEGACY_ETH_ADDRESS);
+      });
+    }
+
+    it('should return the L1 DAI address', async () => {
+      const result = await wallet.l1TokenAddress(DAI_L2);
       expect(result).not.to.be.null;
     });
   });
