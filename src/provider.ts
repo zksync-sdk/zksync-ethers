@@ -609,7 +609,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     try {
       const totalBatchesExecuted =
         await gettersContract.getTotalBatchesExecuted();
-      return totalBatchesExecuted.toNumber(); // Convert BigNumber to a regular number
+      return Number(totalBatchesExecuted.toNumber());
     } catch (error) {
       console.error('Error fetching total batches executed:', error);
       throw new Error(
