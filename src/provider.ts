@@ -23,6 +23,8 @@ import {
   IL2Bridge__factory,
   IL2SharedBridge,
   IL2SharedBridge__factory,
+  IGetters,
+  IGetters__factory,
 } from './typechain';
 import {
   Address,
@@ -65,6 +67,8 @@ import {
   getERC20DefaultBridgeData,
   getERC20BridgeCalldata,
   applyL1ToL2Alias,
+  GETTERS_CONTRACT_ADDRESS,
+  GETTERS_ABI,
 } from './utils';
 import {Signer} from './signer';
 
@@ -529,6 +533,30 @@ export function JsonRpcApiProvider<
       }
 
       return true;
+    }
+
+    /**
+     * Retrieves the total number of executed batches from the Getters contract.
+     *
+     * @returns A Promise that resolves to the total number of executed batches.
+     */
+    public async getTotalBatchesExecuted(): Promise<number> {
+      const gettersContract = new Contract(
+        GETTERS_CONTRACT_ADDRESS,
+        GETTERS_ABI.fragments,
+        this
+      );
+
+      try {
+        const totalBatchesExecuted =
+          await gettersContract.getTotalBatchesExecuted();
+        return totalBatchesExecuted.toNumber(); // Convert BigNumber to a regular number
+      } catch (error) {
+        console.error('Error fetching total batches executed:', error);
+        throw new Error(
+          'Failed to fetch total batches executed from the contract'
+        );
+      }
     }
 
     /**

@@ -6,6 +6,7 @@ export { IContractDeployer__factory } from "./IContractDeployer__factory";
 export { IERC1271__factory } from "./IERC1271__factory";
 export { IERC20__factory } from "./IERC20__factory";
 export { IEthToken__factory } from "./IEthToken__factory";
+export { IGetters__factory } from "./IGetters__factory";
 export { IL1Bridge__factory } from "./IL1Bridge__factory";
 export { IL1ERC20Bridge__factory } from "./IL1ERC20Bridge__factory";
 export { IL1Messenger__factory } from "./IL1Messenger__factory";

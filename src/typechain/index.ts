@@ -6,6 +6,7 @@ export type { IContractDeployer } from "./IContractDeployer";
 export type { IERC1271 } from "./IERC1271";
 export type { IERC20 } from "./IERC20";
 export type { IEthToken } from "./IEthToken";
+export type { IGetters } from "./IGetters";
 export type { IL1Bridge } from "./IL1Bridge";
 export type { IL1ERC20Bridge } from "./IL1ERC20Bridge";
 export type { IL1Messenger } from "./IL1Messenger";
@@ -23,6 +24,7 @@ export { IContractDeployer__factory } from "./factories/IContractDeployer__facto
 export { IERC1271__factory } from "./factories/IERC1271__factory";
 export { IERC20__factory } from "./factories/IERC20__factory";
 export { IEthToken__factory } from "./factories/IEthToken__factory";
+export { IGetters__factory } from "./factories/IGetters__factory";
 export { IL1Bridge__factory } from "./factories/IL1Bridge__factory";
 export { IL1ERC20Bridge__factory } from "./factories/IL1ERC20Bridge__factory";
 export { IL1Messenger__factory } from "./factories/IL1Messenger__factory";
