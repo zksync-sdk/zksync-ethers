@@ -23,7 +23,6 @@ import {
   IL2Bridge__factory,
   IL2SharedBridge,
   IL2SharedBridge__factory,
-  IGetters,
   IGetters__factory,
 } from './typechain';
 import {
@@ -68,7 +67,6 @@ import {
   getERC20BridgeCalldata,
   applyL1ToL2Alias,
   GETTERS_CONTRACT_ADDRESS,
-  GETTERS_ABI,
 } from './utils';
 import {Signer} from './signer';
 
@@ -541,16 +539,15 @@ export function JsonRpcApiProvider<
      * @returns A Promise that resolves to the total number of executed batches.
      */
     public async getTotalBatchesExecuted(): Promise<number> {
-      const gettersContract = new Contract(
+      const gettersContract = IGetters__factory.connect(
         GETTERS_CONTRACT_ADDRESS,
-        GETTERS_ABI.fragments,
         this
       );
 
       try {
         const totalBatchesExecuted =
           await gettersContract.getTotalBatchesExecuted();
-        return totalBatchesExecuted.toNumber(); // Convert BigNumber to a regular number
+        return Number(totalBatchesExecuted);
       } catch (error) {
         console.error('Error fetching total batches executed:', error);
         throw new Error(
