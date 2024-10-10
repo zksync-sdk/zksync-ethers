@@ -12,6 +12,7 @@ import {ConnectionInfo, poll} from '@ethersproject/web';
 import {Ierc20Factory as IERC20Factory} from './typechain/Ierc20Factory';
 import {IEthTokenFactory} from './typechain/IEthTokenFactory';
 import {Il2BridgeFactory as IL2BridgeFactory} from './typechain/Il2BridgeFactory';
+import {IGettersFactory} from './typechain/IGettersFactory';
 import {
   Address,
   BalancesMap,
@@ -55,6 +56,7 @@ import {
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   sleep,
   isAddressEq,
+  GETTERS_CONTRACT_ADDRESS,
 } from './utils';
 import {Signer} from './signer';
 import Formatter = providers.Formatter;
@@ -591,6 +593,29 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       this
     );
     return await sharedBridge.l1TokenAddress(token);
+  }
+
+  /**
+   * Retrieves the total number of executed batches from the Getters contract.
+   *
+   * @returns A Promise that resolves to the total number of executed batches.
+   */
+  public async getTotalBatchesExecuted(): Promise<number> {
+    const gettersContract = IGettersFactory.connect(
+      GETTERS_CONTRACT_ADDRESS,
+      this
+    );
+
+    try {
+      const totalBatchesExecuted =
+        await gettersContract.getTotalBatchesExecuted();
+      return totalBatchesExecuted.toNumber(); // Convert BigNumber to a regular number
+    } catch (error) {
+      console.error('Error fetching total batches executed:', error);
+      throw new Error(
+        'Failed to fetch total batches executed from the contract'
+      );
+    }
   }
 
   /**

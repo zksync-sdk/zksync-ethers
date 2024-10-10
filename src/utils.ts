@@ -28,6 +28,7 @@ import IERC1271ABI from '../abi/IERC1271.json';
 import IL1BridgeABI from '../abi/IL1ERC20Bridge.json';
 import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
+import IGettersABI from '../abi/IGetters.json';
 
 /**
  * The ABI for the `ZKsync` interface.
@@ -82,6 +83,14 @@ export const L2_BRIDGE_ABI = new utils.Interface(IL2BridgeABI);
  * @constant
  */
 export const NONCE_HOLDER_ABI = new utils.Interface(INonceHolderABI);
+
+/**
+ * The ABI for the `IGetters` interface, which is utilized for interacting with
+ * view and pure methods from the GettersFacet on zkSync, including methods such as
+ * `getTotalBatchesExecuted`. This interface is a part of the diamond facet pattern.
+ * @constant
+ */
+export const GETTERS_ABI = new utils.Interface(IGettersABI);
 
 /**
  * The address of the L1 `ETH` token.
@@ -158,6 +167,15 @@ export const ZERO_HASH =
  */
 export const L1_TO_L2_ALIAS_OFFSET =
   '0x1111000000000000000000000000000000001111';
+
+/**
+ * The contract address for the GettersFacet, which provides view and pure methods
+ * for interacting with zkSync state. This contract also implements the diamond loupe pattern
+ * for easier facet management. GettersFacet must never be frozen.
+ * @constant
+ */
+export const GETTERS_CONTRACT_ADDRESS: Address =
+  '0xF3ACF6a03ea4a914B78Ec788624B25ceC37c14A4';
 
 /**
  * The EIP1271 magic value used for signature validation in smart contracts.
