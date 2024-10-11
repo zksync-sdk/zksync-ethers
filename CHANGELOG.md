@@ -1,3 +1,10 @@
+# [6.14.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.13.1...v6.14.0) (2024-10-11)
+
+
+### Features
+
+* **adapter:** add `l1TokenAddress` method ([4243db6](https://github.com/zksync-sdk/zksync-ethers/commit/4243db6f159edc63737dc8f26a81f42c0d4338f8))
+
 ## [6.13.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.13.0...v6.13.1) (2024-10-07)
 
 
