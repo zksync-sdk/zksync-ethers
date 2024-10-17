@@ -551,6 +551,16 @@ export interface FinalizeWithdrawalParams {
     /** The Merkle proof of the inclusion L2 -> L1 message about withdrawal initialization. */
     proof: string[];
 }
+export interface FinalizeWithdrawalParamsWithoutProof {
+    /** The L2 batch number where the withdrawal was processed. */
+    l1BatchNumber: number | null;
+    /** The L2 transaction number in the batch, in which the log was sent. */
+    l2TxNumberInBlock: number | null;
+    /** The L2 withdraw data, stored in an L2 -> L1 message. */
+    message: any;
+    /** The L2 address which sent the log. */
+    sender: string;
+}
 /** Represents storage proof. */
 export interface StorageProof {
     /** Account address associated with the storage proofs. */

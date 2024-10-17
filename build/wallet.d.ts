@@ -52,7 +52,22 @@ declare const Wallet_base: {
         getAllowanceL1(token: string, bridgeAddress?: string | undefined, blockTag?: BlockTag | undefined): Promise<bigint>;
         l2TokenAddress(token: string): Promise<string>;
         approveERC20(token: string, amount: BigNumberish, overrides?: (ethers.Overrides & {
-            bridgeAddress?: string | undefined;
+            bridgeAddress?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * console.log(`Base token: ${await wallet.getBaseToken()}`);
+             */
         }) | undefined): Promise<ethers.TransactionResponse>;
         getBaseCost(params: {
             gasLimit: BigNumberish;
@@ -333,8 +348,7 @@ declare const Wallet_base: {
             token: string;
             to?: string | undefined;
             bridgeAddress?: string | undefined;
-            customBridgeData?: BytesLike | undefined;
-            gasPerPubdataByte?: BigNumberish | undefined; /**
+            customBridgeData?: BytesLike | undefined; /**
              * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
              * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
              * Any other fields that are not set will be prepared by this method.
@@ -358,6 +372,7 @@ declare const Wallet_base: {
              *   value: 7_000_000_000n,
              * });
              */
+            gasPerPubdataByte?: BigNumberish | undefined;
             overrides?: ethers.Overrides | undefined;
         }): Promise<FullDepositFee>;
         getPriorityOpConfirmation(txHash: string, index?: number): Promise<{
@@ -376,6 +391,7 @@ declare const Wallet_base: {
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
         claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
