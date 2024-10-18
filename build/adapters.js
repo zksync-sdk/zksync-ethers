@@ -806,7 +806,10 @@ function AdapterL1(Base) {
         }
         async getFinalizeWithdrawalParamsWithoutProof(withdrawalHash, index = 0) {
             const { log, l1BatchTxId } = await this._getWithdrawalLog(withdrawalHash, index);
-            const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
+            // const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
+            //   withdrawalHash,
+            //   index
+            // );
             const sender = ethers_1.ethers.dataSlice(log.topics[1], 12);
             const message = ethers_1.ethers.AbiCoder.defaultAbiCoder().decode(['bytes'], log.data)[0];
             return {

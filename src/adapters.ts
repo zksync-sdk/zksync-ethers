@@ -1483,10 +1483,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         withdrawalHash,
         index
       );
-      const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
-        withdrawalHash,
-        index
-      );
+      // const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
+      //   withdrawalHash,
+      //   index
+      // );
       const sender = ethers.dataSlice(log.topics[1], 12);
 
       const message = ethers.AbiCoder.defaultAbiCoder().decode(
