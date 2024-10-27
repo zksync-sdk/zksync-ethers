@@ -678,7 +678,7 @@ describe('Wallet', () => {
         } catch (e) {
           expect((e as any).reason).to.include('ERC20: insufficient allowance');
         }
-      }).timeout(10_000);
+      });
 
       it('should return gas estimation for ETH deposit transaction', async () => {
         const token = utils.LEGACY_ETH_ADDRESS;
@@ -702,7 +702,7 @@ describe('Wallet', () => {
           refundRecipient: await wallet.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      }).timeout(10_000);
+      });
 
       it('should return gas estimation for base token deposit transaction', async () => {
         const token = await wallet.getBaseToken();
@@ -726,7 +726,7 @@ describe('Wallet', () => {
           refundRecipient: await wallet.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      }).timeout(10_000);
+      });
 
       it('should return gas estimation for DAI deposit transaction', async () => {
         const token = DAI_L1;
@@ -756,7 +756,7 @@ describe('Wallet', () => {
           refundRecipient: await wallet.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      }).timeout(10_000);
+      });
     }
   });
 
