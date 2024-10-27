@@ -1,3 +1,10 @@
+# [5.10.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.9.2...v5.10.0) (2024-10-27)
+
+
+### Features
+
+* **provider:** add support for provider legacy fetcher ([a658267](https://github.com/zksync-sdk/zksync-ethers/commit/a658267eb92d3ecbf7f6c0ffb81b6756838b08e1))
+
 ## [5.9.2](https://github.com/zksync-sdk/zksync-ethers/compare/v5.9.1...v5.9.2) (2024-08-01)
 
 
