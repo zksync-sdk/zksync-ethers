@@ -61,8 +61,7 @@ import Formatter = providers.Formatter;
 import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
 import {Il2Bridge} from './typechain/Il2Bridge';
 import {Il2SharedBridge} from './typechain/Il2SharedBridge';
-import {Networkish} from '@ethersproject/networks';
-import {deepCopy} from '@ethersproject/properties';
+import {deepCopy} from 'ethers/lib/utils';
 
 let defaultFormatter: Formatter | null = null;
 
@@ -2259,7 +2258,7 @@ export class Web3Provider extends Provider {
    */
   constructor(
     provider: ExternalProvider | JsonRpcFetchFunc,
-    network?: Networkish
+    network?: ethers.providers.Networkish
   ) {
     if (provider === null) {
       throw new Error('Missing provider!');
