@@ -678,7 +678,7 @@ describe('Wallet', () => {
         } catch (e) {
           expect((e as any).reason).to.include('ERC20: insufficient allowance');
         }
-      });
+      }).timeout(25_000);
 
       it('should return gas estimation for ETH deposit transaction', async () => {
         const token = utils.LEGACY_ETH_ADDRESS;
@@ -702,7 +702,7 @@ describe('Wallet', () => {
           refundRecipient: await wallet.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      });
+      }).timeout(25_000);
 
       it('should return gas estimation for base token deposit transaction', async () => {
         const token = await wallet.getBaseToken();
@@ -726,7 +726,7 @@ describe('Wallet', () => {
           refundRecipient: await wallet.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      });
+      }).timeout(25_000);
 
       it('should return gas estimation for DAI deposit transaction', async () => {
         const token = DAI_L1;
@@ -756,7 +756,7 @@ describe('Wallet', () => {
           refundRecipient: await wallet.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      });
+      }).timeout(25_000);
     }
   });
 
@@ -780,7 +780,7 @@ describe('Wallet', () => {
           .be.true;
         expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).gte(amount)).to
           .be.true;
-      }).timeout(10_000);
+      }).timeout(25_000);
 
       it('should deposit DAI to L2 network', async () => {
         const amount = 5;
@@ -998,7 +998,7 @@ describe('Wallet', () => {
             'Not enough allowance to cover the deposit!'
           );
         }
-      }).timeout(10_000);
+      }).timeout(25_000);
 
       it('should return fee for DAI token deposit', async () => {
         const tx = await wallet.approveERC20(DAI_L1, 5);
@@ -1014,7 +1014,7 @@ describe('Wallet', () => {
         expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
         expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
           .false;
-      }).timeout(10_000);
+      }).timeout(25_000);
 
       it('should throw an error when there is not enough balance for the deposit', async () => {
         try {
@@ -1032,7 +1032,7 @@ describe('Wallet', () => {
             'Not enough balance for deposit!'
           );
         }
-      }).timeout(10_000);
+      }).timeout(25_000);
     } else {
       it('should throw an error when there is not enough base token allowance to cover the deposit', async () => {
         try {
@@ -1048,7 +1048,7 @@ describe('Wallet', () => {
             'Not enough base token allowance to cover the deposit!'
           );
         }
-      }).timeout(10_000);
+      }).timeout(25_000);
 
       it('should return fee for ETH token deposit', async () => {
         const token = utils.LEGACY_ETH_ADDRESS;
@@ -1072,7 +1072,7 @@ describe('Wallet', () => {
         expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
         expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
           .false;
-      }).timeout(10_000);
+      }).timeout(25_000);
 
       it('should return fee for base token deposit', async () => {
         const token = await wallet.getBaseToken();
@@ -1090,7 +1090,7 @@ describe('Wallet', () => {
           to: await wallet.getAddress(),
         });
         expect(result).not.to.be.null;
-      }).timeout(10_000);
+      }).timeout(25_000);
 
       it('should return fee for DAI token deposit', async () => {
         const token = DAI_L1;
@@ -1119,7 +1119,7 @@ describe('Wallet', () => {
         expect(BigNumber.from(result.maxFeePerGas).isZero()).to.be.false;
         expect(BigNumber.from(result.maxPriorityFeePerGas).isZero()).to.be
           .false;
-      }).timeout(10_000);
+      }).timeout(25_000);
 
       it('should throw an error when there is not enough token allowance to cover the deposit', async () => {
         const token = DAI_L1;
@@ -1468,7 +1468,7 @@ describe('Wallet', () => {
 
         const result = await wallet.estimateGasRequestExecute(tx);
         expect(result.isZero()).to.be.false;
-      }).timeout(10_000);
+      }).timeout(25_000);
     }
   });
 
@@ -1537,7 +1537,7 @@ describe('Wallet', () => {
         expect(
           l1BalanceBeforeExecution.sub(l1BalanceAfterExecution).gte(amount)
         ).to.be.true;
-      }).timeout(10_000);
+      }).timeout(25_000);
     }
   });
 

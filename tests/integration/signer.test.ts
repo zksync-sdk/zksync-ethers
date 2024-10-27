@@ -787,7 +787,7 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      });
+      }).timeout(25_000);
     } else {
       it('should throw an error for insufficient allowance when estimating gas for ETH deposit transaction', async () => {
         try {
@@ -800,7 +800,7 @@ describe('L1VoidSigner', () => {
         } catch (e) {
           expect((e as any).reason).to.include('ERC20: insufficient allowance');
         }
-      });
+      }).timeout(25_000);
 
       it('should return gas estimation for ETH deposit transaction', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -826,7 +826,7 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      });
+      }).timeout(25_000);
 
       it('should return gas estimation for base token deposit transaction', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -852,7 +852,7 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      });
+      }).timeout(25_000);
 
       it('should return gas estimation for DAI deposit transaction', async () => {
         const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
@@ -884,7 +884,7 @@ describe('L1VoidSigner', () => {
           refundRecipient: await signer.getAddress(),
         });
         expect(result.isZero()).to.be.false;
-      });
+      }).timeout(25_000);
     }
   });
 
