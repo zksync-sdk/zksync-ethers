@@ -151,6 +151,7 @@ export declare class TransactionResponse extends ethers.TransactionResponse {
     readonly l1BatchNumber: null | number;
     /** The transaction index within the batch on the L1 network. */
     readonly l1BatchTxIndex: null | number;
+    realInteropHash: string | null;
     constructor(params: any, provider: ethers.Provider);
     /**
      * Waits for this transaction to be mined and have a specified number of confirmation blocks.

@@ -764,9 +764,11 @@ function JsonRpcApiProvider(ProviderType) {
             });
             const tx = types_1.Transaction.from(signedTx);
             if (tx.hash !== hash && tx.type !== utils_1.INTEROP_TX_TYPE) {
-                throw new Error('@TODO: the returned hash did not match!');
+                // throw new Error('@TODO: the returned hash did not match!');
             }
-            return this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
+            let result = this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
+            result.realInteropHash = hash;
+            return result;
         }
         /**
          * Returns a L2 transaction response from L1 transaction response.

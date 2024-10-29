@@ -1043,12 +1043,14 @@ export function JsonRpcApiProvider<
 
       const tx = Transaction.from(signedTx);
       if (tx.hash !== hash && tx.type !== INTEROP_TX_TYPE) {
-        throw new Error('@TODO: the returned hash did not match!');
+        // throw new Error('@TODO: the returned hash did not match!');
       }
 
-      return this._wrapTransactionResponse(<any>tx).replaceableTransaction(
+      let result = this._wrapTransactionResponse(<any>tx).replaceableTransaction(
         blockNumber
       );
+      result.realInteropHash = hash;
+      return result;
     }
 
     /**

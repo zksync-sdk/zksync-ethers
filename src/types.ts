@@ -198,6 +198,7 @@ export class TransactionResponse extends ethers.TransactionResponse {
   readonly l1BatchNumber!: null | number;
   /** The transaction index within the batch on the L1 network. */
   readonly l1BatchTxIndex!: null | number;
+  public realInteropHash!: string | null;
 
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
