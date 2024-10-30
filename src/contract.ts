@@ -239,8 +239,14 @@ export class ContractFactory<
       deploymentTransaction(): ContractTransactionResponse;
     } & Omit<I, keyof BaseContract>;
 
+    const deploymentTx = contract.deploymentTransaction()!;
+
     contractWithCorrectAddress.deploymentTransaction = () =>
-      contract.deploymentTransaction()!;
+      Object.assign(
+        Object.create(Object.getPrototypeOf(deploymentTx)),
+        deploymentTx,
+        deployTxReceipt
+      ) as ContractTransactionResponse;
     return contractWithCorrectAddress;
   }
 }
