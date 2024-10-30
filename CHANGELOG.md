@@ -1,3 +1,10 @@
+## [6.14.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.0...v6.14.1) (2024-10-30)
+
+
+### Bug Fixes
+
+* **contract:** `deploy` not returning block nubmer ([7167496](https://github.com/zksync-sdk/zksync-ethers/commit/7167496f27bd3d800d50a10f229fc35462c8d617))
+
 # [6.14.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.13.1...v6.14.0) (2024-10-11)
 
 
