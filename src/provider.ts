@@ -1281,6 +1281,9 @@ export function JsonRpcApiProvider<
             Array.from(ethers.getBytes(dep))
         );
       }
+      if (tx.customData.customSignature) {
+        result.eip712Meta.customSignature = Array.from(ethers.getBytes(tx.customData.customSignature));
+      }
       if (tx.customData.paymasterParams) {
         result.eip712Meta.paymasterParams = {
           paymaster: ethers.hexlify(tx.customData.paymasterParams.paymaster),
