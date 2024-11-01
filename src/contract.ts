@@ -241,12 +241,12 @@ export class ContractFactory<
 
     const deploymentTx = contract.deploymentTransaction()!;
 
-    contractWithCorrectAddress.deploymentTransaction = () =>
-      Object.assign(
-        Object.create(Object.getPrototypeOf(deploymentTx)),
-        deploymentTx,
-        deployTxReceipt
-      ) as ContractTransactionResponse;
+    (deploymentTx as any).blockNumber = deployTxReceipt.blockNumber;
+    (deploymentTx as any).blockHash = deployTxReceipt.blockHash;
+    (deploymentTx as any).index = deployTxReceipt.index;
+    (deploymentTx as any).gasPrice = deployTxReceipt.gasPrice;
+
+    contractWithCorrectAddress.deploymentTransaction = () => deploymentTx;
     return contractWithCorrectAddress;
   }
 }
