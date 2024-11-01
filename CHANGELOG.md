@@ -1,3 +1,10 @@
+## [6.14.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.1...v6.14.2) (2024-11-01)
+
+
+### Bug Fixes
+
+* **contract:** fix `waitForDeployment` missing `startBlock` ([8ce644f](https://github.com/zksync-sdk/zksync-ethers/commit/8ce644f862650f579fe29ffcf8e6be8040364d4e))
+
 ## [6.14.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.0...v6.14.1) (2024-10-30)
 
 
