@@ -1282,7 +1282,9 @@ export function JsonRpcApiProvider<
         );
       }
       if (tx.customData.customSignature) {
-        result.eip712Meta.customSignature = Array.from(ethers.getBytes(tx.customData.customSignature));
+        result.eip712Meta.customSignature = Array.from(
+          ethers.getBytes(tx.customData.customSignature)
+        );
       }
       if (tx.customData.paymasterParams) {
         result.eip712Meta.paymasterParams = {
