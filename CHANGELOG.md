@@ -1,3 +1,10 @@
+## [6.14.3](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.2...v6.14.3) (2024-11-05)
+
+
+### Bug Fixes
+
+* include custom signature in estimateGas calls ([703690d](https://github.com/zksync-sdk/zksync-ethers/commit/703690d4ed436cfe8d87dfe9f727ecc2e2d0fd84))
+
 ## [6.14.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.1...v6.14.2) (2024-11-01)
 
 
