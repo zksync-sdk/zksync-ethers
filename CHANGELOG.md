@@ -1,3 +1,10 @@
+# [6.15.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.3...v6.15.0) (2024-11-06)
+
+
+### Features
+
+* **provider:** consider `0.0.0.0` url as localhost ([563773b](https://github.com/zksync-sdk/zksync-ethers/commit/563773b6f357eceb6c2bce5bb039043a9e6caa41))
+
 ## [6.14.3](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.2...v6.14.3) (2024-11-05)
 
 
