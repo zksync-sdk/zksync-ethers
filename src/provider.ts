@@ -1341,8 +1341,12 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
     const isLocalNetwork =
       typeof url === 'string'
-        ? url.includes('localhost') || url.includes('127.0.0.1')
-        : url.url.includes('localhost') || url.url.includes('127.0.0.1');
+        ? url.includes('localhost') ||
+          url.includes('127.0.0.1') ||
+          url.includes('0.0.0.0')
+        : url.url.includes('localhost') ||
+          url.url.includes('127.0.0.1') ||
+          url.url.includes('0.0.0.0');
 
     const optionsWithDisabledCache = isLocalNetwork
       ? {...options, cacheTimeout: -1}
