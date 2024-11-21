@@ -18,6 +18,7 @@ import {IERC20__factory} from './typechain';
 import IZkSyncABI from '../abi/IZkSyncHyperchain.json';
 import IBridgehubABI from '../abi/IBridgehub.json';
 import IContractDeployerABI from '../abi/IContractDeployer.json';
+import Contract2FactoryABI from '../abi/Contract2Factory.json';
 import IL1MessengerABI from '../abi/IL1Messenger.json';
 import IERC20ABI from '../abi/IERC20.json';
 import IERC1271ABI from '../abi/IERC1271.json';
@@ -46,6 +47,12 @@ export const BRIDGEHUB_ABI = new ethers.Interface(IBridgehubABI);
  * @constant
  */
 export const CONTRACT_DEPLOYER = new ethers.Interface(IContractDeployerABI);
+
+/**
+ * The ABI for the `Contract2Factory` interface, which is utilized for deploying smart contracts using CREATE2 and CREATE2ACCOUNT.
+ * @constant
+ */
+export const CONTRACT_2_FACTORY = new ethers.Interface(Contract2FactoryABI);
 
 /**
  * The ABI for the `IL1Messenger` interface, which is utilized for sending messages from the L2 to L1.
@@ -117,6 +124,13 @@ export const BOOTLOADER_FORMAL_ADDRESS: Address =
  */
 export const CONTRACT_DEPLOYER_ADDRESS: Address =
   '0x0000000000000000000000000000000000008006';
+
+/**
+ * The address of the Contract2Factory.
+ * @constant
+ */
+export const CONTRACT_2_FACTORY_ADDRESS: Address =
+'0x0000000000000000000000000000000000010000';
 
 /**
  * The address of the L1 messenger.
