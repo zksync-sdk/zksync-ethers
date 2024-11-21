@@ -1,3 +1,10 @@
+## [6.15.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.0...v6.15.1) (2024-11-21)
+
+
+### Bug Fixes
+
+* create2 and create2Account deploy with Contract2Factory contract ([9cae26c](https://github.com/zksync-sdk/zksync-ethers/commit/9cae26c8d0e1f3636c848e9c759f6e399e284087))
+
 # [6.15.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.3...v6.15.0) (2024-11-06)
 
 
