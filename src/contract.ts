@@ -164,7 +164,11 @@ export class ContractFactory<
       delete txRequest.customData.salt;
     const tx = {
       ...txRequest,
-      to: this.deploymentType === 'create2' || this.deploymentType === 'create2Account' ? CONTRACT_2_FACTORY_ADDRESS : CONTRACT_DEPLOYER_ADDRESS,
+      to:
+        this.deploymentType === 'create2' ||
+        this.deploymentType === 'create2Account'
+          ? CONTRACT_2_FACTORY_ADDRESS
+          : CONTRACT_DEPLOYER_ADDRESS,
       data: deployCalldata,
       type: EIP712_TX_TYPE,
     };
