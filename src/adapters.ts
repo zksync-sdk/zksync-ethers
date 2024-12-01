@@ -28,6 +28,11 @@ import {
   LEGACY_ETH_ADDRESS,
   isAddressEq,
   L2_BASE_TOKEN_ADDRESS,
+  WithTokenOrAssetId,
+  resolveAssetId,
+  ethAssetId,
+  encodeNTVTransferData,
+  encodeSecondBridgeDataV1
 } from './utils';
 import {
   IAssetRouterBase,
@@ -52,6 +57,7 @@ import {
   IL1AssetRouter__factory,
   IL1Nullifier__factory,
   IAssetRouterBase__factory,
+  IL1NativeTokenVault__factory,
 } from './typechain';
 import {
   Address,
@@ -347,6 +353,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
     }
 
+    async getNativeTokenVaultL1(): Promise<ethers.Contract> {
+      // FIXME: maybe makes sense to provide an API to do it in one call
+      const bridgeContracts = await this._providerL2().getDefaultBridgeAddresses();
+
+      const sharedBridge = bridgeContracts.sharedL1;
+      const l1AR = IL1AssetRouter__factory.connect(
+        sharedBridge,
+        this._providerL1()
+      );
+
+      const l1NtvAddress = await l1AR.nativeTokenVault();
+
+      return IL1NativeTokenVault__factory.connect(
+        l1NtvAddress,
+        this._providerL1()
+      // FIXME: unfortunately this is the sort of transformation we need to make
+      // most likely typechain is from other ethers version
+      ) as any as ethers.Contract;
+    }
+
     /**
      * Transfers the specified token from the associated account on the L1 network to the target account on the L2 network.
      * The token can be either ETH or any ERC20 token. For ERC20 tokens, enough approved tokens must be associated with
@@ -397,9 +423,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       approveBaseOverrides?: ethers.Overrides;
       customBridgeData?: BytesLike;
     }): Promise<PriorityOpResponse> {
-      if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)) {
-        transaction.token = ETH_ADDRESS_IN_CONTRACTS;
-      }
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
       const baseTokenAddress = await bridgehub.baseToken(chainId);
@@ -847,6 +870,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       await checkBaseCost(baseCost, mintValue);
       overrides.value ??= 0;
 
+      const [assetId, _] = await resolveAssetId({ token }, await this.getNativeTokenVaultL1());
+      const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
+  
+
+      const secondBridgeCalldata = encodeSecondBridgeDataV1(
+        ethers.hexlify(assetId),
+        ntvData
+      );
+
       return {
         tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
           {
@@ -859,10 +891,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             secondBridgeAddress:
               tx.bridgeAddress ?? (await bridgeContracts.shared.getAddress()),
             secondBridgeValue: 0,
-            secondBridgeCalldata: ethers.AbiCoder.defaultAbiCoder().encode(
-              ['address', 'uint256', 'address'],
-              [token, amount, to]
-            ),
+            secondBridgeCalldata: secondBridgeCalldata,
           },
           overrides
         ),
@@ -962,6 +991,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const mintValue = baseCost + BigInt(operatorTip);
       await checkBaseCost(baseCost, mintValue);
 
+      const [assetId, _] = await resolveAssetId({ token: ETH_ADDRESS_IN_CONTRACTS }, await this.getNativeTokenVaultL1());
+      const ntvData = encodeNTVTransferData(BigInt(amount), to, ETH_ADDRESS_IN_CONTRACTS);
+
+      const secondBridgeCalldata = encodeSecondBridgeDataV1(
+        ethers.hexlify(assetId),
+        ntvData
+      );
+
       return {
         tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
           {
@@ -973,10 +1010,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             refundRecipient: refundRecipient ?? ethers.ZeroAddress,
             secondBridgeAddress: tx.bridgeAddress ?? sharedBridge,
             secondBridgeValue: amount,
-            secondBridgeCalldata: ethers.AbiCoder.defaultAbiCoder().encode(
-              ['address', 'uint256', 'address'],
-              [ETH_ADDRESS_IN_CONTRACTS, 0, to]
-            ),
+            secondBridgeCalldata: secondBridgeCalldata,
           },
           overrides
         ),
@@ -1012,6 +1046,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         gasPerPubdataByte,
       } = tx;
 
+      const [assetId, _] = await resolveAssetId({ token }, await this.getNativeTokenVaultL1());
+      const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
+
       const gasPriceForEstimation =
         overrides.maxFeePerGas || overrides.gasPrice;
       const baseCost = await bridgehub.l2TransactionBaseCost(
@@ -1028,10 +1065,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const secondBridgeAddress =
         tx.bridgeAddress ??
         (await (await this.getL1BridgeContracts()).shared.getAddress());
-      const secondBridgeCalldata = ethers.AbiCoder.defaultAbiCoder().encode(
-        ['address', 'uint256', 'address'],
-        [token, amount, to]
-      );
+
+      const secondBridgeCalldata = encodeSecondBridgeDataV1(ethers.hexlify(assetId), ntvData);
 
       return await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
         {
@@ -1571,7 +1606,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         withdrawalHash,
         index
       );
-      const sender = ethers.dataSlice(log.topics[1], 12);
       // `getLogProof` is called not to get proof but
       // to get the index of the corresponding L2->L1 log,
       // which is returned as `proof.id`.
@@ -1695,6 +1729,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         if (!proof) {
           throw new Error('Log proof not found!');
         }
+        // FIXME: a cheaper way is to call l1 nullifier directly
         return await l1AR[
           'bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])'
         ](

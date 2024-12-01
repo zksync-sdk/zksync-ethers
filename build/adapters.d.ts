@@ -111,6 +111,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             token: Address;
             allowance: BigNumberish;
         }[]>;
+        getNativeTokenVaultL1(): Promise<ethers.Contract>;
         /**
          * Transfers the specified token from the associated account on the L1 network to the target account on the L2 network.
          * The token can be either ETH or any ERC20 token. For ERC20 tokens, enough approved tokens must be associated with

@@ -63,6 +63,7 @@ declare const Wallet_base: {
             token: string;
             allowance: BigNumberish;
         }[]>;
+        getNativeTokenVaultL1(): Promise<ethers.Contract>;
         deposit(transaction: {
             token: string;
             amount: BigNumberish;
@@ -88,7 +89,27 @@ declare const Wallet_base: {
             approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
-            gasPerPubdataByte?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
+             * const gas = await wallet.estimateGasDeposit({
+             *   token: tokenL1,
+             *   amount: 10_000_000n,
+             * });
+             * console.log(`Gas: ${gas}`);
+             */
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
             approveOverrides?: ethers.Overrides | undefined;
@@ -116,23 +137,6 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
-             */
             bridgeAddress?: string | undefined;
             approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
@@ -158,23 +162,7 @@ declare const Wallet_base: {
             overrides?: ethers.Overrides | undefined;
             approveOverrides?: ethers.Overrides | undefined;
             approveBaseOverrides?: ethers.Overrides | undefined;
-            customBridgeData?: BytesLike | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-             * const claimFailedDepositTx = await wallet.claimFailedDeposit(FAILED_DEPOSIT_HASH);
-             */
+            customBridgeData?: BytesLike | undefined;
         }): Promise<PriorityOpResponse>;
         _depositETHToETHBasedChain(transaction: {
             token: string;
@@ -211,7 +199,22 @@ declare const Wallet_base: {
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
-            gasPerPubdataByte?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * console.log(`Nonce: ${await wallet.getDeploymentNonce()}`);
+             */
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
@@ -323,6 +326,22 @@ declare const Wallet_base: {
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
+            /**
+             * Creates a new `Wallet` with the `provider` as L1 provider and a private key that is built from the mnemonic passphrase.
+             *
+             * @param mnemonic The mnemonic of the private key.
+             * @param [provider] The provider instance for connecting to a L1 network.
+             *
+             * @example
+             *
+             * import { Wallet, Provider, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const MNEMONIC = "stuff slice staff easily soup parent arm payment cotton hammer scatter struggle";
+             *
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = Wallet.fromMnemonic(MNEMONIC, ethProvider);
+             */
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;

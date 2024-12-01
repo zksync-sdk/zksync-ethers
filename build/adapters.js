@@ -207,6 +207,17 @@ function AdapterL1(Base) {
                 ];
             }
         }
+        async getNativeTokenVaultL1() {
+            // FIXME: maybe makes sense to provide an API to do it in one call
+            const bridgeContracts = await this._providerL2().getDefaultBridgeAddresses();
+            const sharedBridge = bridgeContracts.sharedL1;
+            const l1AR = typechain_1.IL1AssetRouter__factory.connect(sharedBridge, this._providerL1());
+            const l1NtvAddress = await l1AR.nativeTokenVault();
+            return typechain_1.IL1NativeTokenVault__factory.connect(l1NtvAddress, this._providerL1()
+            // FIXME: unfortunately this is the sort of transformation we need to make
+            // most likely typechain is from other ethers version
+            );
+        }
         /**
          * Transfers the specified token from the associated account on the L1 network to the target account on the L2 network.
          * The token can be either ETH or any ERC20 token. For ERC20 tokens, enough approved tokens must be associated with
@@ -242,9 +253,6 @@ function AdapterL1(Base) {
          * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
          */
         async deposit(transaction) {
-            if ((0, utils_1.isAddressEq)(transaction.token, utils_1.LEGACY_ETH_ADDRESS)) {
-                transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
-            }
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);
@@ -480,6 +488,9 @@ function AdapterL1(Base) {
             const mintValue = baseCost + BigInt(operatorTip);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             overrides.value ?? (overrides.value = 0);
+            const [assetId, _] = await (0, utils_1.resolveAssetId)({ token }, await this.getNativeTokenVaultL1());
+            const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, token);
+            const secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
             return {
                 tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction({
                     chainId: chainId,
@@ -490,7 +501,7 @@ function AdapterL1(Base) {
                     refundRecipient: refundRecipient ?? ethers_1.ethers.ZeroAddress,
                     secondBridgeAddress: tx.bridgeAddress ?? (await bridgeContracts.shared.getAddress()),
                     secondBridgeValue: 0,
-                    secondBridgeCalldata: ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'address'], [token, amount, to]),
+                    secondBridgeCalldata: secondBridgeCalldata,
                 }, overrides),
                 mintValue: mintValue,
             };
@@ -528,6 +539,9 @@ function AdapterL1(Base) {
             overrides.value ?? (overrides.value = amount);
             const mintValue = baseCost + BigInt(operatorTip);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
+            const [assetId, _] = await (0, utils_1.resolveAssetId)({ token: utils_1.ETH_ADDRESS_IN_CONTRACTS }, await this.getNativeTokenVaultL1());
+            const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, utils_1.ETH_ADDRESS_IN_CONTRACTS);
+            const secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
             return {
                 tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction({
                     chainId,
@@ -538,7 +552,7 @@ function AdapterL1(Base) {
                     refundRecipient: refundRecipient ?? ethers_1.ethers.ZeroAddress,
                     secondBridgeAddress: tx.bridgeAddress ?? sharedBridge,
                     secondBridgeValue: amount,
-                    secondBridgeCalldata: ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'address'], [utils_1.ETH_ADDRESS_IN_CONTRACTS, 0, to]),
+                    secondBridgeCalldata: secondBridgeCalldata,
                 }, overrides),
                 mintValue: mintValue,
             };
@@ -549,6 +563,8 @@ function AdapterL1(Base) {
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const tx = await this._getDepositTxWithDefaults(transaction);
             const { token, operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
+            const [assetId, _] = await (0, utils_1.resolveAssetId)({ token }, await this.getNativeTokenVaultL1());
+            const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, token);
             const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
             const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
             const mintValue = baseCost + BigInt(operatorTip);
@@ -556,7 +572,7 @@ function AdapterL1(Base) {
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             const secondBridgeAddress = tx.bridgeAddress ??
                 (await (await this.getL1BridgeContracts()).shared.getAddress());
-            const secondBridgeCalldata = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'address'], [token, amount, to]);
+            const secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
             return await bridgehub.requestL2TransactionTwoBridges.populateTransaction({
                 chainId,
                 mintValue,
@@ -861,7 +877,6 @@ function AdapterL1(Base) {
         async isWithdrawalFinalized(withdrawalHash, index = 0) {
             const { log } = await this._getWithdrawalLog(withdrawalHash, index);
             const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
-            const sender = ethers_1.ethers.dataSlice(log.topics[1], 12);
             // `getLogProof` is called not to get proof but
             // to get the index of the corresponding L2->L1 log,
             // which is returned as `proof.id`.
@@ -923,6 +938,7 @@ function AdapterL1(Base) {
                 if (!proof) {
                     throw new Error('Log proof not found!');
                 }
+                // FIXME: a cheaper way is to call l1 nullifier directly
                 return await l1AR['bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])']((await this._providerL2().getNetwork()).chainId, transferDataDecoded[0], // depositSender
                 calldata['_assetId'], // asset id
                 assetData, depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});

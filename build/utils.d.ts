@@ -781,3 +781,15 @@ export declare function toJSON(object: any): string;
  * // true
  */
 export declare function isAddressEq(a: Address, b: Address): boolean;
+export declare function encodeNTVAssetId(chainId: bigint, address: string): string;
+export declare function ethAssetId(provider: ethers.Provider): Promise<string>;
+interface WithToken {
+    token: Address;
+}
+interface WithAssetId {
+    assetId: BytesLike;
+}
+export type WithTokenOrAssetId = WithToken | WithAssetId;
+export declare function resolveAssetId(info: WithTokenOrAssetId, ntvContract: ethers.Contract): Promise<[BytesLike, boolean]>;
+export declare function encodeNTVTransferData(amount: bigint, receiver: Address, token: Address): string;
+export declare function encodeSecondBridgeDataV1(assetId: string, transferData: string): string;

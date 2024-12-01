@@ -563,6 +563,22 @@ declare const L1Signer_base: {
             bridgeAddress?: string | undefined;
         }) | undefined): Promise<ethers.TransactionResponse>;
         getBaseCost(params: {
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { BrowserProvider, Provider, types } from "zksync-ethers";
+             *
+             * const browserProvider = new BrowserProvider(window.ethereum);
+             * const signer = Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Number((await browserProvider.getNetwork()).chainId),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const allBalances = await signer.getAllBalances();
+             */
             gasLimit: BigNumberish;
             gasPerPubdataByte?: BigNumberish | undefined;
             gasPrice?: BigNumberish | undefined;
@@ -571,6 +587,7 @@ declare const L1Signer_base: {
             token: string;
             allowance: BigNumberish;
         }[]>;
+        getNativeTokenVaultL1(): Promise<ethers.Contract>;
         deposit(transaction: {
             token: string;
             amount: BigNumberish;
@@ -836,7 +853,26 @@ declare const L1Signer_base: {
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
-        }): Promise<BigNumberish>;
+        }): Promise<BigNumberish>; /**
+         * @inheritDoc
+         *
+         * @example
+         *
+         * import { Provider, L1Signer, types } from "zksync-ethers";
+         * import { ethers } from "ethers";
+         *
+         * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+         * const signer = L1Signer.from(
+         *     await browserProvider.getSigner(),
+         *     Provider.getDefaultProvider(types.Network.Sepolia)
+         * );
+         *
+         * await signer.requestExecute({
+         *     contractAddress: await signer.providerL2.getMainContractAddress(),
+         *     calldata: "0x",
+         *     l2Value: 7_000_000_000,
+         * });
+         */
         getFullRequiredDepositFee(transaction: {
             token: string;
             to?: string | undefined;
@@ -1911,6 +1947,22 @@ declare const L1VoidSigner_base: {
             bridgeAddress?: string | undefined;
         }) | undefined): Promise<ethers.TransactionResponse>;
         getBaseCost(params: {
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { BrowserProvider, Provider, types } from "zksync-ethers";
+             *
+             * const browserProvider = new BrowserProvider(window.ethereum);
+             * const signer = Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Number((await browserProvider.getNetwork()).chainId),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const allBalances = await signer.getAllBalances();
+             */
             gasLimit: BigNumberish;
             gasPerPubdataByte?: BigNumberish | undefined;
             gasPrice?: BigNumberish | undefined;
@@ -1919,6 +1971,7 @@ declare const L1VoidSigner_base: {
             token: string;
             allowance: BigNumberish;
         }[]>;
+        getNativeTokenVaultL1(): Promise<ethers.Contract>;
         deposit(transaction: {
             token: string;
             amount: BigNumberish;
@@ -2184,7 +2237,26 @@ declare const L1VoidSigner_base: {
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
-        }): Promise<BigNumberish>;
+        }): Promise<BigNumberish>; /**
+         * @inheritDoc
+         *
+         * @example
+         *
+         * import { Provider, L1Signer, types } from "zksync-ethers";
+         * import { ethers } from "ethers";
+         *
+         * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+         * const signer = L1Signer.from(
+         *     await browserProvider.getSigner(),
+         *     Provider.getDefaultProvider(types.Network.Sepolia)
+         * );
+         *
+         * await signer.requestExecute({
+         *     contractAddress: await signer.providerL2.getMainContractAddress(),
+         *     calldata: "0x",
+         *     l2Value: 7_000_000_000,
+         * });
+         */
         getFullRequiredDepositFee(transaction: {
             token: string;
             to?: string | undefined;

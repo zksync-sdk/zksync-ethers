@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isMessageSignatureCorrect = exports.getERC20BridgeCalldata = exports.getERC20DefaultBridgeData = exports.undoL1ToL2Alias = exports.applyL1ToL2Alias = exports.getL2HashFromPriorityOp = exports.eip712TxHash = exports.parseEip712 = exports.hashBytecode = exports.serializeEip712 = exports.checkBaseCost = exports.createAddress = exports.create2Address = exports.getDeployedContracts = exports.getHashedL2ToL1Msg = exports.layer1TxDefaults = exports.sleep = exports.isETH = exports.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = exports.DEFAULT_GAS_PER_PUBDATA_LIMIT = exports.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = exports.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = exports.L1_FEE_ESTIMATION_COEF_DENOMINATOR = exports.L1_FEE_ESTIMATION_COEF_NUMERATOR = exports.MAX_BYTECODE_LEN_BYTES = exports.PRIORITY_OPERATION_L2_TX_TYPE = exports.EIP712_TX_TYPE = exports.EIP1271_MAGIC_VALUE = exports.L2_NATIVE_TOKEN_VAULT_ADDRESS = exports.L2_ASSET_ROUTER_ADDRESS = exports.L1_TO_L2_ALIAS_OFFSET = exports.NONCE_HOLDER_ADDRESS = exports.L2_BASE_TOKEN_ADDRESS = exports.L2_ETH_TOKEN_ADDRESS = exports.L1_MESSENGER_ADDRESS = exports.CONTRACT_DEPLOYER_ADDRESS = exports.BOOTLOADER_FORMAL_ADDRESS = exports.ETH_ADDRESS_IN_CONTRACTS = exports.LEGACY_ETH_ADDRESS = exports.ETH_ADDRESS = exports.NONCE_HOLDER_ABI = exports.L2_BRIDGE_ABI = exports.L1_BRIDGE_ABI = exports.IERC1271 = exports.IERC20 = exports.L1_MESSENGER = exports.CONTRACT_DEPLOYER = exports.BRIDGEHUB_ABI = exports.ZKSYNC_MAIN_ABI = exports.EIP712_TYPES = void 0;
-exports.isAddressEq = exports.toJSON = exports.estimateCustomBridgeDepositL2Gas = exports.scaleGasLimit = exports.estimateDefaultBridgeDepositL2Gas = exports.isTypedDataSignatureCorrect = void 0;
+exports.encodeSecondBridgeDataV1 = exports.encodeNTVTransferData = exports.resolveAssetId = exports.ethAssetId = exports.encodeNTVAssetId = exports.isAddressEq = exports.toJSON = exports.estimateCustomBridgeDepositL2Gas = exports.scaleGasLimit = exports.estimateDefaultBridgeDepositL2Gas = exports.isTypedDataSignatureCorrect = void 0;
 const ethers_1 = require("ethers");
 const types_1 = require("./types");
 const signer_1 = require("./signer");
@@ -1340,4 +1340,56 @@ function isAddressEq(a, b) {
     return a.toLowerCase() === b.toLowerCase();
 }
 exports.isAddressEq = isAddressEq;
+function encodeNTVAssetId(chainId, address) {
+    const abi = new ethers_1.AbiCoder();
+    const hex = abi.encode(["uint256", "address", "address"], [chainId, exports.L2_NATIVE_TOKEN_VAULT_ADDRESS, address]);
+    return ethers_1.ethers.keccak256(hex);
+}
+exports.encodeNTVAssetId = encodeNTVAssetId;
+async function ethAssetId(provider) {
+    const network = await provider.getNetwork();
+    return encodeNTVAssetId(network.chainId, exports.ETH_ADDRESS_IN_CONTRACTS);
+}
+exports.ethAssetId = ethAssetId;
+async function resolveAssetId(info, ntvContract) {
+    const potentialAssetId = info.assetId;
+    if (potentialAssetId) {
+        return [potentialAssetId, false];
+    }
+    let token = info.token;
+    if (!token) {
+        throw new Error("Neither token nor assetId were provided");
+    }
+    if (isAddressEq(token, exports.LEGACY_ETH_ADDRESS)) {
+        token = exports.ETH_ADDRESS_IN_CONTRACTS;
+    }
+    // In case only token is provided, we expect that it is a token inside Native Token Vault
+    const assetIdFromNTV = await ntvContract.assetId(token);
+    if (assetIdFromNTV && assetIdFromNTV !== ethers_1.ethers.ZeroHash) {
+        return [assetIdFromNTV, false];
+    }
+    // Okay, the token have not been registered within the Native token vault.
+    // There are two cases when it is possible:
+    // - The token is native to L1 (it may or may not be bridged), but it has not been
+    // registered within NTV after the Gateway upgrade. We assume that this is not the case
+    // as the SDK is expected to work only after the full migration is done.  
+    // - The token is native to the current chain and it has never been bridged. 
+    const network = await ntvContract.runner?.provider?.getNetwork();
+    if (!network) {
+        throw new Error('Can not derive assetId since chainId is not available');
+    }
+    const ntvAssetId = encodeNTVAssetId(network.chainId, token);
+    return [ntvAssetId, true];
+}
+exports.resolveAssetId = resolveAssetId;
+function encodeNTVTransferData(amount, receiver, token) {
+    return (new ethers_1.AbiCoder()).encode(['uint256', 'address', 'address'], [amount, receiver, token]);
+}
+exports.encodeNTVTransferData = encodeNTVTransferData;
+function encodeSecondBridgeDataV1(assetId, transferData) {
+    const abi = new ethers_1.AbiCoder();
+    const data = abi.encode(['bytes32', 'bytes'], [assetId, transferData]);
+    return ethers_1.ethers.concat(['0x01', data]);
+}
+exports.encodeSecondBridgeDataV1 = encodeSecondBridgeDataV1;
 //# sourceMappingURL=utils.js.map

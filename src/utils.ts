@@ -24,6 +24,7 @@ import IERC1271ABI from '../abi/IERC1271.json';
 import IL1BridgeABI from '../abi/IL1ERC20Bridge.json';
 import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
+import { encode } from 'punycode';
 
 export * from './paymaster-utils';
 export * from './smart-account-utils';
@@ -1576,4 +1577,89 @@ export function toJSON(object: any): string {
  */
 export function isAddressEq(a: Address, b: Address): boolean {
   return a.toLowerCase() === b.toLowerCase();
+}
+
+export function encodeNTVAssetId(chainId: bigint, address: string) {
+  const abi = new AbiCoder();
+  const hex = abi.encode(["uint256", "address", "address"], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, address]);
+  return ethers.keccak256(hex);
+}
+
+export async function ethAssetId(provider: ethers.Provider) {
+  const network = await provider.getNetwork();
+
+  return encodeNTVAssetId(network.chainId, ETH_ADDRESS_IN_CONTRACTS);
+}
+
+interface WithToken {
+  token: Address;
+}
+
+interface WithAssetId {
+  assetId: BytesLike;
+}
+
+// For backwards compatibility and easier interface lots of methods
+// will continue to allow providing either token or assetId
+export type WithTokenOrAssetId = WithToken | WithAssetId;  
+
+export async function resolveAssetId(
+  info: WithTokenOrAssetId,
+  ntvContract: ethers.Contract
+): Promise<[BytesLike, boolean]> {
+  const potentialAssetId = (info as any).assetId;
+  if (potentialAssetId) {
+    return [potentialAssetId, false];
+  }
+  
+  let token = (info as any).token as Address;
+  if(!token) {
+    throw new Error("Neither token nor assetId were provided");
+  }
+
+  if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+    token = ETH_ADDRESS_IN_CONTRACTS;
+  }
+
+  // In case only token is provided, we expect that it is a token inside Native Token Vault
+  const assetIdFromNTV = await ntvContract.assetId(token);
+
+  if (assetIdFromNTV && assetIdFromNTV !== ethers.ZeroHash) {
+    return [assetIdFromNTV, false];
+  }
+
+  // Okay, the token have not been registered within the Native token vault.
+  // There are two cases when it is possible:
+  // - The token is native to L1 (it may or may not be bridged), but it has not been
+  // registered within NTV after the Gateway upgrade. We assume that this is not the case
+  // as the SDK is expected to work only after the full migration is done.  
+  // - The token is native to the current chain and it has never been bridged. 
+
+  const network = await ntvContract.runner?.provider?.getNetwork();
+
+  if(!network) {
+    throw new Error('Can not derive assetId since chainId is not available');
+  }
+
+  const ntvAssetId = encodeNTVAssetId(network.chainId, token);
+
+  return [ntvAssetId, true];
+} 
+
+export function encodeNTVTransferData(
+  amount: bigint,
+  receiver: Address,
+  token: Address,
+) {
+  return (new AbiCoder()).encode(['uint256', 'address', 'address'], [amount, receiver, token]);
+}
+
+export function encodeSecondBridgeDataV1(
+  assetId: string,
+  transferData: string
+) {
+  const abi = new AbiCoder();
+  const data = abi.encode(['bytes32', 'bytes'], [assetId, transferData]);
+
+  return ethers.concat(['0x01', data]);
 }
