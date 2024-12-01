@@ -253,6 +253,9 @@ function AdapterL1(Base) {
          * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
          */
         async deposit(transaction) {
+            if ((0, utils_1.isAddressEq)(transaction.token, utils_1.LEGACY_ETH_ADDRESS)) {
+                transaction.token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            }
             const bridgehub = await this.getBridgehubContract();
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const baseTokenAddress = await bridgehub.baseToken(chainId);

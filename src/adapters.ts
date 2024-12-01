@@ -423,6 +423,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       approveBaseOverrides?: ethers.Overrides;
       customBridgeData?: BytesLike;
     }): Promise<PriorityOpResponse> {
+      if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)) {
+        transaction.token = ETH_ADDRESS_IN_CONTRACTS;
+      }
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
       const baseTokenAddress = await bridgehub.baseToken(chainId);

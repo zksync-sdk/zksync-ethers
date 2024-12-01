@@ -781,6 +781,23 @@ declare const L1Signer_base: {
             overrides?: ethers.Overrides | undefined;
         }): Promise<ethers.ContractTransaction>;
         _getDepositETHOnETHBasedChainTx(transaction: {
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+             * const params = await signer.finalizeWithdrawalParams(WITHDRAWAL_HASH);
+             */
             token: string;
             amount: BigNumberish;
             to?: string | undefined;
@@ -853,26 +870,7 @@ declare const L1Signer_base: {
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
-        }): Promise<BigNumberish>; /**
-         * @inheritDoc
-         *
-         * @example
-         *
-         * import { Provider, L1Signer, types } from "zksync-ethers";
-         * import { ethers } from "ethers";
-         *
-         * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-         * const signer = L1Signer.from(
-         *     await browserProvider.getSigner(),
-         *     Provider.getDefaultProvider(types.Network.Sepolia)
-         * );
-         *
-         * await signer.requestExecute({
-         *     contractAddress: await signer.providerL2.getMainContractAddress(),
-         *     calldata: "0x",
-         *     l2Value: 7_000_000_000,
-         * });
-         */
+        }): Promise<BigNumberish>;
         getFullRequiredDepositFee(transaction: {
             token: string;
             to?: string | undefined;
@@ -2165,6 +2163,23 @@ declare const L1VoidSigner_base: {
             overrides?: ethers.Overrides | undefined;
         }): Promise<ethers.ContractTransaction>;
         _getDepositETHOnETHBasedChainTx(transaction: {
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+             * const params = await signer.finalizeWithdrawalParams(WITHDRAWAL_HASH);
+             */
             token: string;
             amount: BigNumberish;
             to?: string | undefined;
@@ -2237,26 +2252,7 @@ declare const L1VoidSigner_base: {
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
-        }): Promise<BigNumberish>; /**
-         * @inheritDoc
-         *
-         * @example
-         *
-         * import { Provider, L1Signer, types } from "zksync-ethers";
-         * import { ethers } from "ethers";
-         *
-         * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-         * const signer = L1Signer.from(
-         *     await browserProvider.getSigner(),
-         *     Provider.getDefaultProvider(types.Network.Sepolia)
-         * );
-         *
-         * await signer.requestExecute({
-         *     contractAddress: await signer.providerL2.getMainContractAddress(),
-         *     calldata: "0x",
-         *     l2Value: 7_000_000_000,
-         * });
-         */
+        }): Promise<BigNumberish>;
         getFullRequiredDepositFee(transaction: {
             token: string;
             to?: string | undefined;
