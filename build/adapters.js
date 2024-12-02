@@ -924,19 +924,33 @@ function AdapterL1(Base) {
             const l1AR = typechain_1.IL1AssetRouter__factory.connect(l1BridgeAddress, this._signerL1());
             const l2Bridge = typechain_1.IL2Bridge__factory.connect(l2BridgeAddress, this._providerL2());
             const l2ARInterface = typechain_1.IAssetRouterBase__factory.createInterface();
+            const l1ntv = await this.getNativeTokenVaultL1();
             try {
                 const calldata = l2Bridge.interface.decodeFunctionData('finalizeDeposit', tx.data);
                 const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
                 if (!proof) {
                     throw new Error('Log proof not found!');
                 }
-                return await l1Bridge.claimFailedDeposit((await this._providerL2().getNetwork()).chainId, calldata['_l1Sender'], calldata['_l1Token'], calldata['_amount'], depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});
+                // todo: generally, providing token address is not required for the NTV
+                // this sdk does it, but we should support the case even when it is not given
+                const assetData = (0, utils_1.encodeNTVTransferData)(calldata['_amount'], calldata['_l2Receiver'], calldata['_l1Token']);
+                const assetId = await l1ntv.assetId(calldata['_l1Token']);
+                if (assetId == ethers_1.ethers.ZeroHash) {
+                    throw new Error(`Token ${calldata['_l1Token']} not registered in NTV`);
+                }
+                // todo: this SDK assumes that users used new encoding version,
+                // however in general it should be capable of working with hte old version as well
+                return await l1AR['bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])']((await this._providerL2().getNetwork()).chainId, calldata['_l1Sender'], // depositSender
+                assetId, // asset id
+                assetData, depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});
             }
-            catch {
+            catch (e) {
                 const calldata = l2ARInterface.decodeFunctionData('finalizeDeposit', tx.data);
+                const assetId = calldata['_assetId'];
                 const transferData = calldata['_transferData'];
+                const l1TokenAddress = await l1ntv.tokenAddress(assetId);
                 const transferDataDecoded = ethers_1.ethers.AbiCoder.defaultAbiCoder().decode(['address', 'address', 'address', 'uint256', 'bytes'], transferData);
-                const assetData = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address'], [transferDataDecoded[3], transferDataDecoded[1]]);
+                const assetData = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [transferDataDecoded[3], transferDataDecoded[1], l1TokenAddress]);
                 const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
                 if (!proof) {
                     throw new Error('Log proof not found!');

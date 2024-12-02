@@ -585,7 +585,7 @@ function JsonRpcApiProvider(ProviderType) {
                 const bridge = await this.connectL2AssetRouter();
                 const chainId = Number((await this.getNetwork()).chainId);
                 const assetId = ethers_1.ethers.keccak256(ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-                const assetData = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address'], [tx.amount, tx.to]);
+                const assetData = (0, utils_1.encodeNTVTransferData)(BigInt(tx.amount), tx.to, tx.token);
                 populatedTx = await bridge.withdraw.populateTransaction(assetId, assetData, tx.overrides);
             }
             else {

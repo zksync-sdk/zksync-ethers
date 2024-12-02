@@ -73,6 +73,7 @@ import {
   applyL1ToL2Alias,
   L2_ASSET_ROUTER_ADDRESS,
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
+  encodeNTVTransferData,
 } from './utils';
 import {Signer} from './signer';
 
@@ -810,11 +811,8 @@ export function JsonRpcApiProvider<
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
         const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-        const assetData = ethers.AbiCoder.defaultAbiCoder().encode(
-          ['uint256', 'address'],
-          [tx.amount, tx.to]
-        );
-
+        const assetData = encodeNTVTransferData(BigInt(tx.amount), tx.to!, tx.token);
+    
         populatedTx = await bridge.withdraw.populateTransaction(
           assetId,
           assetData,
