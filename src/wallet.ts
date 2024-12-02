@@ -1462,7 +1462,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       populated.value ??= 0;
       populated.data ??= '0x';
       populated.customData = this._fillCustomData(tx.customData ?? {});
-      populated.nonce = populated.nonce ?? (await this.getNonce());
+      populated.nonce = populated.nonce ?? (await this.getNonce('pending'));
       populated.chainId =
         populated.chainId ?? (await this.provider.getNetwork()).chainId;
 

@@ -143,7 +143,7 @@ describe('SmartAccount', async () => {
         type: utils.EIP712_TX_TYPE,
         from: ADDRESS1,
         nonce: await account.getNonce('pending'),
-        gasLimit: 156_726n,
+        gasLimit: 155_974n,
         chainId: 270n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
@@ -590,7 +590,6 @@ describe('SmartAccount', async () => {
         });
         await withdrawTx.waitFinalize();
         expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
-
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
         );
