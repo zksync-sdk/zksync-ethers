@@ -1,3 +1,11 @@
+## [6.15.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.1...v6.15.2) (2024-12-02)
+
+
+### Bug Fixes
+
+* link to docs in readme ([f93470a](https://github.com/zksync-sdk/zksync-ethers/commit/f93470afc3fd86877b592401860a48d7932f3472))
+* use correct tag for populating `nonce` ([283ba7b](https://github.com/zksync-sdk/zksync-ethers/commit/283ba7bc362e3473d7dae204403c3450739cdb7a))
+
 ## [6.15.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.0...v6.15.1) (2024-11-21)
 
 
