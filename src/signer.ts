@@ -664,7 +664,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         type: tx.type ?? EIP712_TX_TYPE,
         value: tx.value ?? 0,
         data: tx.data ?? '0x',
-        nonce: tx.nonce ?? (await this.getNonce()),
+        nonce: tx.nonce ?? (await this.getNonce('pending')),
         maxFeePerGas: tx.gasPrice ?? tx.maxFeePerGas,
         maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
         gasLimit: tx.gasLimit,
