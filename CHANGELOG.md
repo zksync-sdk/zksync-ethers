@@ -1,3 +1,10 @@
+## [6.15.3](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.2...v6.15.3) (2024-12-06)
+
+
+### Bug Fixes
+
+* allow null for `totalDifficulty` ([4681d5b](https://github.com/zksync-sdk/zksync-ethers/commit/4681d5b887f652e1f7d050b4c40f80763169e110))
+
 ## [6.15.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.1...v6.15.2) (2024-12-02)
 
 
