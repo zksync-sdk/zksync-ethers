@@ -73,7 +73,7 @@ export class EIP712Signer {
    * const PRIVATE_KEY = "<PRIVATE_KEY>";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
+   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY), Number((await provider.getNetwork()).chainId));
    */
   constructor(
     private ethSigner: ethers.Signer,

@@ -1112,7 +1112,6 @@ export function JsonRpcApiProvider<
      * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
      *
      * @param providerL1 The Ethers provider for the L1 network.
-     * @param providerL2 The ZKsync provider for the L2 network.
      * @param token The address of the token to be bridged.
      * @param amount The deposit amount.
      * @param to The recipient address on the L2 network.
@@ -1172,7 +1171,6 @@ export function JsonRpcApiProvider<
     /**
      * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
      *
-     * @param providerL2 The ZKsync provider for the L2 network.
      * @param l1BridgeAddress The address of the custom L1 bridge.
      * @param l2BridgeAddress The address of the custom L2 bridge.
      * @param token The address of the token to be bridged.
