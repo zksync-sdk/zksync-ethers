@@ -700,7 +700,102 @@ declare const L1Signer_base: {
             token: string;
             amount: BigNumberish;
             to?: string | undefined;
-            operatorTip?: BigNumberish | undefined;
+            operatorTip?: BigNumberish | undefined; /**
+             * @inheritDoc
+             *
+             * @example Get allowance parameters for depositing ETH on ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = "<L1_TOKEN>";
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             *
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * @example Get allowance parameters for depositing ETH on non-ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = utils.LEGACY_ETH_ADDRESS;
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * @example Get allowance parameters for depositing base token on non-ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = await signer.getBaseToken();
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * @example Get allowance parameters for depositing non-base token on non-ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = "<L1_TOKEN>";
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             *
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[1].token,
+             *        approveParams[1].allowance
+             *    )
+             * ).wait();
+             */
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
@@ -781,23 +876,6 @@ declare const L1Signer_base: {
             overrides?: ethers.Overrides | undefined;
         }): Promise<ethers.ContractTransaction>;
         _getDepositETHOnETHBasedChainTx(transaction: {
-            /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const params = await signer.finalizeWithdrawalParams(WITHDRAWAL_HASH);
-             */
             token: string;
             amount: BigNumberish;
             to?: string | undefined;
@@ -2082,7 +2160,102 @@ declare const L1VoidSigner_base: {
             token: string;
             amount: BigNumberish;
             to?: string | undefined;
-            operatorTip?: BigNumberish | undefined;
+            operatorTip?: BigNumberish | undefined; /**
+             * @inheritDoc
+             *
+             * @example Get allowance parameters for depositing ETH on ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = "<L1_TOKEN>";
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             *
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * @example Get allowance parameters for depositing ETH on non-ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = utils.LEGACY_ETH_ADDRESS;
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * @example Get allowance parameters for depositing base token on non-ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = await signer.getBaseToken();
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * @example Get allowance parameters for depositing non-base token on non-ETH-based chain.
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const token = "<L1_TOKEN>";
+             * const amount = 5;
+             * const approveParams = await signer.getDepositAllowanceParams(token, amount);
+             *
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[0].token,
+             *        approveParams[0].allowance
+             *    )
+             * ).wait();
+             *
+             * await (
+             *    await signer.approveERC20(
+             *        approveParams[1].token,
+             *        approveParams[1].allowance
+             *    )
+             * ).wait();
+             */
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
@@ -2163,23 +2336,6 @@ declare const L1VoidSigner_base: {
             overrides?: ethers.Overrides | undefined;
         }): Promise<ethers.ContractTransaction>;
         _getDepositETHOnETHBasedChainTx(transaction: {
-            /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const params = await signer.finalizeWithdrawalParams(WITHDRAWAL_HASH);
-             */
             token: string;
             amount: BigNumberish;
             to?: string | undefined;
