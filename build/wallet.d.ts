@@ -316,19 +316,6 @@ declare const Wallet_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
-            /**
-             * Creates a new `Wallet` from encrypted json file using provided `password`.
-             *
-             * @param json The encrypted json file.
-             * @param password The password for the encrypted json file.
-             *
-             * @example
-             *
-             * import { Wallet } from "zksync-ethers";
-             * import * as fs from "fs";
-             *
-             * const wallet = Wallet.fromEncryptedJsonSync(fs.readFileSync("tests/files/wallet.json", "utf8"), "password");
-             */
             overrides?: ethers.Overrides | undefined;
         }): Promise<BigNumberish>;
         _getL2GasLimitFromCustomBridge(transaction: {

@@ -32,7 +32,8 @@ import {
   resolveAssetId,
   ethAssetId,
   encodeNTVTransferData,
-  encodeSecondBridgeDataV1
+  encodeSecondBridgeDataV1,
+  L2_ASSET_ROUTER_ADDRESS
 } from './utils';
 import {
   IAssetRouterBase,
@@ -1549,54 +1550,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         proof,
       } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
-      let l1Bridge: IL1Bridge | IL1SharedBridge | IL1AssetRouter | undefined;
-      let l1Nullifier: IL1Nullifier | undefined;
-      if (isAddressEq(sender, L2_BASE_TOKEN_ADDRESS)) {
-        l1Nullifier = IL1Nullifier__factory.connect(
-          await this.getL1NullifierAddress(),
-          this._signerL1()
-        );
-      } else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
-        l1Nullifier = IL1Nullifier__factory.connect(
-          await this.getL1NullifierAddress(),
-          this._signerL1()
-        );
-      } else {
-        const l2Bridge = IL2Bridge__factory.connect(sender, this._providerL2());
-        const bridgeAddress = await l2Bridge.l1Bridge();
-        l1Bridge = IL1AssetRouter__factory.connect(
-          bridgeAddress,
-          this._signerL1()
-        );
-      }
+      const l1Nullifier = IL1Nullifier__factory.connect(
+        await this.getL1NullifierAddress(),
+        this._signerL1()
+      );
+   
+      const finalizeL1DepositParams: FinalizeL1DepositParamsStruct = {
+        chainId: (await this._providerL2().getNetwork())
+          .chainId as BigNumberish,
+        l2BatchNumber: l1BatchNumber as BigNumberish,
+        l2MessageIndex: l2MessageIndex as BigNumberish,
+        l2Sender: sender,
+        l2TxNumberInBatch: l2TxNumberInBlock as BigNumberish,
+        message: message,
+        merkleProof: proof,
+      };
 
-      if (l1Bridge != undefined) {
-        return await l1Bridge.finalizeWithdrawal(
-          (await this._providerL2().getNetwork()).chainId as BigNumberish,
-          l1BatchNumber as BigNumberish,
-          l2MessageIndex as BigNumberish,
-          l2TxNumberInBlock as BigNumberish,
-          message,
-          proof,
-          overrides ?? {}
-        );
-      } else {
-        const finalizeL1DepositParams: FinalizeL1DepositParamsStruct = {
-          chainId: (await this._providerL2().getNetwork())
-            .chainId as BigNumberish,
-          l2BatchNumber: l1BatchNumber as BigNumberish,
-          l2MessageIndex: l2MessageIndex as BigNumberish,
-          l2Sender: sender,
-          l2TxNumberInBatch: l2TxNumberInBlock as BigNumberish,
-          message: message,
-          merkleProof: proof,
-        };
-        // We assume that either `l1Nullifier` or `l1Bridge` variable are true. 
-        return await l1Nullifier!.finalizeDeposit(
-          finalizeL1DepositParams,
-          overrides ?? {}
-        );
-      }
+      return await l1Nullifier.finalizeDeposit(
+        finalizeL1DepositParams,
+        overrides ?? {}
+      );
     }
 
     /**

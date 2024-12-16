@@ -844,36 +844,18 @@ function AdapterL1(Base) {
          */
         async finalizeWithdrawal(withdrawalHash, index = 0, overrides) {
             const { l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, sender, proof, } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
-            let l1Bridge;
-            let l1Nullifier;
-            if ((0, utils_1.isAddressEq)(sender, utils_1.L2_BASE_TOKEN_ADDRESS)) {
-                l1Nullifier = typechain_1.IL1Nullifier__factory.connect(await this.getL1NullifierAddress(), this._signerL1());
-            }
-            else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
-                l1Nullifier = typechain_1.IL1Nullifier__factory.connect(await this.getL1NullifierAddress(), this._signerL1());
-            }
-            else {
-                const l2Bridge = typechain_1.IL2Bridge__factory.connect(sender, this._providerL2());
-                const bridgeAddress = await l2Bridge.l1Bridge();
-                l1Bridge = typechain_1.IL1AssetRouter__factory.connect(bridgeAddress, this._signerL1());
-            }
-            if (l1Bridge != undefined) {
-                return await l1Bridge.finalizeWithdrawal((await this._providerL2().getNetwork()).chainId, l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, proof, overrides ?? {});
-            }
-            else {
-                const finalizeL1DepositParams = {
-                    chainId: (await this._providerL2().getNetwork())
-                        .chainId,
-                    l2BatchNumber: l1BatchNumber,
-                    l2MessageIndex: l2MessageIndex,
-                    l2Sender: sender,
-                    l2TxNumberInBatch: l2TxNumberInBlock,
-                    message: message,
-                    merkleProof: proof,
-                };
-                // We assume that either `l1Nullifier` or `l1Bridge` variable are true. 
-                return await l1Nullifier.finalizeDeposit(finalizeL1DepositParams, overrides ?? {});
-            }
+            const l1Nullifier = typechain_1.IL1Nullifier__factory.connect(await this.getL1NullifierAddress(), this._signerL1());
+            const finalizeL1DepositParams = {
+                chainId: (await this._providerL2().getNetwork())
+                    .chainId,
+                l2BatchNumber: l1BatchNumber,
+                l2MessageIndex: l2MessageIndex,
+                l2Sender: sender,
+                l2TxNumberInBatch: l2TxNumberInBlock,
+                message: message,
+                merkleProof: proof,
+            };
+            return await l1Nullifier.finalizeDeposit(finalizeL1DepositParams, overrides ?? {});
         }
         /**
          * Returns whether the withdrawal transaction is finalized on the L1 network.
