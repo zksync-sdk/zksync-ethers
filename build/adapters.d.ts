@@ -523,6 +523,12 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          */
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         /**
+         * Returns L1 Nullifier address.
+         *
+         * @returns A promise that resolves to the address of the L1 Nullifier address
+         */
+        getL1NullifierAddress(): Promise<Address>;
+        /**
          * Proves the inclusion of the `L2->L1` withdrawal message.
          *
          * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.

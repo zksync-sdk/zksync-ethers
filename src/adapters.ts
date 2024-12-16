@@ -1513,6 +1513,19 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     /**
+     * Returns L1 Nullifier address.
+     *
+     * @returns A promise that resolves to the address of the L1 Nullifier address
+     */
+    async getL1NullifierAddress(): Promise<Address> {
+      const addresses = await this._providerL2().getDefaultBridgeAddresses();
+      return await IL1AssetRouter__factory.connect(
+        addresses.sharedL1,
+        this._signerL1()
+      ).L1_NULLIFIER();
+    }
+
+    /**
      * Proves the inclusion of the `L2->L1` withdrawal message.
      *
      * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
@@ -1536,18 +1549,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         proof,
       } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
-      let l1Bridge: IL1Bridge | IL1SharedBridge | IL1AssetRouter;
+      let l1Bridge: IL1Bridge | IL1SharedBridge | IL1AssetRouter | undefined;
       let l1Nullifier: IL1Nullifier | undefined;
       if (isAddressEq(sender, L2_BASE_TOKEN_ADDRESS)) {
-        l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
-        const l2Bridge = IL2SharedBridge__factory.connect(
-          sender,
-          this._providerL2()
+        l1Nullifier = IL1Nullifier__factory.connect(
+          await this.getL1NullifierAddress(),
+          this._signerL1()
         );
-        const bridgeAddress = await l2Bridge.l1SharedBridge();
-        l1Bridge = IL1SharedBridge__factory.connect(
-          bridgeAddress,
+      } else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
+        l1Nullifier = IL1Nullifier__factory.connect(
+          await this.getL1NullifierAddress(),
           this._signerL1()
         );
       } else {
@@ -1557,14 +1568,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           bridgeAddress,
           this._signerL1()
         );
-        const l1NullifierAddress = await l1Bridge.L1_NULLIFIER();
-        l1Nullifier = IL1Nullifier__factory.connect(
-          l1NullifierAddress,
-          this._signerL1()
-        );
       }
 
-      if (l1Nullifier == undefined) {
+      if (l1Bridge != undefined) {
         return await l1Bridge.finalizeWithdrawal(
           (await this._providerL2().getNetwork()).chainId as BigNumberish,
           l1BatchNumber as BigNumberish,
@@ -1585,7 +1591,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           message: message,
           merkleProof: proof,
         };
-        return await l1Nullifier.finalizeDeposit(
+        // We assume that either `l1Nullifier` or `l1Bridge` variable are true. 
+        return await l1Nullifier!.finalizeDeposit(
           finalizeL1DepositParams,
           overrides ?? {}
         );
