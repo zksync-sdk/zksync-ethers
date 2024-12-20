@@ -1718,7 +1718,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         );
 
         const assetId = await l1ntv.assetId(calldata['_l1Token']);
-        if (assetId == ethers.ZeroHash) {
+        if (assetId === ethers.ZeroHash) {
           throw new Error(
             `Token ${calldata['_l1Token']} not registered in NTV`
           );

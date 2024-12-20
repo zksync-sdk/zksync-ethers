@@ -25,7 +25,6 @@ import IERC1271ABI from '../abi/IERC1271.json';
 import IL1BridgeABI from '../abi/IL1ERC20Bridge.json';
 import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
-import {encode} from 'punycode';
 
 export * from './paymaster-utils';
 export * from './smart-account-utils';
