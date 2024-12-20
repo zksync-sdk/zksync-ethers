@@ -797,8 +797,8 @@ export function JsonRpcApiProvider<
       const l1ChainId = await this.getL1ChainId();
 
       const isTokenL1Native =
-        originChainId == BigInt(l1ChainId) ||
-        tx.token == ETH_ADDRESS_IN_CONTRACTS;
+        originChainId === BigInt(l1ChainId) ||
+        tx.token === ETH_ADDRESS_IN_CONTRACTS;
       if (!tx.bridgeAddress) {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
         tx.bridgeAddress = isTokenL1Native
