@@ -65,6 +65,7 @@ describe('ContractFactory', () => {
       const bytecode: string = Storage.contracts['Storage.sol:Storage'].bin;
       const factory = new ContractFactory(abi, bytecode, wallet);
       const contract = await factory.deploy();
+      await contract.waitForDeployment();
 
       const code = await provider.getCode(await contract.getAddress());
       expect(code).not.to.be.null;
@@ -119,6 +120,7 @@ describe('ContractFactory', () => {
       const contract = await factory.deploy({
         customData: {salt: ethers.hexlify(ethers.randomBytes(32))},
       });
+      await contract.waitForDeployment();
 
       const code = await provider.getCode(await contract.getAddress());
       expect(code).not.to.be.null;

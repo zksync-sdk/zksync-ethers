@@ -1326,6 +1326,11 @@ export function JsonRpcApiProvider<
             Array.from(ethers.getBytes(dep))
         );
       }
+      if (tx.customData.customSignature) {
+        result.eip712Meta.customSignature = Array.from(
+          ethers.getBytes(tx.customData.customSignature)
+        );
+      }
       if (tx.customData.paymasterParams) {
         result.eip712Meta.paymasterParams = {
           paymaster: ethers.hexlify(tx.customData.paymasterParams.paymaster),
@@ -1381,8 +1386,12 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
     const isLocalNetwork =
       typeof url === 'string'
-        ? url.includes('localhost') || url.includes('127.0.0.1')
-        : url.url.includes('localhost') || url.url.includes('127.0.0.1');
+        ? url.includes('localhost') ||
+          url.includes('127.0.0.1') ||
+          url.includes('0.0.0.0')
+        : url.url.includes('localhost') ||
+          url.url.includes('127.0.0.1') ||
+          url.url.includes('0.0.0.0');
 
     const optionsWithDisabledCache = isLocalNetwork
       ? {...options, cacheTimeout: -1}

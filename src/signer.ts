@@ -707,6 +707,15 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         tx.maxFeePerGas ??= fee.maxFeePerGas;
         tx.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
       }
+      if (
+        tx.type === null ||
+        tx.type === undefined ||
+        tx.type === EIP712_TX_TYPE ||
+        tx.customData
+      ) {
+        tx.customData ??= {};
+        tx.customData.gasPerPubdata = fee.gasPerPubdataLimit;
+      }
     }
     return tx;
   }
@@ -879,6 +888,28 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    */
   override async l2TokenAddress(token: Address): Promise<string> {
     return super.l2TokenAddress(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const tokenL2 = "0xe1134444211593Cfda9fc9eCc7B43208615556E2";
+   *
+   * console.log(`Token L1 address: ${await wallet.l1TokenAddress(tokenL1)}`);
+   */
+  override async l1TokenAddress(token: Address): Promise<string> {
+    return super.l1TokenAddress(token);
   }
 
   /**

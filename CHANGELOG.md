@@ -1,3 +1,84 @@
+## [6.15.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.1...v6.15.2) (2024-12-02)
+
+
+### Bug Fixes
+
+* link to docs in readme ([f93470a](https://github.com/zksync-sdk/zksync-ethers/commit/f93470afc3fd86877b592401860a48d7932f3472))
+* use correct tag for populating `nonce` ([283ba7b](https://github.com/zksync-sdk/zksync-ethers/commit/283ba7bc362e3473d7dae204403c3450739cdb7a))
+
+## [6.15.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.0...v6.15.1) (2024-11-21)
+
+
+### Bug Fixes
+
+* create2 and create2Account deploy with Contract2Factory contract ([9cae26c](https://github.com/zksync-sdk/zksync-ethers/commit/9cae26c8d0e1f3636c848e9c759f6e399e284087))
+
+# [6.15.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.3...v6.15.0) (2024-11-06)
+
+
+### Features
+
+* **provider:** consider `0.0.0.0` url as localhost ([563773b](https://github.com/zksync-sdk/zksync-ethers/commit/563773b6f357eceb6c2bce5bb039043a9e6caa41))
+
+## [6.14.3](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.2...v6.14.3) (2024-11-05)
+
+
+### Bug Fixes
+
+* include custom signature in estimateGas calls ([703690d](https://github.com/zksync-sdk/zksync-ethers/commit/703690d4ed436cfe8d87dfe9f727ecc2e2d0fd84))
+
+## [6.14.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.1...v6.14.2) (2024-11-01)
+
+
+### Bug Fixes
+
+* **contract:** fix `waitForDeployment` missing `startBlock` ([8ce644f](https://github.com/zksync-sdk/zksync-ethers/commit/8ce644f862650f579fe29ffcf8e6be8040364d4e))
+
+## [6.14.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.14.0...v6.14.1) (2024-10-30)
+
+
+### Bug Fixes
+
+* **contract:** `deploy` not returning block nubmer ([7167496](https://github.com/zksync-sdk/zksync-ethers/commit/7167496f27bd3d800d50a10f229fc35462c8d617))
+
+# [6.14.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.13.1...v6.14.0) (2024-10-11)
+
+
+### Features
+
+* **adapter:** add `l1TokenAddress` method ([4243db6](https://github.com/zksync-sdk/zksync-ethers/commit/4243db6f159edc63737dc8f26a81f42c0d4338f8))
+
+## [6.13.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.13.0...v6.13.1) (2024-10-07)
+
+
+### Bug Fixes
+
+* **provider:** `estimateDefaultBridgeDepositL2Gas` use `ETH_ADDRESS_IN_CONTRACTS` for base token ([4116460](https://github.com/zksync-sdk/zksync-ethers/commit/411646077c7f252625170350d6aff3d8b8a56792))
+
+# [6.13.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.12.1...v6.13.0) (2024-09-26)
+
+
+### Bug Fixes
+
+* **tyoes:** add missing field for `FeeParams` ([456c73a](https://github.com/zksync-sdk/zksync-ethers/commit/456c73a00f1d97a0811eceba47575a33d40aacb2))
+
+
+### Features
+
+* utilize estimated `gasPerPubData` ([9f98f75](https://github.com/zksync-sdk/zksync-ethers/commit/9f98f7575e8592c1bd6cc20bc5e5a6ac735211b8))
+
+# [6.13.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.12.1...v6.13.0) (2024-09-26)
+
+
+### Bug Fixes
+
+* **tyoes:** add missing field for `FeeParams` ([456c73a](https://github.com/zksync-sdk/zksync-ethers/commit/456c73a00f1d97a0811eceba47575a33d40aacb2))
+
+
+### Features
+
+* utilize estimated `gasPerPubData` ([9f98f75](https://github.com/zksync-sdk/zksync-ethers/commit/9f98f7575e8592c1bd6cc20bc5e5a6ac735211b8))
+
 ## [6.12.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.12.0...v6.12.1) (2024-09-06)
 
 
