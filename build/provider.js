@@ -965,6 +965,9 @@ function JsonRpcApiProvider(ProviderType) {
                 //  We should change deserialization there.
                 Array.from(ethers_1.ethers.getBytes(dep)));
             }
+            if (tx.customData.customSignature) {
+                result.eip712Meta.customSignature = Array.from(ethers_1.ethers.getBytes(tx.customData.customSignature));
+            }
             if (tx.customData.paymasterParams) {
                 result.eip712Meta.paymasterParams = {
                     paymaster: ethers_1.ethers.hexlify(tx.customData.paymasterParams.paymaster),
@@ -996,8 +999,12 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
             url = 'http://127.0.0.1:3050';
         }
         const isLocalNetwork = typeof url === 'string'
-            ? url.includes('localhost') || url.includes('127.0.0.1')
-            : url.url.includes('localhost') || url.url.includes('127.0.0.1');
+            ? url.includes('localhost') ||
+                url.includes('127.0.0.1') ||
+                url.includes('0.0.0.0')
+            : url.url.includes('localhost') ||
+                url.url.includes('127.0.0.1') ||
+                url.url.includes('0.0.0.0');
         const optionsWithDisabledCache = isLocalNetwork
             ? { ...options, cacheTimeout: -1 }
             : options;

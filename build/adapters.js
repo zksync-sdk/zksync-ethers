@@ -113,6 +113,17 @@ function AdapterL1(Base) {
             return this._providerL2().l2TokenAddress(token);
         }
         /**
+         * Returns the L1 token address equivalent for a L2 token address as they are not equal.
+         * ETH address is set to zero address.
+         *
+         * @remarks Only works for tokens bridged on default ZKsync Era bridges.
+         *
+         * @param token The address of the token on L2.
+         */
+        async l1TokenAddress(token) {
+            return this._providerL2().l1TokenAddress(token);
+        }
+        /**
          * Bridging ERC20 tokens from L1 requires approving the tokens to the ZKsync Era smart contract.
          *
          * @param token The L1 address of the token.

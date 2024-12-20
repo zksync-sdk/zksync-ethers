@@ -25,7 +25,7 @@ import IERC1271ABI from '../abi/IERC1271.json';
 import IL1BridgeABI from '../abi/IL1ERC20Bridge.json';
 import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
-import { encode } from 'punycode';
+import {encode} from 'punycode';
 
 export * from './paymaster-utils';
 export * from './smart-account-utils';
@@ -1409,7 +1409,9 @@ export async function estimateDefaultBridgeDepositL2Gas(
   // due to storage slot aggregation, the gas estimation will depend on the address
   // and so estimation for the zero address may be smaller than for the sender.
   from ??= ethers.Wallet.createRandom().address;
-  token = isAddressEq(token, LEGACY_ETH_ADDRESS) ? ETH_ADDRESS_IN_CONTRACTS : token;
+  token = isAddressEq(token, LEGACY_ETH_ADDRESS)
+    ? ETH_ADDRESS_IN_CONTRACTS
+    : token;
   if (await providerL2.isBaseToken(token)) {
     return await providerL2.estimateL1ToL2Execute({
       contractAddress: to,
@@ -1595,7 +1597,10 @@ export function isAddressEq(a: Address, b: Address): boolean {
 
 export function encodeNTVAssetId(chainId: bigint, address: string) {
   const abi = new AbiCoder();
-  const hex = abi.encode(["uint256", "address", "address"], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, address]);
+  const hex = abi.encode(
+    ['uint256', 'address', 'address'],
+    [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, address]
+  );
   return ethers.keccak256(hex);
 }
 
@@ -1615,7 +1620,7 @@ interface WithAssetId {
 
 // For backwards compatibility and easier interface lots of methods
 // will continue to allow providing either token or assetId
-export type WithTokenOrAssetId = WithToken | WithAssetId;  
+export type WithTokenOrAssetId = WithToken | WithAssetId;
 
 export async function resolveAssetId(
   info: WithTokenOrAssetId,
@@ -1625,10 +1630,10 @@ export async function resolveAssetId(
   if (potentialAssetId) {
     return [potentialAssetId, false];
   }
-  
+
   let token = (info as any).token as Address;
-  if(!token) {
-    throw new Error("Neither token nor assetId were provided");
+  if (!token) {
+    throw new Error('Neither token nor assetId were provided');
   }
 
   if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
@@ -1646,26 +1651,29 @@ export async function resolveAssetId(
   // There are two cases when it is possible:
   // - The token is native to L1 (it may or may not be bridged), but it has not been
   // registered within NTV after the Gateway upgrade. We assume that this is not the case
-  // as the SDK is expected to work only after the full migration is done.  
-  // - The token is native to the current chain and it has never been bridged. 
+  // as the SDK is expected to work only after the full migration is done.
+  // - The token is native to the current chain and it has never been bridged.
 
   const network = await ntvContract.runner?.provider?.getNetwork();
 
-  if(!network) {
+  if (!network) {
     throw new Error('Can not derive assetId since chainId is not available');
   }
 
   const ntvAssetId = encodeNTVAssetId(network.chainId, token);
 
   return [ntvAssetId, true];
-} 
+}
 
 export function encodeNTVTransferData(
   amount: bigint,
   receiver: Address,
-  token: Address,
+  token: Address
 ) {
-  return (new AbiCoder()).encode(['uint256', 'address', 'address'], [amount, receiver, token]);
+  return new AbiCoder().encode(
+    ['uint256', 'address', 'address'],
+    [amount, receiver, token]
+  );
 }
 
 export function encodeSecondBridgeDataV1(

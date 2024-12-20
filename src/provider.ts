@@ -810,9 +810,18 @@ export function JsonRpcApiProvider<
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-        const assetData = encodeNTVTransferData(BigInt(tx.amount), tx.to!, tx.token);
-    
+        const assetId = ethers.keccak256(
+          ethers.AbiCoder.defaultAbiCoder().encode(
+            ['uint256', 'address', 'address'],
+            [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
+          )
+        );
+        const assetData = encodeNTVTransferData(
+          BigInt(tx.amount),
+          tx.to!,
+          tx.token
+        );
+
         populatedTx = await bridge.withdraw.populateTransaction(
           assetId,
           assetData,

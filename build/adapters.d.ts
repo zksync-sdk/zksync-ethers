@@ -75,6 +75,15 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          */
         l2TokenAddress(token: Address): Promise<string>;
         /**
+         * Returns the L1 token address equivalent for a L2 token address as they are not equal.
+         * ETH address is set to zero address.
+         *
+         * @remarks Only works for tokens bridged on default ZKsync Era bridges.
+         *
+         * @param token The address of the token on L2.
+         */
+        l1TokenAddress(token: Address): Promise<string>;
+        /**
          * Bridging ERC20 tokens from L1 requires approving the tokens to the ZKsync Era smart contract.
          *
          * @param token The L1 address of the token.

@@ -33,7 +33,7 @@ import {
   ethAssetId,
   encodeNTVTransferData,
   encodeSecondBridgeDataV1,
-  L2_ASSET_ROUTER_ADDRESS
+  L2_ASSET_ROUTER_ADDRESS,
 } from './utils';
 import {
   IAssetRouterBase,
@@ -368,7 +368,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     async getNativeTokenVaultL1(): Promise<ethers.Contract> {
       // FIXME: maybe makes sense to provide an API to do it in one call
-      const bridgeContracts = await this._providerL2().getDefaultBridgeAddresses();
+      const bridgeContracts =
+        await this._providerL2().getDefaultBridgeAddresses();
 
       const sharedBridge = bridgeContracts.sharedL1;
       const l1AR = IL1AssetRouter__factory.connect(
@@ -381,8 +382,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return IL1NativeTokenVault__factory.connect(
         l1NtvAddress,
         this._providerL1()
-      // FIXME: unfortunately this is the sort of transformation we need to make
-      // most likely typechain is from other ethers version
+        // FIXME: unfortunately this is the sort of transformation we need to make
+        // most likely typechain is from other ethers version
       ) as any as ethers.Contract;
     }
 
@@ -886,9 +887,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       await checkBaseCost(baseCost, mintValue);
       overrides.value ??= 0;
 
-      const [assetId, _] = await resolveAssetId({ token }, await this.getNativeTokenVaultL1());
+      const [assetId, _] = await resolveAssetId(
+        {token},
+        await this.getNativeTokenVaultL1()
+      );
       const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
-  
 
       const secondBridgeCalldata = encodeSecondBridgeDataV1(
         ethers.hexlify(assetId),
@@ -1007,8 +1010,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const mintValue = baseCost + BigInt(operatorTip);
       await checkBaseCost(baseCost, mintValue);
 
-      const [assetId, _] = await resolveAssetId({ token: ETH_ADDRESS_IN_CONTRACTS }, await this.getNativeTokenVaultL1());
-      const ntvData = encodeNTVTransferData(BigInt(amount), to, ETH_ADDRESS_IN_CONTRACTS);
+      const [assetId, _] = await resolveAssetId(
+        {token: ETH_ADDRESS_IN_CONTRACTS},
+        await this.getNativeTokenVaultL1()
+      );
+      const ntvData = encodeNTVTransferData(
+        BigInt(amount),
+        to,
+        ETH_ADDRESS_IN_CONTRACTS
+      );
 
       const secondBridgeCalldata = encodeSecondBridgeDataV1(
         ethers.hexlify(assetId),
@@ -1062,7 +1072,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         gasPerPubdataByte,
       } = tx;
 
-      const [assetId, _] = await resolveAssetId({ token }, await this.getNativeTokenVaultL1());
+      const [assetId, _] = await resolveAssetId(
+        {token},
+        await this.getNativeTokenVaultL1()
+      );
       const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
 
       const gasPriceForEstimation =
@@ -1082,7 +1095,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         tx.bridgeAddress ??
         (await (await this.getL1BridgeContracts()).shared.getAddress());
 
-      const secondBridgeCalldata = encodeSecondBridgeDataV1(ethers.hexlify(assetId), ntvData);
+      const secondBridgeCalldata = encodeSecondBridgeDataV1(
+        ethers.hexlify(assetId),
+        ntvData
+      );
 
       return await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
         {
@@ -1566,7 +1582,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         await this.getL1NullifierAddress(),
         this._signerL1()
       );
-   
+
       const finalizeL1DepositParams: FinalizeL1DepositParamsStruct = {
         chainId: (await this._providerL2().getNetwork())
           .chainId as BigNumberish,
@@ -1702,8 +1718,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         );
 
         const assetId = await l1ntv.assetId(calldata['_l1Token']);
-        if(assetId == ethers.ZeroHash) {
-          throw new Error(`Token ${calldata['_l1Token']} not registered in NTV`);
+        if (assetId == ethers.ZeroHash) {
+          throw new Error(
+            `Token ${calldata['_l1Token']} not registered in NTV`
+          );
         }
 
         // todo: this SDK assumes that users used new encoding version,
@@ -1722,7 +1740,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           proof.proof,
           overrides ?? {}
         );
-      } catch(e) {
+      } catch (e) {
         const calldata = l2ARInterface.decodeFunctionData(
           'finalizeDeposit',
           tx.data

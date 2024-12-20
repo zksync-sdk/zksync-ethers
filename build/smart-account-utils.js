@@ -180,8 +180,7 @@ const populateTransactionECDSA = async (tx, secret, provider) => {
     populatedTx.value = populatedTx.value ? BigInt(populatedTx.value) : 0n;
     populatedTx.data ?? (populatedTx.data = '0x');
     populatedTx.customData = tx.customData ?? {};
-    (_a = populatedTx.customData).gasPerPubdata ?? (_a.gasPerPubdata = utils_1.DEFAULT_GAS_PER_PUBDATA_LIMIT);
-    (_b = populatedTx.customData).factoryDeps ?? (_b.factoryDeps = []);
+    (_a = populatedTx.customData).factoryDeps ?? (_a.factoryDeps = []);
     populatedTx.from ?? (populatedTx.from = new ethers_1.ethers.Wallet(secret).address);
     if (populatedTx.gasPrice &&
         (populatedTx.maxFeePerGas || populatedTx.maxPriorityFeePerGas)) {
@@ -202,6 +201,7 @@ const populateTransactionECDSA = async (tx, secret, provider) => {
             from: fromToUse,
         });
         populatedTx.gasLimit ?? (populatedTx.gasLimit = fee.gasLimit);
+        (_b = populatedTx.customData).gasPerPubdata ?? (_b.gasPerPubdata = fee.gasPerPubdataLimit);
         if (!populatedTx.gasPrice) {
             populatedTx.maxFeePerGas ?? (populatedTx.maxFeePerGas = fee.maxFeePerGas);
             populatedTx.maxPriorityFeePerGas ?? (populatedTx.maxPriorityFeePerGas = fee.maxPriorityFeePerGas);

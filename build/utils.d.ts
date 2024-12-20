@@ -20,6 +20,11 @@ export declare const BRIDGEHUB_ABI: ethers.Interface;
  */
 export declare const CONTRACT_DEPLOYER: ethers.Interface;
 /**
+ * The ABI for the `Contract2Factory` interface, which is utilized for deploying smart contracts using CREATE2 and CREATE2ACCOUNT.
+ * @constant
+ */
+export declare const CONTRACT_2_FACTORY: ethers.Interface;
+/**
  * The ABI for the `IL1Messenger` interface, which is utilized for sending messages from the L2 to L1.
  * @constant
  */
@@ -74,6 +79,11 @@ export declare const BOOTLOADER_FORMAL_ADDRESS: Address;
  * @constant
  */
 export declare const CONTRACT_DEPLOYER_ADDRESS: Address;
+/**
+ * The address of the Contract2Factory.
+ * @constant
+ */
+export declare const CONTRACT_2_FACTORY_ADDRESS: Address;
 /**
  * The address of the L1 messenger.
  * @constant
