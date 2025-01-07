@@ -23,14 +23,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IZkSyncHyperchain__factory = exports.IZkSync__factory = exports.ITestnetERC20Token__factory = exports.IPaymasterFlow__factory = exports.INonceHolder__factory = exports.IL2SharedBridge__factory = exports.IL2NativeTokenVault__factory = exports.IL2Bridge__factory = exports.IL2AssetRouter__factory = exports.IL1SharedBridge__factory = exports.IL1Nullifier__factory = exports.IL1NativeTokenVault__factory = exports.IL1Messenger__factory = exports.IL1ERC20Bridge__factory = exports.IL1Bridge__factory = exports.IL1AssetRouter__factory = exports.IEthToken__factory = exports.IERC20__factory = exports.IERC1271__factory = exports.IContractDeployer__factory = exports.IBridgehub__factory = exports.Contract2Factory__factory = exports.IBridgedStandardToken__factory = exports.IAssetRouterBase__factory = exports.factories = void 0;
+exports.IZkSyncHyperchain__factory = exports.IZkSync__factory = exports.ITestnetERC20Token__factory = exports.IPaymasterFlow__factory = exports.INonceHolder__factory = exports.IL2SharedBridge__factory = exports.IL2NativeTokenVault__factory = exports.IL2Bridge__factory = exports.IL2AssetRouter__factory = exports.IL1SharedBridge__factory = exports.IL1Nullifier__factory = exports.IL1NativeTokenVault__factory = exports.IL1Messenger__factory = exports.IL1ERC20Bridge__factory = exports.IL1Bridge__factory = exports.IL1AssetRouter__factory = exports.IEthToken__factory = exports.IERC20__factory = exports.IERC1271__factory = exports.IContractDeployer__factory = exports.IBridgehub__factory = exports.IBridgedStandardToken__factory = exports.IAssetRouterBase__factory = exports.Contract2Factory__factory = exports.factories = void 0;
 exports.factories = __importStar(require("./factories"));
+var Contract2Factory__factory_1 = require("./factories/Contract2Factory__factory");
+Object.defineProperty(exports, "Contract2Factory__factory", { enumerable: true, get: function () { return Contract2Factory__factory_1.Contract2Factory__factory; } });
 var IAssetRouterBase__factory_1 = require("./factories/IAssetRouterBase__factory");
 Object.defineProperty(exports, "IAssetRouterBase__factory", { enumerable: true, get: function () { return IAssetRouterBase__factory_1.IAssetRouterBase__factory; } });
 var IBridgedStandardToken__factory_1 = require("./factories/IBridgedStandardToken__factory");
 Object.defineProperty(exports, "IBridgedStandardToken__factory", { enumerable: true, get: function () { return IBridgedStandardToken__factory_1.IBridgedStandardToken__factory; } });
-var Contract2Factory__factory_1 = require("./factories/Contract2Factory__factory");
-Object.defineProperty(exports, "Contract2Factory__factory", { enumerable: true, get: function () { return Contract2Factory__factory_1.Contract2Factory__factory; } });
 var IBridgehub__factory_1 = require("./factories/IBridgehub__factory");
 Object.defineProperty(exports, "IBridgehub__factory", { enumerable: true, get: function () { return IBridgehub__factory_1.IBridgehub__factory; } });
 var IContractDeployer__factory_1 = require("./factories/IContractDeployer__factory");

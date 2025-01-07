@@ -1,6 +1,6 @@
+export type { Contract2Factory } from "./Contract2Factory";
 export type { IAssetRouterBase } from "./IAssetRouterBase";
 export type { IBridgedStandardToken } from "./IBridgedStandardToken";
-export type { Contract2Factory } from "./Contract2Factory";
 export type { IBridgehub } from "./IBridgehub";
 export type { IContractDeployer } from "./IContractDeployer";
 export type { IERC1271 } from "./IERC1271";
@@ -23,9 +23,9 @@ export type { ITestnetERC20Token } from "./ITestnetERC20Token";
 export type { IZkSync } from "./IZkSync";
 export type { IZkSyncHyperchain } from "./IZkSyncHyperchain";
 export * as factories from "./factories";
+export { Contract2Factory__factory } from "./factories/Contract2Factory__factory";
 export { IAssetRouterBase__factory } from "./factories/IAssetRouterBase__factory";
 export { IBridgedStandardToken__factory } from "./factories/IBridgedStandardToken__factory";
-export { Contract2Factory__factory } from "./factories/Contract2Factory__factory";
 export { IBridgehub__factory } from "./factories/IBridgehub__factory";
 export { IContractDeployer__factory } from "./factories/IContractDeployer__factory";
 export { IERC1271__factory } from "./factories/IERC1271__factory";
