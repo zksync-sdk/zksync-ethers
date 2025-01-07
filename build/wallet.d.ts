@@ -43,24 +43,6 @@ declare const Wallet_base: {
         getBridgehubContract(): Promise<IBridgehub>;
         getL1BridgeContracts(): Promise<{
             erc20: IL1ERC20Bridge;
-            /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-             *
-             * console.log(`Token balance: ${await wallet.getBalanceL1(tokenL1)}`);
-             */
             weth: IL1ERC20Bridge;
             shared: IL1SharedBridge;
         }>;
@@ -71,22 +53,7 @@ declare const Wallet_base: {
         l2TokenAddress(token: string): Promise<string>;
         l1TokenAddress(token: string): Promise<string>;
         approveERC20(token: string, amount: BigNumberish, overrides?: (ethers.Overrides & {
-            bridgeAddress?: string | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * console.log(`Base token: ${await wallet.getBaseToken()}`);
-             */
+            bridgeAddress?: string | undefined;
         }) | undefined): Promise<ethers.TransactionResponse>;
         getBaseCost(params: {
             gasLimit: BigNumberish;
@@ -298,23 +265,7 @@ declare const Wallet_base: {
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
-            customBridgeData?: BytesLike | undefined; /**
-             * Connects to the L2 network using `provider`.
-             *
-             * @param provider The provider instance for connecting to an L2 network.
-             *
-             * @see {@link connectToL1} in order to connect to L1 network.
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types } from "zksync-ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             * const unconnectedWallet = new Wallet(PRIVATE_KEY);
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const wallet = unconnectedWallet.connect(provider);
-             */
+            customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
         }): Promise<{
@@ -340,22 +291,7 @@ declare const Wallet_base: {
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
-            gasPerPubdataByte?: BigNumberish | undefined; /**
-             * Creates a new `Wallet` with the `provider` as L1 provider and a private key that is built from the mnemonic passphrase.
-             *
-             * @param mnemonic The mnemonic of the private key.
-             * @param [provider] The provider instance for connecting to a L1 network.
-             *
-             * @example
-             *
-             * import { Wallet, Provider, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const MNEMONIC = "stuff slice staff easily soup parent arm payment cotton hammer scatter struggle";
-             *
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = Wallet.fromMnemonic(MNEMONIC, ethProvider);
-             */
+            gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
@@ -388,7 +324,7 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            bridgeAddress?: string | undefined; /**
+            /**
              *
              * @param privateKey The private key of the account.
              * @param providerL2 The provider instance for connecting to a L2 network.
@@ -405,64 +341,18 @@ declare const Wallet_base: {
              * const ethProvider = ethers.getDefaultProvider("sepolia");
              * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
              */
+            bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
         }): Promise<BigNumberish>;
-        /**
-         * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
-         * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
-         * Any other fields that are not set will be prepared by this method.
-         *
-         * @param tx The transaction request that needs to be populated.
-         *
-         * @example
-         *
-         * import { Wallet, Provider, types, utils } from "zksync-ethers";
-         * import { ethers } from "ethers";
-         *
-         * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-         *
-         * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-         * const ethProvider = ethers.getDefaultProvider("sepolia");
-         * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-         *
-         * const populatedTx = await wallet.populateTransaction({
-         *   type: utils.EIP712_TX_TYPE,
-         *   to: RECEIVER,
-         *   value: 7_000_000_000n,
-         * });
-         */
         getFullRequiredDepositFee(transaction: {
             token: string;
             to?: string | undefined;
             bridgeAddress?: string | undefined;
-            customBridgeData?: BytesLike | undefined; /**
-             * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
-             * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
-             * Any other fields that are not set will be prepared by this method.
-             *
-             * @param tx The transaction request that needs to be populated.
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const populatedTx = await wallet.populateTransaction({
-             *   type: utils.EIP712_TX_TYPE,
-             *   to: RECEIVER,
-             *   value: 7_000_000_000n,
-             * });
-             */
+            customBridgeData?: BytesLike | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             overrides?: ethers.Overrides | undefined;
         }): Promise<FullDepositFee>;

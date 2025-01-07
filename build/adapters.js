@@ -949,7 +949,7 @@ function AdapterL1(Base) {
                 // this sdk does it, but we should support the case even when it is not given
                 const assetData = (0, utils_1.encodeNTVTransferData)(calldata['_amount'], calldata['_l2Receiver'], calldata['_l1Token']);
                 const assetId = await l1ntv.assetId(calldata['_l1Token']);
-                if (assetId == ethers_1.ethers.ZeroHash) {
+                if (assetId === ethers_1.ethers.ZeroHash) {
                     throw new Error(`Token ${calldata['_l1Token']} not registered in NTV`);
                 }
                 // todo: this SDK assumes that users used new encoding version,
