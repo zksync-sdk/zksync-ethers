@@ -572,8 +572,8 @@ function JsonRpcApiProvider(ProviderType) {
             const assetId = await ntv.assetId(tx.token);
             const originChainId = await ntv.originChainId(assetId);
             const l1ChainId = await this.getL1ChainId();
-            const isTokenL1Native = originChainId == BigInt(l1ChainId) ||
-                tx.token == utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            const isTokenL1Native = originChainId === BigInt(l1ChainId) ||
+                tx.token === utils_1.ETH_ADDRESS_IN_CONTRACTS;
             if (!tx.bridgeAddress) {
                 const bridgeAddresses = await this.getDefaultBridgeAddresses();
                 tx.bridgeAddress = isTokenL1Native
