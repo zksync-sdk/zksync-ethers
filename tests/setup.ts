@@ -22,8 +22,8 @@ const DAI_L1 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
 
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
-const TOKEN = '0x841c43Fa5d8fFfdB9efE3358906f7578d8700Dd4'; // deployed by using create2 and SALT
-const PAYMASTER = '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174'; // approval based paymaster for TOKEN deployed by using create2 and SALT
+const TOKEN = '0x2dc3685cA34163952CF4A5395b0039c00DFa851D'; // deployed by using create2 and SALT
+const PAYMASTER = '0x0EEc6f45108B4b806e27B81d9002e162BD910670'; // approval based paymaster for TOKEN deployed by using create2 and SALT
 
 // Deploys token and approval based paymaster for that token using create2 method.
 // Mints tokens to wallet and sends ETH to paymaster.
@@ -60,7 +60,6 @@ async function deployPaymasterAndToken(): Promise<{
     customData: {salt: SALT},
   });
   const paymasterAddress = await paymasterContract.getAddress();
-
   // transfer base token to paymaster so it could pay fee
   const faucetTx = await wallet.transfer({
     to: paymasterAddress,

@@ -116,6 +116,13 @@ export interface FeeParams {
             /** Maximum amount of public data allowed per batch. */
             max_pubdata_per_batch: bigint;
         };
+        /** Represents the BaseToken<->ETH conversion ratio. */
+        conversion_ratio: {
+            /** Represents the denominator part of the conversion ratio. */
+            denominator: bigint;
+            /** Represents the numerator part of the conversion ratio. */
+            numerator: bigint;
+        };
         /** Current L1 gas price. */
         l1_gas_price: bigint;
         /** Price of storing public data on L1. */

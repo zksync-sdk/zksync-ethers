@@ -75,6 +75,15 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          */
         l2TokenAddress(token: Address): Promise<string>;
         /**
+         * Returns the L1 token address equivalent for a L2 token address as they are not equal.
+         * ETH address is set to zero address.
+         *
+         * @remarks Only works for tokens bridged on default ZKsync Era bridges.
+         *
+         * @param token The address of the token on L2.
+         */
+        l1TokenAddress(token: Address): Promise<string>;
+        /**
          * Bridging ERC20 tokens from L1 requires approving the tokens to the ZKsync Era smart contract.
          *
          * @param token The L1 address of the token.
@@ -111,6 +120,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             token: Address;
             allowance: BigNumberish;
         }[]>;
+        getNativeTokenVaultL1(): Promise<ethers.Contract>;
         /**
          * Transfers the specified token from the associated account on the L1 network to the target account on the L2 network.
          * The token can be either ETH or any ERC20 token. For ERC20 tokens, enough approved tokens must be associated with
@@ -522,6 +532,12 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          */
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParamsWithoutProof>;
+        /**
+         * Returns L1 Nullifier address.
+         *
+         * @returns A promise that resolves to the address of the L1 Nullifier address
+         */
+        getL1NullifierAddress(): Promise<Address>;
         /**
          * Proves the inclusion of the `L2->L1` withdrawal message.
          *

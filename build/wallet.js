@@ -159,6 +159,27 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const ethProvider = ethers.getDefaultProvider("sepolia");
      * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
      *
+     * const tokenL2 = "0xe1134444211593Cfda9fc9eCc7B43208615556E2";
+     *
+     * console.log(`Token L1 address: ${await wallet.l1TokenAddress(tokenL1)}`);
+     */
+    async l1TokenAddress(token) {
+        return super.l1TokenAddress(token);
+    }
+    /**
+     * @inheritDoc
+     *
+     * @example
+     *
+     * import { Wallet, Provider, types, utils } from "zksync-ethers";
+     * import { ethers } from "ethers";
+     *
+     * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+     *
+     * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+     * const ethProvider = ethers.getDefaultProvider("sepolia");
+     * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+     *
      * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
      * const tx = await wallet.approveERC20(tokenL1, "10000000");
      *
@@ -1175,15 +1196,19 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * });
      */
     async populateTransaction(tx) {
+        var _a;
         const populated = (await this.populateCall(tx));
         if (populated.gasPrice &&
             (populated.maxFeePerGas || populated.maxPriorityFeePerGas)) {
             throw new Error('Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!');
         }
+        let fee;
         if (!populated.gasLimit ||
+            !tx.customData ||
+            !tx.customData.gasPerPubdata ||
             (!populated.gasPrice &&
                 (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))) {
-            const fee = await this.provider.estimateFee(populated);
+            fee = await this.provider.estimateFee(populated);
             populated.gasLimit ?? (populated.gasLimit = fee.gasLimit);
             if (!populated.gasPrice && populated.type === 0) {
                 populated.gasPrice = fee.maxFeePerGas;
@@ -1197,11 +1222,13 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
             tx.type === undefined ||
             tx.type === utils_1.EIP712_TX_TYPE ||
             tx.customData) {
+            tx.customData ?? (tx.customData = {});
+            (_a = tx.customData).gasPerPubdata ?? (_a.gasPerPubdata = fee.gasPerPubdataLimit);
             populated.type = utils_1.EIP712_TX_TYPE;
             populated.value ?? (populated.value = 0);
             populated.data ?? (populated.data = '0x');
             populated.customData = this._fillCustomData(tx.customData ?? {});
-            populated.nonce = populated.nonce ?? (await this.getNonce());
+            populated.nonce = populated.nonce ?? (await this.getNonce('pending'));
             populated.chainId =
                 populated.chainId ?? (await this.provider.getNetwork()).chainId;
             return populated;

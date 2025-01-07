@@ -585,7 +585,7 @@ function JsonRpcApiProvider(ProviderType) {
                 const bridge = await this.connectL2AssetRouter();
                 const chainId = Number((await this.getNetwork()).chainId);
                 const assetId = ethers_1.ethers.keccak256(ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-                const assetData = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address'], [tx.amount, tx.to]);
+                const assetData = (0, utils_1.encodeNTVTransferData)(BigInt(tx.amount), tx.to, tx.token);
                 populatedTx = await bridge.withdraw.populateTransaction(assetId, assetData, tx.overrides);
             }
             else {
@@ -967,6 +967,9 @@ function JsonRpcApiProvider(ProviderType) {
                 //  We should change deserialization there.
                 Array.from(ethers_1.ethers.getBytes(dep)));
             }
+            if (tx.customData.customSignature) {
+                result.eip712Meta.customSignature = Array.from(ethers_1.ethers.getBytes(tx.customData.customSignature));
+            }
             if (tx.customData.paymasterParams) {
                 result.eip712Meta.paymasterParams = {
                     paymaster: ethers_1.ethers.hexlify(tx.customData.paymasterParams.paymaster),
@@ -1010,8 +1013,12 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
             url = 'http://127.0.0.1:3050';
         }
         const isLocalNetwork = typeof url === 'string'
-            ? url.includes('localhost') || url.includes('127.0.0.1')
-            : url.url.includes('localhost') || url.url.includes('127.0.0.1');
+            ? url.includes('localhost') ||
+                url.includes('127.0.0.1') ||
+                url.includes('0.0.0.0')
+            : url.url.includes('localhost') ||
+                url.url.includes('127.0.0.1') ||
+                url.url.includes('0.0.0.0');
         const optionsWithDisabledCache = isLocalNetwork
             ? { ...options, cacheTimeout: -1 }
             : options;

@@ -41,12 +41,12 @@ class ContractFactory extends ethers_1.ethers.ContractFactory {
             ]);
         }
         else if (this.deploymentType === 'create2') {
-            return utils_1.CONTRACT_DEPLOYER.encodeFunctionData('create2', [
+            return utils_1.CONTRACT_2_FACTORY.encodeFunctionData('create2', [
                 ...contractDeploymentArgs,
             ]);
         }
         else if (this.deploymentType === 'create2Account') {
-            return utils_1.CONTRACT_DEPLOYER.encodeFunctionData('create2Account', [
+            return utils_1.CONTRACT_2_FACTORY.encodeFunctionData('create2Account', [
                 ...accountDeploymentArgs,
             ]);
         }
@@ -108,7 +108,10 @@ class ContractFactory extends ethers_1.ethers.ContractFactory {
             delete txRequest.customData.salt;
         const tx = {
             ...txRequest,
-            to: utils_1.CONTRACT_DEPLOYER_ADDRESS,
+            to: this.deploymentType === 'create2' ||
+                this.deploymentType === 'create2Account'
+                ? utils_1.CONTRACT_2_FACTORY_ADDRESS
+                : utils_1.CONTRACT_DEPLOYER_ADDRESS,
             data: deployCalldata,
             type: utils_1.EIP712_TX_TYPE,
         };
@@ -163,7 +166,12 @@ class ContractFactory extends ethers_1.ethers.ContractFactory {
         const deployTxReceipt = (await this.runner?.provider?.getTransactionReceipt(contract.deploymentTransaction().hash));
         const deployedAddresses = (0, utils_1.getDeployedContracts)(deployTxReceipt).map(info => info.deployedAddress);
         const contractWithCorrectAddress = new ethers_1.ethers.Contract(deployedAddresses[deployedAddresses.length - 1], contract.interface.fragments, contract.runner);
-        contractWithCorrectAddress.deploymentTransaction = () => contract.deploymentTransaction();
+        const deploymentTx = contract.deploymentTransaction();
+        deploymentTx.blockNumber = deployTxReceipt.blockNumber;
+        deploymentTx.blockHash = deployTxReceipt.blockHash;
+        deploymentTx.index = deployTxReceipt.index;
+        deploymentTx.gasPrice = deployTxReceipt.gasPrice;
+        contractWithCorrectAddress.deploymentTransaction = () => deploymentTx;
         return contractWithCorrectAddress;
     }
 }

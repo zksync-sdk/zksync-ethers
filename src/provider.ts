@@ -74,6 +74,7 @@ import {
   applyL1ToL2Alias,
   L2_ASSET_ROUTER_ADDRESS,
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
+  encodeNTVTransferData,
 } from './utils';
 import {Signer} from './signer';
 
@@ -797,8 +798,8 @@ export function JsonRpcApiProvider<
       const l1ChainId = await this.getL1ChainId();
 
       const isTokenL1Native =
-        originChainId == BigInt(l1ChainId) ||
-        tx.token == ETH_ADDRESS_IN_CONTRACTS;
+        originChainId === BigInt(l1ChainId) ||
+        tx.token === ETH_ADDRESS_IN_CONTRACTS;
       if (!tx.bridgeAddress) {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
         tx.bridgeAddress = isTokenL1Native
@@ -810,10 +811,16 @@ export function JsonRpcApiProvider<
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-        const assetData = ethers.AbiCoder.defaultAbiCoder().encode(
-          ['uint256', 'address'],
-          [tx.amount, tx.to]
+        const assetId = ethers.keccak256(
+          ethers.AbiCoder.defaultAbiCoder().encode(
+            ['uint256', 'address', 'address'],
+            [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
+          )
+        );
+        const assetData = encodeNTVTransferData(
+          BigInt(tx.amount),
+          tx.to!,
+          tx.token
         );
 
         populatedTx = await bridge.withdraw.populateTransaction(
@@ -1331,6 +1338,11 @@ export function JsonRpcApiProvider<
             Array.from(ethers.getBytes(dep))
         );
       }
+      if (tx.customData.customSignature) {
+        result.eip712Meta.customSignature = Array.from(
+          ethers.getBytes(tx.customData.customSignature)
+        );
+      }
       if (tx.customData.paymasterParams) {
         result.eip712Meta.paymasterParams = {
           paymaster: ethers.hexlify(tx.customData.paymasterParams.paymaster),
@@ -1402,8 +1414,12 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
 
     const isLocalNetwork =
       typeof url === 'string'
-        ? url.includes('localhost') || url.includes('127.0.0.1')
-        : url.url.includes('localhost') || url.url.includes('127.0.0.1');
+        ? url.includes('localhost') ||
+          url.includes('127.0.0.1') ||
+          url.includes('0.0.0.0')
+        : url.url.includes('localhost') ||
+          url.url.includes('127.0.0.1') ||
+          url.url.includes('0.0.0.0');
 
     const optionsWithDisabledCache = isLocalNetwork
       ? {...options, cacheTimeout: -1}

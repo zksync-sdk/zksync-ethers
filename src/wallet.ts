@@ -13,6 +13,7 @@ import {
 import {
   Address,
   BalancesMap,
+  Fee,
   FinalizeWithdrawalParams,
   FullDepositFee,
   PaymasterParams,
@@ -196,6 +197,28 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async l2TokenAddress(token: Address): Promise<string> {
     return super.l2TokenAddress(token);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @example
+   *
+   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   *
+   * const tokenL2 = "0xe1134444211593Cfda9fc9eCc7B43208615556E2";
+   *
+   * console.log(`Token L1 address: ${await wallet.l1TokenAddress(tokenL1)}`);
+   */
+  override async l1TokenAddress(token: Address): Promise<string> {
+    return super.l1TokenAddress(token);
   }
 
   /**
@@ -1438,12 +1461,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
       );
     }
+    let fee: Fee;
     if (
       !populated.gasLimit ||
+      !tx.customData ||
+      !tx.customData.gasPerPubdata ||
       (!populated.gasPrice &&
         (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))
     ) {
-      const fee = await this.provider.estimateFee(populated);
+      fee = await this.provider.estimateFee(populated);
       populated.gasLimit ??= fee.gasLimit;
       if (!populated.gasPrice && populated.type === 0) {
         populated.gasPrice = fee.maxFeePerGas;
@@ -1458,11 +1484,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       tx.type === EIP712_TX_TYPE ||
       tx.customData
     ) {
+      tx.customData ??= {};
+      tx.customData.gasPerPubdata ??= fee!.gasPerPubdataLimit;
       populated.type = EIP712_TX_TYPE;
       populated.value ??= 0;
       populated.data ??= '0x';
       populated.customData = this._fillCustomData(tx.customData ?? {});
-      populated.nonce = populated.nonce ?? (await this.getNonce());
+      populated.nonce = populated.nonce ?? (await this.getNonce('pending'));
       populated.chainId =
         populated.chainId ?? (await this.provider.getNetwork()).chainId;
 

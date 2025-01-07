@@ -11,7 +11,9 @@ import {
 } from 'ethers';
 import {
   CONTRACT_DEPLOYER,
+  CONTRACT_2_FACTORY,
   CONTRACT_DEPLOYER_ADDRESS,
+  CONTRACT_2_FACTORY_ADDRESS,
   DEFAULT_GAS_PER_PUBDATA_LIMIT,
   EIP712_TX_TYPE,
   getDeployedContracts,
@@ -74,11 +76,11 @@ export class ContractFactory<
         ...accountDeploymentArgs,
       ]);
     } else if (this.deploymentType === 'create2') {
-      return CONTRACT_DEPLOYER.encodeFunctionData('create2', [
+      return CONTRACT_2_FACTORY.encodeFunctionData('create2', [
         ...contractDeploymentArgs,
       ]);
     } else if (this.deploymentType === 'create2Account') {
-      return CONTRACT_DEPLOYER.encodeFunctionData('create2Account', [
+      return CONTRACT_2_FACTORY.encodeFunctionData('create2Account', [
         ...accountDeploymentArgs,
       ]);
     } else {
@@ -162,7 +164,11 @@ export class ContractFactory<
       delete txRequest.customData.salt;
     const tx = {
       ...txRequest,
-      to: CONTRACT_DEPLOYER_ADDRESS,
+      to:
+        this.deploymentType === 'create2' ||
+        this.deploymentType === 'create2Account'
+          ? CONTRACT_2_FACTORY_ADDRESS
+          : CONTRACT_DEPLOYER_ADDRESS,
       data: deployCalldata,
       type: EIP712_TX_TYPE,
     };
@@ -239,8 +245,14 @@ export class ContractFactory<
       deploymentTransaction(): ContractTransactionResponse;
     } & Omit<I, keyof BaseContract>;
 
-    contractWithCorrectAddress.deploymentTransaction = () =>
-      contract.deploymentTransaction()!;
+    const deploymentTx = contract.deploymentTransaction()!;
+
+    (deploymentTx as any).blockNumber = deployTxReceipt.blockNumber;
+    (deploymentTx as any).blockHash = deployTxReceipt.blockHash;
+    (deploymentTx as any).index = deployTxReceipt.index;
+    (deploymentTx as any).gasPrice = deployTxReceipt.gasPrice;
+
+    contractWithCorrectAddress.deploymentTransaction = () => deploymentTx;
     return contractWithCorrectAddress;
   }
 }

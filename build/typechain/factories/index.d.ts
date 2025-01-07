@@ -1,5 +1,6 @@
 export { IAssetRouterBase__factory } from "./IAssetRouterBase__factory";
 export { IBridgedStandardToken__factory } from "./IBridgedStandardToken__factory";
+export { Contract2Factory__factory } from "./Contract2Factory__factory";
 export { IBridgehub__factory } from "./IBridgehub__factory";
 export { IContractDeployer__factory } from "./IContractDeployer__factory";
 export { IERC1271__factory } from "./IERC1271__factory";
