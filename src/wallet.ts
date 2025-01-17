@@ -1467,7 +1467,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       !tx.customData ||
       !tx.customData.gasPerPubdata ||
       (!populated.gasPrice &&
-        (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))
+        (!populated.maxFeePerGas ||
+          populated.maxPriorityFeePerGas === null ||
+          populated.maxPriorityFeePerGas === undefined))
     ) {
       fee = await this.provider.estimateFee(populated);
       populated.gasLimit ??= fee.gasLimit;
