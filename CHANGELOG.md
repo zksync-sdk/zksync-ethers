@@ -1,3 +1,10 @@
+## [6.15.4](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.3...v6.15.4) (2025-01-17)
+
+
+### Bug Fixes
+
+* `populateTransaction` estimate fee only if necessary ([8c85348](https://github.com/zksync-sdk/zksync-ethers/commit/8c85348fe4a323f1d37c350d8d9963ffe1de1788))
+
 ## [6.15.3](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.2...v6.15.3) (2024-12-06)
 
 
