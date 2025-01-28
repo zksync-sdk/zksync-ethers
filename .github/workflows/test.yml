@@ -30,9 +30,9 @@ jobs:
           yarn types
           yarn build
           yarn test:build
-      - name: Run local-setup
+      - name: Run local-setup (specific branch)
         run: |
-          git clone https://github.com/matter-labs/local-setup.git
+          git clone --branch ra/local-setup-gateway https://github.com/matter-labs/local-setup.git
           pushd local-setup
           ./start-zk-chains.sh
           popd
