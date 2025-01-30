@@ -414,14 +414,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async getDepositAllowanceParams(
     token: Address,
-    amount: BigNumberish
+    amount: BigNumberish,
+    overrides?: ethers.Overrides
   ): Promise<
     {
       token: Address;
       allowance: BigNumberish;
     }[]
   > {
-    return super.getDepositAllowanceParams(token, amount);
+    return super.getDepositAllowanceParams(token, amount, overrides);
   }
 
   /**
