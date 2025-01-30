@@ -294,10 +294,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      *
      * @param token The address of the token to deposit.
      * @param amount The amount of the token to deposit.
+     * @param overrides Transaction's overrides for deposit which may be used to pass
+     * L1 `gasLimit`, `gasPrice`, `value`, etc.
      */
     async getDepositAllowanceParams(
       token: Address,
-      amount: BigNumberish
+      amount: BigNumberish,
+      overrides?: ethers.Overrides
     ): Promise<{token: Address; allowance: BigNumberish}[]> {
       if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
         token = ETH_ADDRESS_IN_CONTRACTS;
@@ -316,7 +319,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           {
             token: baseTokenAddress,
             allowance: (
-              await this._getDepositETHOnNonETHBasedChainTx({token, amount})
+              await this._getDepositETHOnNonETHBasedChainTx({
+                token,
+                amount,
+                overrides,
+              })
             ).mintValue,
           },
         ];
@@ -328,6 +335,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
               await this._getDepositBaseTokenOnNonETHBasedChainTx({
                 token,
                 amount,
+                overrides,
               })
             ).mintValue,
           },
@@ -341,6 +349,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
               await this._getDepositNonBaseTokenToNonETHBasedChainTx({
                 token,
                 amount,
+                overrides,
               })
             ).mintValue,
           },

@@ -1104,14 +1104,15 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    */
   override async getDepositAllowanceParams(
     token: Address,
-    amount: BigNumberish
+    amount: BigNumberish,
+    overrides?: ethers.Overrides
   ): Promise<
     {
       token: Address;
       allowance: BigNumberish;
     }[]
   > {
-    return super.getDepositAllowanceParams(token, amount);
+    return super.getDepositAllowanceParams(token, amount, overrides);
   }
 
   /**
