@@ -19,10 +19,16 @@ import {
 import {
   IERC20__factory,
   IEthToken__factory,
+  IL2AssetRouter,
+  IL2AssetRouter__factory,
   IL2Bridge,
   IL2Bridge__factory,
+  IL2NativeTokenVault,
+  IL2NativeTokenVault__factory,
   IL2SharedBridge,
   IL2SharedBridge__factory,
+  IBridgedStandardToken,
+  IBridgedStandardToken__factory,
 } from './typechain';
 import {
   Address,
@@ -56,6 +62,7 @@ import {
   CONTRACT_DEPLOYER,
   sleep,
   EIP712_TX_TYPE,
+  INTEROP_TX_TYPE,
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   BOOTLOADER_FORMAL_ADDRESS,
   ETH_ADDRESS_IN_CONTRACTS,
@@ -65,6 +72,9 @@ import {
   getERC20DefaultBridgeData,
   getERC20BridgeCalldata,
   applyL1ToL2Alias,
+  L2_ASSET_ROUTER_ADDRESS,
+  L2_NATIVE_TOKEN_VAULT_ADDRESS,
+  encodeNTVTransferData,
 } from './utils';
 import {Signer} from './signer';
 
@@ -506,6 +516,21 @@ export function JsonRpcApiProvider<
       return IL2SharedBridge__factory.connect(address, this);
     }
 
+    async connectL2NTV(): Promise<IL2NativeTokenVault> {
+      return IL2NativeTokenVault__factory.connect(
+        L2_NATIVE_TOKEN_VAULT_ADDRESS,
+        this
+      );
+    }
+
+    async connectBridgedToken(token: Address): Promise<IBridgedStandardToken> {
+      return IBridgedStandardToken__factory.connect(token, this);
+    }
+
+    async connectL2AssetRouter(): Promise<IL2AssetRouter> {
+      return IL2AssetRouter__factory.connect(L2_ASSET_ROUTER_ADDRESS, this);
+    }
+
     /**
      * Returns true if passed bridge address is legacy and false if its shared bridge.
      **
@@ -767,19 +792,51 @@ export function JsonRpcApiProvider<
         }
         return populatedTx;
       }
+      const ntv = await this.connectL2NTV();
+      const assetId = await ntv.assetId(tx.token);
+      const originChainId = await ntv.originChainId(assetId);
+      const l1ChainId = await this.getL1ChainId();
 
+      const isTokenL1Native =
+        originChainId === BigInt(l1ChainId) ||
+        tx.token === ETH_ADDRESS_IN_CONTRACTS;
       if (!tx.bridgeAddress) {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        tx.bridgeAddress = bridgeAddresses.sharedL2;
+        tx.bridgeAddress = isTokenL1Native
+          ? bridgeAddresses.sharedL2
+          : L2_ASSET_ROUTER_ADDRESS;
       }
 
-      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-      const populatedTx = await bridge.withdraw.populateTransaction(
-        tx.to!,
-        tx.token,
-        tx.amount,
-        tx.overrides
-      );
+      let populatedTx;
+      if (!isTokenL1Native) {
+        const bridge = await this.connectL2AssetRouter();
+        const chainId = Number((await this.getNetwork()).chainId);
+        const assetId = ethers.keccak256(
+          ethers.AbiCoder.defaultAbiCoder().encode(
+            ['uint256', 'address', 'address'],
+            [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
+          )
+        );
+        const assetData = encodeNTVTransferData(
+          BigInt(tx.amount),
+          tx.to!,
+          tx.token
+        );
+
+        populatedTx = await bridge.withdraw.populateTransaction(
+          assetId,
+          assetData,
+          tx.overrides
+        );
+      } else {
+        const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
+        populatedTx = await bridge.withdraw.populateTransaction(
+          tx.to!,
+          tx.token,
+          tx.amount,
+          tx.overrides
+        );
+      }
       if (tx.paymasterParams) {
         return {
           ...populatedTx,
@@ -992,13 +1049,15 @@ export function JsonRpcApiProvider<
       });
 
       const tx = Transaction.from(signedTx);
-      if (tx.hash !== hash) {
-        throw new Error('@TODO: the returned hash did not match!');
+      if (tx.hash !== hash && tx.type !== INTEROP_TX_TYPE) {
+        // throw new Error('@TODO: the returned hash did not match!');
       }
 
-      return this._wrapTransactionResponse(<any>tx).replaceableTransaction(
+      let result = this._wrapTransactionResponse(<any>tx).replaceableTransaction(
         blockNumber
       );
+      result.realInteropHash = hash;
+      return result;
     }
 
     /**
@@ -1155,9 +1214,7 @@ export function JsonRpcApiProvider<
         return await this.estimateCustomBridgeDepositL2Gas(
           l1BridgeAddress,
           l2BridgeAddress,
-          isAddressEq(token, LEGACY_ETH_ADDRESS)
-            ? ETH_ADDRESS_IN_CONTRACTS
-            : token,
+          token,
           amount,
           to,
           bridgeData,
@@ -1291,6 +1348,22 @@ export function JsonRpcApiProvider<
             ethers.getBytes(tx.customData.paymasterParams.paymasterInput)
           ),
         };
+      }
+      if (tx.customData.merkleProof)  {
+        result.eip712Meta.merkleProof = Array.from(
+          ethers.getBytes(tx.customData.merkleProof)
+        )
+      }
+      if (tx.customData.fullFee) {
+        result.eip712Meta.fullFee = ethers.toBeHex(tx.customData.fullFee);
+      }
+      if (tx.customData.toMint) {
+        result.eip712Meta.toMint = ethers.toBeHex(tx.customData.toMint);
+      }
+      if (tx.customData.refundRecipient) {
+        result.eip712Meta.refundRecipient = ethers.toBeHex(
+          tx.customData.refundRecipient
+        );
       }
       return result;
     }

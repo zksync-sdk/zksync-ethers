@@ -1,6 +1,6 @@
 import {EIP712Signer} from './signer';
 import {Provider} from './provider';
-import {EIP712_TX_TYPE, serializeEip712} from './utils';
+import {EIP712_TX_TYPE, INTEROP_TX_TYPE, serializeEip712} from './utils';
 import {
   BigNumberish,
   BlockTag,
@@ -1492,7 +1492,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       populated.type = EIP712_TX_TYPE;
       populated.value ??= 0;
       populated.data ??= '0x';
-      populated.customData = this._fillCustomData(tx.customData);
+      populated.customData = this._fillCustomData(tx.customData ?? {});
       populated.nonce = populated.nonce ?? (await this.getNonce('pending'));
       populated.chainId =
         populated.chainId ?? (await this.provider.getNetwork()).chainId;
@@ -1529,7 +1529,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async signTransaction(tx: TransactionRequest): Promise<string> {
     const populated = await this.populateTransaction(tx);
-    if (populated.type !== EIP712_TX_TYPE) {
+    if (populated.type === INTEROP_TX_TYPE) {
+      return serializeEip712(populated);
+    } else if (populated.type !== EIP712_TX_TYPE) {
       return await super.signTransaction(populated);
     }
 
