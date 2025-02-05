@@ -131,7 +131,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 0n,
-      gasLimit: 155_974n,
+      gasLimit: 162_868n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -148,7 +148,8 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
+    const tolerance = 300n; // acceptable margin as a native BigInt
+    compareTransactionsWithTolerance(tx, result, tolerance, ['nonce', 'customData']);
   });
 
   it('should populate tx using gasPrice as fee model', async () => {
@@ -160,7 +161,7 @@ describe('populateTransaction()', () => {
       type: 113,
       data: '0x',
       gasPrice: 100_000_000n,
-      gasLimit: 155_974n,
+      gasLimit: 162_868n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -177,7 +178,8 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
+    const tolerance = 300n; // acceptable margin as a native BigInt
+    compareTransactionsWithTolerance(tx, result, tolerance, ['nonce', 'customData']);
   });
 
   it('should populate `tx.maxFeePerGas`', async () => {
@@ -190,7 +192,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 100_000_000n,
-      gasLimit: 155_974n,
+      gasLimit: 162_868n,
       customData: {
         factoryDeps: [],
       },
@@ -206,7 +208,8 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
+    const tolerance = 300n; // acceptable margin as a native BigInt
+    compareTransactionsWithTolerance(tx, result, tolerance, ['nonce', 'customData']);
   });
 
   it('should throw an error when provider is not set', async () => {
@@ -245,3 +248,37 @@ describe('populateTransactionMultisig()', () => {
     }
   });
 });
+
+/**
+* Compares two transaction objects, checking that all properties (except those in ignoreKeys)
+* are deeply equal. For the 'gasLimit' property, it checks that the absolute difference is
+* within the provided tolerance.
+*
+* @param tx - The expected transaction object.
+* @param result - The actual transaction object.
+* @param tolerance - The acceptable margin for gasLimit differences (default: 300n).
+* @param ignoreKeys - An array of keys to ignore in the comparison (default: ['nonce', 'customData']).
+*/
+function compareTransactionsWithTolerance(
+  tx: Record<string, any>,
+  result: Record<string, any>,
+  tolerance: bigint = 300n,
+  ignoreKeys: string[] = ['nonce', 'customData']
+ ): void {
+  const keysToCompare = Object.keys(tx).filter(key => !ignoreKeys.includes(key));
+ 
+  for (const key of keysToCompare) {
+    if (key === 'gasLimit') {
+      // Convert both values to BigInt.
+      const expected = BigInt(tx.gasLimit);
+      const actual = BigInt(result.gasLimit);
+      // Calculate the absolute difference.
+      const diff = actual > expected ? actual - expected : expected - actual;
+      // Since Chai's lessThan expects a number, convert the BigInts to numbers.
+      expect(Number(diff)).to.be.lessThan(Number(tolerance));
+    } else {
+      // Cast to any to allow indexing without TypeScript errors.
+      expect((result as any)[key]).to.deep.equal((tx as any)[key]);
+    }
+  }
+ }

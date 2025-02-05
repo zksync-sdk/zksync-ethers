@@ -1866,7 +1866,7 @@ describe('Wallet', () => {
           overrides: {
             maxFeePerGas: 1_000_000_010n,
             maxPriorityFeePerGas: 1_000_000_000n,
-            gasLimit: 238_654n,
+            gasLimit: 638_654n,
             value: 0,
           },
         };
