@@ -10,6 +10,7 @@ import {
 } from '../../src/smart-account-utils';
 import {TypedDataEncoder, hashMessage} from 'ethers';
 import {ADDRESS1, PRIVATE_KEY1, ADDRESS2, L2_CHAIN_URL} from '../utils';
+import {compareTransactionsWithTolerance} from '../utils';
 
 const {expect} = chai;
 
@@ -257,39 +258,3 @@ describe('populateTransactionMultisig()', () => {
     }
   });
 });
-
-/**
- * Compares two transaction objects, checking that all properties (except those in ignoreKeys)
- * are deeply equal. For the 'gasLimit' property, it checks that the absolute difference is
- * within the provided tolerance.
- *
- * @param tx - The expected transaction object.
- * @param result - The actual transaction object.
- * @param tolerance - The acceptable margin for gasLimit differences (default: 300n).
- * @param ignoreKeys - An array of keys to ignore in the comparison (default: ['nonce', 'customData']).
- */
-function compareTransactionsWithTolerance(
-  tx: Record<string, any>,
-  result: Record<string, any>,
-  tolerance = 300n,
-  ignoreKeys: string[] = ['nonce', 'customData']
-): void {
-  const keysToCompare = Object.keys(tx).filter(
-    key => !ignoreKeys.includes(key)
-  );
-
-  for (const key of keysToCompare) {
-    if (key === 'gasLimit') {
-      // Convert both values to BigInt.
-      const expected = BigInt(tx.gasLimit);
-      const actual = BigInt(result.gasLimit);
-      // Calculate the absolute difference.
-      const diff = actual > expected ? actual - expected : expected - actual;
-      // Since Chai's lessThan expects a number, convert the BigInts to numbers.
-      expect(Number(diff)).to.be.lessThan(Number(tolerance));
-    } else {
-      // Cast to any to allow indexing without TypeScript errors.
-      expect((result as any)[key]).to.deep.equal((tx as any)[key]);
-    }
-  }
-}

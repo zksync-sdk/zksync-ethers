@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 export const ADDRESS1 = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
 export const PRIVATE_KEY1 =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
@@ -22,3 +24,39 @@ export const L2_CHAIN_URL = IS_ETH_BASED
   ? 'http://127.0.0.1:15100'
   : 'http://127.0.0.1:15200';
 export const L1_CHAIN_URL = 'http://127.0.0.1:15045';
+
+/**
+ * Compares two transaction objects, checking that all properties (except those in ignoreKeys)
+ * are deeply equal. For the 'gasLimit' property, it checks that the absolute difference is
+ * within the provided tolerance.
+ *
+ * @param tx - The expected transaction object.
+ * @param result - The actual transaction object.
+ * @param tolerance - The acceptable margin for gasLimit differences (default: 300n).
+ * @param ignoreKeys - An array of keys to ignore in the comparison (default: ['nonce', 'customData']).
+ */
+export function compareTransactionsWithTolerance(
+  tx: Record<string, any>,
+  result: Record<string, any>,
+  tolerance = 300n,
+  ignoreKeys: string[] = ['nonce', 'customData']
+): void {
+  const keysToCompare = Object.keys(tx).filter(
+    key => !ignoreKeys.includes(key)
+  );
+
+  for (const key of keysToCompare) {
+    if (key === 'gasLimit') {
+      // Convert both values to BigInt.
+      const expected = BigInt(tx.gasLimit);
+      const actual = BigInt(result.gasLimit);
+      // Calculate the absolute difference.
+      const diff = actual > expected ? actual - expected : expected - actual;
+      // Since Chai's lessThan expects a number, convert the BigInts to numbers.
+      expect(Number(diff)).to.be.lessThan(Number(tolerance));
+    } else {
+      // Cast to any to allow indexing without TypeScript errors.
+      expect((result as any)[key]).to.deep.equal((tx as any)[key]);
+    }
+  }
+}
