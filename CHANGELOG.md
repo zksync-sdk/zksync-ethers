@@ -1,3 +1,10 @@
+# [6.16.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.4...v6.16.0) (2025-01-30)
+
+
+### Features
+
+* **adapter:** add `overrides` param to `getDepositAllowanceParams` ([a67fc7c](https://github.com/zksync-sdk/zksync-ethers/commit/a67fc7c772e18f9feae79cf8b0037dfb6d428082))
+
 ## [6.15.4](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.3...v6.15.4) (2025-01-17)
 
 
