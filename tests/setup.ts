@@ -18,7 +18,9 @@ const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
-const DAI_L1 = process.env.CUSTOM_TOKEN_ADDRESS || '0xDb6ca4Dd98d4F7248f7dEaE35204706e10492Ef7';
+const DAI_L1 =
+  process.env.CUSTOM_TOKEN_ADDRESS ||
+  '0xDb6ca4Dd98d4F7248f7dEaE35204706e10492Ef7';
 
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
