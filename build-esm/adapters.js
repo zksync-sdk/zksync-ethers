@@ -166,8 +166,10 @@ export function AdapterL1(Base) {
          *
          * @param token The address of the token to deposit.
          * @param amount The amount of the token to deposit.
+         * @param overrides Transaction's overrides for deposit which may be used to pass
+         * L1 `gasLimit`, `gasPrice`, `value`, etc.
          */
-        async getDepositAllowanceParams(token, amount) {
+        async getDepositAllowanceParams(token, amount, overrides) {
             if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
                 token = ETH_ADDRESS_IN_CONTRACTS;
             }
@@ -183,7 +185,11 @@ export function AdapterL1(Base) {
                 return [
                     {
                         token: baseTokenAddress,
-                        allowance: (await this._getDepositETHOnNonETHBasedChainTx({ token, amount })).mintValue,
+                        allowance: (await this._getDepositETHOnNonETHBasedChainTx({
+                            token,
+                            amount,
+                            overrides,
+                        })).mintValue,
                     },
                 ];
             }
@@ -194,6 +200,7 @@ export function AdapterL1(Base) {
                         allowance: (await this._getDepositBaseTokenOnNonETHBasedChainTx({
                             token,
                             amount,
+                            overrides,
                         })).mintValue,
                     },
                 ];
@@ -206,6 +213,7 @@ export function AdapterL1(Base) {
                         allowance: (await this._getDepositNonBaseTokenToNonETHBasedChainTx({
                             token,
                             amount,
+                            overrides,
                         })).mintValue,
                     },
                     {

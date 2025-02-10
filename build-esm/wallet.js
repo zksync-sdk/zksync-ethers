@@ -340,8 +340,8 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
      *    )
      * ).wait();
      */
-    async getDepositAllowanceParams(token, amount) {
-        return super.getDepositAllowanceParams(token, amount);
+    async getDepositAllowanceParams(token, amount, overrides) {
+        return super.getDepositAllowanceParams(token, amount, overrides);
     }
     /**
      * @inheritDoc

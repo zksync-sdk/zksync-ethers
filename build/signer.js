@@ -956,8 +956,8 @@ class L1Signer extends (0, adapters_1.AdapterL1)(ethers_1.ethers.JsonRpcSigner) 
      *    )
      * ).wait();
      */
-    async getDepositAllowanceParams(token, amount) {
-        return super.getDepositAllowanceParams(token, amount);
+    async getDepositAllowanceParams(token, amount, overrides) {
+        return super.getDepositAllowanceParams(token, amount, overrides);
     }
     /**
      * @inheritDoc

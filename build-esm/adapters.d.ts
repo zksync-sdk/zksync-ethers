@@ -115,8 +115,10 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          *
          * @param token The address of the token to deposit.
          * @param amount The amount of the token to deposit.
+         * @param overrides Transaction's overrides for deposit which may be used to pass
+         * L1 `gasLimit`, `gasPrice`, `value`, etc.
          */
-        getDepositAllowanceParams(token: Address, amount: BigNumberish): Promise<{
+        getDepositAllowanceParams(token: Address, amount: BigNumberish, overrides?: ethers.Overrides): Promise<{
             token: Address;
             allowance: BigNumberish;
         }[]>;
