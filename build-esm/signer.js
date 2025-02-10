@@ -1,13 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.L1VoidSigner = exports.VoidSigner = exports.L2VoidSigner = exports.L1Signer = exports.Signer = exports.EIP712Signer = exports.EIP712_TYPES = void 0;
-const ethers_1 = require("ethers");
-const utils_1 = require("./utils");
-const adapters_1 = require("./adapters");
+import { ethers, copyRequest, } from 'ethers';
+import { DEFAULT_GAS_PER_PUBDATA_LIMIT, EIP712_TX_TYPE, hashBytecode, isAddressEq, serializeEip712, } from './utils';
+import { AdapterL1, AdapterL2 } from './adapters';
 /**
  * All typed data conforming to the EIP712 standard within ZKsync Era.
  */
-exports.EIP712_TYPES = {
+export const EIP712_TYPES = {
     Transaction: [
         { name: 'txType', type: 'uint256' },
         { name: 'from', type: 'uint256' },
@@ -27,7 +24,7 @@ exports.EIP712_TYPES = {
 /**
  * A `EIP712Signer` provides support for signing EIP712-typed ZKsync Era transactions.
  */
-class EIP712Signer {
+export class EIP712Signer {
     /**
      * @example
      *
@@ -71,9 +68,9 @@ class EIP712Signer {
     static getSignInput(transaction) {
         const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0n;
         const maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
-        const gasPerPubdataByteLimit = transaction.customData?.gasPerPubdata || utils_1.DEFAULT_GAS_PER_PUBDATA_LIMIT;
+        const gasPerPubdataByteLimit = transaction.customData?.gasPerPubdata || DEFAULT_GAS_PER_PUBDATA_LIMIT;
         return {
-            txType: transaction.type || utils_1.EIP712_TX_TYPE,
+            txType: transaction.type || EIP712_TX_TYPE,
             from: transaction.from,
             to: transaction.to,
             gasLimit: transaction.gasLimit || 0n,
@@ -81,11 +78,11 @@ class EIP712Signer {
             maxFeePerGas,
             maxPriorityFeePerGas,
             paymaster: transaction.customData?.paymasterParams?.paymaster ||
-                ethers_1.ethers.ZeroAddress,
+                ethers.ZeroAddress,
             nonce: transaction.nonce || 0,
             value: transaction.value || 0n,
             data: transaction.data || '0x',
-            factoryDeps: transaction.customData?.factoryDeps?.map((dep) => (0, utils_1.hashBytecode)(dep)) || [],
+            factoryDeps: transaction.customData?.factoryDeps?.map((dep) => hashBytecode(dep)) || [],
             paymasterInput: transaction.customData?.paymasterParams?.paymasterInput || '0x',
         };
     }
@@ -115,7 +112,7 @@ class EIP712Signer {
      * })
      */
     async sign(transaction) {
-        return await this.ethSigner.signTypedData(await this.eip712Domain, exports.EIP712_TYPES, EIP712Signer.getSignInput(transaction));
+        return await this.ethSigner.signTypedData(await this.eip712Domain, EIP712_TYPES, EIP712Signer.getSignInput(transaction));
     }
     /**
      * Hashes the transaction request using EIP712.
@@ -150,7 +147,7 @@ class EIP712Signer {
             version: '2',
             chainId: transaction.chainId,
         };
-        return ethers_1.ethers.TypedDataEncoder.hash(domain, exports.EIP712_TYPES, EIP712Signer.getSignInput(transaction));
+        return ethers.TypedDataEncoder.hash(domain, EIP712_TYPES, EIP712Signer.getSignInput(transaction));
     }
     /**
      * Returns ZKsync Era EIP712 domain.
@@ -170,7 +167,6 @@ class EIP712Signer {
         return await this.eip712Domain;
     }
 }
-exports.EIP712Signer = EIP712Signer;
 /* c8 ignore start */
 /**
  * A `Signer` is designed for frontend use with browser wallet injection (e.g., MetaMask),
@@ -178,7 +174,7 @@ exports.EIP712Signer = EIP712Signer;
  *
  * @see {@link L1Signer} for L1 operations.
  */
-class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
+export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     _signerL2() {
         return this;
     }
@@ -553,15 +549,15 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
         const tx = await this.populateFeeData(transaction);
         if (tx.type === null ||
             tx.type === undefined ||
-            tx.type === utils_1.EIP712_TX_TYPE ||
+            tx.type === EIP712_TX_TYPE ||
             tx.customData) {
             const address = await this.getAddress();
             tx.from ?? (tx.from = address);
-            if (!(0, utils_1.isAddressEq)(await ethers_1.ethers.resolveAddress(tx.from), address)) {
+            if (!isAddressEq(await ethers.resolveAddress(tx.from), address)) {
                 throw new Error('Transaction `from` address mismatch!');
             }
             const zkTx = {
-                type: tx.type ?? utils_1.EIP712_TX_TYPE,
+                type: tx.type ?? EIP712_TX_TYPE,
                 value: tx.value ?? 0,
                 data: tx.data ?? '0x',
                 nonce: tx.nonce ?? (await this.getNonce('pending')),
@@ -569,19 +565,19 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
                 maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
                 gasLimit: tx.gasLimit,
                 chainId: tx.chainId ?? (await this.provider.getNetwork()).chainId,
-                to: await ethers_1.ethers.resolveAddress(tx.to),
+                to: await ethers.resolveAddress(tx.to),
                 customData: this._fillCustomData(tx.customData ?? {}),
                 from: address,
             };
             zkTx.customData ?? (zkTx.customData = {});
             zkTx.customData.customSignature = await this.eip712.sign(zkTx);
-            const txBytes = (0, utils_1.serializeEip712)(zkTx);
+            const txBytes = serializeEip712(zkTx);
             return await this.provider.broadcastTransaction(txBytes);
         }
         return (await super.sendTransaction(tx));
     }
     async populateFeeData(transaction) {
-        const tx = (0, ethers_1.copyRequest)(transaction);
+        const tx = copyRequest(transaction);
         if (tx.gasPrice && (tx.maxFeePerGas || tx.maxPriorityFeePerGas)) {
             throw new Error('Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!');
         }
@@ -604,7 +600,7 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
             }
             if (tx.type === null ||
                 tx.type === undefined ||
-                tx.type === utils_1.EIP712_TX_TYPE ||
+                tx.type === EIP712_TX_TYPE ||
                 tx.customData) {
                 tx.customData ?? (tx.customData = {});
                 tx.customData.gasPerPubdata = fee.gasPerPubdataLimit;
@@ -613,14 +609,13 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
         return tx;
     }
 }
-exports.Signer = Signer;
 /**
  * A `L1Signer` is designed for frontend use with browser wallet injection (e.g., MetaMask),
  * providing only L1 operations.
  *
  * @see {@link Signer} for L2 operations.
  */
-class L1Signer extends (0, adapters_1.AdapterL1)(ethers_1.ethers.JsonRpcSigner) {
+export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     _providerL2() {
         return this.providerL2;
     }
@@ -1391,7 +1386,6 @@ class L1Signer extends (0, adapters_1.AdapterL1)(ethers_1.ethers.JsonRpcSigner) 
         return this;
     }
 }
-exports.L1Signer = L1Signer;
 /* c8 ignore stop */
 /**
  * @deprecated In favor of {@link VoidSigner}
@@ -1400,7 +1394,7 @@ exports.L1Signer = L1Signer;
  *
  * @see {@link L1VoidSigner} for L1 operations.
  */
-class L2VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner) {
+export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
     _signerL2() {
         return this;
     }
@@ -1450,12 +1444,12 @@ class L2VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner)
      * });
      */
     async populateTransaction(tx) {
-        if ((!tx.type || tx.type !== utils_1.EIP712_TX_TYPE) && !tx.customData) {
+        if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
             return (await super.populateTransaction(tx));
         }
         tx.type = 2;
         const populated = (await super.populateTransaction(tx));
-        populated.type = utils_1.EIP712_TX_TYPE;
+        populated.type = EIP712_TX_TYPE;
         populated.value ?? (populated.value = 0);
         populated.data ?? (populated.data = '0x');
         populated.customData = this._fillCustomData(tx.customData ?? {});
@@ -1469,13 +1463,12 @@ class L2VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner)
         return this.provider.broadcastTransaction(await this.signTransaction(populated));
     }
 }
-exports.L2VoidSigner = L2VoidSigner;
 /**
  * A `VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L2 operations.
  *
  * @see {@link L1VoidSigner} for L1 operations.
  */
-class VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner) {
+export class VoidSigner extends AdapterL2(ethers.VoidSigner) {
     _signerL2() {
         return this;
     }
@@ -1525,12 +1518,12 @@ class VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner) {
      * });
      */
     async populateTransaction(tx) {
-        if ((!tx.type || tx.type !== utils_1.EIP712_TX_TYPE) && !tx.customData) {
+        if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
             return (await super.populateTransaction(tx));
         }
         tx.type = 2;
         const populated = (await super.populateTransaction(tx));
-        populated.type = utils_1.EIP712_TX_TYPE;
+        populated.type = EIP712_TX_TYPE;
         populated.value ?? (populated.value = 0);
         populated.data ?? (populated.data = '0x');
         populated.customData = this._fillCustomData(tx.customData ?? {});
@@ -1544,13 +1537,12 @@ class VoidSigner extends (0, adapters_1.AdapterL2)(ethers_1.ethers.VoidSigner) {
         return this.provider.broadcastTransaction(await this.signTransaction(populated));
     }
 }
-exports.VoidSigner = VoidSigner;
 /**
  * A `L1VoidSigner` is an extension of {@link ethers.VoidSigner} class providing only L1 operations.
  *
  * @see {@link VoidSigner} for L2 operations.
  */
-class L1VoidSigner extends (0, adapters_1.AdapterL1)(ethers_1.ethers.VoidSigner) {
+export class L1VoidSigner extends AdapterL1(ethers.VoidSigner) {
     _providerL2() {
         if (!this.providerL2) {
             throw new Error('L2 provider missing: use `connectToL2` to specify!');
@@ -1636,5 +1628,4 @@ class L1VoidSigner extends (0, adapters_1.AdapterL1)(ethers_1.ethers.VoidSigner)
         return this;
     }
 }
-exports.L1VoidSigner = L1VoidSigner;
 //# sourceMappingURL=signer.js.map

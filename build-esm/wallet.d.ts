@@ -1,31 +1,520 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Wallet = void 0;
-const signer_1 = require("./signer");
-const utils_1 = require("./utils");
-const ethers_1 = require("ethers");
-const adapters_1 = require("./adapters");
+import { EIP712Signer } from './signer';
+import { Provider } from './provider';
+import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, Overrides, ProgressCallback } from 'ethers';
+import { Address, BalancesMap, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
+import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IL2SharedBridge, IZkSyncHyperchain } from './typechain';
+declare const Wallet_base: {
+    new (...args: any[]): {
+        _providerL2(): Provider;
+        _signerL2(): ethers.Signer;
+        getBalance(token?: string | undefined, blockTag?: BlockTag): Promise<bigint>;
+        getAllBalances(): Promise<BalancesMap>;
+        getDeploymentNonce(): Promise<bigint>;
+        getL2BridgeContracts(): Promise<{
+            erc20: IL2Bridge;
+            weth: IL2Bridge;
+            shared: IL2SharedBridge;
+        }>;
+        _fillCustomData(data: import("./types").Eip712Meta): import("./types").Eip712Meta;
+        withdraw(transaction: {
+            amount: BigNumberish;
+            token: string;
+            to?: string | undefined;
+            bridgeAddress?: string | undefined;
+            paymasterParams?: PaymasterParams | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<TransactionResponse>;
+        transfer(transaction: {
+            to: string;
+            amount: BigNumberish;
+            token?: string | undefined;
+            paymasterParams?: PaymasterParams | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<TransactionResponse>;
+        sendTransaction(tx: ethers.TransactionRequest): Promise<ethers.TransactionResponse>;
+        getAddress(): Promise<string>;
+    };
+} & {
+    new (...args: any[]): {
+        _providerL2(): Provider;
+        _providerL1(): ethers.Provider;
+        _signerL1(): ethers.Signer;
+        getMainContract(): Promise<IZkSyncHyperchain>;
+        getBridgehubContract(): Promise<IBridgehub>;
+        getL1BridgeContracts(): Promise<{
+            erc20: IL1ERC20Bridge;
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+             *
+             * console.log(`Token balance: ${await wallet.getBalanceL1(tokenL1)}`);
+             */
+            weth: IL1ERC20Bridge;
+            shared: IL1SharedBridge;
+        }>;
+        getBaseToken(): Promise<string>;
+        isETHBasedChain(): Promise<boolean>;
+        getBalanceL1(token?: string | undefined, blockTag?: BlockTag | undefined): Promise<bigint>;
+        getAllowanceL1(token: string, bridgeAddress?: string | undefined, blockTag?: BlockTag | undefined): Promise<bigint>;
+        l2TokenAddress(token: string): Promise<string>;
+        l1TokenAddress(token: string): Promise<string>;
+        approveERC20(token: string, amount: BigNumberish, overrides?: (ethers.Overrides & {
+            bridgeAddress?: string | undefined;
+        }) | undefined): Promise<ethers.TransactionResponse>;
+        getBaseCost(params: {
+            gasLimit: BigNumberish;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            gasPrice?: BigNumberish | undefined;
+        }): Promise<bigint>;
+        getDepositAllowanceParams(token: string, amount: BigNumberish): Promise<{
+            token: string;
+            allowance: BigNumberish;
+        }[]>;
+        getNativeTokenVaultL1(): Promise<ethers.Contract>;
+        deposit(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            approveERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+            approveOverrides?: ethers.Overrides | undefined;
+            approveBaseOverrides?: ethers.Overrides | undefined;
+            customBridgeData?: BytesLike | undefined;
+        }): Promise<PriorityOpResponse>;
+        _depositNonBaseTokenToNonETHBasedChain(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            approveERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+            approveOverrides?: ethers.Overrides | undefined;
+            approveBaseOverrides?: ethers.Overrides | undefined;
+            customBridgeData?: BytesLike | undefined;
+        }): Promise<PriorityOpResponse>;
+        _depositBaseTokenToNonETHBasedChain(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            approveERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+            approveOverrides?: ethers.Overrides | undefined;
+            approveBaseOverrides?: ethers.Overrides | undefined;
+            customBridgeData?: BytesLike | undefined;
+        }): Promise<PriorityOpResponse>;
+        _depositETHToNonETHBasedChain(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            approveERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+            approveOverrides?: ethers.Overrides | undefined;
+            approveBaseOverrides?: ethers.Overrides | undefined;
+            customBridgeData?: BytesLike | undefined;
+        }): Promise<PriorityOpResponse>;
+        _depositTokenToETHBasedChain(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            approveERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+            approveOverrides?: ethers.Overrides | undefined;
+            approveBaseOverrides?: ethers.Overrides | undefined;
+            customBridgeData?: BytesLike | undefined;
+        }): Promise<PriorityOpResponse>;
+        _depositETHToETHBasedChain(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            approveERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+            approveOverrides?: ethers.Overrides | undefined;
+            approveBaseOverrides?: ethers.Overrides | undefined;
+            customBridgeData?: BytesLike | undefined;
+        }): Promise<PriorityOpResponse>;
+        estimateGasDeposit(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            customBridgeData?: BytesLike | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<bigint>;
+        getDepositTx(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<any>;
+        _getDepositNonBaseTokenToNonETHBasedChainTx(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<{
+            tx: ethers.ContractTransaction;
+            mintValue: bigint;
+        }>;
+        _getDepositBaseTokenOnNonETHBasedChainTx(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<{
+            tx: {
+                token: string;
+                amount: BigNumberish;
+                to: string;
+                operatorTip: BigNumberish;
+                bridgeAddress?: string | undefined;
+                l2GasLimit: BigNumberish;
+                gasPerPubdataByte: BigNumberish;
+                customBridgeData?: BytesLike | undefined;
+                refundRecipient?: string | undefined;
+                overrides: ethers.Overrides;
+                contractAddress: string;
+                calldata: string;
+                mintValue: bigint;
+                l2Value: BigNumberish;
+            };
+            mintValue: bigint;
+        }>;
+        _getDepositETHOnNonETHBasedChainTx(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<{
+            tx: ethers.ContractTransaction;
+            mintValue: bigint;
+        }>;
+        _getDepositTokenOnETHBasedChainTx(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<ethers.ContractTransaction>;
+        _getDepositETHOnETHBasedChainTx(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined; /**
+             * Connects to the L2 network using `provider`.
+             *
+             * @param provider The provider instance for connecting to an L2 network.
+             *
+             * @see {@link connectToL1} in order to connect to L1 network.
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types } from "zksync-ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             * const unconnectedWallet = new Wallet(PRIVATE_KEY);
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const wallet = unconnectedWallet.connect(provider);
+             */
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<{
+            token: string;
+            amount: BigNumberish;
+            to: string;
+            operatorTip: BigNumberish;
+            bridgeAddress?: string | undefined;
+            l2GasLimit: BigNumberish;
+            gasPerPubdataByte: BigNumberish;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides: ethers.Overrides;
+            contractAddress: string;
+            calldata: string;
+            mintValue: BigNumberish;
+            l2Value: BigNumberish;
+        }>;
+        _getDepositTxWithDefaults(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined; /**
+             * Creates a new `Wallet` with the `provider` as L1 provider and a private key that is built from the mnemonic passphrase.
+             *
+             * @param mnemonic The mnemonic of the private key.
+             * @param [provider] The provider instance for connecting to a L1 network.
+             *
+             * @example
+             *
+             * import { Wallet, Provider, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const MNEMONIC = "stuff slice staff easily soup parent arm payment cotton hammer scatter struggle";
+             *
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = Wallet.fromMnemonic(MNEMONIC, ethProvider);
+             */
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<{
+            token: string;
+            amount: BigNumberish;
+            to: string;
+            operatorTip: BigNumberish;
+            bridgeAddress?: string | undefined;
+            l2GasLimit: BigNumberish;
+            gasPerPubdataByte: BigNumberish;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides: ethers.Overrides;
+        }>;
+        _getL2GasLimit(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined;
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<BigNumberish>;
+        _getL2GasLimitFromCustomBridge(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
+            operatorTip?: BigNumberish | undefined;
+            bridgeAddress?: string | undefined; /**
+             *
+             * @param privateKey The private key of the account.
+             * @param providerL2 The provider instance for connecting to a L2 network.
+             * @param providerL1 The provider instance for connecting to a L1 network.
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             */
+            l2GasLimit?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            customBridgeData?: BytesLike | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<BigNumberish>;
+        /**
+         * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
+         * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
+         * Any other fields that are not set will be prepared by this method.
+         *
+         * @param tx The transaction request that needs to be populated.
+         *
+         * @example
+         *
+         * import { Wallet, Provider, types, utils } from "zksync-ethers";
+         * import { ethers } from "ethers";
+         *
+         * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+         *
+         * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+         * const ethProvider = ethers.getDefaultProvider("sepolia");
+         * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+         *
+         * const populatedTx = await wallet.populateTransaction({
+         *   type: utils.EIP712_TX_TYPE,
+         *   to: RECEIVER,
+         *   value: 7_000_000_000n,
+         * });
+         */
+        getFullRequiredDepositFee(transaction: {
+            token: string;
+            to?: string | undefined;
+            bridgeAddress?: string | undefined;
+            customBridgeData?: BytesLike | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<FullDepositFee>;
+        getPriorityOpConfirmation(txHash: string, index?: number): Promise<{
+            l1BatchNumber: number;
+            l2MessageIndex: number;
+            l2TxNumberInBlock: number | null;
+            proof: string[];
+        }>;
+        _getWithdrawalLog(withdrawalHash: BytesLike, index?: number): Promise<{
+            log: import("./types").Log;
+            l1BatchTxId: number | null;
+        }>;
+        _getWithdrawalL2ToL1Log(withdrawalHash: BytesLike, index?: number): Promise<{
+            l2ToL1LogIndex: number;
+            l2ToL1Log: import("./types").L2ToL1Log;
+        }>;
+        finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getL1NullifierAddress(): Promise<string>;
+        finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
+        isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
+        claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
+        requestExecute(transaction: {
+            contractAddress: string;
+            calldata: string;
+            l2GasLimit?: BigNumberish | undefined;
+            mintValue?: BigNumberish | undefined;
+            l2Value?: BigNumberish | undefined;
+            factoryDeps?: BytesLike[] | undefined;
+            operatorTip?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<PriorityOpResponse>;
+        estimateGasRequestExecute(transaction: {
+            contractAddress: string;
+            calldata: string;
+            l2GasLimit?: BigNumberish | undefined;
+            mintValue?: BigNumberish | undefined;
+            l2Value?: BigNumberish | undefined;
+            factoryDeps?: BytesLike[] | undefined;
+            operatorTip?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<bigint>;
+        getRequestExecuteAllowanceParams(transaction: {
+            contractAddress: string;
+            calldata: string;
+            l2GasLimit?: BigNumberish | undefined;
+            l2Value?: BigNumberish | undefined;
+            factoryDeps?: BytesLike[] | undefined;
+            operatorTip?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<{
+            token: string;
+            allowance: BigNumberish;
+        }>;
+        getRequestExecuteTx(transaction: {
+            contractAddress: string;
+            calldata: string;
+            l2GasLimit?: BigNumberish | undefined;
+            mintValue?: BigNumberish | undefined;
+            l2Value?: BigNumberish | undefined;
+            factoryDeps?: BytesLike[] | undefined;
+            operatorTip?: BigNumberish | undefined;
+            gasPerPubdataByte?: BigNumberish | undefined;
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<ethers.TransactionRequest>;
+        sendTransaction(tx: ethers.TransactionRequest): Promise<ethers.TransactionResponse>;
+        getAddress(): Promise<string>;
+    };
+} & typeof ethers.Wallet;
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with ZKsync Era.
  * It facilitates bridging assets between different networks.
  * All transactions must originate from the address corresponding to the provided private key.
  */
-class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_1.ethers.Wallet)) {
-    _providerL1() {
-        if (!this.providerL1) {
-            throw new Error('L1 provider is missing! Specify an L1 provider using `Wallet.connectToL1()`.');
-        }
-        return this.providerL1;
-    }
-    _providerL2() {
-        return this.provider;
-    }
-    _signerL1() {
-        return this.ethWallet();
-    }
-    _signerL2() {
-        return this;
-    }
+export declare class Wallet extends Wallet_base {
+    readonly provider: Provider;
+    providerL1?: ethers.Provider;
+    eip712: EIP712Signer;
+    _providerL1(): ethers.Provider;
+    _providerL2(): Provider;
+    _signerL1(): ethers.Wallet;
+    _signerL2(): Wallet;
     /**
      * @inheritDoc
      *
@@ -42,9 +531,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const mainContract = await wallet.getMainContract();
      */
-    async getMainContract() {
-        return super.getMainContract();
-    }
+    getMainContract(): Promise<IZkSyncHyperchain>;
     /**
      * @inheritDoc
      *
@@ -61,9 +548,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const bridgehub = await wallet.getBridgehubContract();
      */
-    async getBridgehubContract() {
-        return super.getBridgehubContract();
-    }
+    getBridgehubContract(): Promise<IBridgehub>;
     /**
      * @inheritDoc
      *
@@ -80,9 +565,11 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const l1BridgeContracts = await wallet.getL1BridgeContracts();
      */
-    async getL1BridgeContracts() {
-        return super.getL1BridgeContracts();
-    }
+    getL1BridgeContracts(): Promise<{
+        erc20: IL1ERC20Bridge;
+        weth: IL1ERC20Bridge;
+        shared: IL1SharedBridge;
+    }>;
     /**
      * @inheritDoc
      *
@@ -101,9 +588,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Token balance: ${await wallet.getBalanceL1(tokenL1)}`);
      */
-    async getBalanceL1(token, blockTag) {
-        return super.getBalanceL1(token, blockTag);
-    }
+    getBalanceL1(token?: Address, blockTag?: BlockTag): Promise<bigint>;
     /**
      * @inheritDoc
      *
@@ -121,9 +606,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
      * console.log(`Token allowance: ${await wallet.getAllowanceL1(tokenL1)}`);
      */
-    async getAllowanceL1(token, bridgeAddress, blockTag) {
-        return super.getAllowanceL1(token, bridgeAddress, blockTag);
-    }
+    getAllowanceL1(token: Address, bridgeAddress?: Address, blockTag?: BlockTag): Promise<bigint>;
     /**
      * @inheritDoc
      *
@@ -142,9 +625,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Token L2 address: ${await wallet.l2TokenAddress(tokenL1)}`);
      */
-    async l2TokenAddress(token) {
-        return super.l2TokenAddress(token);
-    }
+    l2TokenAddress(token: Address): Promise<string>;
     /**
      * @inheritDoc
      *
@@ -163,9 +644,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Token L1 address: ${await wallet.l1TokenAddress(tokenL1)}`);
      */
-    async l1TokenAddress(token) {
-        return super.l1TokenAddress(token);
-    }
+    l1TokenAddress(token: Address): Promise<string>;
     /**
      * @inheritDoc
      *
@@ -185,9 +664,9 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * await tx.wait();
      */
-    async approveERC20(token, amount, overrides) {
-        return super.approveERC20(token, amount, overrides);
-    }
+    approveERC20(token: Address, amount: BigNumberish, overrides?: Overrides & {
+        bridgeAddress?: Address;
+    }): Promise<ethers.TransactionResponse>;
     /**
      * @inheritDoc
      *
@@ -204,9 +683,11 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Base cost: ${await wallet.getBaseCost({ gasLimit: 100_000 })}`);
      */
-    async getBaseCost(params) {
-        return super.getBaseCost(params);
-    }
+    getBaseCost(params: {
+        gasLimit: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        gasPrice?: BigNumberish;
+    }): Promise<bigint>;
     /**
      * @inheritDoc
      *
@@ -223,9 +704,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Base token: ${await wallet.getBaseToken()}`);
      */
-    async getBaseToken() {
-        return super.getBaseToken();
-    }
+    getBaseToken(): Promise<string>;
     /**
      * @inheritDoc
      *
@@ -242,9 +721,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Is ETH-based chain: ${await wallet.isETHBasedChain()}`);
      */
-    async isETHBasedChain() {
-        return super.isETHBasedChain();
-    }
+    isETHBasedChain(): Promise<boolean>;
     /**
      * @inheritDoc
      *
@@ -343,9 +820,10 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *    )
      * ).wait();
      */
-    async getDepositAllowanceParams(token, amount) {
-        return super.getDepositAllowanceParams(token, amount);
-    }
+    getDepositAllowanceParams(token: Address, amount: BigNumberish): Promise<{
+        token: Address;
+        allowance: BigNumberish;
+    }[]>;
     /**
      * @inheritDoc
      *
@@ -456,9 +934,22 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * // we can use `await depositTx.waitL1Commit()`
      * await depositTx.wait();
      */
-    async deposit(transaction) {
-        return super.deposit(transaction);
-    }
+    deposit(transaction: {
+        token: Address;
+        amount: BigNumberish;
+        to?: Address;
+        operatorTip?: BigNumberish;
+        bridgeAddress?: Address;
+        approveERC20?: boolean;
+        approveBaseERC20?: boolean;
+        l2GasLimit?: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        refundRecipient?: Address;
+        overrides?: Overrides;
+        approveOverrides?: Overrides;
+        approveBaseOverrides?: Overrides;
+        customBridgeData?: BytesLike;
+    }): Promise<PriorityOpResponse>;
     /**
      * @inheritDoc
      *
@@ -480,9 +971,18 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * });
      * console.log(`Gas: ${gas}`);
      */
-    async estimateGasDeposit(transaction) {
-        return super.estimateGasDeposit(transaction);
-    }
+    estimateGasDeposit(transaction: {
+        token: Address;
+        amount: BigNumberish;
+        to?: Address;
+        operatorTip?: BigNumberish;
+        bridgeAddress?: Address;
+        customBridgeData?: BytesLike;
+        l2GasLimit?: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        refundRecipient?: Address;
+        overrides?: Overrides;
+    }): Promise<bigint>;
     /**
      * @inheritDoc
      *
@@ -503,9 +1003,18 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *   amount: "10_000_000n,
      * });
      */
-    async getDepositTx(transaction) {
-        return super.getDepositTx(transaction);
-    }
+    getDepositTx(transaction: {
+        token: Address;
+        amount: BigNumberish;
+        to?: Address;
+        operatorTip?: BigNumberish;
+        bridgeAddress?: Address;
+        l2GasLimit?: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        customBridgeData?: BytesLike;
+        refundRecipient?: Address;
+        overrides?: Overrides;
+    }): Promise<any>;
     /**
      * @inheritDoc
      *
@@ -527,9 +1036,14 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * });
      * console.log(`Fee: ${fee}`);
      */
-    async getFullRequiredDepositFee(transaction) {
-        return super.getFullRequiredDepositFee(transaction);
-    }
+    getFullRequiredDepositFee(transaction: {
+        token: Address;
+        to?: Address;
+        bridgeAddress?: Address;
+        customBridgeData?: BytesLike;
+        gasPerPubdataByte?: BigNumberish;
+        overrides?: Overrides;
+    }): Promise<FullDepositFee>;
     /**
      * @inheritDoc
      *
@@ -547,9 +1061,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
-    async finalizeWithdrawalParams(withdrawalHash, index = 0) {
-        return super.finalizeWithdrawalParams(withdrawalHash, index);
-    }
+    finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
     /**
      * @inheritDoc
      *
@@ -567,9 +1079,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
-    async getFinalizeWithdrawalParams(withdrawalHash, index = 0) {
-        return super.getFinalizeWithdrawalParams(withdrawalHash, index);
-    }
+    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
     /**
      * @inheritDoc
      *
@@ -587,9 +1097,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const finalizeWithdrawTx = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
      */
-    async finalizeWithdrawal(withdrawalHash, index = 0, overrides) {
-        return super.finalizeWithdrawal(withdrawalHash, index, overrides);
-    }
+    finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: Overrides): Promise<ContractTransactionResponse>;
     /**
      * @inheritDoc
      *
@@ -607,9 +1115,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const isFinalized = await wallet.isWithdrawalFinalized(WITHDRAWAL_HASH);
      */
-    async isWithdrawalFinalized(withdrawalHash, index = 0) {
-        return super.isWithdrawalFinalized(withdrawalHash, index);
-    }
+    isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
     /**
      * @inheritDoc
      *
@@ -627,9 +1133,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
      * const claimFailedDepositTx = await wallet.claimFailedDeposit(FAILED_DEPOSIT_HASH);
      */
-    async claimFailedDeposit(depositHash, overrides) {
-        return super.claimFailedDeposit(depositHash, overrides);
-    }
+    claimFailedDeposit(depositHash: BytesLike, overrides?: Overrides): Promise<ContractTransactionResponse>;
     /**
      * @inheritDoc
      *
@@ -658,9 +1162,20 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *    )
      * ).wait();
      */
-    async getRequestExecuteAllowanceParams(transaction) {
-        return super.getRequestExecuteAllowanceParams(transaction);
-    }
+    getRequestExecuteAllowanceParams(transaction: {
+        contractAddress: Address;
+        calldata: string;
+        l2GasLimit?: BigNumberish;
+        l2Value?: BigNumberish;
+        factoryDeps?: BytesLike[];
+        operatorTip?: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        refundRecipient?: Address;
+        overrides?: Overrides;
+    }): Promise<{
+        token: Address;
+        allowance: BigNumberish;
+    }>;
     /**
      * @inheritDoc
      *
@@ -683,9 +1198,18 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * });
      * await tx.wait();
      */
-    async requestExecute(transaction) {
-        return super.requestExecute(transaction);
-    }
+    requestExecute(transaction: {
+        contractAddress: Address;
+        calldata: string;
+        l2GasLimit?: BigNumberish;
+        mintValue?: BigNumberish;
+        l2Value?: BigNumberish;
+        factoryDeps?: BytesLike[];
+        operatorTip?: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        refundRecipient?: Address;
+        overrides?: Overrides;
+    }): Promise<PriorityOpResponse>;
     /**
      * @inheritDoc
      *
@@ -708,9 +1232,18 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * });
      * console.log(`Gas: ${gas}`);
      */
-    async estimateGasRequestExecute(transaction) {
-        return super.estimateGasRequestExecute(transaction);
-    }
+    estimateGasRequestExecute(transaction: {
+        contractAddress: Address;
+        calldata: string;
+        l2GasLimit?: BigNumberish;
+        mintValue?: BigNumberish;
+        l2Value?: BigNumberish;
+        factoryDeps?: BytesLike[];
+        operatorTip?: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        refundRecipient?: Address;
+        overrides?: Overrides;
+    }): Promise<bigint>;
     /**
      * @inheritDoc
      *
@@ -732,9 +1265,18 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *     l2Value: 7_000_000_000,
      * });
      */
-    async getRequestExecuteTx(transaction) {
-        return super.getRequestExecuteTx(transaction);
-    }
+    getRequestExecuteTx(transaction: {
+        contractAddress: Address;
+        calldata: string;
+        l2GasLimit?: BigNumberish;
+        mintValue?: BigNumberish;
+        l2Value?: BigNumberish;
+        factoryDeps?: BytesLike[];
+        operatorTip?: BigNumberish;
+        gasPerPubdataByte?: BigNumberish;
+        refundRecipient?: Address;
+        overrides?: Overrides;
+    }): Promise<TransactionRequest>;
     /**
      * @inheritDoc
      *
@@ -766,9 +1308,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Token balance: ${await wallet.getBalance(token)}`);
      */
-    async getBalance(token, blockTag = 'committed') {
-        return super.getBalance(token, blockTag);
-    }
+    getBalance(token?: Address, blockTag?: BlockTag): Promise<bigint>;
     /**
      * @inheritDoc
      *
@@ -785,9 +1325,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const allBalances = await wallet.getAllBalances();
      */
-    async getAllBalances() {
-        return super.getAllBalances();
-    }
+    getAllBalances(): Promise<BalancesMap>;
     /**
      * @inheritDoc
      *
@@ -804,9 +1342,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`Nonce: ${await wallet.getDeploymentNonce()}`);
      */
-    async getDeploymentNonce() {
-        return super.getDeploymentNonce();
-    }
+    getDeploymentNonce(): Promise<bigint>;
     /**
      * @inheritDoc
      *
@@ -823,9 +1359,11 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const l2BridgeContracts = await wallet.getL2BridgeContracts();
      */
-    async getL2BridgeContracts() {
-        return super.getL2BridgeContracts();
-    }
+    getL2BridgeContracts(): Promise<{
+        erc20: IL2Bridge;
+        weth: IL2Bridge;
+        shared: IL2SharedBridge;
+    }>;
     /**
      * @inheritDoc
      *
@@ -903,9 +1441,14 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *   }),
      * });
      */
-    async withdraw(transaction) {
-        return super.withdraw(transaction);
-    }
+    withdraw(transaction: {
+        token: Address;
+        amount: BigNumberish;
+        to?: Address;
+        bridgeAddress?: Address;
+        paymasterParams?: PaymasterParams;
+        overrides?: Overrides;
+    }): Promise<TransactionResponse>;
     /**
      * @inheritDoc
      *
@@ -1005,9 +1548,13 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
      */
-    async transfer(transaction) {
-        return super.transfer(transaction);
-    }
+    transfer(transaction: {
+        to: Address;
+        amount: BigNumberish;
+        token?: Address;
+        paymasterParams?: PaymasterParams;
+        overrides?: Overrides;
+    }): Promise<TransactionResponse>;
     /**
      * @inheritDoc
      *
@@ -1026,9 +1573,12 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
      * console.log(`Confirmation data: ${utils.toJSON(await wallet.getPriorityOpConfirmation(tx, 0))}`);
      */
-    async getPriorityOpConfirmation(txHash, index = 0) {
-        return super.getPriorityOpConfirmation(txHash, index);
-    }
+    getPriorityOpConfirmation(txHash: string, index?: number): Promise<{
+        l1BatchNumber: number;
+        l2MessageIndex: number;
+        l2TxNumberInBlock: number | null;
+        proof: string[];
+    }>;
     /**
      * Returns `ethers.Wallet` object with the same private key.
      *
@@ -1045,9 +1595,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const ethWallet = wallet.ethWallet();
      */
-    ethWallet() {
-        return new ethers_1.ethers.Wallet(this.signingKey, this._providerL1());
-    }
+    ethWallet(): ethers.Wallet;
     /**
      * Connects to the L2 network using `provider`.
      *
@@ -1065,9 +1613,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
      * const wallet = unconnectedWallet.connect(provider);
      */
-    connect(provider) {
-        return new Wallet(this.signingKey, provider, this.providerL1);
-    }
+    connect(provider: Provider): Wallet;
     /**
      * Connects to the L1 network using `provider`.
      *
@@ -1088,9 +1634,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * @param provider
      */
-    connectToL1(provider) {
-        return new Wallet(this.signingKey, this.provider, provider);
-    }
+    connectToL1(provider: ethers.Provider): Wallet;
     /**
      * Creates a new `Wallet` with the `provider` as L1 provider and a private key that is built from the mnemonic passphrase.
      *
@@ -1107,10 +1651,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const ethProvider = ethers.getDefaultProvider("sepolia");
      * const wallet = Wallet.fromMnemonic(MNEMONIC, ethProvider);
      */
-    static fromMnemonic(mnemonic, provider) {
-        const wallet = super.fromPhrase(mnemonic, provider);
-        return new Wallet(wallet.signingKey, undefined, wallet.provider);
-    }
+    static fromMnemonic(mnemonic: string, provider?: ethers.Provider): Wallet;
     /**
      * Creates a new `Wallet` from encrypted json file using provided `password`.
      *
@@ -1125,10 +1666,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const wallet = await Wallet.fromEncryptedJson(fs.readFileSync("wallet.json", "utf8"), "password");
      */
-    static async fromEncryptedJson(json, password, callback) {
-        const wallet = await super.fromEncryptedJson(json, password, callback);
-        return new Wallet(wallet.signingKey);
-    }
+    static fromEncryptedJson(json: string, password: string | Uint8Array, callback?: ProgressCallback): Promise<Wallet>;
     /**
      * Creates a new `Wallet` from encrypted json file using provided `password`.
      *
@@ -1142,10 +1680,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *
      * const wallet = Wallet.fromEncryptedJsonSync(fs.readFileSync("tests/files/wallet.json", "utf8"), "password");
      */
-    static fromEncryptedJsonSync(json, password) {
-        const wallet = super.fromEncryptedJsonSync(json, password);
-        return new Wallet(wallet.signingKey);
-    }
+    static fromEncryptedJsonSync(json: string, password: string | Uint8Array): Wallet;
     /**
      *
      * @param privateKey The private key of the account.
@@ -1163,14 +1698,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const ethProvider = ethers.getDefaultProvider("sepolia");
      * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
      */
-    constructor(privateKey, providerL2, providerL1) {
-        super(privateKey, providerL2);
-        if (this.provider) {
-            const network = this.provider.getNetwork();
-            this.eip712 = new signer_1.EIP712Signer(this, network.then(n => Number(n.chainId)));
-        }
-        this.providerL1 = providerL1;
-    }
+    constructor(privateKey: string | ethers.SigningKey, providerL2?: Provider, providerL1?: ethers.Provider);
     /**
      * Designed for users who prefer a simplified approach by providing only the necessary data to create a valid transaction.
      * The only required fields are `transaction.to` and either `transaction.data` or `transaction.value` (or both, if the method is payable).
@@ -1195,48 +1723,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *   value: 7_000_000_000n,
      * });
      */
-    async populateTransaction(tx) {
-        var _a;
-        const populated = (await this.populateCall(tx));
-        if (populated.gasPrice &&
-            (populated.maxFeePerGas || populated.maxPriorityFeePerGas)) {
-            throw new Error('Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!');
-        }
-        let fee;
-        if (!populated.gasLimit ||
-            !tx.customData ||
-            !tx.customData.gasPerPubdata ||
-            (!populated.gasPrice &&
-                (!populated.maxFeePerGas ||
-                    populated.maxPriorityFeePerGas === null ||
-                    populated.maxPriorityFeePerGas === undefined))) {
-            fee = await this.provider.estimateFee(populated);
-            populated.gasLimit ?? (populated.gasLimit = fee.gasLimit);
-            if (!populated.gasPrice && populated.type === 0) {
-                populated.gasPrice = fee.maxFeePerGas;
-            }
-            else if (!populated.gasPrice && populated.type !== 0) {
-                populated.maxFeePerGas ?? (populated.maxFeePerGas = fee.maxFeePerGas);
-                populated.maxPriorityFeePerGas ?? (populated.maxPriorityFeePerGas = fee.maxPriorityFeePerGas);
-            }
-        }
-        if (tx.type === null ||
-            tx.type === undefined ||
-            tx.type === utils_1.EIP712_TX_TYPE ||
-            tx.customData) {
-            tx.customData ?? (tx.customData = {});
-            (_a = tx.customData).gasPerPubdata ?? (_a.gasPerPubdata = fee.gasPerPubdataLimit);
-            populated.type = utils_1.EIP712_TX_TYPE;
-            populated.value ?? (populated.value = 0);
-            populated.data ?? (populated.data = '0x');
-            populated.customData = this._fillCustomData(tx.customData ?? {});
-            populated.nonce = populated.nonce ?? (await this.getNonce('pending'));
-            populated.chainId =
-                populated.chainId ?? (await this.provider.getNetwork()).chainId;
-            return populated;
-        }
-        return super.populateTransaction(populated);
-    }
+    populateTransaction(tx: TransactionRequest): Promise<TransactionLike>;
     /***
      * Signs the transaction and serializes it to be ready to be broadcast to the network.
      *
@@ -1261,14 +1748,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *   value: ethers.parseEther('1'),
      * });
      */
-    async signTransaction(tx) {
-        const populated = await this.populateTransaction(tx);
-        if (populated.type !== utils_1.EIP712_TX_TYPE) {
-            return await super.signTransaction(populated);
-        }
-        populated.customData.customSignature = await this.eip712.sign(populated);
-        return (0, utils_1.serializeEip712)(populated);
-    }
+    signTransaction(tx: TransactionRequest): Promise<string>;
     /**
      * Broadcast the transaction to the network.
      *
@@ -1298,9 +1778,6 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * });
      * await tx.wait();
      */
-    async sendTransaction(tx) {
-        return await this.provider.broadcastTransaction(await this.signTransaction(tx));
-    }
+    sendTransaction(tx: TransactionRequest): Promise<TransactionResponse>;
 }
-exports.Wallet = Wallet;
-//# sourceMappingURL=wallet.js.map
+export {};

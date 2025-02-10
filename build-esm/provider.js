@@ -1,4 +1,3 @@
-"use strict";
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -11,16 +10,14 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _Provider_connect, _BrowserProvider_request;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.BrowserProvider = exports.Provider = exports.JsonRpcApiProvider = void 0;
-const ethers_1 = require("ethers");
-const typechain_1 = require("./typechain");
-const types_1 = require("./types");
-const utils_1 = require("./utils");
-const signer_1 = require("./signer");
-const format_1 = require("./format");
-const ethers_2 = require("ethers");
-function JsonRpcApiProvider(ProviderType) {
+import { ethers, Contract, resolveProperties, FetchRequest, } from 'ethers';
+import { IERC20__factory, IEthToken__factory, IL2AssetRouter__factory, IL2Bridge__factory, IL2NativeTokenVault__factory, IL2SharedBridge__factory, IBridgedStandardToken__factory, } from './typechain';
+import { TransactionResponse, TransactionStatus, TransactionReceipt, Block, Log, Network as ZkSyncNetwork, Transaction, } from './types';
+import { getL2HashFromPriorityOp, CONTRACT_DEPLOYER_ADDRESS, CONTRACT_DEPLOYER, sleep, EIP712_TX_TYPE, REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, BOOTLOADER_FORMAL_ADDRESS, ETH_ADDRESS_IN_CONTRACTS, L2_BASE_TOKEN_ADDRESS, LEGACY_ETH_ADDRESS, isAddressEq, getERC20DefaultBridgeData, getERC20BridgeCalldata, applyL1ToL2Alias, L2_ASSET_ROUTER_ADDRESS, L2_NATIVE_TOKEN_VAULT_ADDRESS, encodeNTVTransferData, } from './utils';
+import { Signer } from './signer';
+import { formatLog, formatBlock, formatTransactionResponse, formatTransactionReceipt, formatFee, } from './format';
+import { makeError } from 'ethers';
+export function JsonRpcApiProvider(ProviderType) {
     return class Provider extends ProviderType {
         /**
          * Sends a JSON-RPC `_payload` (or a batch) to the underlying channel.
@@ -49,18 +46,18 @@ function JsonRpcApiProvider(ProviderType) {
             return super._getBlockTag(blockTag);
         }
         _wrapLog(value) {
-            return new types_1.Log((0, format_1.formatLog)(value), this);
+            return new Log(formatLog(value), this);
         }
         _wrapBlock(value) {
-            return new types_1.Block((0, format_1.formatBlock)(value), this);
+            return new Block(formatBlock(value), this);
         }
         _wrapTransactionResponse(value) {
-            const tx = (0, format_1.formatTransactionResponse)(value);
-            return new types_1.TransactionResponse(tx, this);
+            const tx = formatTransactionResponse(value);
+            return new TransactionResponse(tx, this);
         }
         _wrapTransactionReceipt(value) {
-            const receipt = (0, format_1.formatTransactionReceipt)(value);
-            return new types_1.TransactionReceipt(receipt, this);
+            const receipt = formatTransactionReceipt(value);
+            return new TransactionReceipt(receipt, this);
         }
         /**
          * Resolves to the transaction receipt for `txHash`, if mined.
@@ -112,18 +109,18 @@ function JsonRpcApiProvider(ProviderType) {
          */
         async getBalance(address, blockTag, tokenAddress) {
             if (!tokenAddress) {
-                tokenAddress = utils_1.L2_BASE_TOKEN_ADDRESS;
+                tokenAddress = L2_BASE_TOKEN_ADDRESS;
             }
-            else if ((0, utils_1.isAddressEq)(tokenAddress, utils_1.LEGACY_ETH_ADDRESS) ||
-                (0, utils_1.isAddressEq)(tokenAddress, utils_1.ETH_ADDRESS_IN_CONTRACTS)) {
+            else if (isAddressEq(tokenAddress, LEGACY_ETH_ADDRESS) ||
+                isAddressEq(tokenAddress, ETH_ADDRESS_IN_CONTRACTS)) {
                 tokenAddress = await this.l2TokenAddress(tokenAddress);
             }
-            if ((0, utils_1.isAddressEq)(tokenAddress, utils_1.L2_BASE_TOKEN_ADDRESS)) {
+            if (isAddressEq(tokenAddress, L2_BASE_TOKEN_ADDRESS)) {
                 return await super.getBalance(address, blockTag);
             }
             else {
                 try {
-                    const token = typechain_1.IERC20__factory.connect(tokenAddress, this);
+                    const token = IERC20__factory.connect(tokenAddress, this);
                     return await token.balanceOf(address, { blockTag });
                 }
                 catch {
@@ -141,12 +138,12 @@ function JsonRpcApiProvider(ProviderType) {
          * @param bridgeAddress The address of custom bridge, which will be used to get l2 token address.
          */
         async l2TokenAddress(token, bridgeAddress) {
-            if ((0, utils_1.isAddressEq)(token, utils_1.LEGACY_ETH_ADDRESS)) {
-                token = utils_1.ETH_ADDRESS_IN_CONTRACTS;
+            if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+                token = ETH_ADDRESS_IN_CONTRACTS;
             }
             const baseToken = await this.getBaseTokenContractAddress();
-            if ((0, utils_1.isAddressEq)(token, baseToken)) {
-                return utils_1.L2_BASE_TOKEN_ADDRESS;
+            if (isAddressEq(token, baseToken)) {
+                return L2_BASE_TOKEN_ADDRESS;
             }
             bridgeAddress ?? (bridgeAddress = (await this.getDefaultBridgeAddresses()).sharedL2);
             return await (await this.connectL2Bridge(bridgeAddress)).l2TokenAddress(token);
@@ -160,11 +157,11 @@ function JsonRpcApiProvider(ProviderType) {
          * @param token The address of the token on L2.
          */
         async l1TokenAddress(token) {
-            if ((0, utils_1.isAddressEq)(token, utils_1.LEGACY_ETH_ADDRESS)) {
-                return utils_1.LEGACY_ETH_ADDRESS;
+            if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+                return LEGACY_ETH_ADDRESS;
             }
             const bridgeAddresses = await this.getDefaultBridgeAddresses();
-            const sharedBridge = typechain_1.IL2Bridge__factory.connect(bridgeAddresses.sharedL2, this);
+            const sharedBridge = IL2Bridge__factory.connect(bridgeAddresses.sharedL2, this);
             return await sharedBridge.l1TokenAddress(token);
         }
         /**
@@ -198,7 +195,7 @@ function JsonRpcApiProvider(ProviderType) {
             const fee = await this.send('zks_estimateFee', [
                 await this.getRpcTransaction(transaction),
             ]);
-            return (0, format_1.formatFee)(fee);
+            return formatFee(fee);
         }
         /**
          * Returns the current fee parameters.
@@ -225,7 +222,7 @@ function JsonRpcApiProvider(ProviderType) {
          */
         async getLogProof(txHash, index) {
             return await this.send('zks_getL2ToL1LogProof', [
-                ethers_1.ethers.hexlify(txHash),
+                ethers.hexlify(txHash),
                 index,
             ]);
         }
@@ -274,20 +271,20 @@ function JsonRpcApiProvider(ProviderType) {
             if (!this.contractAddresses().baseToken) {
                 this.contractAddresses().baseToken = await this.send('zks_getBaseTokenL1Address', []);
             }
-            return ethers_1.ethers.getAddress(this.contractAddresses().baseToken);
+            return ethers.getAddress(this.contractAddresses().baseToken);
         }
         /**
          * Returns whether the chain is ETH-based.
          */
         async isEthBasedChain() {
-            return (0, utils_1.isAddressEq)(await this.getBaseTokenContractAddress(), utils_1.ETH_ADDRESS_IN_CONTRACTS);
+            return isAddressEq(await this.getBaseTokenContractAddress(), ETH_ADDRESS_IN_CONTRACTS);
         }
         /**
          * Returns whether the `token` is the base token.
          */
         async isBaseToken(token) {
-            return ((0, utils_1.isAddressEq)(token, await this.getBaseTokenContractAddress()) ||
-                (0, utils_1.isAddressEq)(token, utils_1.L2_BASE_TOKEN_ADDRESS));
+            return (isAddressEq(token, await this.getBaseTokenContractAddress()) ||
+                isAddressEq(token, L2_BASE_TOKEN_ADDRESS));
         }
         /**
          * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
@@ -340,18 +337,18 @@ function JsonRpcApiProvider(ProviderType) {
          */
         async connectL2Bridge(address) {
             if (await this.isL2BridgeLegacy(address)) {
-                return typechain_1.IL2Bridge__factory.connect(address, this);
+                return IL2Bridge__factory.connect(address, this);
             }
-            return typechain_1.IL2SharedBridge__factory.connect(address, this);
+            return IL2SharedBridge__factory.connect(address, this);
         }
         async connectL2NTV() {
-            return typechain_1.IL2NativeTokenVault__factory.connect(utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, this);
+            return IL2NativeTokenVault__factory.connect(L2_NATIVE_TOKEN_VAULT_ADDRESS, this);
         }
         async connectBridgedToken(token) {
-            return typechain_1.IBridgedStandardToken__factory.connect(token, this);
+            return IBridgedStandardToken__factory.connect(token, this);
         }
         async connectL2AssetRouter() {
-            return typechain_1.IL2AssetRouter__factory.connect(utils_1.L2_ASSET_ROUTER_ADDRESS, this);
+            return IL2AssetRouter__factory.connect(L2_ASSET_ROUTER_ADDRESS, this);
         }
         /**
          * Returns true if passed bridge address is legacy and false if its shared bridge.
@@ -367,7 +364,7 @@ function JsonRpcApiProvider(ProviderType) {
          * console.log(isBridgeLegacy);
          */
         async isL2BridgeLegacy(address) {
-            const bridge = typechain_1.IL2SharedBridge__factory.connect(address, this);
+            const bridge = IL2SharedBridge__factory.connect(address, this);
             try {
                 await bridge.l1SharedBridge();
                 return false;
@@ -533,10 +530,10 @@ function JsonRpcApiProvider(ProviderType) {
         async getWithdrawTx(transaction) {
             var _a, _b;
             const { ...tx } = transaction;
-            tx.token ?? (tx.token = utils_1.L2_BASE_TOKEN_ADDRESS);
-            if ((0, utils_1.isAddressEq)(tx.token, utils_1.LEGACY_ETH_ADDRESS) ||
-                (0, utils_1.isAddressEq)(tx.token, utils_1.ETH_ADDRESS_IN_CONTRACTS)) {
-                tx.token = await this.l2TokenAddress(utils_1.ETH_ADDRESS_IN_CONTRACTS);
+            tx.token ?? (tx.token = L2_BASE_TOKEN_ADDRESS);
+            if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+                isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)) {
+                tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
             }
             if ((tx.to === null || tx.to === undefined) &&
                 (tx.from === null || tx.from === undefined)) {
@@ -545,8 +542,8 @@ function JsonRpcApiProvider(ProviderType) {
             tx.to ?? (tx.to = tx.from);
             tx.overrides ?? (tx.overrides = {});
             (_a = tx.overrides).from ?? (_a.from = tx.from);
-            (_b = tx.overrides).type ?? (_b.type = utils_1.EIP712_TX_TYPE);
-            if ((0, utils_1.isAddressEq)(tx.token, utils_1.L2_BASE_TOKEN_ADDRESS)) {
+            (_b = tx.overrides).type ?? (_b.type = EIP712_TX_TYPE);
+            if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
                 if (!tx.overrides.value) {
                     tx.overrides.value = tx.amount;
                 }
@@ -556,7 +553,7 @@ function JsonRpcApiProvider(ProviderType) {
                     // as the value
                     throw new Error('The tx.value is not equal to the value withdrawn!');
                 }
-                const ethL2Token = typechain_1.IEthToken__factory.connect(utils_1.L2_BASE_TOKEN_ADDRESS, this);
+                const ethL2Token = IEthToken__factory.connect(L2_BASE_TOKEN_ADDRESS, this);
                 const populatedTx = await ethL2Token.withdraw.populateTransaction(tx.to, tx.overrides);
                 if (tx.paymasterParams) {
                     return {
@@ -573,19 +570,19 @@ function JsonRpcApiProvider(ProviderType) {
             const originChainId = await ntv.originChainId(assetId);
             const l1ChainId = await this.getL1ChainId();
             const isTokenL1Native = originChainId === BigInt(l1ChainId) ||
-                tx.token === utils_1.ETH_ADDRESS_IN_CONTRACTS;
+                tx.token === ETH_ADDRESS_IN_CONTRACTS;
             if (!tx.bridgeAddress) {
                 const bridgeAddresses = await this.getDefaultBridgeAddresses();
                 tx.bridgeAddress = isTokenL1Native
                     ? bridgeAddresses.sharedL2
-                    : utils_1.L2_ASSET_ROUTER_ADDRESS;
+                    : L2_ASSET_ROUTER_ADDRESS;
             }
             let populatedTx;
             if (!isTokenL1Native) {
                 const bridge = await this.connectL2AssetRouter();
                 const chainId = Number((await this.getNetwork()).chainId);
-                const assetId = ethers_1.ethers.keccak256(ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-                const assetData = (0, utils_1.encodeNTVTransferData)(BigInt(tx.amount), tx.to, tx.token);
+                const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
+                const assetData = encodeNTVTransferData(BigInt(tx.amount), tx.to, tx.token);
                 populatedTx = await bridge.withdraw.populateTransaction(assetId, assetData, tx.overrides);
             }
             else {
@@ -632,20 +629,20 @@ function JsonRpcApiProvider(ProviderType) {
             var _a, _b;
             const { ...tx } = transaction;
             if (!tx.token) {
-                tx.token = utils_1.L2_BASE_TOKEN_ADDRESS;
+                tx.token = L2_BASE_TOKEN_ADDRESS;
             }
-            else if ((0, utils_1.isAddressEq)(tx.token, utils_1.LEGACY_ETH_ADDRESS) ||
-                (0, utils_1.isAddressEq)(tx.token, utils_1.ETH_ADDRESS_IN_CONTRACTS)) {
-                tx.token = await this.l2TokenAddress(utils_1.ETH_ADDRESS_IN_CONTRACTS);
+            else if (isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+                isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)) {
+                tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
             }
             tx.overrides ?? (tx.overrides = {});
             (_a = tx.overrides).from ?? (_a.from = tx.from);
-            (_b = tx.overrides).type ?? (_b.type = utils_1.EIP712_TX_TYPE);
-            if ((0, utils_1.isAddressEq)(tx.token, utils_1.L2_BASE_TOKEN_ADDRESS)) {
+            (_b = tx.overrides).type ?? (_b.type = EIP712_TX_TYPE);
+            if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
                 if (tx.paymasterParams) {
                     return {
                         ...tx.overrides,
-                        type: utils_1.EIP712_TX_TYPE,
+                        type: EIP712_TX_TYPE,
                         to: tx.to,
                         value: tx.amount,
                         customData: {
@@ -660,7 +657,7 @@ function JsonRpcApiProvider(ProviderType) {
                 };
             }
             else {
-                const token = typechain_1.IERC20__factory.connect(tx.token, this);
+                const token = IERC20__factory.connect(tx.token, this);
                 const populatedTx = await token.transfer.populateTransaction(tx.to, tx.amount, tx.overrides);
                 if (tx.paymasterParams) {
                     return {
@@ -720,7 +717,7 @@ function JsonRpcApiProvider(ProviderType) {
          */
         async getFilterChanges(idx) {
             const logs = await this.send('eth_getFilterChanges', [
-                ethers_1.ethers.toBeHex(idx),
+                ethers.toBeHex(idx),
             ]);
             return typeof logs[0] === 'string'
                 ? logs
@@ -735,16 +732,16 @@ function JsonRpcApiProvider(ProviderType) {
         async getTransactionStatus(txHash) {
             const tx = await this.getTransaction(txHash);
             if (!tx) {
-                return types_1.TransactionStatus.NotFound;
+                return TransactionStatus.NotFound;
             }
             if (!tx.blockNumber) {
-                return types_1.TransactionStatus.Processing;
+                return TransactionStatus.Processing;
             }
             const verifiedBlock = (await this.getBlock('finalized'));
             if (tx.blockNumber <= verifiedBlock.number) {
-                return types_1.TransactionStatus.Finalized;
+                return TransactionStatus.Finalized;
             }
-            return types_1.TransactionStatus.Committed;
+            return TransactionStatus.Committed;
         }
         /**
          * Broadcasts the `signedTx` to the network, adding it to the memory pool of any node for which the transaction
@@ -754,7 +751,7 @@ function JsonRpcApiProvider(ProviderType) {
          * @returns A promise that resolves with the transaction response.
          */
         async broadcastTransaction(signedTx) {
-            const { blockNumber, hash } = await (0, ethers_1.resolveProperties)({
+            const { blockNumber, hash } = await resolveProperties({
                 blockNumber: this.getBlockNumber(),
                 hash: this._perform({
                     method: 'broadcastTransaction',
@@ -762,7 +759,7 @@ function JsonRpcApiProvider(ProviderType) {
                 }),
                 network: this.getNetwork(),
             });
-            const tx = types_1.Transaction.from(signedTx);
+            const tx = Transaction.from(signedTx);
             if (tx.hash !== hash) {
                 throw new Error('@TODO: the returned hash did not match!');
             }
@@ -775,12 +772,12 @@ function JsonRpcApiProvider(ProviderType) {
          */
         async getL2TransactionFromPriorityOp(l1TxResponse) {
             const receipt = await l1TxResponse.wait();
-            const l2Hash = (0, utils_1.getL2HashFromPriorityOp)(receipt, await this.getMainContractAddress());
+            const l2Hash = getL2HashFromPriorityOp(receipt, await this.getMainContractAddress());
             let status = null;
             do {
                 status = await this.getTransactionStatus(l2Hash);
-                await (0, utils_1.sleep)(this.pollingInterval);
-            } while (status === types_1.TransactionStatus.NotFound);
+                await sleep(this.pollingInterval);
+            } while (status === TransactionStatus.NotFound);
             return await this.getTransaction(l2Hash);
         }
         /**
@@ -802,12 +799,12 @@ function JsonRpcApiProvider(ProviderType) {
             return l2Response;
         }
         async _getPriorityOpConfirmationL2ToL1Log(txHash, index = 0) {
-            const hash = ethers_1.ethers.hexlify(txHash);
+            const hash = ethers.hexlify(txHash);
             const receipt = await this.getTransactionReceipt(hash);
             if (!receipt) {
                 throw new Error('Transaction is not mined!');
             }
-            const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(([, log]) => (0, utils_1.isAddressEq)(log.sender, utils_1.BOOTLOADER_FORMAL_ADDRESS));
+            const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(([, log]) => isAddressEq(log.sender, BOOTLOADER_FORMAL_ADDRESS));
             const [l2ToL1LogIndex, l2ToL1Log] = messages[index];
             return {
                 l2ToL1LogIndex,
@@ -839,7 +836,7 @@ function JsonRpcApiProvider(ProviderType) {
          * @param address The contract address.
          */
         async getContractAccountInfo(address) {
-            const deployerContract = new ethers_1.Contract(utils_1.CONTRACT_DEPLOYER_ADDRESS, utils_1.CONTRACT_DEPLOYER.fragments, this);
+            const deployerContract = new Contract(CONTRACT_DEPLOYER_ADDRESS, CONTRACT_DEPLOYER.fragments, this);
             const data = await deployerContract.getAccountInfo(address);
             return {
                 supportedAAVersion: Number(data.supportedAAVersion),
@@ -863,9 +860,9 @@ function JsonRpcApiProvider(ProviderType) {
             // If the `from` address is not provided, we use a random address, because
             // due to storage slot aggregation, the gas estimation will depend on the address
             // and so estimation for the zero address may be smaller than for the sender.
-            from ?? (from = ethers_1.ethers.Wallet.createRandom().address);
-            token = (0, utils_1.isAddressEq)(token, utils_1.LEGACY_ETH_ADDRESS)
-                ? utils_1.ETH_ADDRESS_IN_CONTRACTS
+            from ?? (from = ethers.Wallet.createRandom().address);
+            token = isAddressEq(token, LEGACY_ETH_ADDRESS)
+                ? ETH_ADDRESS_IN_CONTRACTS
                 : token;
             if (await this.isBaseToken(token)) {
                 return await this.estimateL1ToL2Execute({
@@ -881,7 +878,7 @@ function JsonRpcApiProvider(ProviderType) {
                 const value = 0;
                 const l1BridgeAddress = bridgeAddresses.sharedL1;
                 const l2BridgeAddress = bridgeAddresses.sharedL2;
-                const bridgeData = await (0, utils_1.getERC20DefaultBridgeData)(token, providerL1);
+                const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
                 return await this.estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, value);
             }
         }
@@ -902,9 +899,9 @@ function JsonRpcApiProvider(ProviderType) {
          * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         async estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value) {
-            const calldata = await (0, utils_1.getERC20BridgeCalldata)(token, from, to, amount, bridgeData);
+            const calldata = await getERC20BridgeCalldata(token, from, to, amount, bridgeData);
             return await this.estimateL1ToL2Execute({
-                caller: (0, utils_1.applyL1ToL2Alias)(l1BridgeAddress),
+                caller: applyL1ToL2Alias(l1BridgeAddress),
                 contractAddress: l2BridgeAddress,
                 gasPerPubdataByte: gasPerPubdataByte,
                 calldata: calldata,
@@ -924,11 +921,11 @@ function JsonRpcApiProvider(ProviderType) {
          * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
          */
         async estimateL1ToL2Execute(transaction) {
-            transaction.gasPerPubdataByte ?? (transaction.gasPerPubdataByte = utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT);
+            transaction.gasPerPubdataByte ?? (transaction.gasPerPubdataByte = REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT);
             // If the `from` address is not provided, we use a random address, because
             // due to storage slot aggregation, the gas estimation will depend on the address
             // and so estimation for the zero address may be smaller than for the sender.
-            transaction.caller ?? (transaction.caller = ethers_1.ethers.Wallet.createRandom().address);
+            transaction.caller ?? (transaction.caller = ethers.Wallet.createRandom().address);
             const customData = {
                 gasPerPubdata: transaction.gasPerPubdataByte,
             };
@@ -953,35 +950,34 @@ function JsonRpcApiProvider(ProviderType) {
             if (!tx.customData) {
                 return result;
             }
-            result.type = ethers_1.ethers.toBeHex(utils_1.EIP712_TX_TYPE);
+            result.type = ethers.toBeHex(EIP712_TX_TYPE);
             result.eip712Meta = {
-                gasPerPubdata: ethers_1.ethers.toBeHex(tx.customData.gasPerPubdata ?? 0),
+                gasPerPubdata: ethers.toBeHex(tx.customData.gasPerPubdata ?? 0),
             };
             if (tx.customData.factoryDeps) {
                 result.eip712Meta.factoryDeps = tx.customData.factoryDeps.map((dep) => 
                 // TODO (SMA-1605): we arraify instead of hexlifying because server expects Vec<u8>.
                 //  We should change deserialization there.
-                Array.from(ethers_1.ethers.getBytes(dep)));
+                Array.from(ethers.getBytes(dep)));
             }
             if (tx.customData.customSignature) {
-                result.eip712Meta.customSignature = Array.from(ethers_1.ethers.getBytes(tx.customData.customSignature));
+                result.eip712Meta.customSignature = Array.from(ethers.getBytes(tx.customData.customSignature));
             }
             if (tx.customData.paymasterParams) {
                 result.eip712Meta.paymasterParams = {
-                    paymaster: ethers_1.ethers.hexlify(tx.customData.paymasterParams.paymaster),
-                    paymasterInput: Array.from(ethers_1.ethers.getBytes(tx.customData.paymasterParams.paymasterInput)),
+                    paymaster: ethers.hexlify(tx.customData.paymasterParams.paymaster),
+                    paymasterInput: Array.from(ethers.getBytes(tx.customData.paymasterParams.paymasterInput)),
                 };
             }
             return result;
         }
     };
 }
-exports.JsonRpcApiProvider = JsonRpcApiProvider;
 /**
  * A `Provider` extends {@link ethers.JsonRpcProvider} and includes additional features for interacting with ZKsync Era.
  * It supports RPC endpoints within the `zks` namespace.
  */
-class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
+export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     contractAddresses() {
         return this._contractAddresses;
     }
@@ -1009,7 +1005,7 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
         super(url, network, optionsWithDisabledCache);
         _Provider_connect.set(this, void 0);
         typeof url === 'string'
-            ? (__classPrivateFieldSet(this, _Provider_connect, new ethers_1.FetchRequest(url), "f"))
+            ? (__classPrivateFieldSet(this, _Provider_connect, new FetchRequest(url), "f"))
             : (__classPrivateFieldSet(this, _Provider_connect, url.clone(), "f"));
         this.pollingInterval = 500;
         this._contractAddresses = {};
@@ -1880,7 +1876,7 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
         const message = _error.error.message ?? 'Execution reverted';
         const code = _error.error.code ?? 0;
         // @ts-ignore
-        return (0, ethers_2.makeError)(message, code, { payload, error });
+        return makeError(message, code, { payload, error });
     }
     async _send(payload) {
         const request = this._getConnection();
@@ -1905,22 +1901,21 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
      *
      * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
      */
-    static getDefaultProvider(zksyncNetwork = types_1.Network.Localhost) {
+    static getDefaultProvider(zksyncNetwork = ZkSyncNetwork.Localhost) {
         switch (zksyncNetwork) {
-            case types_1.Network.Localhost:
+            case ZkSyncNetwork.Localhost:
                 return new Provider('http://127.0.0.1:3050');
-            case types_1.Network.Sepolia:
+            case ZkSyncNetwork.Sepolia:
                 return new Provider('https://sepolia.era.zksync.dev');
-            case types_1.Network.Mainnet:
+            case ZkSyncNetwork.Mainnet:
                 return new Provider('https://mainnet.era.zksync.io');
-            case types_1.Network.EraTestNode:
+            case ZkSyncNetwork.EraTestNode:
                 return new Provider('http://127.0.0.1:8011');
             default:
                 return new Provider('http://127.0.0.1:3050');
         }
     }
 }
-exports.Provider = Provider;
 _Provider_connect = new WeakMap();
 /* c8 ignore start */
 /**
@@ -1929,7 +1924,7 @@ _Provider_connect = new WeakMap();
  * This provider is designed for frontend use in a browser environment and integration for browser wallets
  * (e.g., MetaMask, WalletConnect).
  */
-class BrowserProvider extends JsonRpcApiProvider(ethers_1.ethers.BrowserProvider) {
+export class BrowserProvider extends JsonRpcApiProvider(ethers.BrowserProvider) {
     contractAddresses() {
         return this._contractAddresses;
     }
@@ -2811,7 +2806,7 @@ class BrowserProvider extends JsonRpcApiProvider(ethers_1.ethers.BrowserProvider
         return super.estimateL1ToL2Execute(transaction);
     }
     async _send(payload) {
-        ethers_1.ethers.assertArgument(!Array.isArray(payload), 'EIP-1193 does not support batch request', 'payload', payload);
+        ethers.assertArgument(!Array.isArray(payload), 'EIP-1193 does not support batch request', 'payload', payload);
         try {
             const result = await __classPrivateFieldGet(this, _BrowserProvider_request, "f").call(this, payload.method, payload.params || []);
             return [{ id: payload.id, result }];
@@ -2865,7 +2860,7 @@ class BrowserProvider extends JsonRpcApiProvider(ethers_1.ethers.BrowserProvider
         if (typeof address === 'number') {
             return accounts.length > address;
         }
-        return (accounts.filter((a) => (0, utils_1.isAddressEq)(a, address))
+        return (accounts.filter((a) => isAddressEq(a, address))
             .length !== 0);
     }
     /**
@@ -2897,7 +2892,7 @@ class BrowserProvider extends JsonRpcApiProvider(ethers_1.ethers.BrowserProvider
                 throw this.getRpcError(payload, { id: payload.id, error });
             }
         }
-        return signer_1.Signer.from((await super.getSigner(address)), Number((await this.getNetwork()).chainId));
+        return Signer.from((await super.getSigner(address)), Number((await this.getNetwork()).chainId));
     }
     /**
      * @inheritDoc
@@ -2917,11 +2912,10 @@ class BrowserProvider extends JsonRpcApiProvider(ethers_1.ethers.BrowserProvider
     async estimateGas(transaction) {
         const gas = await super.estimateGas(transaction);
         const metamaskMinimum = 21000n;
-        const isEIP712 = transaction.customData || transaction.type === utils_1.EIP712_TX_TYPE;
+        const isEIP712 = transaction.customData || transaction.type === EIP712_TX_TYPE;
         return gas > metamaskMinimum || isEIP712 ? gas : metamaskMinimum;
     }
 }
-exports.BrowserProvider = BrowserProvider;
 _BrowserProvider_request = new WeakMap();
 /* c8 ignore stop */
 //# sourceMappingURL=provider.js.map

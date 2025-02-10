@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatFee = exports.formatTransactionResponse = exports.formatTransactionReceipt = exports.formatReceiptLog = exports.formatBlock = exports.formatLog = exports.formatUint256 = exports.formatHash = exports.formatData = exports.formatBoolean = exports.object = exports.arrayOf = exports.allowNull = void 0;
-const ethers_1 = require("ethers");
+import { accessListify, assert, assertArgument, getAddress, getBigInt, getCreateAddress, getNumber, hexlify, isHexString, Signature, zeroPadValue, } from 'ethers';
 const BN_0 = BigInt(0);
-function allowNull(format, nullValue) {
+export function allowNull(format, nullValue) {
     return function (value) {
         if (!value) {
             return nullValue;
@@ -11,8 +8,7 @@ function allowNull(format, nullValue) {
         return format(value);
     };
 }
-exports.allowNull = allowNull;
-function arrayOf(format, allowNull) {
+export function arrayOf(format, allowNull) {
     return (array) => {
         if (allowNull && !array) {
             return null;
@@ -23,11 +19,10 @@ function arrayOf(format, allowNull) {
         return array.map(i => format(i));
     };
 }
-exports.arrayOf = arrayOf;
 // Requires an object which matches a fleet of other formatters
 // Any FormatFunc may return `undefined` to have the value omitted
 // from the result object. Calls preserve `this`.
-function object(format, altNames) {
+export function object(format, altNames) {
     return (value) => {
         const result = {};
         for (const key in format) {
@@ -48,14 +43,13 @@ function object(format, altNames) {
             }
             catch (error) {
                 const message = error instanceof Error ? error.message : 'not-an-error';
-                (0, ethers_1.assert)(false, `invalid value for value.${key} (${message})`, 'BAD_DATA', { value });
+                assert(false, `invalid value for value.${key} (${message})`, 'BAD_DATA', { value });
             }
         }
         return result;
     };
 }
-exports.object = object;
-function formatBoolean(value) {
+export function formatBoolean(value) {
     switch (value) {
         case true:
         case 'true':
@@ -64,70 +58,65 @@ function formatBoolean(value) {
         case 'false':
             return false;
     }
-    (0, ethers_1.assertArgument)(false, `invalid boolean; ${JSON.stringify(value)}`, 'value', value);
+    assertArgument(false, `invalid boolean; ${JSON.stringify(value)}`, 'value', value);
 }
-exports.formatBoolean = formatBoolean;
-function formatData(value) {
-    (0, ethers_1.assertArgument)((0, ethers_1.isHexString)(value, true), 'invalid data', 'value', value);
+export function formatData(value) {
+    assertArgument(isHexString(value, true), 'invalid data', 'value', value);
     return value;
 }
-exports.formatData = formatData;
-function formatHash(value) {
-    (0, ethers_1.assertArgument)((0, ethers_1.isHexString)(value, 32), 'invalid hash', 'value', value);
+export function formatHash(value) {
+    assertArgument(isHexString(value, 32), 'invalid hash', 'value', value);
     return value;
 }
-exports.formatHash = formatHash;
-function formatUint256(value) {
-    if (!(0, ethers_1.isHexString)(value)) {
+export function formatUint256(value) {
+    if (!isHexString(value)) {
         throw new Error('Invalid uint256!');
     }
-    return (0, ethers_1.zeroPadValue)(value, 32);
+    return zeroPadValue(value, 32);
 }
-exports.formatUint256 = formatUint256;
 const _formatLog = object({
-    address: ethers_1.getAddress,
+    address: getAddress,
     blockHash: formatHash,
-    blockNumber: ethers_1.getNumber,
+    blockNumber: getNumber,
     data: formatData,
-    index: ethers_1.getNumber,
+    index: getNumber,
     removed: allowNull(formatBoolean, false),
     topics: arrayOf(formatHash),
     transactionHash: formatHash,
-    transactionIndex: ethers_1.getNumber,
-    l1BatchNumber: allowNull(ethers_1.getNumber),
+    transactionIndex: getNumber,
+    l1BatchNumber: allowNull(getNumber),
 }, {
     index: ['logIndex'],
 });
-function formatLog(value) {
+export function formatLog(value) {
     return _formatLog(value);
 }
-exports.formatLog = formatLog;
 const _formatBlock = object({
     hash: allowNull(formatHash),
     parentHash: formatHash,
-    number: ethers_1.getNumber,
+    number: getNumber,
     sha3Uncles: formatHash,
     stateRoot: formatHash,
     transactionsRoot: formatHash,
     receiptsRoot: formatHash,
-    timestamp: ethers_1.getNumber,
+    timestamp: getNumber,
     nonce: allowNull(formatData),
-    difficulty: ethers_1.getBigInt,
-    totalDifficulty: allowNull(ethers_1.getBigInt),
-    gasLimit: ethers_1.getBigInt,
-    gasUsed: ethers_1.getBigInt,
-    miner: allowNull(ethers_1.getAddress),
+    difficulty: getBigInt,
+    totalDifficulty: allowNull(getBigInt),
+    gasLimit: getBigInt,
+    gasUsed: getBigInt,
+    miner: allowNull(getAddress),
     extraData: formatData,
-    baseFeePerGas: allowNull(ethers_1.getBigInt),
+    baseFeePerGas: allowNull(getBigInt),
     logsBloom: formatData,
     sealFields: allowNull(arrayOf(formatData)),
     uncles: arrayOf(formatHash),
-    size: ethers_1.getBigInt,
+    size: getBigInt,
     mixHash: formatHash,
-    l1BatchNumber: allowNull(ethers_1.getNumber),
-    l1BatchTimestamp: allowNull(ethers_1.getNumber),
+    l1BatchNumber: allowNull(getNumber),
+    l1BatchTimestamp: allowNull(getNumber),
 });
-function formatBlock(value) {
+export function formatBlock(value) {
     const result = _formatBlock(value);
     result.transactions = value.transactions.map((tx) => {
         if (typeof tx === 'string') {
@@ -137,102 +126,99 @@ function formatBlock(value) {
     });
     return result;
 }
-exports.formatBlock = formatBlock;
 const _formatReceiptLog = object({
-    transactionIndex: ethers_1.getNumber,
-    blockNumber: ethers_1.getNumber,
+    transactionIndex: getNumber,
+    blockNumber: getNumber,
     transactionHash: formatHash,
-    address: ethers_1.getAddress,
+    address: getAddress,
     topics: arrayOf(formatHash),
     data: formatData,
-    index: ethers_1.getNumber,
+    index: getNumber,
     blockHash: formatHash,
-    l1BatchNumber: allowNull(ethers_1.getNumber),
+    l1BatchNumber: allowNull(getNumber),
 }, {
     index: ['logIndex'],
 });
-function formatReceiptLog(value) {
+export function formatReceiptLog(value) {
     return _formatReceiptLog(value);
 }
-exports.formatReceiptLog = formatReceiptLog;
 const formatL2ToL1Log = object({
-    blockNumber: ethers_1.getNumber,
+    blockNumber: getNumber,
     blockHash: formatHash,
-    l1BatchNumber: allowNull(ethers_1.getNumber),
-    transactionIndex: ethers_1.getNumber,
-    shardId: ethers_1.getNumber,
+    l1BatchNumber: allowNull(getNumber),
+    transactionIndex: getNumber,
+    shardId: getNumber,
     isService: formatBoolean,
-    sender: ethers_1.getAddress,
+    sender: getAddress,
     key: formatHash,
     value: formatHash,
     transactionHash: formatHash,
-    logIndex: ethers_1.getNumber,
+    logIndex: getNumber,
 });
 const _formatTransactionReceipt = object({
-    to: allowNull(ethers_1.getAddress, null),
-    from: allowNull(ethers_1.getAddress, null),
-    contractAddress: allowNull(ethers_1.getAddress, null),
+    to: allowNull(getAddress, null),
+    from: allowNull(getAddress, null),
+    contractAddress: allowNull(getAddress, null),
     // should be allowNull(hash), but broken-EIP-658 support is handled in receipt
-    index: ethers_1.getNumber,
-    root: allowNull(ethers_1.hexlify),
-    gasUsed: ethers_1.getBigInt,
+    index: getNumber,
+    root: allowNull(hexlify),
+    gasUsed: getBigInt,
     logsBloom: allowNull(formatData),
     blockHash: allowNull(formatHash, null),
     hash: formatHash,
     logs: arrayOf(formatReceiptLog),
-    blockNumber: allowNull(ethers_1.getNumber, null),
+    blockNumber: allowNull(getNumber, null),
     //confirmations: allowNull(getNumber, null),
-    cumulativeGasUsed: ethers_1.getBigInt,
-    effectiveGasPrice: allowNull(ethers_1.getBigInt),
-    status: allowNull(ethers_1.getNumber),
-    type: allowNull(ethers_1.getNumber, 0),
-    l1BatchNumber: allowNull(ethers_1.getNumber),
-    l1BatchTxIndex: allowNull(ethers_1.getNumber),
+    cumulativeGasUsed: getBigInt,
+    effectiveGasPrice: allowNull(getBigInt),
+    status: allowNull(getNumber),
+    type: allowNull(getNumber, 0),
+    l1BatchNumber: allowNull(getNumber),
+    l1BatchTxIndex: allowNull(getNumber),
     l2ToL1Logs: allowNull(arrayOf(formatL2ToL1Log), []),
 }, {
     effectiveGasPrice: ['gasPrice'],
     hash: ['transactionHash'],
     index: ['transactionIndex'],
 });
-function formatTransactionReceipt(value) {
+export function formatTransactionReceipt(value) {
     return _formatTransactionReceipt(value);
 }
-exports.formatTransactionReceipt = formatTransactionReceipt;
-function formatTransactionResponse(value) {
+export function formatTransactionResponse(value) {
     // Some clients (TestRPC) do strange things like return 0x0 for the
     // 0 address; correct this to be a real address
-    if (value.to && (0, ethers_1.getBigInt)(value.to) === BN_0) {
+    if (value.to && getBigInt(value.to) === BN_0) {
         value.to = '0x0000000000000000000000000000000000000000';
     }
     const result = object({
         hash: formatHash,
         // Some nodes do not return this, usually test nodes (like Ganache)
-        index: allowNull(ethers_1.getNumber, undefined),
+        index: allowNull(getNumber, undefined),
         type: (value) => {
             if (value === '0x' || value === null || value === undefined) {
                 return 0;
             }
-            return (0, ethers_1.getNumber)(value);
+            return getNumber(value);
         },
-        accessList: allowNull(ethers_1.accessListify, null),
+        accessList: allowNull(accessListify, null),
         blockHash: allowNull(formatHash, null),
-        blockNumber: allowNull(ethers_1.getNumber, null),
-        transactionIndex: allowNull(ethers_1.getNumber, null),
+        blockNumber: allowNull(getNumber, null),
+        transactionIndex: allowNull(getNumber, null),
         //confirmations: allowNull(getNumber, null),
-        from: ethers_1.getAddress,
+        from: getAddress,
         // either (gasPrice) or (maxPriorityFeePerGas + maxFeePerGas) must be set
-        gasPrice: allowNull(ethers_1.getBigInt),
-        maxPriorityFeePerGas: allowNull(ethers_1.getBigInt),
-        maxFeePerGas: allowNull(ethers_1.getBigInt),
-        gasLimit: ethers_1.getBigInt,
-        to: allowNull(ethers_1.getAddress, null),
-        value: ethers_1.getBigInt,
-        nonce: ethers_1.getNumber,
+        gasPrice: allowNull(getBigInt),
+        maxPriorityFeePerGas: allowNull(getBigInt),
+        maxFeePerGas: allowNull(getBigInt),
+        gasLimit: getBigInt,
+        to: allowNull(getAddress, null),
+        value: getBigInt,
+        nonce: getNumber,
         data: formatData,
-        creates: allowNull(ethers_1.getAddress, null),
-        chainId: allowNull(ethers_1.getBigInt, null),
-        l1BatchNumber: allowNull(ethers_1.getNumber),
-        l1BatchTxIndex: allowNull(ethers_1.getNumber),
+        creates: allowNull(getAddress, null),
+        chainId: allowNull(getBigInt, null),
+        l1BatchNumber: allowNull(getNumber),
+        l1BatchTxIndex: allowNull(getNumber),
     }, {
         data: ['input'],
         gasLimit: ['gas'],
@@ -240,7 +226,7 @@ function formatTransactionResponse(value) {
     })(value);
     // If to and creates are empty, populate the creates from the value
     if (!result.to === null && result.creates === null) {
-        result.creates = (0, ethers_1.getCreateAddress)(result);
+        result.creates = getCreateAddress(result);
     }
     // Add an access list to supported transaction types
     if ((value.type === 1 || value.type === 2) && value.accessList === null) {
@@ -249,16 +235,16 @@ function formatTransactionResponse(value) {
     // Compute the signature
     try {
         if (value.signature) {
-            result.signature = ethers_1.Signature.from(value.signature);
+            result.signature = Signature.from(value.signature);
         }
         else {
-            result.signature = ethers_1.Signature.from(value);
+            result.signature = Signature.from(value);
         }
     }
     catch (e) {
         // DepositL2 transactions does not have V,R,S values
         // which causes signature computation to fail
-        result.signature = ethers_1.Signature.from(undefined);
+        result.signature = Signature.from(undefined);
     }
     // Some backends omit ChainId on legacy transactions, but we can compute it
     if (result.chainId === null) {
@@ -268,25 +254,23 @@ function formatTransactionResponse(value) {
         }
     }
     // 0x0000... should actually be null
-    if (result.blockHash && (0, ethers_1.getBigInt)(result.blockHash) === BN_0) {
+    if (result.blockHash && getBigInt(result.blockHash) === BN_0) {
         result.blockHash = null;
     }
     return result;
 }
-exports.formatTransactionResponse = formatTransactionResponse;
 const _formatFee = object({
-    gasLimit: ethers_1.getBigInt,
-    gasPerPubdataLimit: ethers_1.getBigInt,
-    maxPriorityFeePerGas: ethers_1.getBigInt,
-    maxFeePerGas: ethers_1.getBigInt,
+    gasLimit: getBigInt,
+    gasPerPubdataLimit: getBigInt,
+    maxPriorityFeePerGas: getBigInt,
+    maxFeePerGas: getBigInt,
 }, {
     gasLimit: ['gas_limit'],
     gasPerPubdataLimit: ['gas_per_pubdata_limit'],
     maxPriorityFeePerGas: ['max_priority_fee_per_gas'],
     maxFeePerGas: ['max_fee_per_gas'],
 });
-function formatFee(value) {
+export function formatFee(value) {
     return _formatFee(value);
 }
-exports.formatFee = formatFee;
 //# sourceMappingURL=format.js.map

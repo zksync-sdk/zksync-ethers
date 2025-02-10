@@ -1,16 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Wallet = void 0;
-const signer_1 = require("./signer");
-const utils_1 = require("./utils");
-const ethers_1 = require("ethers");
-const adapters_1 = require("./adapters");
+import { EIP712Signer } from './signer';
+import { EIP712_TX_TYPE, serializeEip712 } from './utils';
+import { ethers, } from 'ethers';
+import { AdapterL1, AdapterL2 } from './adapters';
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with ZKsync Era.
  * It facilitates bridging assets between different networks.
  * All transactions must originate from the address corresponding to the provided private key.
  */
-class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_1.ethers.Wallet)) {
+export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     _providerL1() {
         if (!this.providerL1) {
             throw new Error('L1 provider is missing! Specify an L1 provider using `Wallet.connectToL1()`.');
@@ -1046,7 +1043,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const ethWallet = wallet.ethWallet();
      */
     ethWallet() {
-        return new ethers_1.ethers.Wallet(this.signingKey, this._providerL1());
+        return new ethers.Wallet(this.signingKey, this._providerL1());
     }
     /**
      * Connects to the L2 network using `provider`.
@@ -1167,7 +1164,7 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
         super(privateKey, providerL2);
         if (this.provider) {
             const network = this.provider.getNetwork();
-            this.eip712 = new signer_1.EIP712Signer(this, network.then(n => Number(n.chainId)));
+            this.eip712 = new EIP712Signer(this, network.then(n => Number(n.chainId)));
         }
         this.providerL1 = providerL1;
     }
@@ -1222,11 +1219,11 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
         }
         if (tx.type === null ||
             tx.type === undefined ||
-            tx.type === utils_1.EIP712_TX_TYPE ||
+            tx.type === EIP712_TX_TYPE ||
             tx.customData) {
             tx.customData ?? (tx.customData = {});
             (_a = tx.customData).gasPerPubdata ?? (_a.gasPerPubdata = fee.gasPerPubdataLimit);
-            populated.type = utils_1.EIP712_TX_TYPE;
+            populated.type = EIP712_TX_TYPE;
             populated.value ?? (populated.value = 0);
             populated.data ?? (populated.data = '0x');
             populated.customData = this._fillCustomData(tx.customData ?? {});
@@ -1263,11 +1260,11 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      */
     async signTransaction(tx) {
         const populated = await this.populateTransaction(tx);
-        if (populated.type !== utils_1.EIP712_TX_TYPE) {
+        if (populated.type !== EIP712_TX_TYPE) {
             return await super.signTransaction(populated);
         }
         populated.customData.customSignature = await this.eip712.sign(populated);
-        return (0, utils_1.serializeEip712)(populated);
+        return serializeEip712(populated);
     }
     /**
      * Broadcast the transaction to the network.
@@ -1302,5 +1299,4 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
         return await this.provider.broadcastTransaction(await this.signTransaction(tx));
     }
 }
-exports.Wallet = Wallet;
 //# sourceMappingURL=wallet.js.map
