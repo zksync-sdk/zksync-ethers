@@ -1,3 +1,10 @@
+## [6.16.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.0...v6.16.1) (2025-02-12)
+
+
+### Bug Fixes
+
+* **signer:** fix `sendTransaction` populating from address ([2f18080](https://github.com/zksync-sdk/zksync-ethers/commit/2f1808059cc8451a5b2e86cd189a33dd1a9ebde3))
+
 # [6.16.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.4...v6.16.0) (2025-01-30)
 
 
