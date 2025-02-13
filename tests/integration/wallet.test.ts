@@ -28,9 +28,9 @@ import {
 const {expect} = chai;
 
 describe('Wallet', () => {
-  const provider = new Provider(L2_CHAIN_URL);
-  const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
-  const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
+  const provider = new Provider("http://127.0.0.1:3150");
+  const ethProvider = ethers.getDefaultProvider("http://127.0.0.1:3150");
+  const wallet = new Wallet('0x6b0cbc2c0afee36c7f8657b15062350ef52009148181c71104b58e5025dddaed', provider, ethProvider);
 
   describe('#constructor()', () => {
     it('`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider', async () => {
@@ -864,6 +864,11 @@ describe('Wallet', () => {
 
   describe('#deposit()', () => {
     if (IS_ETH_BASED) {
+      it('Test finalize withdrawal params', async () => {
+        console.log(await wallet.getAddress());
+        console.log(await wallet.getFinalizeWithdrawalParams('0x08a16820911668e0a00eb1c9c5f12544d2624aca83a514ffce16062aa01b1b35'));
+      });
+
       it('should deposit ETH to L2 network', async () => {
         const amount = 7_000_000_000;
         const l2BalanceBeforeDeposit = await wallet.getBalance();
@@ -929,6 +934,11 @@ describe('Wallet', () => {
           .true;
       }).timeout(60_000);
     } else {
+      it('Test finalize withdrawal params', async () => {
+        console.log(await wallet.getAddress());
+        console.log(await wallet.getFinalizeWithdrawalParams('0x08a16820911668e0a00eb1c9c5f12544d2624aca83a514ffce16062aa01b1b35'));
+      });
+
       it('should deposit ETH to L2 network', async () => {
         const amount = 7_000_000_000;
         const l2EthAddress = await wallet.l2TokenAddress(
