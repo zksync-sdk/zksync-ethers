@@ -371,7 +371,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * use the {@link getAllowanceL1} method.
      *
      * @param transaction The transaction object containing deposit details.
-     * @param transaction.token The address of the token to deposit. ETH by default.
+     * @param transaction.token The address of the token to deposit.
      * @param transaction.amount The amount of the token to deposit.
      * @param [transaction.to] The address that will receive the deposited tokens on L2.
      * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
@@ -716,14 +716,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * - Depositing any token (including ETH) on a non-ETH-based chain.
      *
      * @param transaction The transaction details.
-     * @param transaction.token The address of the token to deposit. ETH by default.
+     * @param transaction.token The address of the token to deposit.
      * @param transaction.amount The amount of the token to deposit.
      * @param [transaction.to] The address that will receive the deposited tokens on L2.
      * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
      * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
      * base cost of the transaction.
      * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
-     * Defaults to the default ZKsync Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+     * Defaults to the default ZKsync Era bridge (`L1SharedBridge`).
      * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
      * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
      * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
@@ -762,14 +762,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * Returns a populated deposit transaction.
      *
      * @param transaction The transaction details.
-     * @param transaction.token The address of the token to deposit. ETH by default.
+     * @param transaction.token The address of the token to deposit.
      * @param transaction.amount The amount of the token to deposit.
      * @param [transaction.to] The address that will receive the deposited tokens on L2.
      * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
      * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
      * base cost of the transaction.
      * @param [transaction.bridgeAddress] The address of the bridge contract to be used. Defaults to the default ZKsync
-     * Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+     * Era bridge (`L1SharedBridge`).
      * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
      * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
      * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
