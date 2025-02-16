@@ -1,0 +1,59 @@
+name: Publish Documentation
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "ref or tag to publish NPM package from"
+        default: ""
+        required: false
+
+  workflow_run:
+    workflows: ["Publish NPM package"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build TypeDoc Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine ref
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "REF=${{ inputs.ref }}" >> $GITHUB_ENV
+          else
+            echo "REF=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_ENV
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: yarn install
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Generate documentation
+        run: yarn docs
+      - name: Upload docs artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
