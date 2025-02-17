@@ -21,7 +21,7 @@ export const IS_ETH_BASED = ['true', '1', 'yes'].includes(
   process.env.IS_ETH_CHAIN ?? 'true'
 );
 export const L2_CHAIN_URL = IS_ETH_BASED
-  ? 'http://127.0.0.1:https://z2-dev-api.zksync.dev/'
+  ? 'https//z2-dev-api.zksync.dev/'
   : 'https://z2-dev-api.zksync.dev/';
 export const L1_CHAIN_URL = 'https://ethereum-sepolia-rpc.publicnode.com';
 
