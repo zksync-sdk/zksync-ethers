@@ -21,9 +21,9 @@ export const IS_ETH_BASED = ['true', '1', 'yes'].includes(
   process.env.IS_ETH_CHAIN ?? 'true'
 );
 export const L2_CHAIN_URL = IS_ETH_BASED
-  ? 'http://127.0.0.1:3152'
-  : 'http://127.0.0.1:15200';
-export const L1_CHAIN_URL = 'http://127.0.0.1:8545';
+  ? 'http://127.0.0.1:https://z2-dev-api.zksync.dev/'
+  : 'https://z2-dev-api.zksync.dev/';
+export const L1_CHAIN_URL = 'https://ethereum-sepolia-rpc.publicnode.com';
 
 /**
  * Compares two transaction objects, checking that all properties (except those in ignoreKeys)
