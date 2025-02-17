@@ -866,7 +866,7 @@ describe('Wallet', () => {
     if (IS_ETH_BASED) {
       it('Test finalize withdrawal params', async () => {
         console.log(await wallet.getAddress());
-        console.log(await wallet.getFinalizeWithdrawalParams('0x08a16820911668e0a00eb1c9c5f12544d2624aca83a514ffce16062aa01b1b35'));
+        console.log(await wallet.getFinalizeWithdrawalParams('0xcf2b45f86cf7cd47257ac8e4a9a0db90588ddd8038695038cb0e08e83b1e3b03'));
       });
 
       it('should deposit ETH to L2 network', async () => {
@@ -936,7 +936,7 @@ describe('Wallet', () => {
     } else {
       it('Test finalize withdrawal params', async () => {
         console.log(await wallet.getAddress());
-        console.log(await wallet.getFinalizeWithdrawalParams('0x08a16820911668e0a00eb1c9c5f12544d2624aca83a514ffce16062aa01b1b35'));
+        console.log(await wallet.getFinalizeWithdrawalParams('0xcf2b45f86cf7cd47257ac8e4a9a0db90588ddd8038695038cb0e08e83b1e3b03'));
       });
 
       it('should deposit ETH to L2 network', async () => {
