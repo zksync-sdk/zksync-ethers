@@ -281,18 +281,23 @@ function AdapterL1(Base) {
             const isETHBasedChain = (0, utils_1.isAddressEq)(baseTokenAddress, utils_1.ETH_ADDRESS_IN_CONTRACTS);
             if (isETHBasedChain &&
                 (0, utils_1.isAddressEq)(transaction.token, utils_1.ETH_ADDRESS_IN_CONTRACTS)) {
+                console.log('depositETHToETHBasedChain');
                 return await this._depositETHToETHBasedChain(transaction);
             }
             else if ((0, utils_1.isAddressEq)(baseTokenAddress, utils_1.ETH_ADDRESS_IN_CONTRACTS)) {
+                console.log('depositTokenToETHBasedChain');
                 return await this._depositTokenToETHBasedChain(transaction);
             }
             else if ((0, utils_1.isAddressEq)(transaction.token, utils_1.ETH_ADDRESS_IN_CONTRACTS)) {
+                console.log('depositETHToNonETHBasedChain');
                 return await this._depositETHToNonETHBasedChain(transaction);
             }
             else if ((0, utils_1.isAddressEq)(transaction.token, baseTokenAddress)) {
+                console.log('depositBaseTokenToNonETHBasedChain');
                 return await this._depositBaseTokenToNonETHBasedChain(transaction);
             }
             else {
+                console.log('depositNonBaseTokenToNonETHBasedChain');
                 return await this._depositNonBaseTokenToNonETHBasedChain(transaction);
             }
         }
@@ -403,6 +408,7 @@ function AdapterL1(Base) {
                     await approveTx.wait();
                 }
             }
+            console.log('depositTokenToETHBasedChain', tx);
             const baseGasLimit = await this._providerL1().estimateGas(tx);
             const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
             tx.gasLimit ?? (tx.gasLimit = gasLimit);

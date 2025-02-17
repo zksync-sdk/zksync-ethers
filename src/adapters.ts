@@ -456,19 +456,24 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         baseTokenAddress,
         ETH_ADDRESS_IN_CONTRACTS
       );
-
+      
       if (
         isETHBasedChain &&
         isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)
       ) {
+        console.log('depositETHToETHBasedChain'); 
         return await this._depositETHToETHBasedChain(transaction);
       } else if (isAddressEq(baseTokenAddress, ETH_ADDRESS_IN_CONTRACTS)) {
+        console.log('depositTokenToETHBasedChain');
         return await this._depositTokenToETHBasedChain(transaction);
       } else if (isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)) {
+        console.log('depositETHToNonETHBasedChain');
         return await this._depositETHToNonETHBasedChain(transaction);
       } else if (isAddressEq(transaction.token, baseTokenAddress)) {
+        console.log('depositBaseTokenToNonETHBasedChain');
         return await this._depositBaseTokenToNonETHBasedChain(transaction);
       } else {
+        console.log('depositNonBaseTokenToNonETHBasedChain');
         return await this._depositNonBaseTokenToNonETHBasedChain(transaction);
       }
     }
@@ -704,7 +709,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           await approveTx.wait();
         }
       }
-
+      console.log('depositTokenToETHBasedChain', tx);
       const baseGasLimit = await this._providerL1().estimateGas(tx);
       const gasLimit = scaleGasLimit(baseGasLimit);
 

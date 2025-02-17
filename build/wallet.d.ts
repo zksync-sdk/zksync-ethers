@@ -104,27 +104,7 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            bridgeAddress?: string | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
-             * const gas = await wallet.estimateGasDeposit({
-             *   token: tokenL1,
-             *   amount: 10_000_000n,
-             * });
-             * console.log(`Gas: ${gas}`);
-             */
+            bridgeAddress?: string | undefined;
             approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
@@ -208,16 +188,10 @@ declare const Wallet_base: {
             customBridgeData?: BytesLike | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
-            refundRecipient?: string | undefined;
-            overrides?: ethers.Overrides | undefined;
-        }): Promise<bigint>;
-        getDepositTx(transaction: {
-            token: string;
-            amount: BigNumberish;
-            to?: string | undefined; /**
+            /**
              * @inheritDoc
              *
-             * @example
+             * @example Get ETH balance.
              *
              * import { Wallet, Provider, types, utils } from "zksync-ethers";
              * import { ethers } from "ethers";
@@ -228,8 +202,30 @@ declare const Wallet_base: {
              * const ethProvider = ethers.getDefaultProvider("sepolia");
              * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
              *
-             * console.log(`Nonce: ${await wallet.getDeploymentNonce()}`);
+             * console.log(`ETH balance: ${await wallet.getBalance()}`);
+             *
+             * @example Get token balance.
+             *
+             * import { Wallet, Provider, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const token = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+             *
+             * console.log(`Token balance: ${await wallet.getBalance(token)}`);
              */
+            refundRecipient?: string | undefined;
+            overrides?: ethers.Overrides | undefined;
+        }): Promise<bigint>;
+        getDepositTx(transaction: {
+            token: string;
+            amount: BigNumberish;
+            to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
