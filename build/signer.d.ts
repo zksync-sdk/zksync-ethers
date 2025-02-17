@@ -759,26 +759,7 @@ declare const L1Signer_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            l2GasLimit?: BigNumberish | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-             * const tx = await signer.getDepositTx({
-             *   token: tokenL1,
-             *   amount: 10_000_000n,
-             * });
-             */
+            l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
@@ -2148,26 +2129,7 @@ declare const L1VoidSigner_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            l2GasLimit?: BigNumberish | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
-             * const tx = await signer.getDepositTx({
-             *   token: tokenL1,
-             *   amount: 10_000_000n,
-             * });
-             */
+            l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;

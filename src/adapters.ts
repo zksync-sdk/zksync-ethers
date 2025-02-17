@@ -710,7 +710,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }
       }
       console.log('depositTokenToETHBasedChain', tx);
-      const baseGasLimit = await this._providerL1().estimateGas(tx);
+
+      let baseGasLimit = 0n;
+      try {
+        baseGasLimit = await this._providerL1().estimateGas(tx);
+      } catch (e) {
+        console.log('error', e);
+        baseGasLimit = 1000000n;
+      }
       const gasLimit = scaleGasLimit(baseGasLimit);
 
       tx.gasLimit ??= gasLimit;
