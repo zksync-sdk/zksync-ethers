@@ -545,7 +545,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }
       }
 
-      const baseGasLimit = await this._providerL1().estimateGas(tx);
+      let baseGasLimit = 0n;
+      try {
+        baseGasLimit = await this._providerL1().estimateGas(tx);
+      } catch (e) {
+        console.log('error', e);
+        baseGasLimit = 1000000n;
+      }
       const gasLimit = scaleGasLimit(baseGasLimit);
 
       tx.gasLimit ??= gasLimit;
@@ -657,7 +663,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }
       }
 
-      const baseGasLimit = await this._providerL1().estimateGas(tx);
+      let baseGasLimit = 0n;
+      try {
+        baseGasLimit = await this._providerL1().estimateGas(tx);
+      } catch (e) {
+        console.log('error', e);
+        baseGasLimit = 1000000n;
+      }
       const gasLimit = scaleGasLimit(baseGasLimit);
 
       tx.gasLimit ??= gasLimit;
@@ -799,8 +811,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (tx.token && isAddressEq(tx.token, await this.getBaseToken())) {
         baseGasLimit = await this.estimateGasRequestExecute(tx);
       } else {
-        baseGasLimit = await this._providerL1().estimateGas(tx);
-      }
+        try {
+          baseGasLimit = await this._providerL1().estimateGas(tx);
+        } catch (e) {
+          console.log('error', e);
+          baseGasLimit = 1000000n;
+        }
+        }
 
       return scaleGasLimit(baseGasLimit);
     }
@@ -1876,7 +1893,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       delete requestExecuteTx.maxFeePerGas;
       delete requestExecuteTx.maxPriorityFeePerGas;
 
-      return this._providerL1().estimateGas(requestExecuteTx);
+      let baseGasLimit = 0n;
+      try {
+        baseGasLimit = await this._providerL1().estimateGas(requestExecuteTx);
+      } catch (e) {
+        console.log('error', e);
+        baseGasLimit = 1000000n;
+      }
+      return baseGasLimit;
     }
 
     /**

@@ -334,7 +334,14 @@ function AdapterL1(Base) {
                     await approveTx.wait();
                 }
             }
-            const baseGasLimit = await this._providerL1().estimateGas(tx);
+            let baseGasLimit = 0n;
+            try {
+                baseGasLimit = await this._providerL1().estimateGas(tx);
+            }
+            catch (e) {
+                console.log('error', e);
+                baseGasLimit = 1000000n;
+            }
             const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
             tx.gasLimit ?? (tx.gasLimit = gasLimit);
             return await this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(tx));
@@ -385,7 +392,14 @@ function AdapterL1(Base) {
                     await approveTx.wait();
                 }
             }
-            const baseGasLimit = await this._providerL1().estimateGas(tx);
+            let baseGasLimit = 0n;
+            try {
+                baseGasLimit = await this._providerL1().estimateGas(tx);
+            }
+            catch (e) {
+                console.log('error', e);
+                baseGasLimit = 1000000n;
+            }
             const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
             tx.gasLimit ?? (tx.gasLimit = gasLimit);
             return await this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(tx));
@@ -464,7 +478,13 @@ function AdapterL1(Base) {
                 baseGasLimit = await this.estimateGasRequestExecute(tx);
             }
             else {
-                baseGasLimit = await this._providerL1().estimateGas(tx);
+                try {
+                    baseGasLimit = await this._providerL1().estimateGas(tx);
+                }
+                catch (e) {
+                    console.log('error', e);
+                    baseGasLimit = 1000000n;
+                }
             }
             return (0, utils_1.scaleGasLimit)(baseGasLimit);
         }
@@ -1027,7 +1047,15 @@ function AdapterL1(Base) {
             delete requestExecuteTx.gasPrice;
             delete requestExecuteTx.maxFeePerGas;
             delete requestExecuteTx.maxPriorityFeePerGas;
-            return this._providerL1().estimateGas(requestExecuteTx);
+            let baseGasLimit = 0n;
+            try {
+                baseGasLimit = await this._providerL1().estimateGas(requestExecuteTx);
+            }
+            catch (e) {
+                console.log('error', e);
+                baseGasLimit = 1000000n;
+            }
+            return baseGasLimit;
         }
         /**
          * Returns the parameters for the approval token transaction based on the request execute transaction.

@@ -797,7 +797,23 @@ declare const L1Signer_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            bridgeAddress?: string | undefined;
+            bridgeAddress?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+             * const isFinalized = await signer.isWithdrawalFinalized(WITHDRAWAL_HASH);
+             */
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
@@ -2167,7 +2183,23 @@ declare const L1VoidSigner_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            bridgeAddress?: string | undefined;
+            bridgeAddress?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+             * const isFinalized = await signer.isWithdrawalFinalized(WITHDRAWAL_HASH);
+             */
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
