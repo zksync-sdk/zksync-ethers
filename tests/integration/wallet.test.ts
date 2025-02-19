@@ -28,9 +28,9 @@ import {
 const {expect} = chai;
 
 describe('Wallet', () => {
-  const provider = new Provider("https://z2-dev-api.zksync.dev/");
-  const ethProvider = ethers.getDefaultProvider("https://ethereum-sepolia-rpc.publicnode.com");
-  const wallet = new Wallet('0x97e10f0b4330cc7a11354bd438e11d1e5599adb9a9c596e871c3bd22783368af', provider, ethProvider);
+  const provider = new Provider("http://127.0.0.1:3150");
+  const ethProvider = ethers.getDefaultProvider("http://127.0.0.1:8545");
+  const wallet = new Wallet('0x6b0cbc2c0afee36c7f8657b15062350ef52009148181c71104b58e5025dddaed', provider, ethProvider);
 
   describe('#constructor()', () => {
     it('`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider', async () => {
@@ -866,7 +866,7 @@ describe('Wallet', () => {
     if (IS_ETH_BASED) {
       it('Test finalize withdrawal params', async () => {
         console.log(await wallet.getAddress());
-        console.log(await wallet.getFinalizeWithdrawalParams('0xe8b2241bbf685a44af3f365637b374302fd8782177dee21c80340e0064405cdd'));
+        console.log(await wallet.getFinalizeWithdrawalParams('0xe4965ff24f358cdab5810c2b55e7a4a1bcc8d886a307bcebd4c7df0de39e5abf'));
       });
 
       it('should deposit ETH to L2 network', async () => {
@@ -936,7 +936,7 @@ describe('Wallet', () => {
     } else {
       it('Test finalize withdrawal params', async () => {
         console.log(await wallet.getAddress());
-        console.log(await wallet.getFinalizeWithdrawalParams('0xe8b2241bbf685a44af3f365637b374302fd8782177dee21c80340e0064405cdd'));
+        console.log(await wallet.getFinalizeWithdrawalParams('0xe4965ff24f358cdab5810c2b55e7a4a1bcc8d886a307bcebd4c7df0de39e5abf'));
       });
 
       it('should deposit ETH to L2 network', async () => {
