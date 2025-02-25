@@ -8,11 +8,6 @@ on:
         default: ""
         required: false
 
-  workflow_run:
-    workflows: ["Publish NPM package"]
-    types:
-      - completed
-
 permissions:
   contents: read
   pages: write
