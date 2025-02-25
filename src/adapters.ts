@@ -1510,7 +1510,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      */
     async getFinalizeWithdrawalParams(
       withdrawalHash: BytesLike,
-      index = 0
+      index = 0,
+      precommitLogIndex = 0,
+      extendeduntilChainId?: number,
     ): Promise<FinalizeWithdrawalParams> {
       const {log, l1BatchTxId} = await this._getWithdrawalLog(
         withdrawalHash,
@@ -1523,7 +1525,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const sender = ethers.dataSlice(log.topics[1], 12);
       const proof = await this._providerL2().getLogProof(
         withdrawalHash,
-        l2ToL1LogIndex
+        l2ToL1LogIndex,
+        extendeduntilChainId,
+        precommitLogIndex
       );
       if (!proof) {
         throw new Error('Log proof not found!');
