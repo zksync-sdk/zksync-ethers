@@ -28,7 +28,7 @@ import {
 const {expect} = chai;
 
 describe('Wallet', () => {
-  const provider = new Provider("http://127.0.0.1:3170");
+  const provider = new Provider("http://127.0.0.1:3250");
   const ethProvider = ethers.getDefaultProvider("http://127.0.0.1:8545");
   const wallet = new Wallet('0x6b0cbc2c0afee36c7f8657b15062350ef52009148181c71104b58e5025dddaed', provider, ethProvider);
 
