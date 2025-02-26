@@ -174,6 +174,10 @@ export const L2_ASSET_ROUTER_ADDRESS: Address =
 export const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address =
   '0x0000000000000000000000000000000000010004';
 
+export const PROTOCOL_VERSION_V25 = 25;
+
+export const PROTOCOL_VERSION_V26 = 26;
+
 /**
  * The EIP1271 magic value used for signature validation in smart contracts.
  * This predefined constant serves as a standardized indicator to signal successful

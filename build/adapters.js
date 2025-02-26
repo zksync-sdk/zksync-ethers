@@ -510,9 +510,16 @@ function AdapterL1(Base) {
             const mintValue = baseCost + BigInt(operatorTip);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             overrides.value ?? (overrides.value = 0);
-            const [assetId, _] = await (0, utils_1.resolveAssetId)({ token }, await this.getNativeTokenVaultL1());
-            const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, token);
-            const secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
+            let secondBridgeCalldata;
+            const protocolVersion = await this._providerL2().getProtocolVersion();
+            if (protocolVersion.version_id == utils_1.PROTOCOL_VERSION_V26) {
+                const [assetId, _] = await (0, utils_1.resolveAssetId)({ token }, await this.getNativeTokenVaultL1());
+                const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, token);
+                secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
+            }
+            else {
+                secondBridgeCalldata = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'address'], [token, amount, to]);
+            }
             return {
                 tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction({
                     chainId: chainId,
@@ -561,9 +568,16 @@ function AdapterL1(Base) {
             overrides.value ?? (overrides.value = amount);
             const mintValue = baseCost + BigInt(operatorTip);
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
-            const [assetId, _] = await (0, utils_1.resolveAssetId)({ token: utils_1.ETH_ADDRESS_IN_CONTRACTS }, await this.getNativeTokenVaultL1());
-            const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, utils_1.ETH_ADDRESS_IN_CONTRACTS);
-            const secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
+            let secondBridgeCalldata;
+            const protocolVersion = await this._providerL2().getProtocolVersion();
+            if (protocolVersion.version_id == utils_1.PROTOCOL_VERSION_V26) {
+                const [assetId, _] = await (0, utils_1.resolveAssetId)({ token: utils_1.ETH_ADDRESS_IN_CONTRACTS }, await this.getNativeTokenVaultL1());
+                const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, utils_1.ETH_ADDRESS_IN_CONTRACTS);
+                secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
+            }
+            else {
+                secondBridgeCalldata = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'address'], [utils_1.ETH_ADDRESS_IN_CONTRACTS, 0, to]);
+            }
             return {
                 tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction({
                     chainId,
@@ -585,8 +599,16 @@ function AdapterL1(Base) {
             const chainId = (await this._providerL2().getNetwork()).chainId;
             const tx = await this._getDepositTxWithDefaults(transaction);
             const { token, operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
-            const [assetId, _] = await (0, utils_1.resolveAssetId)({ token }, await this.getNativeTokenVaultL1());
-            const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, token);
+            let secondBridgeCalldata;
+            const protocolVersion = await this._providerL2().getProtocolVersion();
+            if (protocolVersion.version_id == utils_1.PROTOCOL_VERSION_V26) {
+                const [assetId, _] = await (0, utils_1.resolveAssetId)({ token }, await this.getNativeTokenVaultL1());
+                const ntvData = (0, utils_1.encodeNTVTransferData)(BigInt(amount), to, token);
+                secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
+            }
+            else {
+                secondBridgeCalldata = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'address'], [token, amount, to]);
+            }
             const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
             const baseCost = await bridgehub.l2TransactionBaseCost(chainId, gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
             const mintValue = baseCost + BigInt(operatorTip);
@@ -594,7 +616,6 @@ function AdapterL1(Base) {
             await (0, utils_1.checkBaseCost)(baseCost, mintValue);
             const secondBridgeAddress = tx.bridgeAddress ??
                 (await (await this.getL1BridgeContracts()).shared.getAddress());
-            const secondBridgeCalldata = (0, utils_1.encodeSecondBridgeDataV1)(ethers_1.ethers.hexlify(assetId), ntvData);
             return await bridgehub.requestL2TransactionTwoBridges.populateTransaction({
                 chainId,
                 mintValue,
@@ -883,18 +904,38 @@ function AdapterL1(Base) {
          */
         async finalizeWithdrawal(withdrawalHash, index = 0, overrides) {
             const { l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, sender, proof, } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
-            const l1Nullifier = typechain_1.IL1Nullifier__factory.connect(await this.getL1NullifierAddress(), this._signerL1());
-            const finalizeL1DepositParams = {
-                chainId: (await this._providerL2().getNetwork())
-                    .chainId,
-                l2BatchNumber: l1BatchNumber,
-                l2MessageIndex: l2MessageIndex,
-                l2Sender: sender,
-                l2TxNumberInBatch: l2TxNumberInBlock,
-                message: message,
-                merkleProof: proof,
-            };
-            return await l1Nullifier.finalizeDeposit(finalizeL1DepositParams, overrides ?? {});
+            const protocolVersion = await this._providerL2().getProtocolVersion();
+            if (protocolVersion.version_id == utils_1.PROTOCOL_VERSION_V26) {
+                const l1Nullifier = typechain_1.IL1Nullifier__factory.connect(await this.getL1NullifierAddress(), this._signerL1());
+                const finalizeL1DepositParams = {
+                    chainId: (await this._providerL2().getNetwork())
+                        .chainId,
+                    l2BatchNumber: l1BatchNumber,
+                    l2MessageIndex: l2MessageIndex,
+                    l2Sender: sender,
+                    l2TxNumberInBatch: l2TxNumberInBlock,
+                    message: message,
+                    merkleProof: proof,
+                };
+                return await l1Nullifier.finalizeDeposit(finalizeL1DepositParams, overrides ?? {});
+            }
+            else {
+                let l1Bridge;
+                if ((0, utils_1.isAddressEq)(sender, utils_1.L2_BASE_TOKEN_ADDRESS)) {
+                    l1Bridge = (await this.getL1BridgeContracts()).shared;
+                }
+                else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
+                    const l2Bridge = typechain_1.IL2SharedBridge__factory.connect(sender, this._providerL2());
+                    const bridgeAddress = await l2Bridge.l1SharedBridge();
+                    l1Bridge = typechain_1.IL1SharedBridge__factory.connect(bridgeAddress, this._signerL1());
+                }
+                else {
+                    const l2Bridge = typechain_1.IL2Bridge__factory.connect(sender, this._providerL2());
+                    const bridgeAddress = await l2Bridge.l1Bridge();
+                    l1Bridge = typechain_1.IL1Bridge__factory.connect(bridgeAddress, this._signerL1());
+                }
+                return await l1Bridge.finalizeWithdrawal((await this._providerL2().getNetwork()).chainId, l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, proof, overrides ?? {});
+            }
         }
         /**
          * Returns whether the withdrawal transaction is finalized on the L1 network.
@@ -915,8 +956,19 @@ function AdapterL1(Base) {
                 throw new Error('Log proof not found!');
             }
             const chainId = (await this._providerL2().getNetwork()).chainId;
-            const l1Bridge = (await this.getL1BridgeContracts())
-                .shared;
+            let l1Bridge;
+            const protocolVersion = await this._providerL2().getProtocolVersion();
+            if (protocolVersion.version_id == utils_1.PROTOCOL_VERSION_V26) {
+                l1Bridge = (await this.getL1BridgeContracts()).shared;
+            }
+            else if (await this._providerL2().isBaseToken(ethers_1.ethers.dataSlice(log.topics[1], 12))) {
+                l1Bridge = (await this.getL1BridgeContracts()).shared;
+            }
+            else {
+                const sender = ethers_1.ethers.dataSlice(log.topics[1], 12);
+                const l2Bridge = typechain_1.IL2SharedBridge__factory.connect(sender, this._providerL2());
+                l1Bridge = typechain_1.IL1SharedBridge__factory.connect(await l2Bridge.l1SharedBridge(), this._providerL1());
+            }
             return await l1Bridge.isWithdrawalFinalized(chainId, log.l1BatchNumber, proof.id);
         }
         /**
@@ -948,44 +1000,55 @@ function AdapterL1(Base) {
                 throw new Error('L2 bridge address not found!');
             }
             const l1Bridge = typechain_1.IL1SharedBridge__factory.connect(l1BridgeAddress, this._signerL1());
-            const l1AR = typechain_1.IL1AssetRouter__factory.connect(l1BridgeAddress, this._signerL1());
             const l2Bridge = typechain_1.IL2Bridge__factory.connect(l2BridgeAddress, this._providerL2());
-            const l2ARInterface = typechain_1.IAssetRouterBase__factory.createInterface();
-            const l1ntv = await this.getNativeTokenVaultL1();
-            try {
+            const protocolVersion = await this._providerL2().getProtocolVersion();
+            if (protocolVersion.version_id != utils_1.PROTOCOL_VERSION_V26) {
                 const calldata = l2Bridge.interface.decodeFunctionData('finalizeDeposit', tx.data);
                 const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
                 if (!proof) {
                     throw new Error('Log proof not found!');
                 }
-                // todo: generally, providing token address is not required for the NTV
-                // this sdk does it, but we should support the case even when it is not given
-                const assetData = (0, utils_1.encodeNTVTransferData)(calldata['_amount'], calldata['_l2Receiver'], calldata['_l1Token']);
-                const assetId = await l1ntv.assetId(calldata['_l1Token']);
-                if (assetId === ethers_1.ethers.ZeroHash) {
-                    throw new Error(`Token ${calldata['_l1Token']} not registered in NTV`);
-                }
-                // todo: this SDK assumes that users used new encoding version,
-                // however in general it should be capable of working with hte old version as well
-                return await l1AR['bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])']((await this._providerL2().getNetwork()).chainId, calldata['_l1Sender'], // depositSender
-                assetId, // asset id
-                assetData, depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});
+                return await l1Bridge.claimFailedDeposit((await this._providerL2().getNetwork()).chainId, calldata['_l1Sender'], calldata['_l1Token'], calldata['_amount'], depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});
             }
-            catch (e) {
-                const calldata = l2ARInterface.decodeFunctionData('finalizeDeposit', tx.data);
-                const assetId = calldata['_assetId'];
-                const transferData = calldata['_transferData'];
-                const l1TokenAddress = await l1ntv.tokenAddress(assetId);
-                const transferDataDecoded = ethers_1.ethers.AbiCoder.defaultAbiCoder().decode(['address', 'address', 'address', 'uint256', 'bytes'], transferData);
-                const assetData = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [transferDataDecoded[3], transferDataDecoded[1], l1TokenAddress]);
-                const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
-                if (!proof) {
-                    throw new Error('Log proof not found!');
+            else {
+                const l1AR = typechain_1.IL1AssetRouter__factory.connect(l1BridgeAddress, this._signerL1());
+                const l2ARInterface = typechain_1.IAssetRouterBase__factory.createInterface();
+                const l1ntv = await this.getNativeTokenVaultL1();
+                try {
+                    const calldata = l2Bridge.interface.decodeFunctionData('finalizeDeposit', tx.data);
+                    const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
+                    if (!proof) {
+                        throw new Error('Log proof not found!');
+                    }
+                    // todo: generally, providing token address is not required for the NTV
+                    // this sdk does it, but we should support the case even when it is not given
+                    const assetData = (0, utils_1.encodeNTVTransferData)(calldata['_amount'], calldata['_l2Receiver'], calldata['_l1Token']);
+                    const assetId = await l1ntv.assetId(calldata['_l1Token']);
+                    if (assetId === ethers_1.ethers.ZeroHash) {
+                        throw new Error(`Token ${calldata['_l1Token']} not registered in NTV`);
+                    }
+                    // todo: this SDK assumes that users used new encoding version,
+                    // however in general it should be capable of working with hte old version as well
+                    return await l1AR['bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])']((await this._providerL2().getNetwork()).chainId, calldata['_l1Sender'], // depositSender
+                    assetId, // asset id
+                    assetData, depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});
                 }
-                // FIXME: a cheaper way is to call l1 nullifier directly
-                return await l1AR['bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])']((await this._providerL2().getNetwork()).chainId, transferDataDecoded[0], // depositSender
-                calldata['_assetId'], // asset id
-                assetData, depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});
+                catch (e) {
+                    const calldata = l2ARInterface.decodeFunctionData('finalizeDeposit', tx.data);
+                    const assetId = calldata['_assetId'];
+                    const transferData = calldata['_transferData'];
+                    const l1TokenAddress = await l1ntv.tokenAddress(assetId);
+                    const transferDataDecoded = ethers_1.ethers.AbiCoder.defaultAbiCoder().decode(['address', 'address', 'address', 'uint256', 'bytes'], transferData);
+                    const assetData = ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [transferDataDecoded[3], transferDataDecoded[1], l1TokenAddress]);
+                    const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
+                    if (!proof) {
+                        throw new Error('Log proof not found!');
+                    }
+                    // FIXME: a cheaper way is to call l1 nullifier directly
+                    return await l1AR['bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])']((await this._providerL2().getNetwork()).chainId, transferDataDecoded[0], // depositSender
+                    calldata['_assetId'], // asset id
+                    assetData, depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides ?? {});
+                }
             }
         }
         /**

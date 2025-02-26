@@ -112,6 +112,8 @@ export declare const NONCE_HOLDER_ADDRESS: Address;
 export declare const L1_TO_L2_ALIAS_OFFSET: Address;
 export declare const L2_ASSET_ROUTER_ADDRESS: Address;
 export declare const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address;
+export declare const PROTOCOL_VERSION_V25 = 25;
+export declare const PROTOCOL_VERSION_V26 = 26;
 /**
  * The EIP1271 magic value used for signature validation in smart contracts.
  * This predefined constant serves as a standardized indicator to signal successful

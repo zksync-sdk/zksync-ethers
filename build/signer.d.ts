@@ -643,7 +643,22 @@ declare const L1Signer_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            approveERC20?: boolean | undefined;
+            approveERC20?: boolean | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const bridgehub = await signer.getBridgehubContract();
+             */
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
@@ -821,23 +836,7 @@ declare const L1Signer_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            l2GasLimit?: BigNumberish | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-             * const claimFailedDepositTx = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
-             */
+            l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
@@ -2030,7 +2029,22 @@ declare const L1VoidSigner_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            approveERC20?: boolean | undefined;
+            approveERC20?: boolean | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const bridgehub = await signer.getBridgehubContract();
+             */
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
@@ -2208,23 +2222,7 @@ declare const L1VoidSigner_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            l2GasLimit?: BigNumberish | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-             * const claimFailedDepositTx = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
-             */
+            l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
