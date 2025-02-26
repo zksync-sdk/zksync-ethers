@@ -153,7 +153,7 @@ describe('Provider', () => {
     it('should return the all balances of the account at `address`', async () => {
       const result = await provider.getAllAccountBalances(ADDRESS1);
       const expected =
-        (IS_ETH_BASED ? 1 : 2) + (protocolVersionIsNew ? 1 : 0);
+        (IS_ETH_BASED ? 1 : 2) + (protocolVersionIsNew ? 0 : 1);
       expect(Object.keys(result)).to.have.lengthOf(expected);
     });
   });

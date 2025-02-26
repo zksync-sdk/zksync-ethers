@@ -21,6 +21,9 @@ const {expect} = chai;
 import {ITestnetERC20Token__factory} from '../../src/typechain';
 import {VoidSigner} from '../../src/signer';
 let DAI_L1: string;
+let protocolVersionIsNew: boolean;
+let maxFeePerGas: bigint;
+let maxPriorityFeePerGas: bigint;
 
 describe('VoidSigner', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -31,9 +34,11 @@ describe('VoidSigner', () => {
   before('setup', async function () {
     this.timeout(25_000);
     baseToken = await provider.getBaseTokenContractAddress();
-    const protocolVersionIsNew:boolean =
+    protocolVersionIsNew =
       (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
     DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
+    maxFeePerGas = protocolVersionIsNew ? 200_000_000n : 1_200_000_000n;
+    maxPriorityFeePerGas = protocolVersionIsNew ? 0n : 1_000_000_000n;
   });
 
   describe('#constructor()', () => {
@@ -107,7 +112,7 @@ describe('VoidSigner', () => {
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         chainId: 270n,
-        maxFeePerGas: 200_000_000n,
+        maxFeePerGas: maxFeePerGas,
         maxPriorityFeePerGas: 0n,
       };
       const result = await signer.populateTransaction({
@@ -164,7 +169,7 @@ describe('VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        maxFeePerGas: 200_000_000n,
+        maxFeePerGas: maxFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -192,7 +197,7 @@ describe('VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
-        maxPriorityFeePerGas: 0n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -419,8 +424,8 @@ describe('L2VoidSigner', () => {
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         chainId: 270n,
-        maxFeePerGas: 200_000_000n,
-        maxPriorityFeePerGas: 0n,
+        maxFeePerGas: maxFeePerGas,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
@@ -476,7 +481,7 @@ describe('L2VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        maxFeePerGas: 200_000_000n,
+        maxFeePerGas: maxFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -504,7 +509,7 @@ describe('L2VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
-        maxPriorityFeePerGas: 0n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
