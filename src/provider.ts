@@ -352,8 +352,8 @@ export function JsonRpcApiProvider<
     async getLogProof(
       txHash: BytesLike,
       index?: number,
-      extendeduntilChainId?: number,
-      precommitLogIndex?: number
+      precommitLogIndex?: number,
+      extendeduntilChainId?: number
     ): Promise<LogProof | null> {
       if (extendeduntilChainId) {
         return await this.send('zks_getL2ToL1LogProofUntilChainId', [
@@ -1673,7 +1673,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     precommitLogIndex?: number,
     extendeduntilChainId?: number,
   ): Promise<LogProof | null> {
-    return super.getLogProof(txHash, index, extendeduntilChainId, precommitLogIndex);
+    return super.getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId);
   }
 
   /**

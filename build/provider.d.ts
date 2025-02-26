@@ -131,7 +131,7 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
          */
-        getLogProof(txHash: BytesLike, index?: number, extendeduntilChainId?: number, precommitLogIndex?: number): Promise<LogProof | null>;
+        getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -720,7 +720,7 @@ declare const Provider_base: {
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, extendeduntilChainId?: number | undefined, precommitLogIndex?: number | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, extendeduntilChainId?: number | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -2165,7 +2165,7 @@ declare const BrowserProvider_base: {
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, extendeduntilChainId?: number | undefined, precommitLogIndex?: number | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, extendeduntilChainId?: number | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *

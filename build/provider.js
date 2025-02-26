@@ -223,7 +223,7 @@ function JsonRpcApiProvider(ProviderType) {
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
          */
-        async getLogProof(txHash, index, extendeduntilChainId, precommitLogIndex) {
+        async getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId) {
             if (extendeduntilChainId) {
                 return await this.send('zks_getL2ToL1LogProofUntilChainId', [
                     ethers_1.ethers.hexlify(txHash),
@@ -1242,7 +1242,7 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
      * console.log(`Log ${utils.toJSON(await provider.getLogProof(tx, 0))}`);
      */
     async getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId) {
-        return super.getLogProof(txHash, index, extendeduntilChainId, precommitLogIndex);
+        return super.getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId);
     }
     /**
      * @inheritDoc

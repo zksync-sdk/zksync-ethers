@@ -820,7 +820,7 @@ function AdapterL1(Base) {
             const { log, l1BatchTxId } = await this._getWithdrawalLog(withdrawalHash, index);
             const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
             const sender = ethers_1.ethers.dataSlice(log.topics[1], 12);
-            const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex, extendeduntilChainId, precommitLogIndex);
+            const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex, precommitLogIndex, extendeduntilChainId);
             if (!proof) {
                 throw new Error('Log proof not found!');
             }

@@ -1526,8 +1526,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const proof = await this._providerL2().getLogProof(
         withdrawalHash,
         l2ToL1LogIndex,
-        extendeduntilChainId,
-        precommitLogIndex
+        precommitLogIndex,
+        extendeduntilChainId
       );
       if (!proof) {
         throw new Error('Log proof not found!');
