@@ -581,12 +581,6 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
         once(event: ethers.ProviderEvent, listener: ethers.Listener): Promise<any>;
         emit(event: ethers.ProviderEvent, ...args: any[]): Promise<boolean>;
         listenerCount(event?: ethers.ProviderEvent | undefined): Promise<number>;
-        /**
-         * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
-         * if available, or `null`.
-         *
-         * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettestnetpaymaster zks_getTestnetPaymaster} JSON-RPC method.
-         */
         listeners(event?: ethers.ProviderEvent | undefined): Promise<ethers.Listener[]>;
         off(event: ethers.ProviderEvent, listener?: ethers.Listener | undefined): Promise<any>;
         removeAllListeners(event?: ethers.ProviderEvent | undefined): Promise<any>;
@@ -1176,12 +1170,6 @@ declare const Provider_base: {
         once(event: ethers.ProviderEvent, listener: ethers.Listener): Promise<any>;
         emit(event: ethers.ProviderEvent, ...args: any[]): Promise<boolean>;
         listenerCount(event?: ethers.ProviderEvent | undefined): Promise<number>;
-        /**
-         * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
-         * if available, or `null`.
-         *
-         * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettestnetpaymaster zks_getTestnetPaymaster} JSON-RPC method.
-         */
         listeners(event?: ethers.ProviderEvent | undefined): Promise<ethers.Listener[]>;
         off(event: ethers.ProviderEvent, listener?: ethers.Listener | undefined): Promise<any>;
         removeAllListeners(event?: ethers.ProviderEvent | undefined): Promise<any>;
@@ -2627,12 +2615,6 @@ declare const BrowserProvider_base: {
         once(event: ethers.ProviderEvent, listener: ethers.Listener): Promise<any>;
         emit(event: ethers.ProviderEvent, ...args: any[]): Promise<boolean>;
         listenerCount(event?: ethers.ProviderEvent | undefined): Promise<number>;
-        /**
-         * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
-         * if available, or `null`.
-         *
-         * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettestnetpaymaster zks_getTestnetPaymaster} JSON-RPC method.
-         */
         listeners(event?: ethers.ProviderEvent | undefined): Promise<ethers.Listener[]>;
         off(event: ethers.ProviderEvent, listener?: ethers.Listener | undefined): Promise<any>;
         removeAllListeners(event?: ethers.ProviderEvent | undefined): Promise<any>;
