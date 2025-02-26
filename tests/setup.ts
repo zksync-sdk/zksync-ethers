@@ -5,6 +5,8 @@ import {
   IL2NativeTokenVault__factory,
   IERC20__factory,
 } from '../src/typechain';
+import {DAI_L1_V25, DAI_L1_V26} from './utils';
+import {PROTOCOL_VERSION_V26} from '../src/utils';
 
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
@@ -17,10 +19,6 @@ const provider = new Provider(L2_CHAIN_URL);
 const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-
-const DAI_L1 =
-  process.env.CUSTOM_TOKEN_ADDRESS ||
-  '0xDb6ca4Dd98d4F7248f7dEaE35204706e10492Ef7';
 
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
@@ -173,6 +171,9 @@ async function main() {
     );
   }
 
+  const protocolVersionIsNew =
+    (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+  const DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
   const l2DAIAddress = await wallet.l2TokenAddress(DAI_L1);
   console.log(`DAI L1: ${DAI_L1}`);
   console.log(`DAI L2: ${l2DAIAddress}`);

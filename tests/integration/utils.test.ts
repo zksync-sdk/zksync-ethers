@@ -7,12 +7,15 @@ import {
   ADDRESS1,
   IS_ETH_BASED,
   ADDRESS2,
-  DAI_L1,
+  DAI_L1_V25,
+  DAI_L1_V26,
   L1_CHAIN_URL,
   L2_CHAIN_URL,
 } from '../utils';
+import {PROTOCOL_VERSION_V26} from '../../src/utils';
 
 const {expect} = chai;
+let DAI_L1;
 
 describe('utils', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -20,6 +23,9 @@ describe('utils', () => {
 
   describe('#isMessageSignatureCorrect()', () => {
     it('should return true for a valid message signature', async () => {
+      const protocolVersionIsNew =
+        (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+      DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
       const message = 'Hello, world!';
       const signature = await new ethers.Wallet(PRIVATE_KEY1).signMessage(
         message

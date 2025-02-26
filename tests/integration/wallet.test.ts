@@ -15,7 +15,8 @@ import {
   PRIVATE_KEY1,
   MNEMONIC1,
   ADDRESS2,
-  DAI_L1,
+  DAI_L1_V25,
+  DAI_L1_V26,
   APPROVAL_TOKEN,
   PAYMASTER,
   L1_CHAIN_URL,
@@ -24,6 +25,7 @@ import {
   NON_ETH_BASED_ETH_L2_ADDRESS,
   DAI_L2,
 } from '../utils';
+import {PROTOCOL_VERSION_V26} from '../../src/utils';
 
 const {expect} = chai;
 
@@ -31,10 +33,15 @@ describe('Wallet', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
+  let protocolVersionIsNew;
+  let DAI_L1;
 
   describe('#constructor()', () => {
     it('`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider', async () => {
       const wallet = new Wallet(PRIVATE_KEY1, provider);
+      protocolVersionIsNew =
+        (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+      DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
 
       expect(wallet.signingKey.privateKey).to.be.equal(PRIVATE_KEY1);
       expect(wallet.provider).to.be.equal(provider);
@@ -1639,6 +1646,9 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should withdraw Crown to the L1 network', async () => {
+      if (protocolVersionIsNew) {
+        return;
+      }
       const amount = 5n;
       const l2Crown = APPROVAL_TOKEN;
       const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2Crown);
@@ -1664,6 +1674,9 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should deposit Crown to the L2 network', async () => {
+      if (protocolVersionIsNew) {
+        return;
+      }
       const amount = 5n;
       const crownL2Address = APPROVAL_TOKEN;
       const bridgeContracts = await wallet.getL1BridgeContracts();
@@ -1710,6 +1723,9 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should withdraw Crown to the L1 network using paymaster to cover fee', async () => {
+      if (protocolVersionIsNew) {
+        return;
+      }
       const amount = 5n;
       const minimalAllowance = 1n;
       const l2Crown = APPROVAL_TOKEN;

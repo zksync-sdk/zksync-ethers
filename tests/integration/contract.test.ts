@@ -2,8 +2,8 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {ContractFactory, Provider, Wallet, Contract} from '../../src';
 import {ethers} from 'ethers';
-import {PRIVATE_KEY1, DAI_L1, L2_CHAIN_URL} from '../utils';
-
+import {PRIVATE_KEY1, DAI_L1_V25, DAI_L1_V26, L2_CHAIN_URL} from '../utils';
+import {PROTOCOL_VERSION_V26} from '../../src/utils';
 const {expect} = chai;
 
 import Token from '../files/Token.json';
@@ -14,9 +14,12 @@ import Demo from '../files/Demo.json';
 describe('ContractFactory', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
-
+  let DAI_L1;
   describe('#constructor()', () => {
     it('`ContractFactory(abi, bytecode, runner)` should return a `ContractFactory` with `create` deployment', async () => {
+      const protocolVersionIsNew =
+        (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+      DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
       const abi = Token.abi;
       const bytecode: string = Token.bytecode;
       const factory = new ContractFactory(abi, bytecode, wallet);

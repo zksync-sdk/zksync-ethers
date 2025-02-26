@@ -7,17 +7,20 @@ import {
   ADDRESS1,
   PRIVATE_KEY1,
   ADDRESS2,
-  DAI_L1,
+  DAI_L1_V25,
+  DAI_L1_V26,
   L2_CHAIN_URL,
   L1_CHAIN_URL,
   NON_ETH_BASED_ETH_L2_ADDRESS,
   DAI_L2,
 } from '../utils';
+import {PROTOCOL_VERSION_V26} from '../../src/utils';
 
 const {expect} = chai;
 
 import {ITestnetERC20Token__factory} from '../../src/typechain';
 import {VoidSigner} from '../../src/signer';
+let DAI_L1;
 
 describe('VoidSigner', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -28,6 +31,9 @@ describe('VoidSigner', () => {
   before('setup', async function () {
     this.timeout(25_000);
     baseToken = await provider.getBaseTokenContractAddress();
+    const protocolVersionIsNew =
+      (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+    DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
   });
 
   describe('#constructor()', () => {
