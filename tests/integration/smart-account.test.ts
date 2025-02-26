@@ -27,7 +27,7 @@ import {PROTOCOL_VERSION_V26} from '../../src/utils';
 const {expect} = chai;
 
 import MultisigAccount from '../files/TwoUserMultisig.json';
-let DAI_L1;
+let DAI_L1: string;
 describe('SmartAccount', async () => {
   const provider = new Provider(L2_CHAIN_URL);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
@@ -39,7 +39,7 @@ describe('SmartAccount', async () => {
 
   describe('#constructor()', async () => {
     it('`SmartAccount(address, {address, secret}, provider)` should return a `SmartAccount` with signer and provider', async () => {
-      const protocolVersionIsNew =
+      const protocolVersionIsNew: boolean =
         (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
       DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
       const account = new SmartAccount(

@@ -33,8 +33,8 @@ describe('Wallet', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
-  let protocolVersionIsNew;
-  let DAI_L1;
+  let protocolVersionIsNew: boolean;
+  let DAI_L1: string;
 
   describe('#constructor()', () => {
     it('`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider', async () => {

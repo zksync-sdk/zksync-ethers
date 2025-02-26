@@ -20,8 +20,8 @@ describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
-  let protocolVersionIsNew;
-  let DAI_L1;
+  let protocolVersionIsNew: boolean;
+  let DAI_L1: string;
   let receipt: types.TransactionReceipt;
   let baseToken: string;
 

@@ -20,7 +20,7 @@ const {expect} = chai;
 
 import {ITestnetERC20Token__factory} from '../../src/typechain';
 import {VoidSigner} from '../../src/signer';
-let DAI_L1;
+let DAI_L1: string;
 
 describe('VoidSigner', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -31,7 +31,7 @@ describe('VoidSigner', () => {
   before('setup', async function () {
     this.timeout(25_000);
     baseToken = await provider.getBaseTokenContractAddress();
-    const protocolVersionIsNew =
+    const protocolVersionIsNew:boolean =
       (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
     DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
   });

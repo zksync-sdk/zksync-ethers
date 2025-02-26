@@ -15,7 +15,7 @@ import {
 import {PROTOCOL_VERSION_V26} from '../../src/utils';
 
 const {expect} = chai;
-let DAI_L1;
+let DAI_L1: string;
 
 describe('utils', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -23,7 +23,7 @@ describe('utils', () => {
 
   describe('#isMessageSignatureCorrect()', () => {
     it('should return true for a valid message signature', async () => {
-      const protocolVersionIsNew =
+      const protocolVersionIsNew: boolean =
         (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
       DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
       const message = 'Hello, world!';
