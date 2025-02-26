@@ -1646,7 +1646,7 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should withdraw Crown to the L1 network', async () => {
-      if (protocolVersionIsNew) {
+      if (!protocolVersionIsNew) {
         return;
       }
       const amount = 5n;
@@ -1674,7 +1674,7 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should deposit Crown to the L2 network', async () => {
-      if (protocolVersionIsNew) {
+      if (!protocolVersionIsNew) {
         return;
       }
       const amount = 5n;
@@ -1723,7 +1723,7 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should withdraw Crown to the L1 network using paymaster to cover fee', async () => {
-      if (protocolVersionIsNew) {
+      if (!protocolVersionIsNew) {
         return;
       }
       const amount = 5n;

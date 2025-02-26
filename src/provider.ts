@@ -74,6 +74,7 @@ import {
   L2_ASSET_ROUTER_ADDRESS,
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
   encodeNTVTransferData,
+  PROTOCOL_VERSION_V26,
   PROTOCOL_VERSION_V25,
 } from './utils';
 import {Signer} from './signer';
@@ -795,7 +796,7 @@ export function JsonRpcApiProvider<
       const protocolVersion = await this.getProtocolVersion();
 
       let populatedTx;
-      if (protocolVersion.version_id == PROTOCOL_VERSION_V25) {
+      if (protocolVersion.version_id < PROTOCOL_VERSION_V26) {
         if (!tx.bridgeAddress) {
           const bridgeAddresses = await this.getDefaultBridgeAddresses();
           tx.bridgeAddress = bridgeAddresses.sharedL2;

@@ -14,7 +14,7 @@ import {
   L2_CHAIN_URL,
   L1_CHAIN_URL,
 } from '../utils';
-import {EIP712_TX_TYPE} from '../../src/utils';
+import {EIP712_TX_TYPE, PROTOCOL_VERSION_V25} from '../../src/utils';
 import {PROTOCOL_VERSION_V26} from '../../src/utils';
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -28,7 +28,7 @@ describe('Provider', () => {
   before('setup', async function () {
     this.timeout(25_000);
     protocolVersionIsNew =
-      (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+      (await provider.getProtocolVersion()).version_id > PROTOCOL_VERSION_V25;
     DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
 
     baseToken = await provider.getBaseTokenContractAddress();
@@ -591,6 +591,9 @@ describe('Provider', () => {
     });
 
     it('should return a Crown withdraw transaction', async () => {
+      if (!protocolVersionIsNew) {
+        return;
+      }
       const tx = {
         type: 113,
         from: ADDRESS1,
