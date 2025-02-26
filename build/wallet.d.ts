@@ -408,6 +408,7 @@ declare const Wallet_base: {
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParamsStruct>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;

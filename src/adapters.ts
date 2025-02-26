@@ -1550,6 +1550,42 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
+    async getFinalizeDepositParams(
+      withdrawalHash: BytesLike,
+      index = 0
+    ): Promise<FinalizeL1DepositParamsStruct> {
+      const {log, l1BatchTxId} = await this._getWithdrawalLog(
+        withdrawalHash,
+        index
+      );
+      const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
+        withdrawalHash,
+        index
+      );
+      const sender = ethers.dataSlice(log.topics[1], 12);
+      const proof = await this._providerL2().getLogProof(
+        withdrawalHash,
+        l2ToL1LogIndex
+      );
+      if (!proof) {
+        throw new Error('Log proof not found!');
+      }
+      const message = ethers.AbiCoder.defaultAbiCoder().decode(
+        ['bytes'],
+        log.data
+      )[0];
+      return {
+        chainId: (await this._providerL2().getNetwork())
+          .chainId as BigNumberish,
+        l2BatchNumber: log.l1BatchNumber as BigNumberish,
+        l2MessageIndex: proof.id,
+        l2Sender: sender,
+        l2TxNumberInBatch: l1BatchTxId as BigNumberish,
+        message,
+        merkleProof: proof.proof,
+      };
+    }
+
     /**
      * Returns L1 Nullifier address.
      *
