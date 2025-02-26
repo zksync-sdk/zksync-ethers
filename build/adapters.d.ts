@@ -530,7 +530,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * withdrawal you want to finalize.
          * @throws {Error} If log proof can not be found.
          */
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParamsWithoutProof>;
         /**
          * Returns L1 Nullifier address.

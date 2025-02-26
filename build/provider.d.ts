@@ -131,7 +131,7 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
          */
-        getLogProof(txHash: BytesLike, index?: number): Promise<LogProof | null>;
+        getLogProof(txHash: BytesLike, index?: number, extendeduntilChainId?: number, precommitLogIndex?: number): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -581,6 +581,12 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
         once(event: ethers.ProviderEvent, listener: ethers.Listener): Promise<any>;
         emit(event: ethers.ProviderEvent, ...args: any[]): Promise<boolean>;
         listenerCount(event?: ethers.ProviderEvent | undefined): Promise<number>;
+        /**
+         * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
+         * if available, or `null`.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettestnetpaymaster zks_getTestnetPaymaster} JSON-RPC method.
+         */
         listeners(event?: ethers.ProviderEvent | undefined): Promise<ethers.Listener[]>;
         off(event: ethers.ProviderEvent, listener?: ethers.Listener | undefined): Promise<any>;
         removeAllListeners(event?: ethers.ProviderEvent | undefined): Promise<any>;
@@ -720,7 +726,7 @@ declare const Provider_base: {
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, extendeduntilChainId?: number | undefined, precommitLogIndex?: number | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -1170,6 +1176,12 @@ declare const Provider_base: {
         once(event: ethers.ProviderEvent, listener: ethers.Listener): Promise<any>;
         emit(event: ethers.ProviderEvent, ...args: any[]): Promise<boolean>;
         listenerCount(event?: ethers.ProviderEvent | undefined): Promise<number>;
+        /**
+         * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
+         * if available, or `null`.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettestnetpaymaster zks_getTestnetPaymaster} JSON-RPC method.
+         */
         listeners(event?: ethers.ProviderEvent | undefined): Promise<ethers.Listener[]>;
         off(event: ethers.ProviderEvent, listener?: ethers.Listener | undefined): Promise<any>;
         removeAllListeners(event?: ethers.ProviderEvent | undefined): Promise<any>;
@@ -1379,7 +1391,7 @@ export declare class Provider extends Provider_base {
      * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
      * console.log(`Log ${utils.toJSON(await provider.getLogProof(tx, 0))}`);
      */
-    getLogProof(txHash: BytesLike, index?: number): Promise<LogProof | null>;
+    getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<LogProof | null>;
     /**
      * @inheritDoc
      *
@@ -2165,7 +2177,7 @@ declare const BrowserProvider_base: {
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, extendeduntilChainId?: number | undefined, precommitLogIndex?: number | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -2615,6 +2627,12 @@ declare const BrowserProvider_base: {
         once(event: ethers.ProviderEvent, listener: ethers.Listener): Promise<any>;
         emit(event: ethers.ProviderEvent, ...args: any[]): Promise<boolean>;
         listenerCount(event?: ethers.ProviderEvent | undefined): Promise<number>;
+        /**
+         * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
+         * if available, or `null`.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettestnetpaymaster zks_getTestnetPaymaster} JSON-RPC method.
+         */
         listeners(event?: ethers.ProviderEvent | undefined): Promise<ethers.Listener[]>;
         off(event: ethers.ProviderEvent, listener?: ethers.Listener | undefined): Promise<any>;
         removeAllListeners(event?: ethers.ProviderEvent | undefined): Promise<any>;

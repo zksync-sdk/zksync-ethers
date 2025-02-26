@@ -816,11 +816,11 @@ function AdapterL1(Base) {
          * withdrawal you want to finalize.
          * @throws {Error} If log proof can not be found.
          */
-        async getFinalizeWithdrawalParams(withdrawalHash, index = 0) {
+        async getFinalizeWithdrawalParams(withdrawalHash, index = 0, precommitLogIndex = 0, extendeduntilChainId) {
             const { log, l1BatchTxId } = await this._getWithdrawalLog(withdrawalHash, index);
             const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
             const sender = ethers_1.ethers.dataSlice(log.topics[1], 12);
-            const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex);
+            const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex, extendeduntilChainId, precommitLogIndex);
             if (!proof) {
                 throw new Error('Log proof not found!');
             }
