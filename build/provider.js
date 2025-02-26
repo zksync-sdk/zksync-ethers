@@ -228,7 +228,7 @@ function JsonRpcApiProvider(ProviderType) {
                 return await this.send('zks_getL2ToL1LogProofUntilChainId', [
                     ethers_1.ethers.hexlify(txHash),
                     index,
-                    extendeduntilChainId.toString(),
+                    extendeduntilChainId.toString(16),
                     precommitLogIndex,
                 ]);
             }
