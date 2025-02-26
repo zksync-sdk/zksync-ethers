@@ -699,9 +699,11 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async getFinalizeWithdrawalParams(
     withdrawalHash: BytesLike,
-    index = 0
+    index = 0,
+    precommitLogIndex = 0,  
+    extendeduntilChainId?: number,
   ): Promise<FinalizeWithdrawalParams> {
-    return super.getFinalizeWithdrawalParams(withdrawalHash, index);
+    return super.getFinalizeWithdrawalParams(withdrawalHash, index, precommitLogIndex, extendeduntilChainId);
   }
 
   /**
