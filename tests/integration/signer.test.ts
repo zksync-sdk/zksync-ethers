@@ -35,7 +35,7 @@ describe('VoidSigner', () => {
     this.timeout(25_000);
     baseToken = await provider.getBaseTokenContractAddress();
     protocolVersionIsNew =
-      (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+      (await provider.getProtocolVersion()).version_id === PROTOCOL_VERSION_V26;
     DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
     maxFeePerGas = protocolVersionIsNew ? 200_000_000n : 1_200_000_000n;
     maxPriorityFeePerGas = protocolVersionIsNew ? 0n : 1_000_000_000n;

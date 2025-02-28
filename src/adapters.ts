@@ -900,7 +900,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let secondBridgeCalldata: string;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
         const [assetId, _] = await resolveAssetId(
           {token},
           await this.getNativeTokenVaultL1()
@@ -1032,7 +1032,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let secondBridgeCalldata: string;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
         const [assetId, _] = await resolveAssetId(
           {token: ETH_ADDRESS_IN_CONTRACTS},
           await this.getNativeTokenVaultL1()
@@ -1102,7 +1102,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let secondBridgeCalldata: string;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
         const [assetId, _] = await resolveAssetId(
           {token},
           await this.getNativeTokenVaultL1()
@@ -1135,7 +1135,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const secondBridgeAddress =
         tx.bridgeAddress ??
         (await (await this.getL1BridgeContracts()).shared.getAddress());
-
 
       return await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
         {
@@ -1652,7 +1651,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
         const l1Nullifier = IL1Nullifier__factory.connect(
           await this.getL1NullifierAddress(),
           this._signerL1()
@@ -1688,9 +1687,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             this._signerL1()
           );
         } else {
-          const l2Bridge = IL2Bridge__factory.connect(sender, this._providerL2());
+          const l2Bridge = IL2Bridge__factory.connect(
+            sender,
+            this._providerL2()
+          );
           const bridgeAddress = await l2Bridge.l1Bridge();
-          l1Bridge = IL1Bridge__factory.connect(bridgeAddress, this._signerL1());
+          l1Bridge = IL1Bridge__factory.connect(
+            bridgeAddress,
+            this._signerL1()
+          );
         }
         return await l1Bridge.finalizeWithdrawal(
           (await this._providerL2().getNetwork()).chainId as BigNumberish,
@@ -1736,9 +1741,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let l1Bridge: IL1SharedBridge;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else if (await this._providerL2().isBaseToken(ethers.dataSlice(log.topics[1], 12))) {
+      } else if (
+        await this._providerL2().isBaseToken(
+          ethers.dataSlice(log.topics[1], 12)
+        )
+      ) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
       } else {
         const sender = ethers.dataSlice(log.topics[1], 12);
@@ -1809,7 +1818,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         this._providerL2()
       );
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id != PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id !== PROTOCOL_VERSION_V26) {
         const calldata = l2Bridge.interface.decodeFunctionData(
           'finalizeDeposit',
           tx.data

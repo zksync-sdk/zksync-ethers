@@ -152,8 +152,7 @@ describe('Provider', () => {
   describe('#getAllAccountBalances()', () => {
     it('should return the all balances of the account at `address`', async () => {
       const result = await provider.getAllAccountBalances(ADDRESS1);
-      const expected =
-        (IS_ETH_BASED ? 1 : 2) + (protocolVersionIsNew ? 0 : 1);
+      const expected = (IS_ETH_BASED ? 1 : 2) + (protocolVersionIsNew ? 0 : 1);
       expect(Object.keys(result)).to.have.lengthOf(expected);
     });
   });
@@ -1069,12 +1068,11 @@ describe('Provider', () => {
           from: ADDRESS1,
         });
       } catch (e) {
-        const revertString = !protocolVersionIsNew ? 'insufficient balance for transfer' : 'insufficient funds for gas + value.';
-        expect(
-          (e as Error).message
-            .toString()
-            .includes(revertString)
-        ).to.be.true;
+        const revertString = !protocolVersionIsNew
+          ? 'insufficient balance for transfer'
+          : 'insufficient funds for gas + value.';
+        expect((e as Error).message.toString().includes(revertString)).to.be
+          .true;
       }
     });
   });

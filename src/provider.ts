@@ -813,15 +813,15 @@ export function JsonRpcApiProvider<
         const assetId = await ntv.assetId(tx.token);
         const originChainId = await ntv.originChainId(assetId);
         const l1ChainId = await this.getL1ChainId();
-  
+
         const isTokenL1Native =
           originChainId === BigInt(l1ChainId) ||
           tx.token === ETH_ADDRESS_IN_CONTRACTS;
         if (!tx.bridgeAddress) {
           const bridgeAddresses = await this.getDefaultBridgeAddresses();
           tx.bridgeAddress = isTokenL1Native
-          ? bridgeAddresses.sharedL2
-          : L2_ASSET_ROUTER_ADDRESS;
+            ? bridgeAddresses.sharedL2
+            : L2_ASSET_ROUTER_ADDRESS;
         }
         if (!isTokenL1Native) {
           const bridge = await this.connectL2AssetRouter();
@@ -852,7 +852,7 @@ export function JsonRpcApiProvider<
             tx.overrides
           );
         }
-    }
+      }
       if (tx.paymasterParams) {
         return {
           ...populatedTx,

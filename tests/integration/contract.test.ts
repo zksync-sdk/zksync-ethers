@@ -18,7 +18,8 @@ describe('ContractFactory', () => {
   describe('#constructor()', () => {
     it('`ContractFactory(abi, bytecode, runner)` should return a `ContractFactory` with `create` deployment', async () => {
       const protocolVersionIsNew: boolean =
-      (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+        (await provider.getProtocolVersion()).version_id ===
+        PROTOCOL_VERSION_V26;
       DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
       const abi = Token.abi;
       const bytecode: string = Token.bytecode;

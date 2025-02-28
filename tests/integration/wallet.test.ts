@@ -40,7 +40,8 @@ describe('Wallet', () => {
     it('`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider', async () => {
       const wallet = new Wallet(PRIVATE_KEY1, provider);
       protocolVersionIsNew =
-        (await provider.getProtocolVersion()).version_id == PROTOCOL_VERSION_V26;
+        (await provider.getProtocolVersion()).version_id ===
+        PROTOCOL_VERSION_V26;
       DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
 
       expect(wallet.signingKey.privateKey).to.be.equal(PRIVATE_KEY1);
