@@ -1069,7 +1069,7 @@ describe('Provider', () => {
           from: ADDRESS1,
         });
       } catch (e) {
-        const revertString = protocolVersionIsNew ? 'insufficient balance for transfer' : 'insufficient funds for gas + value.';
+        const revertString = !protocolVersionIsNew ? 'insufficient balance for transfer' : 'insufficient funds for gas + value.';
         expect(
           (e as Error).message
             .toString()
