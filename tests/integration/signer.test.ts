@@ -7,17 +7,23 @@ import {
   ADDRESS1,
   PRIVATE_KEY1,
   ADDRESS2,
-  DAI_L1,
+  DAI_L1_V25,
+  DAI_L1_V26,
   L2_CHAIN_URL,
   L1_CHAIN_URL,
   NON_ETH_BASED_ETH_L2_ADDRESS,
   DAI_L2,
 } from '../utils';
+import {PROTOCOL_VERSION_V26} from '../../src/utils';
 
 const {expect} = chai;
 
 import {ITestnetERC20Token__factory} from '../../src/typechain';
 import {VoidSigner} from '../../src/signer';
+let DAI_L1: string;
+let protocolVersionIsNew: boolean;
+let maxFeePerGas: bigint;
+let maxPriorityFeePerGas: bigint;
 
 describe('VoidSigner', () => {
   const provider = new Provider(L2_CHAIN_URL);
@@ -28,6 +34,11 @@ describe('VoidSigner', () => {
   before('setup', async function () {
     this.timeout(25_000);
     baseToken = await provider.getBaseTokenContractAddress();
+    protocolVersionIsNew =
+      (await provider.getProtocolVersion()).version_id === PROTOCOL_VERSION_V26;
+    DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
+    maxFeePerGas = protocolVersionIsNew ? 200_000_000n : 1_200_000_000n;
+    maxPriorityFeePerGas = protocolVersionIsNew ? 0n : 1_000_000_000n;
   });
 
   describe('#constructor()', () => {
@@ -101,8 +112,8 @@ describe('VoidSigner', () => {
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         chainId: 270n,
-        maxFeePerGas: 1_200_000_000n,
-        maxPriorityFeePerGas: 1_000_000_000n,
+        maxFeePerGas: maxFeePerGas,
+        maxPriorityFeePerGas: 0n,
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
@@ -116,7 +127,6 @@ describe('VoidSigner', () => {
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
       expect(BigInt(result.maxFeePerGas!) > 0n).to.be.true;
-      expect(BigInt(result.maxPriorityFeePerGas!) > 0n).to.be.true;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -159,7 +169,7 @@ describe('VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        maxFeePerGas: 1_200_000_000n,
+        maxFeePerGas: maxFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -187,7 +197,7 @@ describe('VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
-        maxPriorityFeePerGas: 1_000_000_000n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -414,8 +424,8 @@ describe('L2VoidSigner', () => {
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         chainId: 270n,
-        maxFeePerGas: 1_200_000_000n,
-        maxPriorityFeePerGas: 1_000_000_000n,
+        maxFeePerGas: maxFeePerGas,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
@@ -429,7 +439,6 @@ describe('L2VoidSigner', () => {
       ]);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
       expect(BigInt(result.maxFeePerGas!) > 0n).to.be.true;
-      expect(BigInt(result.maxPriorityFeePerGas!) > 0n).to.be.true;
     });
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
@@ -472,7 +481,7 @@ describe('L2VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        maxFeePerGas: 1_200_000_000n,
+        maxFeePerGas: maxFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -500,7 +509,7 @@ describe('L2VoidSigner', () => {
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
-        maxPriorityFeePerGas: 1_000_000_000n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: [],
@@ -1200,7 +1209,6 @@ describe('L1VoidSigner', async () => {
           token,
           amount
         );
-
         await (
           await wallet.approveERC20(
             approveParams[0].token,

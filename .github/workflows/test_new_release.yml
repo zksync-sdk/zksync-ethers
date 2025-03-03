@@ -1,0 +1,122 @@
+name: Run tests new release
+on:
+  push:
+    branches: [ main, beta ]
+  workflow_dispatch:
+  pull_request:
+    branches:  [ main, beta ]
+    types: [ opened, reopened, synchronize ]
+
+permissions:
+  contents: read # for checkout
+
+jobs:
+  eth-based-chain-test:
+    name: ETH-based Chain Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+      - name: Install dependencies
+        run: yarn install
+      - name: Build
+        run: |
+          yarn types
+          yarn build
+          yarn test:build
+      - name: Run local-setup (specific branch)
+        run: |
+          git clone --branch kl/gw-api-comment-out https://github.com/matter-labs/local-setup.git
+          pushd local-setup
+          ./start-zk-chains.sh
+          popd
+      - name: Extract custom token address
+        run: |
+          echo "Waiting for token deployment..."
+          until docker exec local-setup-zksync-1 test -f /configs/erc20.yaml; do
+            echo "Token config file not found yet, checking again in 5 seconds..."
+            sleep 5
+          done
+
+          echo "Extracting deployed token address from inside zksync container..."
+          CUSTOM_TOKEN_ADDRESS=$(docker exec local-setup-zksync-1 awk -F": " '/tokens:/ {found_tokens=1} found_tokens && /DAI:/ {found_dai=1} found_dai && /address:/ {print $2; exit}' /configs/erc20.yaml)
+
+          if [ -z "$CUSTOM_TOKEN_ADDRESS" ]; then
+            echo "❌ Error: Could not retrieve token address. Exiting."
+            exit 1
+          fi
+
+          echo "Custom token address: $CUSTOM_TOKEN_ADDRESS"
+          # Export the variable so subsequent steps have access to it
+          echo "CUSTOM_TOKEN_ADDRESS=$CUSTOM_TOKEN_ADDRESS" >> $GITHUB_ENV
+      - name: Prepare environment
+        env:
+          IS_ETH_CHAIN: true
+          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
+        run: yarn test:prepare
+      - name: Run tests
+        env:
+          IS_ETH_CHAIN: true
+          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
+        run: yarn test
+
+  non-eth-based-chain-test:
+    name: Non-ETH-based Chain Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+      - name: Install dependencies
+        run: yarn install
+      - name: Build
+        run: |
+          yarn types
+          yarn build
+          yarn test:build
+      - name: Run local-setup
+        run: |
+          git clone --branch ra/local-setup-gateway https://github.com/matter-labs/local-setup.git
+          pushd local-setup
+          ./start-zk-chains.sh
+          popd
+      - name: Extract custom token address
+        run: |
+          echo "Waiting for token deployment..."
+          until docker exec local-setup-zksync-1 test -f /configs/erc20.yaml; do
+            echo "Token config file not found yet, checking again in 5 seconds..."
+            sleep 5
+          done
+
+          echo "Extracting deployed token address from inside zksync container..."
+          CUSTOM_TOKEN_ADDRESS=$(docker exec local-setup-zksync-1 awk -F": " '/tokens:/ {found_tokens=1} found_tokens && /DAI:/ {found_dai=1} found_dai && /address:/ {print $2; exit}' /configs/erc20.yaml)
+
+          if [ -z "$CUSTOM_TOKEN_ADDRESS" ]; then
+            echo "❌ Error: Could not retrieve token address. Exiting."
+            exit 1
+          fi
+
+          echo "Custom token address: $CUSTOM_TOKEN_ADDRESS"
+          # Export the variable so subsequent steps have access to it
+          echo "CUSTOM_TOKEN_ADDRESS=$CUSTOM_TOKEN_ADDRESS" >> $GITHUB_ENV
+      - name: Prepare environment
+        env:
+          IS_ETH_CHAIN: false
+          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
+        run: yarn test:prepare
+      - name: Run tests
+        env:
+          IS_ETH_CHAIN: false
+          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
+        run: yarn test
