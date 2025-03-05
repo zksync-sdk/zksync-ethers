@@ -13,7 +13,7 @@ permissions:
 jobs:
   eth-based-chain-test:
     name: ETH-based Chain Test
-    runs-on: ubuntu-latest-xl
+    runs-on: ubuntu-22.04-16core
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,7 +68,7 @@ jobs:
 
   non-eth-based-chain-test:
     name: Non-ETH-based Chain Test
-    runs-on: ubuntu-latest-xl
+    runs-on: ubuntu-22.04-16core
     steps:
       - name: Checkout
         uses: actions/checkout@v4
