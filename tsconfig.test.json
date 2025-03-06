@@ -16,7 +16,5 @@
     "noImplicitOverride": true,
     "strict": true
   },
-  "include": [
-    "tests/**/*.ts"
-  ]
+  "include": ["tests/**/*.ts"]
 }
