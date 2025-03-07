@@ -14,6 +14,7 @@ import {
   Address,
   BalancesMap,
   Fee,
+  FinalizeL1DepositParamsStruct,
   FinalizeWithdrawalParams,
   FullDepositFee,
   PaymasterParams,
@@ -703,6 +704,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     index = 0
   ): Promise<FinalizeWithdrawalParams> {
     return super.getFinalizeWithdrawalParams(withdrawalHash, index);
+  }
+
+  override async getFinalizeDepositParams(
+    withdrawalHash: BytesLike,
+    index = 0
+  ): Promise<FinalizeL1DepositParamsStruct> {
+    return super.getFinalizeDepositParams(withdrawalHash, index);
   }
 
   /**
