@@ -7,633 +7,1392 @@ exports.IBridgehub__factory = void 0;
 const ethers_1 = require("ethers");
 const _abi = [
     {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: "address",
-                name: "oldAdmin",
-                type: "address",
-            },
-            {
-                indexed: true,
-                internalType: "address",
-                name: "newAdmin",
-                type: "address",
-            },
-        ],
-        name: "NewAdmin",
-        type: "event",
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: "uint256",
-                name: "chainId",
-                type: "uint256",
-            },
-            {
-                indexed: false,
-                internalType: "address",
-                name: "stateTransitionManager",
-                type: "address",
-            },
-            {
-                indexed: true,
-                internalType: "address",
-                name: "chainGovernance",
-                type: "address",
-            },
-        ],
-        name: "NewChain",
-        type: "event",
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: "address",
-                name: "oldPendingAdmin",
-                type: "address",
-            },
-            {
-                indexed: true,
-                internalType: "address",
-                name: "newPendingAdmin",
-                type: "address",
-            },
-        ],
-        name: "NewPendingAdmin",
-        type: "event",
-    },
-    {
+        type: "function",
+        name: "L1_CHAIN_ID",
         inputs: [],
-        name: "acceptAdmin",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_stateTransitionManager",
-                type: "address",
-            },
-        ],
-        name: "addStateTransitionManager",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_token",
-                type: "address",
-            },
-        ],
-        name: "addToken",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "uint256",
-                name: "_chainId",
-                type: "uint256",
-            },
-        ],
-        name: "baseToken",
         outputs: [
             {
-                internalType: "address",
                 name: "",
-                type: "address",
+                type: "uint256",
+                internalType: "uint256",
             },
         ],
         stateMutability: "view",
-        type: "function",
     },
     {
+        type: "function",
+        name: "acceptAdmin",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "addChainTypeManager",
         inputs: [
             {
-                internalType: "uint256",
+                name: "_chainTypeManager",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "addTokenAssetId",
+        inputs: [
+            {
+                name: "_baseTokenAssetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "admin",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "assetIdIsRegistered",
+        inputs: [
+            {
+                name: "_baseTokenAssetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "bool",
+                internalType: "bool",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "assetRouter",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "assetTracker",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "contract IAssetTracker",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "baseToken",
+        inputs: [
+            {
                 name: "_chainId",
                 type: "uint256",
-            },
-            {
-                internalType: "address",
-                name: "_stateTransitionManager",
-                type: "address",
-            },
-            {
-                internalType: "address",
-                name: "_baseToken",
-                type: "address",
-            },
-            {
                 internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "baseTokenAssetId",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "bridgeBurn",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_msgValue",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "_originalCaller",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "_data",
+                type: "bytes",
+                internalType: "bytes",
+            },
+        ],
+        outputs: [
+            {
+                name: "_bridgeMintData",
+                type: "bytes",
+                internalType: "bytes",
+            },
+        ],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "bridgeMint",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "_data",
+                type: "bytes",
+                internalType: "bytes",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "bridgeRecoverFailedTransfer",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "_depositSender",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "_data",
+                type: "bytes",
+                internalType: "bytes",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "chainTypeManager",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "chainTypeManagerIsRegistered",
+        inputs: [
+            {
+                name: "_chainTypeManager",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "bool",
+                internalType: "bool",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "createNewChain",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_chainTypeManager",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "_baseTokenAssetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
                 name: "_salt",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "address",
                 name: "_admin",
                 type: "address",
+                internalType: "address",
             },
             {
-                internalType: "bytes",
                 name: "_initData",
                 type: "bytes",
+                internalType: "bytes",
+            },
+            {
+                name: "_factoryDeps",
+                type: "bytes[]",
+                internalType: "bytes[]",
             },
         ],
-        name: "createNewChain",
         outputs: [
             {
-                internalType: "uint256",
                 name: "chainId",
                 type: "uint256",
+                internalType: "uint256",
             },
         ],
         stateMutability: "nonpayable",
-        type: "function",
     },
     {
+        type: "function",
+        name: "ctmAssetIdFromAddress",
         inputs: [
             {
-                internalType: "uint256",
-                name: "_chainId",
-                type: "uint256",
+                name: "_ctmAddress",
+                type: "address",
+                internalType: "address",
             },
         ],
-        name: "getHyperchain",
         outputs: [
             {
-                internalType: "address",
                 name: "",
-                type: "address",
+                type: "bytes32",
+                internalType: "bytes32",
             },
         ],
         stateMutability: "view",
-        type: "function",
     },
     {
+        type: "function",
+        name: "ctmAssetIdFromChainId",
         inputs: [
             {
-                internalType: "uint256",
                 name: "_chainId",
                 type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "ctmAssetIdToAddress",
+        inputs: [
+            {
+                name: "_assetInfo",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "forwardTransactionOnGatewayWithBalanceChange",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
             },
             {
+                name: "_canonicalTxHash",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "_expirationTimestamp",
+                type: "uint64",
+                internalType: "uint64",
+            },
+            {
+                name: "_baseTokenAmount",
+                type: "uint256",
                 internalType: "uint256",
+            },
+            {
+                name: "_assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "_amount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "getAllZKChainChainIDs",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "uint256[]",
+                internalType: "uint256[]",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "getAllZKChains",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address[]",
+                internalType: "address[]",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "getZKChain",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "interopCenter",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "contract IInteropCenter",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "l1CtmDeployer",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "contract ICTMDeploymentTracker",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "l2TransactionBaseCost",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
                 name: "_gasPrice",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "uint256",
                 name: "_l2GasLimit",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "uint256",
                 name: "_l2GasPerPubdataByteLimit",
                 type: "uint256",
+                internalType: "uint256",
             },
         ],
-        name: "l2TransactionBaseCost",
         outputs: [
             {
-                internalType: "uint256",
                 name: "",
                 type: "uint256",
+                internalType: "uint256",
             },
         ],
         stateMutability: "view",
-        type: "function",
     },
     {
+        type: "function",
+        name: "messageRoot",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "contract IMessageRoot",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "migrationPaused",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "bool",
+                internalType: "bool",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "proveL1ToL2TransactionStatus",
         inputs: [
             {
-                internalType: "uint256",
                 name: "_chainId",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "bytes32",
                 name: "_l2TxHash",
                 type: "bytes32",
+                internalType: "bytes32",
             },
             {
-                internalType: "uint256",
                 name: "_l2BatchNumber",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "uint256",
                 name: "_l2MessageIndex",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "uint16",
                 name: "_l2TxNumberInBatch",
                 type: "uint16",
+                internalType: "uint16",
             },
             {
-                internalType: "bytes32[]",
                 name: "_merkleProof",
                 type: "bytes32[]",
+                internalType: "bytes32[]",
             },
             {
-                internalType: "enum TxStatus",
                 name: "_status",
                 type: "uint8",
+                internalType: "enum TxStatus",
             },
         ],
-        name: "proveL1ToL2TransactionStatus",
         outputs: [
             {
-                internalType: "bool",
                 name: "",
                 type: "bool",
+                internalType: "bool",
             },
         ],
         stateMutability: "view",
-        type: "function",
     },
     {
+        type: "function",
+        name: "proveL2LogInclusion",
         inputs: [
             {
-                internalType: "uint256",
                 name: "_chainId",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "uint256",
                 name: "_batchNumber",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                internalType: "uint256",
                 name: "_index",
                 type: "uint256",
+                internalType: "uint256",
             },
             {
-                components: [
-                    {
-                        internalType: "uint8",
-                        name: "l2ShardId",
-                        type: "uint8",
-                    },
-                    {
-                        internalType: "bool",
-                        name: "isService",
-                        type: "bool",
-                    },
-                    {
-                        internalType: "uint16",
-                        name: "txNumberInBatch",
-                        type: "uint16",
-                    },
-                    {
-                        internalType: "address",
-                        name: "sender",
-                        type: "address",
-                    },
-                    {
-                        internalType: "bytes32",
-                        name: "key",
-                        type: "bytes32",
-                    },
-                    {
-                        internalType: "bytes32",
-                        name: "value",
-                        type: "bytes32",
-                    },
-                ],
-                internalType: "struct L2Log",
                 name: "_log",
                 type: "tuple",
-            },
-            {
-                internalType: "bytes32[]",
-                name: "_proof",
-                type: "bytes32[]",
-            },
-        ],
-        name: "proveL2LogInclusion",
-        outputs: [
-            {
-                internalType: "bool",
-                name: "",
-                type: "bool",
-            },
-        ],
-        stateMutability: "view",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "uint256",
-                name: "_chainId",
-                type: "uint256",
-            },
-            {
-                internalType: "uint256",
-                name: "_batchNumber",
-                type: "uint256",
-            },
-            {
-                internalType: "uint256",
-                name: "_index",
-                type: "uint256",
-            },
-            {
+                internalType: "struct L2Log",
                 components: [
                     {
-                        internalType: "uint16",
+                        name: "l2ShardId",
+                        type: "uint8",
+                        internalType: "uint8",
+                    },
+                    {
+                        name: "isService",
+                        type: "bool",
+                        internalType: "bool",
+                    },
+                    {
                         name: "txNumberInBatch",
                         type: "uint16",
+                        internalType: "uint16",
                     },
                     {
-                        internalType: "address",
                         name: "sender",
                         type: "address",
+                        internalType: "address",
                     },
                     {
-                        internalType: "bytes",
-                        name: "data",
-                        type: "bytes",
+                        name: "key",
+                        type: "bytes32",
+                        internalType: "bytes32",
+                    },
+                    {
+                        name: "value",
+                        type: "bytes32",
+                        internalType: "bytes32",
                     },
                 ],
-                internalType: "struct L2Message",
-                name: "_message",
-                type: "tuple",
             },
             {
-                internalType: "bytes32[]",
                 name: "_proof",
                 type: "bytes32[]",
+                internalType: "bytes32[]",
             },
         ],
-        name: "proveL2MessageInclusion",
         outputs: [
             {
-                internalType: "bool",
                 name: "",
                 type: "bool",
+                internalType: "bool",
             },
         ],
         stateMutability: "view",
-        type: "function",
     },
     {
+        type: "function",
+        name: "proveL2MessageInclusion",
         inputs: [
             {
-                internalType: "address",
-                name: "_stateTransitionManager",
-                type: "address",
-            },
-        ],
-        name: "removeStateTransitionManager",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: "uint256",
-                        name: "chainId",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "mintValue",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "address",
-                        name: "l2Contract",
-                        type: "address",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "l2Value",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "bytes",
-                        name: "l2Calldata",
-                        type: "bytes",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "l2GasLimit",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "l2GasPerPubdataByteLimit",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "bytes[]",
-                        name: "factoryDeps",
-                        type: "bytes[]",
-                    },
-                    {
-                        internalType: "address",
-                        name: "refundRecipient",
-                        type: "address",
-                    },
-                ],
-                internalType: "struct L2TransactionRequestDirect",
-                name: "_request",
-                type: "tuple",
-            },
-        ],
-        name: "requestL2TransactionDirect",
-        outputs: [
-            {
-                internalType: "bytes32",
-                name: "canonicalTxHash",
-                type: "bytes32",
-            },
-        ],
-        stateMutability: "payable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: "uint256",
-                        name: "chainId",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "mintValue",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "l2Value",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "l2GasLimit",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "l2GasPerPubdataByteLimit",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "address",
-                        name: "refundRecipient",
-                        type: "address",
-                    },
-                    {
-                        internalType: "address",
-                        name: "secondBridgeAddress",
-                        type: "address",
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "secondBridgeValue",
-                        type: "uint256",
-                    },
-                    {
-                        internalType: "bytes",
-                        name: "secondBridgeCalldata",
-                        type: "bytes",
-                    },
-                ],
-                internalType: "struct L2TransactionRequestTwoBridgesOuter",
-                name: "_request",
-                type: "tuple",
-            },
-        ],
-        name: "requestL2TransactionTwoBridges",
-        outputs: [
-            {
-                internalType: "bytes32",
-                name: "canonicalTxHash",
-                type: "bytes32",
-            },
-        ],
-        stateMutability: "payable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_newPendingAdmin",
-                type: "address",
-            },
-        ],
-        name: "setPendingAdmin",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_sharedBridge",
-                type: "address",
-            },
-        ],
-        name: "setSharedBridge",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [],
-        name: "sharedBridge",
-        outputs: [
-            {
-                internalType: "contract IL1SharedBridge",
-                name: "",
-                type: "address",
-            },
-        ],
-        stateMutability: "view",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "uint256",
                 name: "_chainId",
                 type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_batchNumber",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_index",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_message",
+                type: "tuple",
+                internalType: "struct L2Message",
+                components: [
+                    {
+                        name: "txNumberInBatch",
+                        type: "uint16",
+                        internalType: "uint16",
+                    },
+                    {
+                        name: "sender",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "data",
+                        type: "bytes",
+                        internalType: "bytes",
+                    },
+                ],
+            },
+            {
+                name: "_proof",
+                type: "bytes32[]",
+                internalType: "bytes32[]",
             },
         ],
-        name: "stateTransitionManager",
         outputs: [
             {
-                internalType: "address",
-                name: "",
-                type: "address",
-            },
-        ],
-        stateMutability: "view",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_stateTransitionManager",
-                type: "address",
-            },
-        ],
-        name: "stateTransitionManagerIsRegistered",
-        outputs: [
-            {
-                internalType: "bool",
-                name: "",
-                type: "bool",
-            },
-        ],
-        stateMutability: "view",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_baseToken",
-                type: "address",
-            },
-        ],
-        name: "tokenIsRegistered",
-        outputs: [
-            {
-                internalType: "bool",
                 name: "",
                 type: "bool",
+                internalType: "bool",
             },
         ],
         stateMutability: "view",
+    },
+    {
         type: "function",
+        name: "registerAlreadyDeployedZKChain",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_hyperchain",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "registerLegacyChain",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "registerSettlementLayer",
+        inputs: [
+            {
+                name: "_newSettlementLayerChainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_isWhitelisted",
+                type: "bool",
+                internalType: "bool",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "removeChainTypeManager",
+        inputs: [
+            {
+                name: "_chainTypeManager",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "requestL2TransactionDirect",
+        inputs: [
+            {
+                name: "_request",
+                type: "tuple",
+                internalType: "struct L2TransactionRequestDirect",
+                components: [
+                    {
+                        name: "chainId",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "mintValue",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "l2Contract",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "l2Value",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "l2Calldata",
+                        type: "bytes",
+                        internalType: "bytes",
+                    },
+                    {
+                        name: "l2GasLimit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "l2GasPerPubdataByteLimit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "factoryDeps",
+                        type: "bytes[]",
+                        internalType: "bytes[]",
+                    },
+                    {
+                        name: "refundRecipient",
+                        type: "address",
+                        internalType: "address",
+                    },
+                ],
+            },
+        ],
+        outputs: [
+            {
+                name: "canonicalTxHash",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "requestL2TransactionTwoBridges",
+        inputs: [
+            {
+                name: "_request",
+                type: "tuple",
+                internalType: "struct L2TransactionRequestTwoBridgesOuter",
+                components: [
+                    {
+                        name: "chainId",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "mintValue",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "l2Value",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "l2GasLimit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "l2GasPerPubdataByteLimit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "refundRecipient",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "secondBridgeAddress",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "secondBridgeValue",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "secondBridgeCalldata",
+                        type: "bytes",
+                        internalType: "bytes",
+                    },
+                ],
+            },
+        ],
+        outputs: [
+            {
+                name: "canonicalTxHash",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "routeBridgehubConfirmL2Transaction",
+        inputs: [
+            {
+                name: "_secondBridgeAddress",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_txDataHash",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "_canonicalTxHash",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "routeBridgehubDeposit",
+        inputs: [
+            {
+                name: "_request",
+                type: "tuple",
+                internalType: "struct RouteBridgehubDepositStruct",
+                components: [
+                    {
+                        name: "secondBridgeAddress",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "chainId",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "sender",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "l2Value",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "secondBridgeCalldata",
+                        type: "bytes",
+                        internalType: "bytes",
+                    },
+                ],
+            },
+        ],
+        outputs: [
+            {
+                name: "outputRequest",
+                type: "tuple",
+                internalType: "struct L2TransactionRequestTwoBridgesInner",
+                components: [
+                    {
+                        name: "magicValue",
+                        type: "bytes32",
+                        internalType: "bytes32",
+                    },
+                    {
+                        name: "l2Contract",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "l2Calldata",
+                        type: "bytes",
+                        internalType: "bytes",
+                    },
+                    {
+                        name: "factoryDeps",
+                        type: "bytes[]",
+                        internalType: "bytes[]",
+                    },
+                    {
+                        name: "txDataHash",
+                        type: "bytes32",
+                        internalType: "bytes32",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "setAddresses",
+        inputs: [
+            {
+                name: "_sharedBridge",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "_l1CtmDeployer",
+                type: "address",
+                internalType: "contract ICTMDeploymentTracker",
+            },
+            {
+                name: "_messageRoot",
+                type: "address",
+                internalType: "contract IMessageRoot",
+            },
+            {
+                name: "_interopCenter",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "_assetTracker",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "setCTMAssetAddress",
+        inputs: [
+            {
+                name: "_additionalData",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "_assetAddress",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "setPendingAdmin",
+        inputs: [
+            {
+                name: "_newPendingAdmin",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "settlementLayer",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "whitelistedSettlementLayers",
+        inputs: [
+            {
+                name: "_chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "bool",
+                internalType: "bool",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "event",
+        name: "AssetRegistered",
+        inputs: [
+            {
+                name: "assetInfo",
+                type: "bytes32",
+                indexed: true,
+                internalType: "bytes32",
+            },
+            {
+                name: "_assetAddress",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+            {
+                name: "additionalData",
+                type: "bytes32",
+                indexed: true,
+                internalType: "bytes32",
+            },
+            {
+                name: "sender",
+                type: "address",
+                indexed: false,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "BaseTokenAssetIdRegistered",
+        inputs: [
+            {
+                name: "assetId",
+                type: "bytes32",
+                indexed: true,
+                internalType: "bytes32",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "BridgeBurn",
+        inputs: [
+            {
+                name: "chainId",
+                type: "uint256",
+                indexed: true,
+                internalType: "uint256",
+            },
+            {
+                name: "assetId",
+                type: "bytes32",
+                indexed: true,
+                internalType: "bytes32",
+            },
+            {
+                name: "sender",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+            {
+                name: "receiver",
+                type: "address",
+                indexed: false,
+                internalType: "address",
+            },
+            {
+                name: "amount",
+                type: "uint256",
+                indexed: false,
+                internalType: "uint256",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "BridgeMint",
+        inputs: [
+            {
+                name: "chainId",
+                type: "uint256",
+                indexed: true,
+                internalType: "uint256",
+            },
+            {
+                name: "assetId",
+                type: "bytes32",
+                indexed: true,
+                internalType: "bytes32",
+            },
+            {
+                name: "receiver",
+                type: "address",
+                indexed: false,
+                internalType: "address",
+            },
+            {
+                name: "amount",
+                type: "uint256",
+                indexed: false,
+                internalType: "uint256",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "ChainTypeManagerAdded",
+        inputs: [
+            {
+                name: "chainTypeManager",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "ChainTypeManagerRemoved",
+        inputs: [
+            {
+                name: "chainTypeManager",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "MigrationFinalized",
+        inputs: [
+            {
+                name: "chainId",
+                type: "uint256",
+                indexed: true,
+                internalType: "uint256",
+            },
+            {
+                name: "assetId",
+                type: "bytes32",
+                indexed: true,
+                internalType: "bytes32",
+            },
+            {
+                name: "zkChain",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "MigrationStarted",
+        inputs: [
+            {
+                name: "chainId",
+                type: "uint256",
+                indexed: true,
+                internalType: "uint256",
+            },
+            {
+                name: "assetId",
+                type: "bytes32",
+                indexed: true,
+                internalType: "bytes32",
+            },
+            {
+                name: "settlementLayerChainId",
+                type: "uint256",
+                indexed: true,
+                internalType: "uint256",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "NewAdmin",
+        inputs: [
+            {
+                name: "oldAdmin",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+            {
+                name: "newAdmin",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "NewChain",
+        inputs: [
+            {
+                name: "chainId",
+                type: "uint256",
+                indexed: true,
+                internalType: "uint256",
+            },
+            {
+                name: "chainTypeManager",
+                type: "address",
+                indexed: false,
+                internalType: "address",
+            },
+            {
+                name: "chainGovernance",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "NewPendingAdmin",
+        inputs: [
+            {
+                name: "oldPendingAdmin",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+            {
+                name: "newPendingAdmin",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "SettlementLayerRegistered",
+        inputs: [
+            {
+                name: "chainId",
+                type: "uint256",
+                indexed: true,
+                internalType: "uint256",
+            },
+            {
+                name: "isWhitelisted",
+                type: "bool",
+                indexed: true,
+                internalType: "bool",
+            },
+        ],
+        anonymous: false,
     },
 ];
 class IBridgehub__factory {
