@@ -112,6 +112,8 @@ export declare const NONCE_HOLDER_ADDRESS: Address;
 export declare const L1_TO_L2_ALIAS_OFFSET: Address;
 export declare const L2_ASSET_ROUTER_ADDRESS: Address;
 export declare const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address;
+export declare const PROTOCOL_VERSION_V25 = 25;
+export declare const PROTOCOL_VERSION_V26 = 26;
 /**
  * The EIP1271 magic value used for signature validation in smart contracts.
  * This predefined constant serves as a standardized indicator to signal successful
@@ -162,7 +164,7 @@ export declare const L1_FEE_ESTIMATION_COEF_DENOMINATOR = 10;
  *
  * @constant
  */
-export declare const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 400000;
+export declare const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 800000;
 /**
  * Gas limit used for displaying the error messages when the
  * users do not have enough fee when depositing `ETH` token from L1 to L2.

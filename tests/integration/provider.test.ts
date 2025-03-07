@@ -7,24 +7,29 @@ import {
   ADDRESS1,
   PRIVATE_KEY1,
   ADDRESS2,
-  DAI_L1,
+  DAI_L1_V25,
+  DAI_L1_V26,
   APPROVAL_TOKEN,
   PAYMASTER,
   L2_CHAIN_URL,
   L1_CHAIN_URL,
 } from '../utils';
-import {EIP712_TX_TYPE} from '../../src/utils';
-
+import {EIP712_TX_TYPE, PROTOCOL_VERSION_V25} from '../../src/utils';
+import {PROTOCOL_VERSION_V26} from '../../src/utils';
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
-
+  let protocolVersionIsNew: boolean;
+  let DAI_L1: string;
   let receipt: types.TransactionReceipt;
   let baseToken: string;
 
   before('setup', async function () {
     this.timeout(25_000);
+    protocolVersionIsNew =
+      (await provider.getProtocolVersion()).version_id > PROTOCOL_VERSION_V25;
+    DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
 
     baseToken = await provider.getBaseTokenContractAddress();
     const tx = await wallet.transfer({
@@ -147,7 +152,7 @@ describe('Provider', () => {
   describe('#getAllAccountBalances()', () => {
     it('should return the all balances of the account at `address`', async () => {
       const result = await provider.getAllAccountBalances(ADDRESS1);
-      const expected = IS_ETH_BASED ? 2 : 3;
+      const expected = (IS_ETH_BASED ? 1 : 2) + (protocolVersionIsNew ? 0 : 1);
       expect(Object.keys(result)).to.have.lengthOf(expected);
     });
   });
@@ -585,6 +590,9 @@ describe('Provider', () => {
     });
 
     it('should return a Crown withdraw transaction', async () => {
+      if (!protocolVersionIsNew) {
+        return;
+      }
       const tx = {
         type: 113,
         from: ADDRESS1,
@@ -1060,11 +1068,11 @@ describe('Provider', () => {
           from: ADDRESS1,
         });
       } catch (e) {
-        expect(
-          (e as Error).message
-            .toString()
-            .includes('insufficient funds for gas + value.')
-        ).to.be.true;
+        const revertString = !protocolVersionIsNew
+          ? 'insufficient balance for transfer'
+          : 'insufficient funds for gas + value.';
+        expect((e as Error).message.toString().includes(revertString)).to.be
+          .true;
       }
     });
   });

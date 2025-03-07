@@ -1,7 +1,7 @@
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, TransactionRequest as EthersTransactionRequest } from 'ethers';
 import { Provider } from './provider';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IZkSyncHyperchain, IL2SharedBridge } from './typechain';
-import { Address, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
+import { Address, FinalizeL1DepositParamsStruct, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
 type Constructor<T = {}> = new (...args: any[]) => T;
 interface TxSender {
     sendTransaction(tx: EthersTransactionRequest): Promise<ethers.TransactionResponse>;
@@ -533,6 +533,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * @throws {Error} If log proof can not be found.
          */
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParamsStruct>;
         /**
          * Returns L1 Nullifier address.
          *

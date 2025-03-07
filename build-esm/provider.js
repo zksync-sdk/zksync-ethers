@@ -13,7 +13,7 @@ var _Provider_connect, _BrowserProvider_request;
 import { ethers, Contract, resolveProperties, FetchRequest, } from 'ethers';
 import { IERC20__factory, IEthToken__factory, IL2AssetRouter__factory, IL2Bridge__factory, IL2NativeTokenVault__factory, IL2SharedBridge__factory, IBridgedStandardToken__factory, } from './typechain';
 import { TransactionResponse, TransactionStatus, TransactionReceipt, Block, Log, Network as ZkSyncNetwork, Transaction, } from './types';
-import { getL2HashFromPriorityOp, CONTRACT_DEPLOYER_ADDRESS, CONTRACT_DEPLOYER, sleep, EIP712_TX_TYPE, REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, BOOTLOADER_FORMAL_ADDRESS, ETH_ADDRESS_IN_CONTRACTS, L2_BASE_TOKEN_ADDRESS, LEGACY_ETH_ADDRESS, isAddressEq, getERC20DefaultBridgeData, getERC20BridgeCalldata, applyL1ToL2Alias, L2_ASSET_ROUTER_ADDRESS, L2_NATIVE_TOKEN_VAULT_ADDRESS, encodeNTVTransferData, } from './utils';
+import { getL2HashFromPriorityOp, CONTRACT_DEPLOYER_ADDRESS, CONTRACT_DEPLOYER, sleep, EIP712_TX_TYPE, REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, BOOTLOADER_FORMAL_ADDRESS, ETH_ADDRESS_IN_CONTRACTS, L2_BASE_TOKEN_ADDRESS, LEGACY_ETH_ADDRESS, isAddressEq, getERC20DefaultBridgeData, getERC20BridgeCalldata, applyL1ToL2Alias, L2_ASSET_ROUTER_ADDRESS, L2_NATIVE_TOKEN_VAULT_ADDRESS, encodeNTVTransferData, PROTOCOL_VERSION_V25, } from './utils';
 import { Signer } from './signer';
 import { formatLog, formatBlock, formatTransactionResponse, formatTransactionReceipt, formatFee, } from './format';
 import { makeError } from 'ethers';
@@ -565,29 +565,40 @@ export function JsonRpcApiProvider(ProviderType) {
                 }
                 return populatedTx;
             }
-            const ntv = await this.connectL2NTV();
-            const assetId = await ntv.assetId(tx.token);
-            const originChainId = await ntv.originChainId(assetId);
-            const l1ChainId = await this.getL1ChainId();
-            const isTokenL1Native = originChainId === BigInt(l1ChainId) ||
-                tx.token === ETH_ADDRESS_IN_CONTRACTS;
-            if (!tx.bridgeAddress) {
-                const bridgeAddresses = await this.getDefaultBridgeAddresses();
-                tx.bridgeAddress = isTokenL1Native
-                    ? bridgeAddresses.sharedL2
-                    : L2_ASSET_ROUTER_ADDRESS;
-            }
+            const protocolVersion = await this.getProtocolVersion();
             let populatedTx;
-            if (!isTokenL1Native) {
-                const bridge = await this.connectL2AssetRouter();
-                const chainId = Number((await this.getNetwork()).chainId);
-                const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-                const assetData = encodeNTVTransferData(BigInt(tx.amount), tx.to, tx.token);
-                populatedTx = await bridge.withdraw.populateTransaction(assetId, assetData, tx.overrides);
-            }
-            else {
+            if (protocolVersion.version_id == PROTOCOL_VERSION_V25) {
+                if (!tx.bridgeAddress) {
+                    const bridgeAddresses = await this.getDefaultBridgeAddresses();
+                    tx.bridgeAddress = bridgeAddresses.sharedL2;
+                }
                 const bridge = await this.connectL2Bridge(tx.bridgeAddress);
                 populatedTx = await bridge.withdraw.populateTransaction(tx.to, tx.token, tx.amount, tx.overrides);
+            }
+            else {
+                const ntv = await this.connectL2NTV();
+                const assetId = await ntv.assetId(tx.token);
+                const originChainId = await ntv.originChainId(assetId);
+                const l1ChainId = await this.getL1ChainId();
+                const isTokenL1Native = originChainId === BigInt(l1ChainId) ||
+                    tx.token === ETH_ADDRESS_IN_CONTRACTS;
+                if (!tx.bridgeAddress) {
+                    const bridgeAddresses = await this.getDefaultBridgeAddresses();
+                    tx.bridgeAddress = isTokenL1Native
+                        ? bridgeAddresses.sharedL2
+                        : L2_ASSET_ROUTER_ADDRESS;
+                }
+                if (!isTokenL1Native) {
+                    const bridge = await this.connectL2AssetRouter();
+                    const chainId = Number((await this.getNetwork()).chainId);
+                    const assetId = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
+                    const assetData = encodeNTVTransferData(BigInt(tx.amount), tx.to, tx.token);
+                    populatedTx = await bridge.withdraw.populateTransaction(assetId, assetData, tx.overrides);
+                }
+                else {
+                    const bridge = await this.connectL2Bridge(tx.bridgeAddress);
+                    populatedTx = await bridge.withdraw.populateTransaction(tx.to, tx.token, tx.amount, tx.overrides);
+                }
             }
             if (tx.paymasterParams) {
                 return {
