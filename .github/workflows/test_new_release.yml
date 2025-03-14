@@ -32,7 +32,7 @@ jobs:
           yarn test:build
       - name: Run local-setup (specific branch)
         run: |
-          git clone --branch kl/gw-api-comment-out https://github.com/matter-labs/local-setup.git
+          git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
           ./start-zk-chains.sh
           popd
