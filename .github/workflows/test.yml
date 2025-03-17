@@ -34,6 +34,7 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
+          git checkout 2ba19fa60e46c46bbf24495674971405c538f555
           ./start-zk-chains.sh
           popd
       - name: Prepare environment
@@ -68,6 +69,7 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
+          git checkout 2ba19fa60e46c46bbf24495674971405c538f555
           ./start-zk-chains.sh
           popd
       - name: Prepare environment
