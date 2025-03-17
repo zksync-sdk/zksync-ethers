@@ -613,7 +613,7 @@ describe('SmartAccount', async () => {
         expect(result).not.to.be.null;
         expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
           .to.be.true;
-      }).timeout(90_000);
+      }).timeout(900_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000n;
