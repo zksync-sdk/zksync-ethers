@@ -224,7 +224,7 @@ export const L1_FEE_ESTIMATION_COEF_DENOMINATOR = 10;
  *
  * @readonly
  */
-export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 400_000;
+export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 1_000_000;
 
 /**
  * Gas limit used for displaying the error messages when the
