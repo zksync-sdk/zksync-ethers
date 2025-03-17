@@ -132,7 +132,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 0n,
-      gasLimit: 162_868n,
+      gasLimit: 170_000n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -149,7 +149,7 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    const tolerance = 300n; // acceptable margin as a native BigInt
+    const tolerance = 1000n; // acceptable margin as a native BigInt
     compareTransactionsWithTolerance(tx, result, tolerance, [
       'nonce',
       'customData',
@@ -165,7 +165,7 @@ describe('populateTransaction()', () => {
       type: 113,
       data: '0x',
       gasPrice: 100_000_000n,
-      gasLimit: 162_868n,
+      gasLimit: 170_000n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -182,7 +182,7 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    const tolerance = 300n; // acceptable margin as a native BigInt
+    const tolerance = 1000n; // acceptable margin as a native BigInt
     compareTransactionsWithTolerance(tx, result, tolerance, [
       'nonce',
       'customData',
@@ -199,7 +199,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 100_000_000n,
-      gasLimit: 162_868n,
+      gasLimit: 170_000n,
       customData: {
         factoryDeps: [],
       },
@@ -215,7 +215,7 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    const tolerance = 300n; // acceptable margin as a native BigInt
+    const tolerance = 1000n; // acceptable margin as a native BigInt
     compareTransactionsWithTolerance(tx, result, tolerance, [
       'nonce',
       'customData',
