@@ -26,7 +26,8 @@ describe('types', () => {
           .version_id;
         const protocolVersionIsNew = protocolVersion >= PROTOCOL_VERSION_V26;
         const expectedProtocolVersionId = protocolVersionIsNew
-          ? PROTOCOL_VERSION_V26
+          ? // we use v27 in local setup
+            PROTOCOL_VERSION_V26 + 1
           : PROTOCOL_VERSION_V25;
         expect(protocolVersion).to.be.equal(expectedProtocolVersionId);
       });
