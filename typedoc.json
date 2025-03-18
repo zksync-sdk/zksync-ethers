@@ -1,3 +1,43 @@
 {
-  "plugin": ["typedoc-plugin-markdown"]
+  "entryPoints": ["./src/index.ts"],
+  "out": "docs",
+  "includeVersion": true,
+  "plugin": ["typedoc-plugin-replace-text"],
+  "externalSymbolLinkMappings": {
+    "ethers": {
+      "TransactionRequest": "https://docs.ethers.org/v6/api/providers/#TransactionRequest",
+      "TransactionResponse": "https://docs.ethers.org/v6/api/providers/#TransactionResponse",
+      "TransactionReceipt": "https://docs.ethers.org/v6/api/providers/#TransactionReceipt",
+      "TransactionLike": "https://docs.ethers.org/v6/api/transaction/#TransactionLike",
+      "Transaction": "https://docs.ethers.org/v6/api/transaction/#Transaction",
+      "Block": "https://docs.ethers.org/v6/api/providers/#Block",
+      "Log": "https://docs.ethers.org/v6/api/providers/#Log",
+      "LogParams": "https://docs.ethers.org/v6/api/providers/#LogParams",
+      "VoidSigner": "https://docs.ethers.org/v6/api/providers/abstract-signer/#VoidSigner",
+      "Wallet": "https://docs.ethers.org/v6/api/wallet/#Wallet",
+      "ContractFactory": "https://docs.ethers.org/v6/api/contract/#ContractFactory",
+      "BrowserProvider": "https://docs.ethers.org/v6/api/providers/#BrowserProvider",
+      "JsonRpcProvider": "https://docs.ethers.org/v6/api/providers/jsonrpc/#JsonRpcProvider",
+      "Overrides": "https://docs.ethers.org/v6/api/contract/#Overrides"
+    }
+  },
+  "replaceText": {
+    "inCodeCommentText": true,
+    "inCodeCommentTags": true,
+    "inMarkdown": false,
+    "replacements": [
+      {
+        "pattern": "%%([^%]*)%%",
+        "replace": "`$1`"
+      },
+      {
+        "pattern": "\\[\\[",
+        "replace": "`"
+      },
+      {
+        "pattern": "\\]\\]",
+        "replace": "`"
+      }
+    ]
+  }
 }

@@ -1,3 +1,17 @@
+## [6.16.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.1...v6.16.2) (2025-03-18)
+
+
+### Bug Fixes
+
+* increase l2 gas limit ([0da8fdb](https://github.com/zksync-sdk/zksync-ethers/commit/0da8fdb3508c412bbfff09fdd56a0b2e0833e31b))
+
+## [6.16.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.0...v6.16.1) (2025-02-12)
+
+
+### Bug Fixes
+
+* **signer:** fix `sendTransaction` populating from address ([2f18080](https://github.com/zksync-sdk/zksync-ethers/commit/2f1808059cc8451a5b2e86cd189a33dd1a9ebde3))
+
 # [6.16.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.4...v6.16.0) (2025-01-30)
 
 
