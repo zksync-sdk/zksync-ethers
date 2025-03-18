@@ -18,16 +18,9 @@ jobs:
     name: Build TypeDoc Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Determine ref
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "REF=${{ inputs.ref }}" >> $GITHUB_ENV
-          else
-            echo "REF=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_ENV
-          fi
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.REF }}
+          ref: ${{ inputs.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 18
