@@ -172,7 +172,7 @@ async function main() {
   }
 
   const protocolVersionIsNew: boolean =
-    (await provider.getProtocolVersion()).version_id === PROTOCOL_VERSION_V26;
+    (await provider.getProtocolVersion()).version_id >= PROTOCOL_VERSION_V26;
   const DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
   const l2DAIAddress = await wallet.l2TokenAddress(DAI_L1);
   console.log(`DAI L1: ${DAI_L1}`);

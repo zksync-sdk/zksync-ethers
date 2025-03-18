@@ -900,7 +900,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let secondBridgeCalldata: string;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
         const [assetId, _] = await resolveAssetId(
           {token},
           await this.getNativeTokenVaultL1()
@@ -1032,7 +1032,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let secondBridgeCalldata: string;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
         const [assetId, _] = await resolveAssetId(
           {token: ETH_ADDRESS_IN_CONTRACTS},
           await this.getNativeTokenVaultL1()
@@ -1102,7 +1102,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let secondBridgeCalldata: string;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
         const [assetId, _] = await resolveAssetId(
           {token},
           await this.getNativeTokenVaultL1()
@@ -1651,7 +1651,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
         const l1Nullifier = IL1Nullifier__factory.connect(
           await this.getL1NullifierAddress(),
           this._signerL1()
@@ -1741,7 +1741,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let l1Bridge: IL1SharedBridge;
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id === PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
       } else if (
         await this._providerL2().isBaseToken(

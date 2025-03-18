@@ -128,7 +128,7 @@ describe('populateTransaction()', () => {
 
   it('should populate `tx.from` to address derived from private key if it not set', async () => {
     protocolVersionIsNew =
-      (await provider.getProtocolVersion()).version_id === PROTOCOL_VERSION_V26;
+      (await provider.getProtocolVersion()).version_id >= PROTOCOL_VERSION_V26;
     const tx: TransactionRequest = {
       chainId: 270,
       to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',

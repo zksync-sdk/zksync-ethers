@@ -24,7 +24,7 @@ describe('types', () => {
       it('should return the protocol version', async () => {
         const protocolVersion = (await provider.getProtocolVersion())
           .version_id;
-        const protocolVersionIsNew = protocolVersion === PROTOCOL_VERSION_V26;
+        const protocolVersionIsNew = protocolVersion >= PROTOCOL_VERSION_V26;
         const expectedProtocolVersionId = protocolVersionIsNew
           ? PROTOCOL_VERSION_V26
           : PROTOCOL_VERSION_V25;
