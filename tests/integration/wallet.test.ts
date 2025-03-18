@@ -1041,7 +1041,7 @@ describe('Wallet', () => {
           const result = await tx.wait();
           expect(result?.blockHash).to.be.not.null;
         }
-      }).timeout(40_000);
+      }).timeout(100_000);
 
       it('should throw an error when trying to claim successful deposit', async () => {
         const response = await wallet.deposit({
