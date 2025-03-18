@@ -13,7 +13,7 @@ var _Provider_connect, _BrowserProvider_request;
 import { ethers, Contract, resolveProperties, FetchRequest, } from 'ethers';
 import { IERC20__factory, IEthToken__factory, IL2AssetRouter__factory, IL2Bridge__factory, IL2NativeTokenVault__factory, IL2SharedBridge__factory, IBridgedStandardToken__factory, } from './typechain';
 import { TransactionResponse, TransactionStatus, TransactionReceipt, Block, Log, Network as ZkSyncNetwork, Transaction, } from './types';
-import { getL2HashFromPriorityOp, CONTRACT_DEPLOYER_ADDRESS, CONTRACT_DEPLOYER, sleep, EIP712_TX_TYPE, REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, BOOTLOADER_FORMAL_ADDRESS, ETH_ADDRESS_IN_CONTRACTS, L2_BASE_TOKEN_ADDRESS, LEGACY_ETH_ADDRESS, isAddressEq, getERC20DefaultBridgeData, getERC20BridgeCalldata, applyL1ToL2Alias, L2_ASSET_ROUTER_ADDRESS, L2_NATIVE_TOKEN_VAULT_ADDRESS, encodeNTVTransferData, PROTOCOL_VERSION_V25, } from './utils';
+import { getL2HashFromPriorityOp, CONTRACT_DEPLOYER_ADDRESS, CONTRACT_DEPLOYER, sleep, EIP712_TX_TYPE, REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, BOOTLOADER_FORMAL_ADDRESS, ETH_ADDRESS_IN_CONTRACTS, L2_BASE_TOKEN_ADDRESS, LEGACY_ETH_ADDRESS, isAddressEq, getERC20DefaultBridgeData, getERC20BridgeCalldata, applyL1ToL2Alias, L2_ASSET_ROUTER_ADDRESS, L2_NATIVE_TOKEN_VAULT_ADDRESS, encodeNTVTransferData, PROTOCOL_VERSION_V26, } from './utils';
 import { Signer } from './signer';
 import { formatLog, formatBlock, formatTransactionResponse, formatTransactionReceipt, formatFee, } from './format';
 import { makeError } from 'ethers';
@@ -567,7 +567,7 @@ export function JsonRpcApiProvider(ProviderType) {
             }
             const protocolVersion = await this.getProtocolVersion();
             let populatedTx;
-            if (protocolVersion.version_id == PROTOCOL_VERSION_V25) {
+            if (protocolVersion.version_id < PROTOCOL_VERSION_V26) {
                 if (!tx.bridgeAddress) {
                     const bridgeAddresses = await this.getDefaultBridgeAddresses();
                     tx.bridgeAddress = bridgeAddresses.sharedL2;
@@ -863,9 +863,6 @@ export function JsonRpcApiProvider(ProviderType) {
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         async estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte) {
             // If the `from` address is not provided, we use a random address, because
@@ -905,9 +902,6 @@ export function JsonRpcApiProvider(ProviderType) {
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         async estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value) {
             const calldata = await getERC20BridgeCalldata(token, from, to, amount, bridgeData);

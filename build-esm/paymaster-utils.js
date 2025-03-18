@@ -3,7 +3,7 @@ import IPaymasterFlowABI from '../abi/IPaymasterFlow.json';
 /**
  * The ABI for the `IPaymasterFlow` interface, which is utilized
  * for encoding input parameters for paymaster flows.
- * @constant
+ * @readonly
  */
 export const PAYMASTER_FLOW_ABI = new ethers.Interface(IPaymasterFlowABI);
 /**

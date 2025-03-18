@@ -570,7 +570,7 @@ function JsonRpcApiProvider(ProviderType) {
             }
             const protocolVersion = await this.getProtocolVersion();
             let populatedTx;
-            if (protocolVersion.version_id == utils_1.PROTOCOL_VERSION_V25) {
+            if (protocolVersion.version_id < utils_1.PROTOCOL_VERSION_V26) {
                 if (!tx.bridgeAddress) {
                     const bridgeAddresses = await this.getDefaultBridgeAddresses();
                     tx.bridgeAddress = bridgeAddresses.sharedL2;
@@ -866,9 +866,6 @@ function JsonRpcApiProvider(ProviderType) {
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         async estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte) {
             // If the `from` address is not provided, we use a random address, because
@@ -908,9 +905,6 @@ function JsonRpcApiProvider(ProviderType) {
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         async estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value) {
             const calldata = await (0, utils_1.getERC20BridgeCalldata)(token, from, to, amount, bridgeData);

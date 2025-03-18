@@ -570,6 +570,9 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
     async getFinalizeWithdrawalParams(withdrawalHash, index = 0) {
         return super.getFinalizeWithdrawalParams(withdrawalHash, index);
     }
+    async getFinalizeDepositParams(withdrawalHash, index = 0) {
+        return super.getFinalizeDepositParams(withdrawalHash, index);
+    }
     /**
      * @inheritDoc
      *

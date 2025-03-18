@@ -477,9 +477,6 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         estimateDefaultBridgeDepositL2Gas(providerL1: ethers.Provider, token: Address, amount: BigNumberish, to: Address, from?: Address, gasPerPubdataByte?: BigNumberish): Promise<bigint>;
         /**
@@ -494,9 +491,6 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         estimateCustomBridgeDepositL2Gas(l1BridgeAddress: Address, l2BridgeAddress: Address, token: Address, amount: BigNumberish, to: Address, bridgeData: BytesLike, from: Address, gasPerPubdataByte?: BigNumberish, l2Value?: BigNumberish): Promise<bigint>;
         /**
@@ -1064,9 +1058,6 @@ declare const Provider_base: {
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         estimateDefaultBridgeDepositL2Gas(providerL1: ethers.Provider, token: string, amount: ethers.BigNumberish, to: string, from?: string | undefined, gasPerPubdataByte?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**
@@ -1081,9 +1072,6 @@ declare const Provider_base: {
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         estimateCustomBridgeDepositL2Gas(l1BridgeAddress: string, l2BridgeAddress: string, token: string, amount: ethers.BigNumberish, to: string, bridgeData: ethers.BytesLike, from: string, gasPerPubdataByte?: ethers.BigNumberish | undefined, l2Value?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**
@@ -2507,9 +2495,6 @@ declare const BrowserProvider_base: {
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         estimateDefaultBridgeDepositL2Gas(providerL1: ethers.Provider, token: string, amount: ethers.BigNumberish, to: string, from?: string | undefined, gasPerPubdataByte?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**
@@ -2524,9 +2509,6 @@ declare const BrowserProvider_base: {
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         estimateCustomBridgeDepositL2Gas(l1BridgeAddress: string, l2BridgeAddress: string, token: string, amount: ethers.BigNumberish, to: string, bridgeData: ethers.BytesLike, from: string, gasPerPubdataByte?: ethers.BigNumberish | undefined, l2Value?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**

@@ -6,108 +6,108 @@ export * from './smart-account-utils';
 export { EIP712_TYPES } from './signer';
 /**
  * The ABI for the `ZKsync` interface.
- * @constant
+ * @readonly
  */
 export declare const ZKSYNC_MAIN_ABI: ethers.Interface;
 /**
  * The ABI of the `Bridgehub` interface.
- * @constant
+ * @readonly
  */
 export declare const BRIDGEHUB_ABI: ethers.Interface;
 /**
  * The ABI for the `IContractDeployer` interface, which is utilized for deploying smart contracts.
- * @constant
+ * @readonly
  */
 export declare const CONTRACT_DEPLOYER: ethers.Interface;
 /**
  * The ABI for the `Contract2Factory` interface, which is utilized for deploying smart contracts using CREATE2 and CREATE2ACCOUNT.
- * @constant
+ * @readonly
  */
 export declare const CONTRACT_2_FACTORY: ethers.Interface;
 /**
  * The ABI for the `IL1Messenger` interface, which is utilized for sending messages from the L2 to L1.
- * @constant
+ * @readonly
  */
 export declare const L1_MESSENGER: ethers.Interface;
 /**
  * The ABI for the `IERC20` interface, which is utilized for interacting with ERC20 tokens.
- * @constant
+ * @readonly
  */
 export declare const IERC20: ethers.Interface;
 /**
  * The ABI for the `IERC1271` interface, which is utilized for signature validation by contracts.
- * @constant
+ * @readonly
  */
 export declare const IERC1271: ethers.Interface;
 /**
  * The ABI for the `IL1Bridge` interface, which is utilized for transferring ERC20 tokens from L1 to L2.
- * @constant
+ * @readonly
  */
 export declare const L1_BRIDGE_ABI: ethers.Interface;
 /**
  * The ABI for the `IL2Bridge` interface, which is utilized for transferring ERC20 tokens from L2 to L1.
- * @constant
+ * @readonly
  */
 export declare const L2_BRIDGE_ABI: ethers.Interface;
 /**
  * The ABI for the `INonceHolder` interface, which is utilized for managing deployment nonces.
- * @constant
+ * @readonly
  */
 export declare const NONCE_HOLDER_ABI: ethers.Interface;
 /**
  * The address of the L1 `ETH` token.
- * @constant
+ * @readonly
  */
 export declare const ETH_ADDRESS: Address;
 /**
  * The address of the L1 `ETH` token.
- * @constant
+ * @readonly
  */
 export declare const LEGACY_ETH_ADDRESS: Address;
 /**
  * In the contracts the zero address can not be used, use one instead
- * @constant
+ * @readonly
  */
 export declare const ETH_ADDRESS_IN_CONTRACTS: Address;
 /**
  * The formal address for the `Bootloader`.
- * @constant
+ * @readonly
  */
 export declare const BOOTLOADER_FORMAL_ADDRESS: Address;
 /**
  * The address of the Contract deployer.
- * @constant
+ * @readonly
  */
 export declare const CONTRACT_DEPLOYER_ADDRESS: Address;
 /**
  * The address of the Contract2Factory.
- * @constant
+ * @readonly
  */
 export declare const CONTRACT_2_FACTORY_ADDRESS: Address;
 /**
  * The address of the L1 messenger.
- * @constant
+ * @readonly
  */
 export declare const L1_MESSENGER_ADDRESS: Address;
 /**
  * The address of the L2 `ETH` token.
- * @constant
+ * @readonly
  * @deprecated In favor of {@link L2_BASE_TOKEN_ADDRESS}.
  */
 export declare const L2_ETH_TOKEN_ADDRESS: Address;
 /**
  * The address of the base token.
- * @constant
+ * @readonly
  */
 export declare const L2_BASE_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 /**
  * The address of the Nonce holder.
- * @constant
+ * @readonly
  */
 export declare const NONCE_HOLDER_ADDRESS: Address;
 /**
  * Used for applying and undoing aliases on addresses during bridging from L1 to L2.
- * @constant
+ * @readonly
  */
 export declare const L1_TO_L2_ALIAS_OFFSET: Address;
 export declare const L2_ASSET_ROUTER_ADDRESS: Address;
@@ -119,25 +119,25 @@ export declare const PROTOCOL_VERSION_V26 = 26;
  * This predefined constant serves as a standardized indicator to signal successful
  * signature validation by the contract.
  *
- * @constant
+ * @readonly
  */
 export declare const EIP1271_MAGIC_VALUE = "0x1626ba7e";
 /**
  * Represents an EIP712 transaction type.
  *
- * @constant
+ * @readonly
  */
 export declare const EIP712_TX_TYPE = 113;
 /**
  * Represents a priority transaction operation on L2.
  *
- * @constant
+ * @readonly
  */
 export declare const PRIORITY_OPERATION_L2_TX_TYPE = 255;
 /**
  * The maximum bytecode length in bytes that can be deployed.
  *
- * @constant
+ * @readonly
  */
 export declare const MAX_BYTECODE_LEN_BYTES: number;
 /**
@@ -146,7 +146,7 @@ export declare const MAX_BYTECODE_LEN_BYTES: number;
  * This constant is part of a coefficient calculation to adjust the gas limit to account for variations
  * in the SDK estimation, ensuring the transaction will be accepted.
  *
- * @constant
+ * @readonly
  */
 export declare const L1_FEE_ESTIMATION_COEF_NUMERATOR = 12;
 /**
@@ -155,21 +155,21 @@ export declare const L1_FEE_ESTIMATION_COEF_NUMERATOR = 12;
  * This constant is part of a coefficient calculation to adjust the gas limit to account for variations
  * in the SDK estimation, ensuring the transaction will be accepted.
  *
- * @constant
+ * @readonly
  */
 export declare const L1_FEE_ESTIMATION_COEF_DENOMINATOR = 10;
 /**
  * Gas limit used for displaying the error messages when the
  * users do not have enough fee when depositing ERC20 token from L1 to L2.
  *
- * @constant
+ * @readonly
  */
-export declare const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 800000;
+export declare const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 1000000;
 /**
  * Gas limit used for displaying the error messages when the
  * users do not have enough fee when depositing `ETH` token from L1 to L2.
  *
- * @constant
+ * @readonly
  */
 export declare const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200000;
 /**
@@ -177,13 +177,13 @@ export declare const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200000;
  * This value is utilized when inserting a default value for type 2
  * and EIP712 type transactions.
  *
- * @constant
+ * @readonly
  */
 export declare const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50000;
 /**
  * The `L1->L2` transactions are required to have the following gas per pubdata byte.
  *
- * @constant
+ * @readonly
  */
 export declare const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
 /**
@@ -660,9 +660,6 @@ export declare function isTypedDataSignatureCorrect(provider: Provider, address:
  * @param from The sender address on the L1 network.
  * @param gasPerPubdataByte The current gas per byte of pubdata.
  *
- * @see
- * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
- *
  * @example
  *
  * import { Provider, utils, types } from "zksync-ethers";
@@ -720,9 +717,6 @@ export declare function scaleGasLimit(gasLimit: bigint): bigint;
  * @param from The sender address on the L1 network.
  * @param gasPerPubdataByte The current gas per byte of pubdata.
  * @param l2Value The `msg.value` of L2 transaction.
- *
- * @see
- * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
  *
  * @example
  *

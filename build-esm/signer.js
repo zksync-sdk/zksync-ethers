@@ -546,16 +546,19 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
      * });
      */
     async sendTransaction(transaction) {
+        if (!transaction.type) {
+            transaction.type = EIP712_TX_TYPE;
+        }
+        const address = await this.getAddress();
+        transaction.from ?? (transaction.from = address);
         const tx = await this.populateFeeData(transaction);
+        if (!isAddressEq(await ethers.resolveAddress(tx.from), address)) {
+            throw new Error('Transaction `from` address mismatch!');
+        }
         if (tx.type === null ||
             tx.type === undefined ||
             tx.type === EIP712_TX_TYPE ||
             tx.customData) {
-            const address = await this.getAddress();
-            tx.from ?? (tx.from = address);
-            if (!isAddressEq(await ethers.resolveAddress(tx.from), address)) {
-                throw new Error('Transaction `from` address mismatch!');
-            }
             const zkTx = {
                 type: tx.type ?? EIP712_TX_TYPE,
                 value: tx.value ?? 0,

@@ -244,7 +244,7 @@ export function AdapterL1(Base) {
          * use the {@link getAllowanceL1} method.
          *
          * @param transaction The transaction object containing deposit details.
-         * @param transaction.token The address of the token to deposit. ETH by default.
+         * @param transaction.token The address of the token to deposit.
          * @param transaction.amount The amount of the token to deposit.
          * @param [transaction.to] The address that will receive the deposited tokens on L2.
          * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
@@ -423,14 +423,14 @@ export function AdapterL1(Base) {
          * - Depositing any token (including ETH) on a non-ETH-based chain.
          *
          * @param transaction The transaction details.
-         * @param transaction.token The address of the token to deposit. ETH by default.
+         * @param transaction.token The address of the token to deposit.
          * @param transaction.amount The amount of the token to deposit.
          * @param [transaction.to] The address that will receive the deposited tokens on L2.
          * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
          * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
          * base cost of the transaction.
          * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
-         * Defaults to the default ZKsync Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+         * Defaults to the default ZKsync Era bridge (`L1SharedBridge`).
          * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
          * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
          * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
@@ -456,14 +456,14 @@ export function AdapterL1(Base) {
          * Returns a populated deposit transaction.
          *
          * @param transaction The transaction details.
-         * @param transaction.token The address of the token to deposit. ETH by default.
+         * @param transaction.token The address of the token to deposit.
          * @param transaction.amount The amount of the token to deposit.
          * @param [transaction.to] The address that will receive the deposited tokens on L2.
          * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
          * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
          * base cost of the transaction.
          * @param [transaction.bridgeAddress] The address of the bridge contract to be used. Defaults to the default ZKsync
-         * Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+         * Era bridge (`L1SharedBridge`).
          * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
          * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
          * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
@@ -509,7 +509,7 @@ export function AdapterL1(Base) {
             overrides.value ?? (overrides.value = 0);
             let secondBridgeCalldata;
             const protocolVersion = await this._providerL2().getProtocolVersion();
-            if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+            if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
                 const [assetId, _] = await resolveAssetId({ token }, await this.getNativeTokenVaultL1());
                 const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
                 secondBridgeCalldata = encodeSecondBridgeDataV1(ethers.hexlify(assetId), ntvData);
@@ -567,7 +567,7 @@ export function AdapterL1(Base) {
             await checkBaseCost(baseCost, mintValue);
             let secondBridgeCalldata;
             const protocolVersion = await this._providerL2().getProtocolVersion();
-            if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+            if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
                 const [assetId, _] = await resolveAssetId({ token: ETH_ADDRESS_IN_CONTRACTS }, await this.getNativeTokenVaultL1());
                 const ntvData = encodeNTVTransferData(BigInt(amount), to, ETH_ADDRESS_IN_CONTRACTS);
                 secondBridgeCalldata = encodeSecondBridgeDataV1(ethers.hexlify(assetId), ntvData);
@@ -598,7 +598,7 @@ export function AdapterL1(Base) {
             const { token, operatorTip, amount, overrides, l2GasLimit, to, refundRecipient, gasPerPubdataByte, } = tx;
             let secondBridgeCalldata;
             const protocolVersion = await this._providerL2().getProtocolVersion();
-            if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+            if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
                 const [assetId, _] = await resolveAssetId({ token }, await this.getNativeTokenVaultL1());
                 const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
                 secondBridgeCalldata = encodeSecondBridgeDataV1(ethers.hexlify(assetId), ntvData);
@@ -902,7 +902,7 @@ export function AdapterL1(Base) {
         async finalizeWithdrawal(withdrawalHash, index = 0, overrides) {
             const { l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, sender, proof, } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
             const protocolVersion = await this._providerL2().getProtocolVersion();
-            if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+            if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
                 const l1Nullifier = IL1Nullifier__factory.connect(await this.getL1NullifierAddress(), this._signerL1());
                 const finalizeL1DepositParams = {
                     chainId: (await this._providerL2().getNetwork())
@@ -955,7 +955,7 @@ export function AdapterL1(Base) {
             const chainId = (await this._providerL2().getNetwork()).chainId;
             let l1Bridge;
             const protocolVersion = await this._providerL2().getProtocolVersion();
-            if (protocolVersion.version_id == PROTOCOL_VERSION_V26) {
+            if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
                 l1Bridge = (await this.getL1BridgeContracts()).shared;
             }
             else if (await this._providerL2().isBaseToken(ethers.dataSlice(log.topics[1], 12))) {
@@ -999,7 +999,7 @@ export function AdapterL1(Base) {
             const l1Bridge = IL1SharedBridge__factory.connect(l1BridgeAddress, this._signerL1());
             const l2Bridge = IL2Bridge__factory.connect(l2BridgeAddress, this._providerL2());
             const protocolVersion = await this._providerL2().getProtocolVersion();
-            if (protocolVersion.version_id != PROTOCOL_VERSION_V26) {
+            if (protocolVersion.version_id !== PROTOCOL_VERSION_V26) {
                 const calldata = l2Bridge.interface.decodeFunctionData('finalizeDeposit', tx.data);
                 const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
                 if (!proof) {

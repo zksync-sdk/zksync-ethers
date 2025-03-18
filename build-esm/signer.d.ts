@@ -643,22 +643,7 @@ declare const L1Signer_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            approveERC20?: boolean | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const bridgehub = await signer.getBridgehubContract();
-             */
+            approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
@@ -829,7 +814,34 @@ declare const L1Signer_base: {
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides: ethers.Overrides;
-        }>;
+        }>; /**
+         * @inheritDoc
+         *
+         * @example
+         *
+         * import { Provider, L1Signer, types } from "zksync-ethers";
+         * import { ethers } from "ethers";
+         *
+         * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+         * const signer = L1Signer.from(
+         *     await browserProvider.getSigner(),
+         *     Provider.getDefaultProvider(types.Network.Sepolia)
+         * );
+         *
+         * const tx = {
+         *    contractAddress: await signer.getAddress(),
+         *    calldata: '0x',
+         *    l2Value: 7_000_000_000,
+         * };
+         *
+         * const approveParams = await signer.getRequestExecuteAllowanceParams(tx);
+         * await (
+         *    await signer.approveERC20(
+         *        approveParams.token,
+         *        approveParams.allowance
+         *    )
+         * ).wait();
+         */
         _getL2GasLimit(transaction: {
             token: string;
             amount: BigNumberish;
@@ -856,6 +868,26 @@ declare const L1Signer_base: {
         }): Promise<BigNumberish>;
         getFullRequiredDepositFee(transaction: {
             token: string;
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const tx = await signer.getRequestExecuteTx({
+             *     contractAddress: await signer.providerL2.getMainContractAddress(),
+             *     calldata: "0x",
+             *     l2Value: 7_000_000_000,
+             * });
+             */
             to?: string | undefined;
             bridgeAddress?: string | undefined;
             customBridgeData?: BytesLike | undefined;
@@ -2029,22 +2061,7 @@ declare const L1VoidSigner_base: {
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
-            approveERC20?: boolean | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const bridgehub = await signer.getBridgehubContract();
-             */
+            approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
@@ -2215,7 +2232,34 @@ declare const L1VoidSigner_base: {
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
             overrides: ethers.Overrides;
-        }>;
+        }>; /**
+         * @inheritDoc
+         *
+         * @example
+         *
+         * import { Provider, L1Signer, types } from "zksync-ethers";
+         * import { ethers } from "ethers";
+         *
+         * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+         * const signer = L1Signer.from(
+         *     await browserProvider.getSigner(),
+         *     Provider.getDefaultProvider(types.Network.Sepolia)
+         * );
+         *
+         * const tx = {
+         *    contractAddress: await signer.getAddress(),
+         *    calldata: '0x',
+         *    l2Value: 7_000_000_000,
+         * };
+         *
+         * const approveParams = await signer.getRequestExecuteAllowanceParams(tx);
+         * await (
+         *    await signer.approveERC20(
+         *        approveParams.token,
+         *        approveParams.allowance
+         *    )
+         * ).wait();
+         */
         _getL2GasLimit(transaction: {
             token: string;
             amount: BigNumberish;
@@ -2242,6 +2286,26 @@ declare const L1VoidSigner_base: {
         }): Promise<BigNumberish>;
         getFullRequiredDepositFee(transaction: {
             token: string;
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const tx = await signer.getRequestExecuteTx({
+             *     contractAddress: await signer.providerL2.getMainContractAddress(),
+             *     calldata: "0x",
+             *     l2Value: 7_000_000_000,
+             * });
+             */
             to?: string | undefined;
             bridgeAddress?: string | undefined;
             customBridgeData?: BytesLike | undefined;

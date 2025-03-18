@@ -567,6 +567,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     async getFinalizeWithdrawalParams(withdrawalHash, index = 0) {
         return super.getFinalizeWithdrawalParams(withdrawalHash, index);
     }
+    async getFinalizeDepositParams(withdrawalHash, index = 0) {
+        return super.getFinalizeDepositParams(withdrawalHash, index);
+    }
     /**
      * @inheritDoc
      *

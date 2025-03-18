@@ -1,7 +1,7 @@
 import { EIP712Signer } from './signer';
 import { Provider } from './provider';
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, Overrides, ProgressCallback } from 'ethers';
-import { Address, BalancesMap, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
+import { Address, BalancesMap, FinalizeL1DepositParamsStruct, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IL2SharedBridge, IZkSyncHyperchain } from './typechain';
 declare const Wallet_base: {
     new (...args: any[]): {
@@ -86,7 +86,27 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            bridgeAddress?: string | undefined;
+            bridgeAddress?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
+             * const gas = await wallet.estimateGasDeposit({
+             *   token: tokenL1,
+             *   amount: 10_000_000n,
+             * });
+             * console.log(`Gas: ${gas}`);
+             */
             approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
@@ -112,23 +132,7 @@ declare const Wallet_base: {
             approveOverrides?: ethers.Overrides | undefined;
             approveBaseOverrides?: ethers.Overrides | undefined;
             customBridgeData?: BytesLike | undefined;
-        }): Promise<PriorityOpResponse>; /**
-         * @inheritDoc
-         *
-         * @example
-         *
-         * import { Wallet, Provider, types, utils } from "zksync-ethers";
-         * import { ethers } from "ethers";
-         *
-         * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-         *
-         * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-         * const ethProvider = ethers.getDefaultProvider("sepolia");
-         * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-         *
-         * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-         * const finalizeWithdrawTx = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
-         */
+        }): Promise<PriorityOpResponse>;
         _depositETHToNonETHBasedChain(transaction: {
             token: string;
             amount: BigNumberish;
@@ -136,7 +140,23 @@ declare const Wallet_base: {
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
             approveERC20?: boolean | undefined;
-            approveBaseERC20?: boolean | undefined;
+            approveBaseERC20?: boolean | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+             * const finalizeWithdrawTx = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
+             */
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             refundRecipient?: string | undefined;
@@ -165,6 +185,28 @@ declare const Wallet_base: {
             token: string;
             amount: BigNumberish;
             to?: string | undefined;
+            /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             * const CONTRACT_ADDRESS = "<CONTRACT_ADDRESS>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const tx = await wallet.requestExecute({
+             *     contractAddress: await provider.getMainContractAddress(),
+             *     calldata: "0x",
+             *     l2Value: 7_000_000_000,
+             * });
+             * await tx.wait();
+             */
             operatorTip?: BigNumberish | undefined;
             bridgeAddress?: string | undefined;
             approveERC20?: boolean | undefined;
@@ -188,24 +230,39 @@ declare const Wallet_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
-        }): Promise<bigint>;
+        }): Promise<bigint>; /**
+         * @inheritDoc
+         *
+         * @example Get ETH balance.
+         *
+         * import { Wallet, Provider, types, utils } from "zksync-ethers";
+         * import { ethers } from "ethers";
+         *
+         * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+         *
+         * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+         * const ethProvider = ethers.getDefaultProvider("sepolia");
+         * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+         *
+         * console.log(`ETH balance: ${await wallet.getBalance()}`);
+         *
+         * @example Get token balance.
+         *
+         * import { Wallet, Provider, utils } from "zksync-ethers";
+         * import { ethers } from "ethers";
+         *
+         * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+         *
+         * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+         * const ethProvider = ethers.getDefaultProvider("sepolia");
+         * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+         *
+         * const token = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
+         *
+         * console.log(`Token balance: ${await wallet.getBalance(token)}`);
+         */
         getDepositTx(transaction: {
-            token: string; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * console.log(`Nonce: ${await wallet.getDeploymentNonce()}`);
-             */
+            token: string;
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
@@ -248,19 +305,7 @@ declare const Wallet_base: {
                 amount: BigNumberish;
                 to: string;
                 operatorTip: BigNumberish;
-                bridgeAddress?: string | undefined; /**
-                 * Creates a new `Wallet` from encrypted json file using provided `password`.
-                 *
-                 * @param json The encrypted json file.
-                 * @param password The password for the encrypted json file.
-                 *
-                 * @example
-                 *
-                 * import { Wallet } from "zksync-ethers";
-                 * import * as fs from "fs";
-                 *
-                 * const wallet = Wallet.fromEncryptedJsonSync(fs.readFileSync("tests/files/wallet.json", "utf8"), "password");
-                 */
+                bridgeAddress?: string | undefined;
                 l2GasLimit: BigNumberish;
                 gasPerPubdataByte: BigNumberish;
                 customBridgeData?: BytesLike | undefined;
@@ -316,19 +361,7 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to: string;
             operatorTip: BigNumberish;
-            bridgeAddress?: string | undefined; /**
-             * Creates a new `Wallet` from encrypted json file using provided `password`.
-             *
-             * @param json The encrypted json file.
-             * @param password The password for the encrypted json file.
-             *
-             * @example
-             *
-             * import { Wallet } from "zksync-ethers";
-             * import * as fs from "fs";
-             *
-             * const wallet = Wallet.fromEncryptedJsonSync(fs.readFileSync("tests/files/wallet.json", "utf8"), "password");
-             */
+            bridgeAddress?: string | undefined;
             l2GasLimit: BigNumberish;
             gasPerPubdataByte: BigNumberish;
             customBridgeData?: BytesLike | undefined;
@@ -355,19 +388,7 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to: string;
             operatorTip: BigNumberish;
-            bridgeAddress?: string | undefined; /**
-             * Creates a new `Wallet` from encrypted json file using provided `password`.
-             *
-             * @param json The encrypted json file.
-             * @param password The password for the encrypted json file.
-             *
-             * @example
-             *
-             * import { Wallet } from "zksync-ethers";
-             * import * as fs from "fs";
-             *
-             * const wallet = Wallet.fromEncryptedJsonSync(fs.readFileSync("tests/files/wallet.json", "utf8"), "password");
-             */
+            bridgeAddress?: string | undefined;
             l2GasLimit: BigNumberish;
             gasPerPubdataByte: BigNumberish;
             customBridgeData?: BytesLike | undefined;
@@ -422,7 +443,7 @@ declare const Wallet_base: {
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
-        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParamsStruct>;
+        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParamsStruct>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
@@ -1059,6 +1080,7 @@ export declare class Wallet extends Wallet_base {
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
     getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
+    getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParamsStruct>;
     /**
      * @inheritDoc
      *
