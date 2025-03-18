@@ -1818,7 +1818,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         this._providerL2()
       );
       const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id !== PROTOCOL_VERSION_V26) {
+      if (protocolVersion.version_id < PROTOCOL_VERSION_V26) {
         const calldata = l2Bridge.interface.decodeFunctionData(
           'finalizeDeposit',
           tx.data
