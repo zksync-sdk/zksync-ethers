@@ -34,7 +34,6 @@ jobs:
         run: |
           git clone --branch ra/local-setup-gateway https://github.com/matter-labs/local-setup.git
           pushd local-setup
-          git checkout 2ba19fa60e46c46bbf24495674971405c538f555
           ./start-zk-chains.sh
           popd
       - name: Extract custom token address
@@ -90,7 +89,6 @@ jobs:
         run: |
           git clone --branch ra/local-setup-gateway https://github.com/matter-labs/local-setup.git
           pushd local-setup
-          git checkout 2ba19fa60e46c46bbf24495674971405c538f555
           ./start-zk-chains.sh
           popd
       - name: Extract custom token address
