@@ -26,9 +26,9 @@ describe('types', () => {
           .version_id;
         const protocolVersionIsNew = protocolVersion >= PROTOCOL_VERSION_V26;
         const expectedProtocolVersionId = protocolVersionIsNew
-          ? // we use v27 in local setup
+          ? // we use v27 in local setup, or v24.
             PROTOCOL_VERSION_V26 + 1
-          : PROTOCOL_VERSION_V25;
+          : PROTOCOL_VERSION_V25 - 1;
         expect(protocolVersion).to.be.equal(expectedProtocolVersionId);
       });
     });

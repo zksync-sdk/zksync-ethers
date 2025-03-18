@@ -152,7 +152,7 @@ describe('Provider', () => {
   describe('#getAllAccountBalances()', () => {
     it('should return the all balances of the account at `address`', async () => {
       const result = await provider.getAllAccountBalances(ADDRESS1);
-      const expected = (IS_ETH_BASED ? 1 : 2) + (protocolVersionIsNew ? 0 : 1);
+      const expected = IS_ETH_BASED ? 2 : 3;
       expect(Object.keys(result)).to.have.lengthOf(expected);
     });
   });
