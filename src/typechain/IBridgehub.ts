@@ -128,68 +128,271 @@ export type L2TransactionRequestTwoBridgesOuterStructOutput = [
   secondBridgeCalldata: string;
 };
 
+export type RouteBridgehubDepositStructStruct = {
+  secondBridgeAddress: AddressLike;
+  chainId: BigNumberish;
+  sender: AddressLike;
+  l2Value: BigNumberish;
+  secondBridgeCalldata: BytesLike;
+};
+
+export type RouteBridgehubDepositStructStructOutput = [
+  secondBridgeAddress: string,
+  chainId: bigint,
+  sender: string,
+  l2Value: bigint,
+  secondBridgeCalldata: string
+] & {
+  secondBridgeAddress: string;
+  chainId: bigint;
+  sender: string;
+  l2Value: bigint;
+  secondBridgeCalldata: string;
+};
+
+export type L2TransactionRequestTwoBridgesInnerStruct = {
+  magicValue: BytesLike;
+  l2Contract: AddressLike;
+  l2Calldata: BytesLike;
+  factoryDeps: BytesLike[];
+  txDataHash: BytesLike;
+};
+
+export type L2TransactionRequestTwoBridgesInnerStructOutput = [
+  magicValue: string,
+  l2Contract: string,
+  l2Calldata: string,
+  factoryDeps: string[],
+  txDataHash: string
+] & {
+  magicValue: string;
+  l2Contract: string;
+  l2Calldata: string;
+  factoryDeps: string[];
+  txDataHash: string;
+};
+
 export interface IBridgehubInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "L1_CHAIN_ID"
+      | "MAX_NUMBER_OF_ZK_CHAINS"
       | "acceptAdmin"
-      | "addStateTransitionManager"
-      | "addToken"
+      | "acceptOwnership"
+      | "addChainTypeManager"
+      | "addTokenAssetId"
+      | "admin"
+      | "assetIdIsRegistered"
+      | "assetRouter"
       | "baseToken"
+      | "baseTokenAssetId"
+      | "bridgeBurn"
+      | "bridgeMint"
+      | "bridgeRecoverFailedTransfer"
+      | "chainTypeManager"
+      | "chainTypeManagerIsRegistered"
       | "createNewChain"
-      | "getHyperchain"
+      | "ctmAssetIdFromAddress"
+      | "ctmAssetIdFromChainId"
+      | "ctmAssetIdToAddress"
+      | "forwardTransactionOnGateway"
+      | "getAllZKChainChainIDs"
+      | "getAllZKChains"
+      | "getZKChain"
+      | "initialize"
+      | "initializeV2"
+      | "interopCenter"
+      | "l1CtmDeployer"
       | "l2TransactionBaseCost"
+      | "messageRoot"
+      | "migrationPaused"
+      | "owner"
+      | "pause"
+      | "pauseMigration"
+      | "paused"
+      | "pendingOwner"
       | "proveL1ToL2TransactionStatus"
       | "proveL2LogInclusion"
       | "proveL2MessageInclusion"
-      | "removeStateTransitionManager"
+      | "registerAlreadyDeployedZKChain"
+      | "registerLegacyChain"
+      | "registerSettlementLayer"
+      | "removeChainTypeManager"
+      | "renounceOwnership"
       | "requestL2TransactionDirect"
       | "requestL2TransactionTwoBridges"
+      | "routeBridgehubConfirmL2Transaction"
+      | "routeBridgehubDeposit"
+      | "setAddresses"
+      | "setCTMAssetAddress"
       | "setPendingAdmin"
-      | "setSharedBridge"
-      | "sharedBridge"
-      | "stateTransitionManager"
-      | "stateTransitionManagerIsRegistered"
-      | "tokenIsRegistered"
+      | "settlementLayer"
+      | "transferOwnership"
+      | "unpause"
+      | "unpauseMigration"
+      | "whitelistedSettlementLayers"
   ): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic: "NewAdmin" | "NewChain" | "NewPendingAdmin"
+    nameOrSignatureOrTopic:
+      | "AssetRegistered"
+      | "BaseTokenAssetIdRegistered"
+      | "BridgeBurn"
+      | "BridgeMint"
+      | "ChainTypeManagerAdded"
+      | "ChainTypeManagerRemoved"
+      | "Initialized"
+      | "MigrationFinalized"
+      | "MigrationStarted"
+      | "NewAdmin"
+      | "NewChain"
+      | "NewPendingAdmin"
+      | "OwnershipTransferStarted"
+      | "OwnershipTransferred"
+      | "Paused"
+      | "SettlementLayerRegistered"
+      | "Unpaused"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "L1_CHAIN_ID",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_NUMBER_OF_ZK_CHAINS",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "acceptAdmin",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "addStateTransitionManager",
+    functionFragment: "acceptOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "addChainTypeManager",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "addToken",
-    values: [AddressLike]
+    functionFragment: "addTokenAssetId",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "admin", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "assetIdIsRegistered",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "assetRouter",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "baseToken",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "baseTokenAssetId",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgeBurn",
+    values: [BigNumberish, BigNumberish, BytesLike, AddressLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgeMint",
+    values: [BigNumberish, BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgeRecoverFailedTransfer",
+    values: [BigNumberish, BytesLike, AddressLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "chainTypeManager",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "chainTypeManagerIsRegistered",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "createNewChain",
     values: [
       BigNumberish,
       AddressLike,
-      AddressLike,
+      BytesLike,
       BigNumberish,
       AddressLike,
-      BytesLike
+      BytesLike,
+      BytesLike[]
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "getHyperchain",
+    functionFragment: "ctmAssetIdFromAddress",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ctmAssetIdFromChainId",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ctmAssetIdToAddress",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "forwardTransactionOnGateway",
+    values: [BigNumberish, BytesLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllZKChainChainIDs",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllZKChains",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getZKChain",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "initialize",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "initializeV2",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "interopCenter",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "l1CtmDeployer",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "l2TransactionBaseCost",
     values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "messageRoot",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "migrationPaused",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: "pause", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "pauseMigration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "paused", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "pendingOwner",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "proveL1ToL2TransactionStatus",
@@ -218,8 +421,24 @@ export interface IBridgehubInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "removeStateTransitionManager",
+    functionFragment: "registerAlreadyDeployedZKChain",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "registerLegacyChain",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "registerSettlementLayer",
+    values: [BigNumberish, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeChainTypeManager",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "requestL2TransactionDirect",
@@ -230,50 +449,158 @@ export interface IBridgehubInterface extends Interface {
     values: [L2TransactionRequestTwoBridgesOuterStruct]
   ): string;
   encodeFunctionData(
+    functionFragment: "routeBridgehubConfirmL2Transaction",
+    values: [AddressLike, BigNumberish, BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "routeBridgehubDeposit",
+    values: [RouteBridgehubDepositStructStruct]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAddresses",
+    values: [AddressLike, AddressLike, AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setCTMAssetAddress",
+    values: [BytesLike, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setPendingAdmin",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setSharedBridge",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "sharedBridge",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "stateTransitionManager",
+    functionFragment: "settlementLayer",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "stateTransitionManagerIsRegistered",
+    functionFragment: "transferOwnership",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "unpauseMigration",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenIsRegistered",
-    values: [AddressLike]
+    functionFragment: "whitelistedSettlementLayers",
+    values: [BigNumberish]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "L1_CHAIN_ID",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_NUMBER_OF_ZK_CHAINS",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "acceptAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addStateTransitionManager",
+    functionFragment: "acceptOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "addToken", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "addChainTypeManager",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "addTokenAssetId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "admin", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "assetIdIsRegistered",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "assetRouter",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "baseToken", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "baseTokenAssetId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "bridgeBurn", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "bridgeMint", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "bridgeRecoverFailedTransfer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "chainTypeManager",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "chainTypeManagerIsRegistered",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "createNewChain",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getHyperchain",
+    functionFragment: "ctmAssetIdFromAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ctmAssetIdFromChainId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ctmAssetIdToAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "forwardTransactionOnGateway",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAllZKChainChainIDs",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAllZKChains",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "getZKChain", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "initializeV2",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "interopCenter",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "l1CtmDeployer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "l2TransactionBaseCost",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "messageRoot",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "migrationPaused",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "pauseMigration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "pendingOwner",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -289,7 +616,23 @@ export interface IBridgehubInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removeStateTransitionManager",
+    functionFragment: "registerAlreadyDeployedZKChain",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "registerLegacyChain",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "registerSettlementLayer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "removeChainTypeManager",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -301,29 +644,208 @@ export interface IBridgehubInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "routeBridgehubConfirmL2Transaction",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "routeBridgehubDeposit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setAddresses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setCTMAssetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setPendingAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setSharedBridge",
+    functionFragment: "settlementLayer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "sharedBridge",
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "unpauseMigration",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "stateTransitionManager",
+    functionFragment: "whitelistedSettlementLayers",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "stateTransitionManagerIsRegistered",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "tokenIsRegistered",
-    data: BytesLike
-  ): Result;
+}
+
+export namespace AssetRegisteredEvent {
+  export type InputTuple = [
+    assetInfo: BytesLike,
+    _assetAddress: AddressLike,
+    additionalData: BytesLike,
+    sender: AddressLike
+  ];
+  export type OutputTuple = [
+    assetInfo: string,
+    _assetAddress: string,
+    additionalData: string,
+    sender: string
+  ];
+  export interface OutputObject {
+    assetInfo: string;
+    _assetAddress: string;
+    additionalData: string;
+    sender: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace BaseTokenAssetIdRegisteredEvent {
+  export type InputTuple = [assetId: BytesLike];
+  export type OutputTuple = [assetId: string];
+  export interface OutputObject {
+    assetId: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace BridgeBurnEvent {
+  export type InputTuple = [
+    chainId: BigNumberish,
+    assetId: BytesLike,
+    sender: AddressLike,
+    receiver: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    chainId: bigint,
+    assetId: string,
+    sender: string,
+    receiver: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    chainId: bigint;
+    assetId: string;
+    sender: string;
+    receiver: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace BridgeMintEvent {
+  export type InputTuple = [
+    chainId: BigNumberish,
+    assetId: BytesLike,
+    receiver: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    chainId: bigint,
+    assetId: string,
+    receiver: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    chainId: bigint;
+    assetId: string;
+    receiver: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace ChainTypeManagerAddedEvent {
+  export type InputTuple = [chainTypeManager: AddressLike];
+  export type OutputTuple = [chainTypeManager: string];
+  export interface OutputObject {
+    chainTypeManager: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace ChainTypeManagerRemovedEvent {
+  export type InputTuple = [chainTypeManager: AddressLike];
+  export type OutputTuple = [chainTypeManager: string];
+  export interface OutputObject {
+    chainTypeManager: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace InitializedEvent {
+  export type InputTuple = [version: BigNumberish];
+  export type OutputTuple = [version: bigint];
+  export interface OutputObject {
+    version: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace MigrationFinalizedEvent {
+  export type InputTuple = [
+    chainId: BigNumberish,
+    assetId: BytesLike,
+    zkChain: AddressLike
+  ];
+  export type OutputTuple = [chainId: bigint, assetId: string, zkChain: string];
+  export interface OutputObject {
+    chainId: bigint;
+    assetId: string;
+    zkChain: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace MigrationStartedEvent {
+  export type InputTuple = [
+    chainId: BigNumberish,
+    assetId: BytesLike,
+    settlementLayerChainId: BigNumberish
+  ];
+  export type OutputTuple = [
+    chainId: bigint,
+    assetId: string,
+    settlementLayerChainId: bigint
+  ];
+  export interface OutputObject {
+    chainId: bigint;
+    assetId: string;
+    settlementLayerChainId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace NewAdminEvent {
@@ -342,17 +864,17 @@ export namespace NewAdminEvent {
 export namespace NewChainEvent {
   export type InputTuple = [
     chainId: BigNumberish,
-    stateTransitionManager: AddressLike,
+    chainTypeManager: AddressLike,
     chainGovernance: AddressLike
   ];
   export type OutputTuple = [
     chainId: bigint,
-    stateTransitionManager: string,
+    chainTypeManager: string,
     chainGovernance: string
   ];
   export interface OutputObject {
     chainId: bigint;
-    stateTransitionManager: string;
+    chainTypeManager: string;
     chainGovernance: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -370,6 +892,69 @@ export namespace NewPendingAdminEvent {
   export interface OutputObject {
     oldPendingAdmin: string;
     newPendingAdmin: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferStartedEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace PausedEvent {
+  export type InputTuple = [account: AddressLike];
+  export type OutputTuple = [account: string];
+  export interface OutputObject {
+    account: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace SettlementLayerRegisteredEvent {
+  export type InputTuple = [chainId: BigNumberish, isWhitelisted: boolean];
+  export type OutputTuple = [chainId: bigint, isWhitelisted: boolean];
+  export interface OutputObject {
+    chainId: bigint;
+    isWhitelisted: boolean;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UnpausedEvent {
+  export type InputTuple = [account: AddressLike];
+  export type OutputTuple = [account: string];
+  export interface OutputObject {
+    account: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -420,36 +1005,140 @@ export interface IBridgehub extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  L1_CHAIN_ID: TypedContractMethod<[], [bigint], "view">;
+
+  MAX_NUMBER_OF_ZK_CHAINS: TypedContractMethod<[], [bigint], "view">;
+
   acceptAdmin: TypedContractMethod<[], [void], "nonpayable">;
 
-  addStateTransitionManager: TypedContractMethod<
-    [_stateTransitionManager: AddressLike],
+  acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  addChainTypeManager: TypedContractMethod<
+    [_chainTypeManager: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  addToken: TypedContractMethod<[_token: AddressLike], [void], "nonpayable">;
+  addTokenAssetId: TypedContractMethod<
+    [_baseTokenAssetId: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+
+  admin: TypedContractMethod<[], [string], "view">;
+
+  assetIdIsRegistered: TypedContractMethod<
+    [baseTokenAssetId: BytesLike],
+    [boolean],
+    "view"
+  >;
+
+  assetRouter: TypedContractMethod<[], [string], "view">;
 
   baseToken: TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
+
+  baseTokenAssetId: TypedContractMethod<
+    [chainId: BigNumberish],
+    [string],
+    "view"
+  >;
+
+  bridgeBurn: TypedContractMethod<
+    [
+      _settlementChainId: BigNumberish,
+      _l2MsgValue: BigNumberish,
+      _assetId: BytesLike,
+      _originalCaller: AddressLike,
+      _data: BytesLike
+    ],
+    [string],
+    "payable"
+  >;
+
+  bridgeMint: TypedContractMethod<
+    [arg0: BigNumberish, _assetId: BytesLike, _bridgehubMintData: BytesLike],
+    [void],
+    "payable"
+  >;
+
+  bridgeRecoverFailedTransfer: TypedContractMethod<
+    [
+      arg0: BigNumberish,
+      _assetId: BytesLike,
+      _depositSender: AddressLike,
+      _data: BytesLike
+    ],
+    [void],
+    "payable"
+  >;
+
+  chainTypeManager: TypedContractMethod<
+    [chainId: BigNumberish],
+    [string],
+    "view"
+  >;
+
+  chainTypeManagerIsRegistered: TypedContractMethod<
+    [chainTypeManager: AddressLike],
+    [boolean],
+    "view"
+  >;
 
   createNewChain: TypedContractMethod<
     [
       _chainId: BigNumberish,
-      _stateTransitionManager: AddressLike,
-      _baseToken: AddressLike,
+      _chainTypeManager: AddressLike,
+      _baseTokenAssetId: BytesLike,
       _salt: BigNumberish,
       _admin: AddressLike,
-      _initData: BytesLike
+      _initData: BytesLike,
+      _factoryDeps: BytesLike[]
     ],
     [bigint],
     "nonpayable"
   >;
 
-  getHyperchain: TypedContractMethod<
+  ctmAssetIdFromAddress: TypedContractMethod<
+    [ctmAddress: AddressLike],
+    [string],
+    "view"
+  >;
+
+  ctmAssetIdFromChainId: TypedContractMethod<
     [_chainId: BigNumberish],
     [string],
     "view"
   >;
+
+  ctmAssetIdToAddress: TypedContractMethod<
+    [ctmAssetId: BytesLike],
+    [string],
+    "view"
+  >;
+
+  forwardTransactionOnGateway: TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _canonicalTxHash: BytesLike,
+      _expirationTimestamp: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  getAllZKChainChainIDs: TypedContractMethod<[], [bigint[]], "view">;
+
+  getAllZKChains: TypedContractMethod<[], [string[]], "view">;
+
+  getZKChain: TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
+
+  initialize: TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
+
+  initializeV2: TypedContractMethod<[], [void], "nonpayable">;
+
+  interopCenter: TypedContractMethod<[], [string], "view">;
+
+  l1CtmDeployer: TypedContractMethod<[], [string], "view">;
 
   l2TransactionBaseCost: TypedContractMethod<
     [
@@ -461,6 +1150,20 @@ export interface IBridgehub extends BaseContract {
     [bigint],
     "view"
   >;
+
+  messageRoot: TypedContractMethod<[], [string], "view">;
+
+  migrationPaused: TypedContractMethod<[], [boolean], "view">;
+
+  owner: TypedContractMethod<[], [string], "view">;
+
+  pause: TypedContractMethod<[], [void], "nonpayable">;
+
+  pauseMigration: TypedContractMethod<[], [void], "nonpayable">;
+
+  paused: TypedContractMethod<[], [boolean], "view">;
+
+  pendingOwner: TypedContractMethod<[], [string], "view">;
 
   proveL1ToL2TransactionStatus: TypedContractMethod<
     [
@@ -500,11 +1203,31 @@ export interface IBridgehub extends BaseContract {
     "view"
   >;
 
-  removeStateTransitionManager: TypedContractMethod<
-    [_stateTransitionManager: AddressLike],
+  registerAlreadyDeployedZKChain: TypedContractMethod<
+    [_chainId: BigNumberish, _zkChain: AddressLike],
     [void],
     "nonpayable"
   >;
+
+  registerLegacyChain: TypedContractMethod<
+    [_chainId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  registerSettlementLayer: TypedContractMethod<
+    [_newSettlementLayerChainId: BigNumberish, _isWhitelisted: boolean],
+    [void],
+    "nonpayable"
+  >;
+
+  removeChainTypeManager: TypedContractMethod<
+    [_chainTypeManager: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   requestL2TransactionDirect: TypedContractMethod<
     [_request: L2TransactionRequestDirectStruct],
@@ -518,34 +1241,64 @@ export interface IBridgehub extends BaseContract {
     "payable"
   >;
 
+  routeBridgehubConfirmL2Transaction: TypedContractMethod<
+    [
+      _secondBridgeAddress: AddressLike,
+      _chainId: BigNumberish,
+      _txDataHash: BytesLike,
+      _canonicalTxHash: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  routeBridgehubDeposit: TypedContractMethod<
+    [_request: RouteBridgehubDepositStructStruct],
+    [L2TransactionRequestTwoBridgesInnerStructOutput],
+    "payable"
+  >;
+
+  setAddresses: TypedContractMethod<
+    [
+      _assetRouter: AddressLike,
+      _l1CtmDeployer: AddressLike,
+      _messageRoot: AddressLike,
+      _interopCenter: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  setCTMAssetAddress: TypedContractMethod<
+    [_additionalData: BytesLike, _assetAddress: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   setPendingAdmin: TypedContractMethod<
     [_newPendingAdmin: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  setSharedBridge: TypedContractMethod<
-    [_sharedBridge: AddressLike],
+  settlementLayer: TypedContractMethod<
+    [chainId: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
+  transferOwnership: TypedContractMethod<
+    [newOwner: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  sharedBridge: TypedContractMethod<[], [string], "view">;
+  unpause: TypedContractMethod<[], [void], "nonpayable">;
 
-  stateTransitionManager: TypedContractMethod<
-    [_chainId: BigNumberish],
-    [string],
-    "view"
-  >;
+  unpauseMigration: TypedContractMethod<[], [void], "nonpayable">;
 
-  stateTransitionManagerIsRegistered: TypedContractMethod<
-    [_stateTransitionManager: AddressLike],
-    [boolean],
-    "view"
-  >;
-
-  tokenIsRegistered: TypedContractMethod<
-    [_baseToken: AddressLike],
+  whitelistedSettlementLayers: TypedContractMethod<
+    [chainId: BigNumberish],
     [boolean],
     "view"
   >;
@@ -555,38 +1308,136 @@ export interface IBridgehub extends BaseContract {
   ): T;
 
   getFunction(
+    nameOrSignature: "L1_CHAIN_ID"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MAX_NUMBER_OF_ZK_CHAINS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "acceptAdmin"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "addStateTransitionManager"
+    nameOrSignature: "acceptOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "addChainTypeManager"
   ): TypedContractMethod<
-    [_stateTransitionManager: AddressLike],
+    [_chainTypeManager: AddressLike],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "addToken"
-  ): TypedContractMethod<[_token: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "addTokenAssetId"
+  ): TypedContractMethod<[_baseTokenAssetId: BytesLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "admin"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "assetIdIsRegistered"
+  ): TypedContractMethod<[baseTokenAssetId: BytesLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "assetRouter"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "baseToken"
   ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "baseTokenAssetId"
+  ): TypedContractMethod<[chainId: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "bridgeBurn"
+  ): TypedContractMethod<
+    [
+      _settlementChainId: BigNumberish,
+      _l2MsgValue: BigNumberish,
+      _assetId: BytesLike,
+      _originalCaller: AddressLike,
+      _data: BytesLike
+    ],
+    [string],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "bridgeMint"
+  ): TypedContractMethod<
+    [arg0: BigNumberish, _assetId: BytesLike, _bridgehubMintData: BytesLike],
+    [void],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "bridgeRecoverFailedTransfer"
+  ): TypedContractMethod<
+    [
+      arg0: BigNumberish,
+      _assetId: BytesLike,
+      _depositSender: AddressLike,
+      _data: BytesLike
+    ],
+    [void],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "chainTypeManager"
+  ): TypedContractMethod<[chainId: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "chainTypeManagerIsRegistered"
+  ): TypedContractMethod<[chainTypeManager: AddressLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "createNewChain"
   ): TypedContractMethod<
     [
       _chainId: BigNumberish,
-      _stateTransitionManager: AddressLike,
-      _baseToken: AddressLike,
+      _chainTypeManager: AddressLike,
+      _baseTokenAssetId: BytesLike,
       _salt: BigNumberish,
       _admin: AddressLike,
-      _initData: BytesLike
+      _initData: BytesLike,
+      _factoryDeps: BytesLike[]
     ],
     [bigint],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "getHyperchain"
+    nameOrSignature: "ctmAssetIdFromAddress"
+  ): TypedContractMethod<[ctmAddress: AddressLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "ctmAssetIdFromChainId"
   ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "ctmAssetIdToAddress"
+  ): TypedContractMethod<[ctmAssetId: BytesLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "forwardTransactionOnGateway"
+  ): TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _canonicalTxHash: BytesLike,
+      _expirationTimestamp: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getAllZKChainChainIDs"
+  ): TypedContractMethod<[], [bigint[]], "view">;
+  getFunction(
+    nameOrSignature: "getAllZKChains"
+  ): TypedContractMethod<[], [string[]], "view">;
+  getFunction(
+    nameOrSignature: "getZKChain"
+  ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "initialize"
+  ): TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "initializeV2"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "interopCenter"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "l1CtmDeployer"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "l2TransactionBaseCost"
   ): TypedContractMethod<
@@ -599,6 +1450,27 @@ export interface IBridgehub extends BaseContract {
     [bigint],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "messageRoot"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "migrationPaused"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "pause"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "pauseMigration"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "paused"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "pendingOwner"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "proveL1ToL2TransactionStatus"
   ): TypedContractMethod<
@@ -641,12 +1513,32 @@ export interface IBridgehub extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "removeStateTransitionManager"
+    nameOrSignature: "registerAlreadyDeployedZKChain"
   ): TypedContractMethod<
-    [_stateTransitionManager: AddressLike],
+    [_chainId: BigNumberish, _zkChain: AddressLike],
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "registerLegacyChain"
+  ): TypedContractMethod<[_chainId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "registerSettlementLayer"
+  ): TypedContractMethod<
+    [_newSettlementLayerChainId: BigNumberish, _isWhitelisted: boolean],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "removeChainTypeManager"
+  ): TypedContractMethod<
+    [_chainTypeManager: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "renounceOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "requestL2TransactionDirect"
   ): TypedContractMethod<
@@ -662,28 +1554,125 @@ export interface IBridgehub extends BaseContract {
     "payable"
   >;
   getFunction(
+    nameOrSignature: "routeBridgehubConfirmL2Transaction"
+  ): TypedContractMethod<
+    [
+      _secondBridgeAddress: AddressLike,
+      _chainId: BigNumberish,
+      _txDataHash: BytesLike,
+      _canonicalTxHash: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "routeBridgehubDeposit"
+  ): TypedContractMethod<
+    [_request: RouteBridgehubDepositStructStruct],
+    [L2TransactionRequestTwoBridgesInnerStructOutput],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "setAddresses"
+  ): TypedContractMethod<
+    [
+      _assetRouter: AddressLike,
+      _l1CtmDeployer: AddressLike,
+      _messageRoot: AddressLike,
+      _interopCenter: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setCTMAssetAddress"
+  ): TypedContractMethod<
+    [_additionalData: BytesLike, _assetAddress: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "setPendingAdmin"
   ): TypedContractMethod<[_newPendingAdmin: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "setSharedBridge"
-  ): TypedContractMethod<[_sharedBridge: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "settlementLayer"
+  ): TypedContractMethod<[chainId: BigNumberish], [bigint], "view">;
   getFunction(
-    nameOrSignature: "sharedBridge"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: "transferOwnership"
+  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "stateTransitionManager"
-  ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
+    nameOrSignature: "unpause"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "stateTransitionManagerIsRegistered"
-  ): TypedContractMethod<
-    [_stateTransitionManager: AddressLike],
-    [boolean],
-    "view"
-  >;
+    nameOrSignature: "unpauseMigration"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "tokenIsRegistered"
-  ): TypedContractMethod<[_baseToken: AddressLike], [boolean], "view">;
+    nameOrSignature: "whitelistedSettlementLayers"
+  ): TypedContractMethod<[chainId: BigNumberish], [boolean], "view">;
 
+  getEvent(
+    key: "AssetRegistered"
+  ): TypedContractEvent<
+    AssetRegisteredEvent.InputTuple,
+    AssetRegisteredEvent.OutputTuple,
+    AssetRegisteredEvent.OutputObject
+  >;
+  getEvent(
+    key: "BaseTokenAssetIdRegistered"
+  ): TypedContractEvent<
+    BaseTokenAssetIdRegisteredEvent.InputTuple,
+    BaseTokenAssetIdRegisteredEvent.OutputTuple,
+    BaseTokenAssetIdRegisteredEvent.OutputObject
+  >;
+  getEvent(
+    key: "BridgeBurn"
+  ): TypedContractEvent<
+    BridgeBurnEvent.InputTuple,
+    BridgeBurnEvent.OutputTuple,
+    BridgeBurnEvent.OutputObject
+  >;
+  getEvent(
+    key: "BridgeMint"
+  ): TypedContractEvent<
+    BridgeMintEvent.InputTuple,
+    BridgeMintEvent.OutputTuple,
+    BridgeMintEvent.OutputObject
+  >;
+  getEvent(
+    key: "ChainTypeManagerAdded"
+  ): TypedContractEvent<
+    ChainTypeManagerAddedEvent.InputTuple,
+    ChainTypeManagerAddedEvent.OutputTuple,
+    ChainTypeManagerAddedEvent.OutputObject
+  >;
+  getEvent(
+    key: "ChainTypeManagerRemoved"
+  ): TypedContractEvent<
+    ChainTypeManagerRemovedEvent.InputTuple,
+    ChainTypeManagerRemovedEvent.OutputTuple,
+    ChainTypeManagerRemovedEvent.OutputObject
+  >;
+  getEvent(
+    key: "Initialized"
+  ): TypedContractEvent<
+    InitializedEvent.InputTuple,
+    InitializedEvent.OutputTuple,
+    InitializedEvent.OutputObject
+  >;
+  getEvent(
+    key: "MigrationFinalized"
+  ): TypedContractEvent<
+    MigrationFinalizedEvent.InputTuple,
+    MigrationFinalizedEvent.OutputTuple,
+    MigrationFinalizedEvent.OutputObject
+  >;
+  getEvent(
+    key: "MigrationStarted"
+  ): TypedContractEvent<
+    MigrationStartedEvent.InputTuple,
+    MigrationStartedEvent.OutputTuple,
+    MigrationStartedEvent.OutputObject
+  >;
   getEvent(
     key: "NewAdmin"
   ): TypedContractEvent<
@@ -705,8 +1694,142 @@ export interface IBridgehub extends BaseContract {
     NewPendingAdminEvent.OutputTuple,
     NewPendingAdminEvent.OutputObject
   >;
+  getEvent(
+    key: "OwnershipTransferStarted"
+  ): TypedContractEvent<
+    OwnershipTransferStartedEvent.InputTuple,
+    OwnershipTransferStartedEvent.OutputTuple,
+    OwnershipTransferStartedEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferred"
+  ): TypedContractEvent<
+    OwnershipTransferredEvent.InputTuple,
+    OwnershipTransferredEvent.OutputTuple,
+    OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "Paused"
+  ): TypedContractEvent<
+    PausedEvent.InputTuple,
+    PausedEvent.OutputTuple,
+    PausedEvent.OutputObject
+  >;
+  getEvent(
+    key: "SettlementLayerRegistered"
+  ): TypedContractEvent<
+    SettlementLayerRegisteredEvent.InputTuple,
+    SettlementLayerRegisteredEvent.OutputTuple,
+    SettlementLayerRegisteredEvent.OutputObject
+  >;
+  getEvent(
+    key: "Unpaused"
+  ): TypedContractEvent<
+    UnpausedEvent.InputTuple,
+    UnpausedEvent.OutputTuple,
+    UnpausedEvent.OutputObject
+  >;
 
   filters: {
+    "AssetRegistered(bytes32,address,bytes32,address)": TypedContractEvent<
+      AssetRegisteredEvent.InputTuple,
+      AssetRegisteredEvent.OutputTuple,
+      AssetRegisteredEvent.OutputObject
+    >;
+    AssetRegistered: TypedContractEvent<
+      AssetRegisteredEvent.InputTuple,
+      AssetRegisteredEvent.OutputTuple,
+      AssetRegisteredEvent.OutputObject
+    >;
+
+    "BaseTokenAssetIdRegistered(bytes32)": TypedContractEvent<
+      BaseTokenAssetIdRegisteredEvent.InputTuple,
+      BaseTokenAssetIdRegisteredEvent.OutputTuple,
+      BaseTokenAssetIdRegisteredEvent.OutputObject
+    >;
+    BaseTokenAssetIdRegistered: TypedContractEvent<
+      BaseTokenAssetIdRegisteredEvent.InputTuple,
+      BaseTokenAssetIdRegisteredEvent.OutputTuple,
+      BaseTokenAssetIdRegisteredEvent.OutputObject
+    >;
+
+    "BridgeBurn(uint256,bytes32,address,address,uint256)": TypedContractEvent<
+      BridgeBurnEvent.InputTuple,
+      BridgeBurnEvent.OutputTuple,
+      BridgeBurnEvent.OutputObject
+    >;
+    BridgeBurn: TypedContractEvent<
+      BridgeBurnEvent.InputTuple,
+      BridgeBurnEvent.OutputTuple,
+      BridgeBurnEvent.OutputObject
+    >;
+
+    "BridgeMint(uint256,bytes32,address,uint256)": TypedContractEvent<
+      BridgeMintEvent.InputTuple,
+      BridgeMintEvent.OutputTuple,
+      BridgeMintEvent.OutputObject
+    >;
+    BridgeMint: TypedContractEvent<
+      BridgeMintEvent.InputTuple,
+      BridgeMintEvent.OutputTuple,
+      BridgeMintEvent.OutputObject
+    >;
+
+    "ChainTypeManagerAdded(address)": TypedContractEvent<
+      ChainTypeManagerAddedEvent.InputTuple,
+      ChainTypeManagerAddedEvent.OutputTuple,
+      ChainTypeManagerAddedEvent.OutputObject
+    >;
+    ChainTypeManagerAdded: TypedContractEvent<
+      ChainTypeManagerAddedEvent.InputTuple,
+      ChainTypeManagerAddedEvent.OutputTuple,
+      ChainTypeManagerAddedEvent.OutputObject
+    >;
+
+    "ChainTypeManagerRemoved(address)": TypedContractEvent<
+      ChainTypeManagerRemovedEvent.InputTuple,
+      ChainTypeManagerRemovedEvent.OutputTuple,
+      ChainTypeManagerRemovedEvent.OutputObject
+    >;
+    ChainTypeManagerRemoved: TypedContractEvent<
+      ChainTypeManagerRemovedEvent.InputTuple,
+      ChainTypeManagerRemovedEvent.OutputTuple,
+      ChainTypeManagerRemovedEvent.OutputObject
+    >;
+
+    "Initialized(uint8)": TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+    Initialized: TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+
+    "MigrationFinalized(uint256,bytes32,address)": TypedContractEvent<
+      MigrationFinalizedEvent.InputTuple,
+      MigrationFinalizedEvent.OutputTuple,
+      MigrationFinalizedEvent.OutputObject
+    >;
+    MigrationFinalized: TypedContractEvent<
+      MigrationFinalizedEvent.InputTuple,
+      MigrationFinalizedEvent.OutputTuple,
+      MigrationFinalizedEvent.OutputObject
+    >;
+
+    "MigrationStarted(uint256,bytes32,uint256)": TypedContractEvent<
+      MigrationStartedEvent.InputTuple,
+      MigrationStartedEvent.OutputTuple,
+      MigrationStartedEvent.OutputObject
+    >;
+    MigrationStarted: TypedContractEvent<
+      MigrationStartedEvent.InputTuple,
+      MigrationStartedEvent.OutputTuple,
+      MigrationStartedEvent.OutputObject
+    >;
+
     "NewAdmin(address,address)": TypedContractEvent<
       NewAdminEvent.InputTuple,
       NewAdminEvent.OutputTuple,
@@ -738,6 +1861,61 @@ export interface IBridgehub extends BaseContract {
       NewPendingAdminEvent.InputTuple,
       NewPendingAdminEvent.OutputTuple,
       NewPendingAdminEvent.OutputObject
+    >;
+
+    "OwnershipTransferStarted(address,address)": TypedContractEvent<
+      OwnershipTransferStartedEvent.InputTuple,
+      OwnershipTransferStartedEvent.OutputTuple,
+      OwnershipTransferStartedEvent.OutputObject
+    >;
+    OwnershipTransferStarted: TypedContractEvent<
+      OwnershipTransferStartedEvent.InputTuple,
+      OwnershipTransferStartedEvent.OutputTuple,
+      OwnershipTransferStartedEvent.OutputObject
+    >;
+
+    "OwnershipTransferred(address,address)": TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+    OwnershipTransferred: TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+
+    "Paused(address)": TypedContractEvent<
+      PausedEvent.InputTuple,
+      PausedEvent.OutputTuple,
+      PausedEvent.OutputObject
+    >;
+    Paused: TypedContractEvent<
+      PausedEvent.InputTuple,
+      PausedEvent.OutputTuple,
+      PausedEvent.OutputObject
+    >;
+
+    "SettlementLayerRegistered(uint256,bool)": TypedContractEvent<
+      SettlementLayerRegisteredEvent.InputTuple,
+      SettlementLayerRegisteredEvent.OutputTuple,
+      SettlementLayerRegisteredEvent.OutputObject
+    >;
+    SettlementLayerRegistered: TypedContractEvent<
+      SettlementLayerRegisteredEvent.InputTuple,
+      SettlementLayerRegisteredEvent.OutputTuple,
+      SettlementLayerRegisteredEvent.OutputObject
+    >;
+
+    "Unpaused(address)": TypedContractEvent<
+      UnpausedEvent.InputTuple,
+      UnpausedEvent.OutputTuple,
+      UnpausedEvent.OutputObject
+    >;
+    Unpaused: TypedContractEvent<
+      UnpausedEvent.InputTuple,
+      UnpausedEvent.OutputTuple,
+      UnpausedEvent.OutputObject
     >;
   };
 }
