@@ -1,4 +1,4 @@
-name: Run tests new release
+name: Run tests v26
 on:
   push:
     branches: [ main, beta ]
@@ -32,7 +32,7 @@ jobs:
           yarn test:build
       - name: Run local-setup (specific branch)
         run: |
-          git clone --branch ra/local-setup-gateway https://github.com/matter-labs/local-setup.git
+          git clone --branch https://github.com/matter-labs/local-setup.git
           pushd local-setup
           ./start-zk-chains.sh
           popd
@@ -87,7 +87,7 @@ jobs:
           yarn test:build
       - name: Run local-setup
         run: |
-          git clone --branch ra/local-setup-gateway https://github.com/matter-labs/local-setup.git
+          git clone --branch https://github.com/matter-labs/local-setup.git
           pushd local-setup
           ./start-zk-chains.sh
           popd
