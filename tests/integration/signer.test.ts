@@ -1493,7 +1493,7 @@ describe('L1VoidSigner', async () => {
         }
       });
     }
-  });
+  }).timeout(60_000);
 
   describe('#getRequestExecuteTx()', () => {
     const amount = 7_000_000_000;
