@@ -813,17 +813,7 @@ export function JsonRpcApiProvider<
 
       let populatedTx;
       if (!(await this.isProtocolVersionNew())) {
-        if (!tx.bridgeAddress) {
-          const bridgeAddresses = await this.getDefaultBridgeAddresses();
-          tx.bridgeAddress = bridgeAddresses.sharedL2;
-        }
-        const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-        populatedTx = await bridge.withdraw.populateTransaction(
-          tx.to!,
-          tx.token,
-          tx.amount,
-          tx.overrides
-        );
+        populatedTx = await this.getWithdrawTxPreGateway(tx);
       } else {
         const ntv = await this.connectL2NativeTokenVault();
         const assetId = await ntv.assetId(tx.token);
@@ -878,6 +868,28 @@ export function JsonRpcApiProvider<
         };
       }
       return populatedTx;
+    }
+
+    async getWithdrawTxPreGateway(tx: {
+      amount: BigNumberish;
+      token?: Address;
+      from?: Address;
+      to?: Address;
+      bridgeAddress?: Address;
+      paymasterParams?: PaymasterParams;
+      overrides?: ethers.Overrides;
+    }): Promise<ethers.ContractTransaction> {
+      if (!tx.bridgeAddress) {
+        const bridgeAddresses = await this.getDefaultBridgeAddresses();
+        tx.bridgeAddress = bridgeAddresses.sharedL2;
+      }
+      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
+      return await bridge.withdraw.populateTransaction(
+        tx.to!,
+        tx.token!,
+        tx.amount,
+        tx.overrides!
+      );
     }
 
     /**
