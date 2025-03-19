@@ -115,23 +115,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       // there is an intermediate stage during the upgrade when the chains have upgraded, but not the L1 contracts.
       let sharedBridgeIsNew = false;
       try {
-        const l1Nullifier = await this.getL1NullifierAddress();
-        if (l1Nullifier !== ethers.ZeroAddress) {
-          const assetRouter = (
-            await this._providerL2().getDefaultBridgeAddresses()
-          ).sharedL1;
-          const assetRouterFromL1Nullifier =
-            await IL1Nullifier__factory.connect(
-              l1Nullifier,
-              this._providerL1()
-            ).l1AssetRouter();
-          if (
-            assetRouterFromL1Nullifier.toLowerCase() ===
-            assetRouter.toLowerCase()
+          const l1AssetRouter = await this.getL1AssetRouter();
+          // this fails if the bridge is not upgraded.
+          const l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
+          if ( l1Nullifier && 
+            l1Nullifier.toLowerCase() !== ethers.ZeroAddress.toLowerCase()
           ) {
             sharedBridgeIsNew = true;
           }
-        }
       } catch {
         sharedBridgeIsNew = false;
       }
@@ -157,15 +148,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           let l1Nullifier: Address;
           let l1NativeTokenVault: Address;  
           if (!addresses.l1Nullifier) {
-            // todo return from server instead
-            l1Nullifier = (await IL1AssetRouter__factory.connect(
-              addresses.sharedBridgeL1!,
-              this._providerL1()
-            ).L1_NULLIFIER());
-            l1NativeTokenVault = (await IL1AssetRouter__factory.connect(
-              addresses.sharedBridgeL1!,
-              this._providerL1()
-            ).nativeTokenVault());
+            if (await this.isProtocolVersionNew()) {
+            // todo return these values from server instead
+            let l1AssetRouter = await this.getL1AssetRouter();
+            l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
+            l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
+          } else {
+            l1Nullifier = ethers.ZeroAddress;
+            l1NativeTokenVault = ethers.ZeroAddress;
+          }
             this._providerL2().setL1NullifierAndNativeTokenVault(l1Nullifier, l1NativeTokenVault);
           }
           return {
@@ -223,14 +214,25 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
-          /**
-     * Returns the L1 Nullifier contract, used for replay protection for failed deposits and withdrawals.
+
+    /**
+     * Returns the L1 asset router contract, used for handling cross chain calls.
      */
+    async getL1AssetRouter(): Promise<IL1AssetRouter> {
+      // FIXME: maybe makes sense to provide an API to do it in one call
+      const bridgeContracts =
+        await this.getDefaultBridgeAddresses();
+
+      return IL1AssetRouter__factory.connect(
+        bridgeContracts.sharedL1!,
+        this._providerL1()
+      );
+    }
 
     /**
      * Returns the L1 native token vault contract, used for interacting with tokens.
      */
-    async getNativeTokenVaultL1(): Promise<IL1NativeTokenVault> {
+    async getL1NativeTokenVault(): Promise<IL1NativeTokenVault> {
       // FIXME: maybe makes sense to provide an API to do it in one call
       const bridgeContracts =
         await this.getDefaultBridgeAddresses();
@@ -988,7 +990,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (await this.isProtocolVersionNew()) {
         const [assetId, _] = await resolveAssetId(
           {token},
-          await this.getNativeTokenVaultL1()
+          await this.getL1NativeTokenVault()
         );
         const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
 
@@ -1119,7 +1121,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (await this.isProtocolVersionNew()) {
         const [assetId, _] = await resolveAssetId(
           {token: ETH_ADDRESS_IN_CONTRACTS},
-          await this.getNativeTokenVaultL1()
+          await this.getL1NativeTokenVault()
         );
         const ntvData = encodeNTVTransferData(
           BigInt(amount),
@@ -1188,7 +1190,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (await this.isProtocolVersionNew()) {
         const [assetId, _] = await resolveAssetId(
           {token},
-          await this.getNativeTokenVaultL1()
+          await this.getL1NativeTokenVault()
         );
         const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
         secondBridgeCalldata = encodeSecondBridgeDataV1(
@@ -1697,19 +1699,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     /**
-     * Returns L1 Nullifier address.
-     *
-     * @returns A promise that resolves to the address of the L1 Nullifier address
-     */
-    async getL1NullifierAddress(): Promise<Address> {
-      const addresses = await this._providerL2().getDefaultBridgeAddresses();
-      return await IL1AssetRouter__factory.connect(
-        addresses.sharedL1,
-        this._signerL1()
-      ).L1_NULLIFIER();
-    }
-
-    /**
      * Proves the inclusion of the `L2->L1` withdrawal message.
      *
      * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
@@ -1734,10 +1723,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
       if (await this.isProtocolVersionNew()) {
-        const l1Nullifier = IL1Nullifier__factory.connect(
-          await this.getL1NullifierAddress(),
-          this._signerL1()
-        );
+        const l1Nullifier = await this.getL1Nullifier();
 
         const finalizeL1DepositParams: FinalizeL1DepositParams = {
           chainId: (await this._providerL2().getNetwork())
@@ -1931,7 +1917,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           this._signerL1()
         );
         const l2ARInterface = IAssetRouterBase__factory.createInterface();
-        const l1NativeTokenVault = await this.getNativeTokenVaultL1();
+        const l1NativeTokenVault = await this.getL1NativeTokenVault();
         try {
           const calldata = l2Bridge.interface.decodeFunctionData(
             'finalizeDeposit',

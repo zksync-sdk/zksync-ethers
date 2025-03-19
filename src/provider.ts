@@ -29,7 +29,6 @@ import {
   IL2SharedBridge__factory,
   IBridgedStandardToken,
   IBridgedStandardToken__factory,
-  IL1AssetRouter__factory
 } from './typechain';
 import {
   Address,
