@@ -14,7 +14,7 @@ import {
 } from './types';
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
-import {IERC20__factory} from './typechain';
+import {IERC20__factory, IL1NativeTokenVault} from './typechain';
 import IZkSyncABI from '../abi/IZkSyncHyperchain.json';
 import IBridgehubABI from '../abi/IBridgehub.json';
 import IContractDeployerABI from '../abi/IContractDeployer.json';
@@ -1621,7 +1621,7 @@ export type WithTokenOrAssetId = WithToken | WithAssetId;
 
 export async function resolveAssetId(
   info: WithTokenOrAssetId,
-  ntvContract: ethers.Contract
+  ntvContract: IL1NativeTokenVault
 ): Promise<[BytesLike, boolean]> {
   const potentialAssetId = (info as any).assetId;
   if (potentialAssetId) {

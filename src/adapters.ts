@@ -55,6 +55,7 @@ import {
   IL1Nullifier__factory,
   IAssetRouterBase__factory,
   IL1NativeTokenVault__factory,
+  IL1NativeTokenVault,
 } from './typechain';
 import {
   Address,
@@ -138,6 +139,48 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     /**
+     * Returns the addresses of the default ZKsync Era bridge contracts on both L1 and L2, and some L1 specific contracts.
+     *
+     */
+        async getDefaultBridgeAddresses(): Promise<{
+          erc20L1: string;
+          erc20L2: string;
+          wethL1: string;
+          wethL2: string;
+          sharedL1: string;
+          sharedL2: string;
+          l1Nullifier: string;
+          l1NativeTokenVault: string;
+        }> {
+          await this._providerL2().getDefaultBridgeAddresses();
+          const addresses = await this._providerL2().contractAddresses();
+          let l1Nullifier: Address;
+          let l1NativeTokenVault: Address;  
+          if (!addresses.l1Nullifier) {
+            // todo return from server instead
+            l1Nullifier = (await IL1AssetRouter__factory.connect(
+              addresses.sharedBridgeL1!,
+              this._providerL1()
+            ).L1_NULLIFIER());
+            l1NativeTokenVault = (await IL1AssetRouter__factory.connect(
+              addresses.sharedBridgeL1!,
+              this._providerL1()
+            ).nativeTokenVault());
+            this._providerL2().setL1NullifierAndNativeTokenVault(l1Nullifier, l1NativeTokenVault);
+          }
+          return {
+            erc20L1: addresses.erc20BridgeL1!,
+            erc20L2: addresses.erc20BridgeL2!,
+            wethL1: addresses.wethBridgeL1!,
+            wethL2: addresses.wethBridgeL2!,
+            sharedL1: addresses.sharedBridgeL1!,
+            sharedL2: addresses.sharedBridgeL2!,
+            l1Nullifier: l1Nullifier!,
+            l1NativeTokenVault: l1NativeTokenVault!,
+          };
+        }
+
+    /**
      * Returns `Contract` wrapper of the ZKsync Era smart contract.
      */
     async getMainContract(): Promise<IZkSyncHyperchain> {
@@ -178,6 +221,39 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           this._signerL1()
         ),
       };
+    }
+
+          /**
+     * Returns the L1 Nullifier contract, used for replay protection for failed deposits and withdrawals.
+     */
+
+    /**
+     * Returns the L1 native token vault contract, used for interacting with tokens.
+     */
+    async getNativeTokenVaultL1(): Promise<IL1NativeTokenVault> {
+      // FIXME: maybe makes sense to provide an API to do it in one call
+      const bridgeContracts =
+        await this.getDefaultBridgeAddresses();
+
+      return IL1NativeTokenVault__factory.connect(
+        bridgeContracts.l1NativeTokenVault!,
+        this._providerL1()
+      );
+    }
+
+          /**
+     * Returns the L1 Nullifier contract, used for replay protection for failed deposits and withdrawals.
+     */
+    async getL1Nullifier(): Promise<IL1Nullifier> {
+      // FIXME: maybe makes sense to provide an API to do it in one call
+      const bridgeContracts =
+        await this.getDefaultBridgeAddresses();
+
+
+      return IL1Nullifier__factory.connect(
+        bridgeContracts.l1Nullifier!,
+        this._providerL1()
+      );
     }
 
     /**
@@ -407,26 +483,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
     }
 
-    async getNativeTokenVaultL1(): Promise<ethers.Contract> {
-      // FIXME: maybe makes sense to provide an API to do it in one call
-      const bridgeContracts =
-        await this._providerL2().getDefaultBridgeAddresses();
-
-      const sharedBridge = bridgeContracts.sharedL1;
-      const l1AssetRouter = IL1AssetRouter__factory.connect(
-        sharedBridge,
-        this._providerL1()
-      );
-
-      const l1NtvAddress = await l1AssetRouter.nativeTokenVault();
-
-      return IL1NativeTokenVault__factory.connect(
-        l1NtvAddress,
-        this._providerL1()
-        // FIXME: unfortunately this is the sort of transformation we need to make
-        // most likely typechain is from other ethers version
-      ) as any as ethers.Contract;
-    }
 
     /**
      * Transfers the specified token from the associated account on the L1 network to the target account on the L2 network.
@@ -1842,6 +1898,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         l2BridgeAddress,
         this._providerL2()
       );
+      let depositSender: string;
+      let assetId: string;
+      let assetData: string;
       if (!(await this.isProtocolVersionNew())) {
         const calldata = l2Bridge.interface.decodeFunctionData(
           'finalizeDeposit',
@@ -1867,97 +1926,77 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           overrides ?? {}
         );
       } else {
-        const l1AR = IL1AssetRouter__factory.connect(
+        const l1AssetRouter = IL1AssetRouter__factory.connect(
           l1BridgeAddress,
           this._signerL1()
         );
         const l2ARInterface = IAssetRouterBase__factory.createInterface();
-        const l1ntv = await this.getNativeTokenVaultL1();
+        const l1NativeTokenVault = await this.getNativeTokenVaultL1();
         try {
           const calldata = l2Bridge.interface.decodeFunctionData(
             'finalizeDeposit',
             tx.data
           );
 
-          const proof = await this._providerL2().getLogProof(
-            depositHash,
-            successL2ToL1LogIndex
-          );
-          if (!proof) {
-            throw new Error('Log proof not found!');
-          }
-
           // todo: generally, providing token address is not required for the NTV
           // this sdk does it, but we should support the case even when it is not given
-          const assetData = encodeNTVTransferData(
+          assetData = encodeNTVTransferData(
             calldata['_amount'],
             calldata['_l2Receiver'],
             calldata['_l1Token']
           );
 
-          const assetId = await l1ntv.assetId(calldata['_l1Token']);
+          assetId = await l1NativeTokenVault.assetId(calldata['_l1Token']);
+          depositSender = calldata['_l1Sender'];
           if (assetId === ethers.ZeroHash) {
             throw new Error(
               `Token ${calldata['_l1Token']} not registered in NTV`
             );
           }
-
           // todo: this SDK assumes that users used new encoding version,
-          // however in general it should be capable of working with hte old version as well
-          return await l1AR[
-            'bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])'
-          ](
-            (await this._providerL2().getNetwork()).chainId as BigNumberish,
-            calldata['_l1Sender'], // depositSender
-            assetId, // asset id
-            assetData,
-            depositHash,
-            receipt.l1BatchNumber!,
-            proof.id,
-            receipt.l1BatchTxIndex!,
-            proof.proof,
-            overrides ?? {}
-          );
+         // however in general it should be capable of working with the old version as well
         } catch (e) {
           const calldata = l2ARInterface.decodeFunctionData(
             'finalizeDeposit',
             tx.data
           );
-          const assetId = calldata['_assetId'];
+          assetId = calldata['_assetId'];
           const transferData = calldata['_transferData'];
-          const l1TokenAddress = await l1ntv.tokenAddress(assetId);
+          const l1TokenAddress = await l1NativeTokenVault.tokenAddress(assetId);
 
           const transferDataDecoded = ethers.AbiCoder.defaultAbiCoder().decode(
             ['address', 'address', 'address', 'uint256', 'bytes'],
             transferData
           );
-          const assetData = ethers.AbiCoder.defaultAbiCoder().encode(
+          assetData = ethers.AbiCoder.defaultAbiCoder().encode(
             ['uint256', 'address', 'address'],
             [transferDataDecoded[3], transferDataDecoded[1], l1TokenAddress]
           );
-          const proof = await this._providerL2().getLogProof(
-            depositHash,
-            successL2ToL1LogIndex
-          );
-          if (!proof) {
-            throw new Error('Log proof not found!');
-          }
-          // FIXME: a cheaper way is to call l1 nullifier directly
-          return await l1AR[
-            'bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])'
-          ](
-            (await this._providerL2().getNetwork()).chainId as BigNumberish,
-            transferDataDecoded[0], // depositSender
-            calldata['_assetId'], // asset id
-            assetData,
-            depositHash,
-            receipt.l1BatchNumber!,
-            proof.id,
-            receipt.l1BatchTxIndex!,
-            proof.proof,
-            overrides ?? {}
-          );
+          depositSender = transferDataDecoded[0];
         }
+
+        let proof = await this._providerL2().getLogProof(
+          depositHash,
+          successL2ToL1LogIndex
+        );
+        if (!proof) {
+          throw new Error('Log proof not found!');
+        }
+        // FIXME: a cheaper way is to call l1 nullifier directly
+        return await l1AssetRouter[
+          'bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])'
+        ](
+          (await this._providerL2().getNetwork()).chainId as BigNumberish,
+          depositSender, // depositSender
+          assetId, // asset id
+          assetData,
+          depositHash,
+          receipt.l1BatchNumber!,
+          proof.id,
+          receipt.l1BatchTxIndex!,
+          proof.proof,
+          overrides ?? {}
+        );
       }
     }
 

@@ -121,6 +121,7 @@ export function JsonRpcApiProvider<
       sharedBridgeL2?: Address;
       baseToken?: Address;
       l1Nullifier?: Address;
+      l1NativeTokenVault?: Address;
     } {
       throw new Error('Must be implemented by the derived class!');
     }
@@ -475,7 +476,6 @@ export function JsonRpcApiProvider<
       wethL2: string;
       sharedL1: string;
       sharedL2: string;
-      l1Nullifier: string;
     }> {
       if (!this.contractAddresses().erc20BridgeL1) {
         const addresses: {
@@ -495,11 +495,7 @@ export function JsonRpcApiProvider<
           addresses.l1SharedDefaultBridge;
         this.contractAddresses().sharedBridgeL2 =
           addresses.l2SharedDefaultBridge;
-        // todo return from server instead
-        this.contractAddresses().l1Nullifier = (await IL1AssetRouter__factory.connect(
-          addresses.l1SharedDefaultBridge,
-          this
-        ).L1_NULLIFIER());
+
       }
       return {
         erc20L1: this.contractAddresses().erc20BridgeL1!,
@@ -508,8 +504,15 @@ export function JsonRpcApiProvider<
         wethL2: this.contractAddresses().wethBridgeL2!,
         sharedL1: this.contractAddresses().sharedBridgeL1!,
         sharedL2: this.contractAddresses().sharedBridgeL2!,
-        l1Nullifier: this.contractAddresses().l1Nullifier!,
       };
+    }
+
+    setL1NullifierAndNativeTokenVault(
+      l1Nullifier: Address,
+      l1NativeTokenVault: Address
+    ) {
+      this.contractAddresses().l1Nullifier = l1Nullifier;
+      this.contractAddresses().l1NativeTokenVault = l1NativeTokenVault;
     }
 
     /**
@@ -1384,19 +1387,31 @@ export function JsonRpcApiProvider<
 export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   #connect: FetchRequest;
   protected _contractAddresses: {
+    bridgehubContract?: Address;
     mainContract?: Address;
     erc20BridgeL1?: Address;
     erc20BridgeL2?: Address;
     wethBridgeL1?: Address;
     wethBridgeL2?: Address;
+    sharedBridgeL1?: Address;
+    sharedBridgeL2?: Address;
+    baseToken?: Address;
+    l1Nullifier?: Address;
+    l1NativeTokenVault?: Address;
   };
 
   override contractAddresses(): {
+    bridgehubContract?: Address;
     mainContract?: Address;
     erc20BridgeL1?: Address;
     erc20BridgeL2?: Address;
     wethBridgeL1?: Address;
     wethBridgeL2?: Address;
+    sharedBridgeL1?: Address;
+    sharedBridgeL2?: Address;
+    baseToken?: Address;
+    l1Nullifier?: Address;
+    l1NativeTokenVault?: Address;
   } {
     return this._contractAddresses;
   }
@@ -1780,7 +1795,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     wethL2: string;
     sharedL1: string;
     sharedL2: string;
-    l1Nullifier: string;
   }> {
     return super.getDefaultBridgeAddresses();
   }
@@ -2939,7 +2953,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
     wethL2: string;
     sharedL1: string;
     sharedL2: string;
-    l1Nullifier: string;
   }> {
     return super.getDefaultBridgeAddresses();
   }

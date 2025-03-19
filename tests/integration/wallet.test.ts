@@ -1690,7 +1690,7 @@ describe('Wallet', () => {
         NTV_ADDRESS,
         wallet._signerL2()
       );
-      const l1NtvAddress = await l1AR.nativeTokenVault();
+      const l1NtvAddress = await l1AssetRouter.nativeTokenVault();
       const l1Ntv = IL1NativeTokenVault__factory.connect(
         l1NtvAddress,
         wallet._signerL1()
