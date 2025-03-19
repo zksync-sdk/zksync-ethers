@@ -115,7 +115,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       // there is an intermediate stage during the upgrade when the chains have upgraded, but not the L1 contracts.
       let sharedBridgeIsNew = false;
       try {
-        const l1AssetRouter = await this.getL1AssetRouter((await this._providerL2().getDefaultBridgeAddresses()).sharedL1!);
+        const l1AssetRouter = await this.getL1AssetRouter(
+          (await this._providerL2().getDefaultBridgeAddresses()).sharedL1!
+        );
         // this fails if the bridge is not upgraded.
         const l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
         if (
@@ -151,7 +153,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (!addresses.l1Nullifier) {
         if (await this.isProtocolVersionNew()) {
           // todo return these values from server instead
-          const l1AssetRouter = await this.getL1AssetRouter((await this._providerL2().getDefaultBridgeAddresses()).sharedL1!);
+          const l1AssetRouter = await this.getL1AssetRouter(
+            (await this._providerL2().getDefaultBridgeAddresses()).sharedL1!
+          );
           l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
           l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
         } else {
@@ -223,12 +227,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      */
     async getL1AssetRouter(address?: string): Promise<IL1AssetRouter> {
       // FIXME: maybe makes sense to provide an API to do it in one call
-      let _address = address? address : (await this.getDefaultBridgeAddresses()).sharedL1!;
+      const _address = address
+        ? address
+        : (await this.getDefaultBridgeAddresses()).sharedL1!;
 
-      return IL1AssetRouter__factory.connect(
-        _address,
-        this._providerL1()
-      );
+      return IL1AssetRouter__factory.connect(_address, this._providerL1());
     }
 
     /**
