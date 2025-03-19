@@ -494,7 +494,6 @@ export function JsonRpcApiProvider<
           addresses.l1SharedDefaultBridge;
         this.contractAddresses().sharedBridgeL2 =
           addresses.l2SharedDefaultBridge;
-
       }
       return {
         erc20L1: this.contractAddresses().erc20BridgeL1!,

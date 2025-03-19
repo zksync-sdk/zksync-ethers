@@ -115,14 +115,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       // there is an intermediate stage during the upgrade when the chains have upgraded, but not the L1 contracts.
       let sharedBridgeIsNew = false;
       try {
-          const l1AssetRouter = await this.getL1AssetRouter();
-          // this fails if the bridge is not upgraded.
-          const l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
-          if ( l1Nullifier && 
-            l1Nullifier.toLowerCase() !== ethers.ZeroAddress.toLowerCase()
-          ) {
-            sharedBridgeIsNew = true;
-          }
+        const l1AssetRouter = await this.getL1AssetRouter();
+        // this fails if the bridge is not upgraded.
+        const l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
+        if (
+          l1Nullifier &&
+          l1Nullifier.toLowerCase() !== ethers.ZeroAddress.toLowerCase()
+        ) {
+          sharedBridgeIsNew = true;
+        }
       } catch {
         sharedBridgeIsNew = false;
       }
@@ -133,43 +134,46 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * Returns the addresses of the default ZKsync Era bridge contracts on both L1 and L2, and some L1 specific contracts.
      *
      */
-        async getDefaultBridgeAddresses(): Promise<{
-          erc20L1: string;
-          erc20L2: string;
-          wethL1: string;
-          wethL2: string;
-          sharedL1: string;
-          sharedL2: string;
-          l1Nullifier: string;
-          l1NativeTokenVault: string;
-        }> {
-          await this._providerL2().getDefaultBridgeAddresses();
-          const addresses = await this._providerL2().contractAddresses();
-          let l1Nullifier: Address;
-          let l1NativeTokenVault: Address;  
-          if (!addresses.l1Nullifier) {
-            if (await this.isProtocolVersionNew()) {
-            // todo return these values from server instead
-            let l1AssetRouter = await this.getL1AssetRouter();
-            l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
-            l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
-          } else {
-            l1Nullifier = ethers.ZeroAddress;
-            l1NativeTokenVault = ethers.ZeroAddress;
-          }
-            this._providerL2().setL1NullifierAndNativeTokenVault(l1Nullifier, l1NativeTokenVault);
-          }
-          return {
-            erc20L1: addresses.erc20BridgeL1!,
-            erc20L2: addresses.erc20BridgeL2!,
-            wethL1: addresses.wethBridgeL1!,
-            wethL2: addresses.wethBridgeL2!,
-            sharedL1: addresses.sharedBridgeL1!,
-            sharedL2: addresses.sharedBridgeL2!,
-            l1Nullifier: l1Nullifier!,
-            l1NativeTokenVault: l1NativeTokenVault!,
-          };
+    async getDefaultBridgeAddresses(): Promise<{
+      erc20L1: string;
+      erc20L2: string;
+      wethL1: string;
+      wethL2: string;
+      sharedL1: string;
+      sharedL2: string;
+      l1Nullifier: string;
+      l1NativeTokenVault: string;
+    }> {
+      await this._providerL2().getDefaultBridgeAddresses();
+      const addresses = await this._providerL2().contractAddresses();
+      let l1Nullifier: Address;
+      let l1NativeTokenVault: Address;
+      if (!addresses.l1Nullifier) {
+        if (await this.isProtocolVersionNew()) {
+          // todo return these values from server instead
+          const l1AssetRouter = await this.getL1AssetRouter();
+          l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
+          l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
+        } else {
+          l1Nullifier = ethers.ZeroAddress;
+          l1NativeTokenVault = ethers.ZeroAddress;
         }
+        this._providerL2().setL1NullifierAndNativeTokenVault(
+          l1Nullifier,
+          l1NativeTokenVault
+        );
+      }
+      return {
+        erc20L1: addresses.erc20BridgeL1!,
+        erc20L2: addresses.erc20BridgeL2!,
+        wethL1: addresses.wethBridgeL1!,
+        wethL2: addresses.wethBridgeL2!,
+        sharedL1: addresses.sharedBridgeL1!,
+        sharedL2: addresses.sharedBridgeL2!,
+        l1Nullifier: l1Nullifier!,
+        l1NativeTokenVault: l1NativeTokenVault!,
+      };
+    }
 
     /**
      * Returns `Contract` wrapper of the ZKsync Era smart contract.
@@ -214,14 +218,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
-
     /**
      * Returns the L1 asset router contract, used for handling cross chain calls.
      */
     async getL1AssetRouter(): Promise<IL1AssetRouter> {
       // FIXME: maybe makes sense to provide an API to do it in one call
-      const bridgeContracts =
-        await this.getDefaultBridgeAddresses();
+      const bridgeContracts = await this.getDefaultBridgeAddresses();
 
       return IL1AssetRouter__factory.connect(
         bridgeContracts.sharedL1!,
@@ -234,8 +236,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      */
     async getL1NativeTokenVault(): Promise<IL1NativeTokenVault> {
       // FIXME: maybe makes sense to provide an API to do it in one call
-      const bridgeContracts =
-        await this.getDefaultBridgeAddresses();
+      const bridgeContracts = await this.getDefaultBridgeAddresses();
 
       return IL1NativeTokenVault__factory.connect(
         bridgeContracts.l1NativeTokenVault!,
@@ -243,14 +244,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
-          /**
+    /**
      * Returns the L1 Nullifier contract, used for replay protection for failed deposits and withdrawals.
      */
     async getL1Nullifier(): Promise<IL1Nullifier> {
       // FIXME: maybe makes sense to provide an API to do it in one call
-      const bridgeContracts =
-        await this.getDefaultBridgeAddresses();
-
+      const bridgeContracts = await this.getDefaultBridgeAddresses();
 
       return IL1Nullifier__factory.connect(
         bridgeContracts.l1Nullifier!,
@@ -484,7 +483,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ];
       }
     }
-
 
     /**
      * Transfers the specified token from the associated account on the L1 network to the target account on the L2 network.
@@ -1940,7 +1938,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
           }
           // todo: this SDK assumes that users used new encoding version,
-         // however in general it should be capable of working with the old version as well
+          // however in general it should be capable of working with the old version as well
         } catch (e) {
           const calldata = l2ARInterface.decodeFunctionData(
             'finalizeDeposit',
@@ -1961,7 +1959,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           depositSender = transferDataDecoded[0];
         }
 
-        let proof = await this._providerL2().getLogProof(
+        const proof = await this._providerL2().getLogProof(
           depositHash,
           successL2ToL1LogIndex
         );
