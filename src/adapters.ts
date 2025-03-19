@@ -990,7 +990,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       await checkBaseCost(baseCost, mintValue);
       overrides.value ??= 0;
 
-      let secondBridgeCalldata = await this.getSecondBridgeCalldata(token, amount, to);
+      const secondBridgeCalldata = await this.getSecondBridgeCalldata(
+        token,
+        amount,
+        to
+      );
 
       return {
         tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
@@ -1104,7 +1108,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const mintValue = baseCost + BigInt(operatorTip);
       await checkBaseCost(baseCost, mintValue);
 
-      const secondBridgeCalldata = await this.getSecondBridgeCalldata(ETH_ADDRESS_IN_CONTRACTS, amount, to);
+      const secondBridgeCalldata = await this.getSecondBridgeCalldata(
+        ETH_ADDRESS_IN_CONTRACTS,
+        amount,
+        to
+      );
 
       return {
         tx: await bridgehub.requestL2TransactionTwoBridges.populateTransaction(
@@ -1153,7 +1161,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         gasPerPubdataByte,
       } = tx;
 
-      const secondBridgeCalldata = await this.getSecondBridgeCalldata(token, amount, to);
+      const secondBridgeCalldata = await this.getSecondBridgeCalldata(
+        token,
+        amount,
+        to
+      );
 
       const gasPriceForEstimation =
         overrides.maxFeePerGas || overrides.gasPrice;
@@ -1234,12 +1246,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
-    async getSecondBridgeCalldata(token: Address, amount: BigNumberish, to: Address): Promise<string> {
+    async getSecondBridgeCalldata(
+      token: Address,
+      amount: BigNumberish,
+      to: Address
+    ): Promise<string> {
       let secondBridgeCalldata: string;
       if (!(await this.isProtocolVersionNew())) {
         secondBridgeCalldata = ethers.AbiCoder.defaultAbiCoder().encode(
           ['address', 'uint256', 'address'],
-          [token, token == ETH_ADDRESS_IN_CONTRACTS ? 0 : amount, to]
+          [token, token === ETH_ADDRESS_IN_CONTRACTS ? 0 : amount, to]
         );
       } else {
         const [assetId, _] = await resolveAssetId(
@@ -1686,36 +1702,49 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       index = 0,
       overrides?: ethers.Overrides
     ): Promise<ethers.ContractTransactionResponse> {
-      let finalizeWithdrawalParams = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
+      const finalizeWithdrawalParams = await this.getFinalizeWithdrawalParams(
+        withdrawalHash,
+        index
+      );
 
       if (!(await this.isProtocolVersionNew())) {
-        return await this.finalizeWithdrawalPreGateway(finalizeWithdrawalParams, overrides);
-      } else {
-        const l1Nullifier = await this.getL1Nullifier();
-
-        const finalizeL1DepositParams: FinalizeL1DepositParams = {
-          chainId: (await this._providerL2().getNetwork())
-            .chainId as BigNumberish,
-          l2BatchNumber: finalizeWithdrawalParams.l1BatchNumber as BigNumberish,
-          l2MessageIndex: finalizeWithdrawalParams.l2MessageIndex as BigNumberish,
-          l2Sender: finalizeWithdrawalParams.sender,
-          l2TxNumberInBatch: finalizeWithdrawalParams.l2TxNumberInBlock as BigNumberish,
-          message: finalizeWithdrawalParams.message,
-          merkleProof: finalizeWithdrawalParams.proof,
-        };
-
-        return await l1Nullifier.finalizeDeposit(
-          finalizeL1DepositParams,
-          overrides ?? {}
+        return await this.finalizeWithdrawalPreGateway(
+          finalizeWithdrawalParams,
+          overrides
         );
       }
+      const l1Nullifier = await this.getL1Nullifier();
+
+      const finalizeL1DepositParams: FinalizeL1DepositParams = {
+        chainId: (await this._providerL2().getNetwork())
+          .chainId as BigNumberish,
+        l2BatchNumber: finalizeWithdrawalParams.l1BatchNumber as BigNumberish,
+        l2MessageIndex: finalizeWithdrawalParams.l2MessageIndex as BigNumberish,
+        l2Sender: finalizeWithdrawalParams.sender,
+        l2TxNumberInBatch:
+          finalizeWithdrawalParams.l2TxNumberInBlock as BigNumberish,
+        message: finalizeWithdrawalParams.message,
+        merkleProof: finalizeWithdrawalParams.proof,
+      };
+
+      return await l1Nullifier.finalizeDeposit(
+        finalizeL1DepositParams,
+        overrides ?? {}
+      );
     }
 
-    async finalizeWithdrawalPreGateway(finalizeWithdrawalParams: FinalizeWithdrawalParams, overrides?: ethers.Overrides) {
+    async finalizeWithdrawalPreGateway(
+      finalizeWithdrawalParams: FinalizeWithdrawalParams,
+      overrides?: ethers.Overrides
+    ) {
       let l1Bridge: IL1Bridge | IL1SharedBridge;
       if (isAddressEq(finalizeWithdrawalParams.sender, L2_BASE_TOKEN_ADDRESS)) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else if (!(await this._providerL2().isL2BridgeLegacy(finalizeWithdrawalParams.sender))) {
+      } else if (
+        !(await this._providerL2().isL2BridgeLegacy(
+          finalizeWithdrawalParams.sender
+        ))
+      ) {
         const l2Bridge = IL2SharedBridge__factory.connect(
           finalizeWithdrawalParams.sender,
           this._providerL2()
@@ -1731,10 +1760,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           this._providerL2()
         );
         const bridgeAddress = await l2Bridge.l1Bridge();
-        l1Bridge = IL1Bridge__factory.connect(
-          bridgeAddress,
-          this._signerL1()
-        );
+        l1Bridge = IL1Bridge__factory.connect(bridgeAddress, this._signerL1());
       }
       return await l1Bridge.finalizeWithdrawal(
         (await this._providerL2().getNetwork()).chainId as BigNumberish,
@@ -1780,22 +1806,20 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       let l1Bridge: IL1SharedBridge;
       if (await this.isProtocolVersionNew()) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else if (
-        await this._providerL2().isBaseToken(
-          ethers.dataSlice(log.topics[1], 12)
-        )
-      ) {
-        l1Bridge = (await this.getL1BridgeContracts()).shared;
       } else {
-        const sender = ethers.dataSlice(log.topics[1], 12);
-        const l2Bridge = IL2SharedBridge__factory.connect(
-          sender,
-          this._providerL2()
-        );
-        l1Bridge = IL1SharedBridge__factory.connect(
-          await l2Bridge.l1SharedBridge(),
-          this._providerL1()
-        );
+        const senderOrToken = ethers.dataSlice(log.topics[1], 12);
+        if (await this._providerL2().isBaseToken(senderOrToken)) {
+          l1Bridge = (await this.getL1BridgeContracts()).shared;
+        } else {
+          const l2Bridge = IL2SharedBridge__factory.connect(
+            senderOrToken,
+            this._providerL2()
+          );
+          l1Bridge = IL1SharedBridge__factory.connect(
+            await l2Bridge.l1SharedBridge(),
+            this._providerL1()
+          );
+        }
       }
 
       return await l1Bridge.isWithdrawalFinalized(
@@ -1909,8 +1933,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
               `Token ${calldata['_l1Token']} not registered in NTV`
             );
           }
-          // todo: this SDK assumes that users used new encoding version,
-          // however in general it should be capable of working with the old version as well
+          // todo: it is assumed that users used new encoding version,
+          // however legacy withdrawals need to be supported with the old version as well
         } catch (e) {
           const calldata = l2ARInterface.decodeFunctionData(
             'finalizeDeposit',
@@ -1939,9 +1963,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           throw new Error('Log proof not found!');
         }
         // FIXME: a cheaper way is to call l1 nullifier directly
-        const bridgeRecoverFailedTransfer = l1AssetRouter[
-          'bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])'
-        ];
+        const bridgeRecoverFailedTransfer =
+          l1AssetRouter[
+            'bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])'
+          ];
         return await bridgeRecoverFailedTransfer(
           (await this._providerL2().getNetwork()).chainId as BigNumberish,
           depositSender, // depositSender

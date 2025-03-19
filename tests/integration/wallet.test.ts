@@ -37,12 +37,8 @@ describe('Wallet', () => {
   let DAI_L1: string;
 
   before('setup', async () => {
-    protocolVersionIsNew =
-      (await provider.getProtocolVersion()).version_id >=
-      PROTOCOL_VERSION_V26;
+    protocolVersionIsNew = await provider.isProtocolVersionNew();
     DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
-    console.log("kl todo 1");
-    console.log(DAI_L1);
   });
 
   describe('#constructor()', () => {

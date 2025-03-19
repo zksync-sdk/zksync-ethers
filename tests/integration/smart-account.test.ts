@@ -39,9 +39,7 @@ describe('SmartAccount', async () => {
   );
 
   before('setup', async () => {
-    protocolVersionIsNew =
-      (await provider.getProtocolVersion()).version_id >=
-      PROTOCOL_VERSION_V26;
+    protocolVersionIsNew = await provider.isProtocolVersionNew();
     DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
   });
 
