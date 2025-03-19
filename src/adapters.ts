@@ -28,17 +28,11 @@ import {
   LEGACY_ETH_ADDRESS,
   isAddressEq,
   L2_BASE_TOKEN_ADDRESS,
-  WithTokenOrAssetId,
   resolveAssetId,
-  ethAssetId,
   encodeNTVTransferData,
   encodeSecondBridgeDataV1,
-  L2_ASSET_ROUTER_ADDRESS,
-  PROTOCOL_VERSION_V25,
-  PROTOCOL_VERSION_V26,
 } from './utils';
 import {
-  IAssetRouterBase,
   IBridgehub,
   IBridgehub__factory,
   IERC20__factory,
@@ -105,6 +99,38 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      */
     _signerL1(): ethers.Signer {
       throw new Error('Must be implemented by the derived class!');
+    }
+
+    async isProtocolVersionNew(): Promise<boolean> {
+      const serverIsNew = await this._providerL2().isProtocolVersionNew();
+      if (!serverIsNew) {
+        return false;
+      }
+
+      // there is an intermediate stage during the upgrade.
+      let sharedBridgeIsNew = false;
+      try {
+        const l1Nullifier = await this.getL1NullifierAddress();
+        if (l1Nullifier !== ethers.ZeroAddress) {
+          const assetRouter = (
+            await this._providerL2().getDefaultBridgeAddresses()
+          ).sharedL1;
+          const assetRouterFromL1Nullifier =
+            await IL1Nullifier__factory.connect(
+              l1Nullifier,
+              this._providerL1()
+            ).l1AssetRouter();
+          if (
+            assetRouterFromL1Nullifier.toLowerCase() ===
+            assetRouter.toLowerCase()
+          ) {
+            sharedBridgeIsNew = true;
+          }
+        }
+      } catch {
+        sharedBridgeIsNew = false;
+      }
+      return sharedBridgeIsNew;
     }
 
     /**
@@ -899,8 +925,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides.value ??= 0;
 
       let secondBridgeCalldata: string;
-      const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
+      if (await this.isProtocolVersionNew()) {
         const [assetId, _] = await resolveAssetId(
           {token},
           await this.getNativeTokenVaultL1()
@@ -1031,8 +1056,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       await checkBaseCost(baseCost, mintValue);
 
       let secondBridgeCalldata: string;
-      const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
+      if (await this.isProtocolVersionNew()) {
         const [assetId, _] = await resolveAssetId(
           {token: ETH_ADDRESS_IN_CONTRACTS},
           await this.getNativeTokenVaultL1()
@@ -1101,8 +1125,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       } = tx;
 
       let secondBridgeCalldata: string;
-      const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
+      if (await this.isProtocolVersionNew()) {
         const [assetId, _] = await resolveAssetId(
           {token},
           await this.getNativeTokenVaultL1()
@@ -1650,8 +1673,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         proof,
       } = await this.getFinalizeWithdrawalParams(withdrawalHash, index);
 
-      const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
+      if (await this.isProtocolVersionNew()) {
         const l1Nullifier = IL1Nullifier__factory.connect(
           await this.getL1NullifierAddress(),
           this._signerL1()
@@ -1740,8 +1762,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const chainId = (await this._providerL2().getNetwork()).chainId;
 
       let l1Bridge: IL1SharedBridge;
-      const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id >= PROTOCOL_VERSION_V26) {
+      if (await this.isProtocolVersionNew()) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
       } else if (
         await this._providerL2().isBaseToken(
@@ -1817,8 +1838,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         l2BridgeAddress,
         this._providerL2()
       );
-      const protocolVersion = await this._providerL2().getProtocolVersion();
-      if (protocolVersion.version_id < PROTOCOL_VERSION_V26) {
+      if (!(await this.isProtocolVersionNew())) {
         const calldata = l2Bridge.interface.decodeFunctionData(
           'finalizeDeposit',
           tx.data

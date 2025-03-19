@@ -75,7 +75,6 @@ import {
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
   encodeNTVTransferData,
   PROTOCOL_VERSION_V26,
-  PROTOCOL_VERSION_V25,
 } from './utils';
 import {Signer} from './signer';
 
@@ -298,6 +297,11 @@ export function JsonRpcApiProvider<
      */
     async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
       return await this.send('zks_getProtocolVersion', [id]);
+    }
+
+    async isProtocolVersionNew(): Promise<boolean> {
+      const protocolVersion = await this.getProtocolVersion();
+      return protocolVersion.version_id >= PROTOCOL_VERSION_V26;
     }
 
     /**
@@ -793,10 +797,9 @@ export function JsonRpcApiProvider<
         }
         return populatedTx;
       }
-      const protocolVersion = await this.getProtocolVersion();
 
       let populatedTx;
-      if (protocolVersion.version_id < PROTOCOL_VERSION_V26) {
+      if (!(await this.isProtocolVersionNew())) {
         if (!tx.bridgeAddress) {
           const bridgeAddresses = await this.getDefaultBridgeAddresses();
           tx.bridgeAddress = bridgeAddresses.sharedL2;
