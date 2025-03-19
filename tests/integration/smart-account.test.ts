@@ -38,12 +38,15 @@ describe('SmartAccount', async () => {
     provider
   );
 
+  before('setup', async () => {
+    protocolVersionIsNew =
+      (await provider.getProtocolVersion()).version_id >=
+      PROTOCOL_VERSION_V26;
+    DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
+  });
+
   describe('#constructor()', async () => {
     it('`SmartAccount(address, {address, secret}, provider)` should return a `SmartAccount` with signer and provider', async () => {
-      protocolVersionIsNew =
-        (await provider.getProtocolVersion()).version_id >=
-        PROTOCOL_VERSION_V26;
-      DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
       const account = new SmartAccount(
         {address: ADDRESS1, secret: PRIVATE_KEY1},
         provider
