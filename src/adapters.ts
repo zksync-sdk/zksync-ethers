@@ -162,10 +162,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           l1Nullifier = ethers.ZeroAddress;
           l1NativeTokenVault = ethers.ZeroAddress;
         }
-        this._providerL2().setL1NullifierAndNativeTokenVault(
+        await this._providerL2().setL1NullifierAndNativeTokenVault(
           l1Nullifier,
           l1NativeTokenVault
         );
+      } else {
+        l1Nullifier = addresses.l1Nullifier;
+        l1NativeTokenVault = addresses.l1NativeTokenVault!;
       }
       return {
         erc20L1: addresses.erc20BridgeL1!,
