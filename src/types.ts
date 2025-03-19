@@ -1042,7 +1042,7 @@ export interface SmartAccountSigner {
   transactionBuilder?: TransactionBuilder;
 }
 
-export type FinalizeL1DepositParamsStruct = {
+export type FinalizeL1DepositParams = {
   chainId: BigNumberish;
   l2BatchNumber: BigNumberish;
   l2MessageIndex: BigNumberish;

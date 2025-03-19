@@ -29,6 +29,7 @@ import {
   IL2SharedBridge__factory,
   IBridgedStandardToken,
   IBridgedStandardToken__factory,
+  IL1AssetRouter__factory
 } from './typechain';
 import {
   Address,
@@ -119,6 +120,7 @@ export function JsonRpcApiProvider<
       sharedBridgeL1?: Address;
       sharedBridgeL2?: Address;
       baseToken?: Address;
+      l1Nullifier?: Address;
     } {
       throw new Error('Must be implemented by the derived class!');
     }
@@ -299,6 +301,9 @@ export function JsonRpcApiProvider<
       return await this.send('zks_getProtocolVersion', [id]);
     }
 
+    /**
+     * Returns whether the protocol version is new (v26 or higher).
+     */
     async isProtocolVersionNew(): Promise<boolean> {
       const protocolVersion = await this.getProtocolVersion();
       return protocolVersion.version_id >= PROTOCOL_VERSION_V26;
@@ -470,6 +475,7 @@ export function JsonRpcApiProvider<
       wethL2: string;
       sharedL1: string;
       sharedL2: string;
+      l1Nullifier: string;
     }> {
       if (!this.contractAddresses().erc20BridgeL1) {
         const addresses: {
@@ -489,6 +495,11 @@ export function JsonRpcApiProvider<
           addresses.l1SharedDefaultBridge;
         this.contractAddresses().sharedBridgeL2 =
           addresses.l2SharedDefaultBridge;
+        // todo return from server instead
+        this.contractAddresses().l1Nullifier = (await IL1AssetRouter__factory.connect(
+          addresses.l1SharedDefaultBridge,
+          this
+        ).L1_NULLIFIER());
       }
       return {
         erc20L1: this.contractAddresses().erc20BridgeL1!,
@@ -497,6 +508,7 @@ export function JsonRpcApiProvider<
         wethL2: this.contractAddresses().wethBridgeL2!,
         sharedL1: this.contractAddresses().sharedBridgeL1!,
         sharedL2: this.contractAddresses().sharedBridgeL2!,
+        l1Nullifier: this.contractAddresses().l1Nullifier!,
       };
     }
 
@@ -521,7 +533,7 @@ export function JsonRpcApiProvider<
       return IL2SharedBridge__factory.connect(address, this);
     }
 
-    async connectL2NTV(): Promise<IL2NativeTokenVault> {
+    async connectL2NativeTokenVault(): Promise<IL2NativeTokenVault> {
       return IL2NativeTokenVault__factory.connect(
         L2_NATIVE_TOKEN_VAULT_ADDRESS,
         this
@@ -812,7 +824,7 @@ export function JsonRpcApiProvider<
           tx.overrides
         );
       } else {
-        const ntv = await this.connectL2NTV();
+        const ntv = await this.connectL2NativeTokenVault();
         const assetId = await ntv.assetId(tx.token);
         const originChainId = await ntv.originChainId(assetId);
         const l1ChainId = await this.getL1ChainId();
@@ -1768,6 +1780,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     wethL2: string;
     sharedL1: string;
     sharedL2: string;
+    l1Nullifier: string;
   }> {
     return super.getDefaultBridgeAddresses();
   }
@@ -2926,6 +2939,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
     wethL2: string;
     sharedL1: string;
     sharedL2: string;
+    l1Nullifier: string;
   }> {
     return super.getDefaultBridgeAddresses();
   }

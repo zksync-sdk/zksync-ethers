@@ -1682,7 +1682,7 @@ describe('Wallet', () => {
       const crownL2Address = APPROVAL_TOKEN;
       const bridgeContracts = await wallet.getL1BridgeContracts();
       const sharedBridge = bridgeContracts.shared;
-      const l1AR = IL1AssetRouter__factory.connect(
+      const l1AssetRouter = IL1AssetRouter__factory.connect(
         await sharedBridge.getAddress(),
         wallet._signerL1()
       );

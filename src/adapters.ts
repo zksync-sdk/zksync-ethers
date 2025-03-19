@@ -58,7 +58,7 @@ import {
 } from './typechain';
 import {
   Address,
-  FinalizeL1DepositParamsStruct,
+  FinalizeL1DepositParams,
   BalancesMap,
   Eip712Meta,
   FinalizeWithdrawalParams,
@@ -66,6 +66,7 @@ import {
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
+  LogProof,
 } from './types';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -101,13 +102,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       throw new Error('Must be implemented by the derived class!');
     }
 
+    /**
+     * Returns whether the protocol version is new (v26 or higher).
+     */
     async isProtocolVersionNew(): Promise<boolean> {
       const serverIsNew = await this._providerL2().isProtocolVersionNew();
       if (!serverIsNew) {
         return false;
       }
 
-      // there is an intermediate stage during the upgrade.
+      // there is an intermediate stage during the upgrade when the chains have upgraded, but not the L1 contracts.
       let sharedBridgeIsNew = false;
       try {
         const l1Nullifier = await this.getL1NullifierAddress();
@@ -409,12 +413,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         await this._providerL2().getDefaultBridgeAddresses();
 
       const sharedBridge = bridgeContracts.sharedL1;
-      const l1AR = IL1AssetRouter__factory.connect(
+      const l1AssetRouter = IL1AssetRouter__factory.connect(
         sharedBridge,
         this._providerL1()
       );
 
-      const l1NtvAddress = await l1AR.nativeTokenVault();
+      const l1NtvAddress = await l1AssetRouter.nativeTokenVault();
 
       return IL1NativeTokenVault__factory.connect(
         l1NtvAddress,
@@ -1603,7 +1607,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getFinalizeDepositParams(
       withdrawalHash: BytesLike,
       index = 0
-    ): Promise<FinalizeL1DepositParamsStruct> {
+    ): Promise<FinalizeL1DepositParams> {
       const {log, l1BatchTxId} = await this._getWithdrawalLog(
         withdrawalHash,
         index
@@ -1679,7 +1683,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           this._signerL1()
         );
 
-        const finalizeL1DepositParams: FinalizeL1DepositParamsStruct = {
+        const finalizeL1DepositParams: FinalizeL1DepositParams = {
           chainId: (await this._providerL2().getNetwork())
             .chainId as BigNumberish,
           l2BatchNumber: l1BatchNumber as BigNumberish,
