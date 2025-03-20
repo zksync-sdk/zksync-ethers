@@ -107,7 +107,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * Returns whether the protocol version is new (v26 or higher).
      */
     async isProtocolVersionV26OrHigher(): Promise<boolean> {
-      const serverIsNew = await this._providerL2().isProtocolVersionV26OrHigher();
+      const serverIsNew =
+        await this._providerL2().isProtocolVersionV26OrHigher();
       if (!serverIsNew) {
         return false;
       }
@@ -126,8 +127,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ) {
           sharedBridgeIsNew = true;
         }
-      } catch {
-        sharedBridgeIsNew = false;
+      } catch(e) {
+        if (e instanceof Error && e.message.includes("CALL_EXCEPTION")) {
+          sharedBridgeIsNew = false;
+        } else {
+          throw(e);
+        }
       }
       return sharedBridgeIsNew;
     }
@@ -1610,7 +1615,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     /**
      * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
-     * withdrawal transaction's log on the L1 network.
+     * withdrawal transaction's log on the L2 network. This struct is deprecated in favor of {@link getFinalizeDepositParams}.
      *
      * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
      * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
@@ -1651,6 +1656,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
+    /**
+     * Returns the {@link FinalizeDepositParams parameters} required for finalizing a L2->L1 deposit from the
+     * deposit transaction's log on the L2 network.
+     * This function supersedes {@link getFinalizeWithdrawalParams} with V26, as now L2 native token bridging is also supported. 
+     *
+     * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
+     * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
+     * withdrawal you want to finalize.
+     * @throws {Error} If log proof can not be found.
+     */
     async getFinalizeDepositParams(
       withdrawalHash: BytesLike,
       index = 0
