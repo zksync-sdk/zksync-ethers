@@ -106,8 +106,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     /**
      * Returns whether the protocol version is new (v26 or higher).
      */
-    async isProtocolVersionNew(): Promise<boolean> {
-      const serverIsNew = await this._providerL2().isProtocolVersionNew();
+    async isProtocolVersionV26OrHigher(): Promise<boolean> {
+      const serverIsNew = await this._providerL2().isProtocolVersionV26OrHigher();
       if (!serverIsNew) {
         return false;
       }
@@ -151,7 +151,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       let l1Nullifier: Address;
       let l1NativeTokenVault: Address;
       if (!addresses.l1Nullifier) {
-        if (await this.isProtocolVersionNew()) {
+        if (await this.isProtocolVersionV26OrHigher()) {
           // todo return these values from server instead
           const l1AssetRouter = await this.getL1AssetRouter(
             (await this._providerL2().getDefaultBridgeAddresses()).sharedL1!
@@ -1252,7 +1252,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to: Address
     ): Promise<string> {
       let secondBridgeCalldata: string;
-      if (!(await this.isProtocolVersionNew())) {
+      if (!(await this.isProtocolVersionV26OrHigher())) {
         secondBridgeCalldata = ethers.AbiCoder.defaultAbiCoder().encode(
           ['address', 'uint256', 'address'],
           [token, token === ETH_ADDRESS_IN_CONTRACTS ? 0 : amount, to]
@@ -1707,7 +1707,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         index
       );
 
-      if (!(await this.isProtocolVersionNew())) {
+      if (!(await this.isProtocolVersionV26OrHigher())) {
         return await this.finalizeWithdrawalPreGateway(
           finalizeWithdrawalParams,
           overrides
@@ -1804,7 +1804,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const chainId = (await this._providerL2().getNetwork()).chainId;
 
       let l1Bridge: IL1SharedBridge;
-      if (await this.isProtocolVersionNew()) {
+      if (await this.isProtocolVersionV26OrHigher()) {
         l1Bridge = (await this.getL1BridgeContracts()).shared;
       } else {
         const senderOrToken = ethers.dataSlice(log.topics[1], 12);
@@ -1881,7 +1881,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       let depositSender: string;
       let assetId: string;
       let assetData: string;
-      if (!(await this.isProtocolVersionNew())) {
+      if (!(await this.isProtocolVersionV26OrHigher())) {
         const calldata = l2Bridge.interface.decodeFunctionData(
           'finalizeDeposit',
           tx.data

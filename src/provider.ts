@@ -304,7 +304,7 @@ export function JsonRpcApiProvider<
     /**
      * Returns whether the protocol version is new (v26 or higher).
      */
-    async isProtocolVersionNew(): Promise<boolean> {
+    async isProtocolVersionV26OrHigher(): Promise<boolean> {
       const protocolVersion = await this.getProtocolVersion();
       return protocolVersion.version_id >= PROTOCOL_VERSION_V26;
     }
@@ -812,7 +812,7 @@ export function JsonRpcApiProvider<
       }
 
       let populatedTx;
-      if (!(await this.isProtocolVersionNew())) {
+      if (!(await this.isProtocolVersionV26OrHigher())) {
         populatedTx = await this.getWithdrawTxPreGateway(tx);
       } else {
         const ntv = await this.connectL2NativeTokenVault();
