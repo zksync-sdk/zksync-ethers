@@ -7,24 +7,29 @@ import {
   ADDRESS1,
   PRIVATE_KEY1,
   ADDRESS2,
-  DAI_L1,
+  DAI_L1_V25,
+  DAI_L1_V26,
   APPROVAL_TOKEN,
   PAYMASTER,
   L2_CHAIN_URL,
   L1_CHAIN_URL,
 } from '../utils';
-import {EIP712_TX_TYPE} from '../../src/utils';
-
+import {EIP712_TX_TYPE, PROTOCOL_VERSION_V25} from '../../src/utils';
+import {PROTOCOL_VERSION_V26} from '../../src/utils';
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
-
+  let protocolVersionIsNew: boolean;
+  let DAI_L1: string;
   let receipt: types.TransactionReceipt;
   let baseToken: string;
 
   before('setup', async function () {
     this.timeout(25_000);
+    protocolVersionIsNew =
+      (await provider.getProtocolVersion()).version_id > PROTOCOL_VERSION_V25;
+    DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
 
     baseToken = await provider.getBaseTokenContractAddress();
     const tx = await wallet.transfer({
@@ -320,7 +325,7 @@ describe('Provider', () => {
       const result = await provider.l1TokenAddress(
         await provider.l2TokenAddress(DAI_L1)
       );
-      expect(result).to.be.equal(DAI_L1);
+      expect(result.toLowerCase()).to.equal(DAI_L1.toLowerCase());
     });
   });
 
@@ -418,9 +423,9 @@ describe('Provider', () => {
         const tx = {
           from: ADDRESS1,
           value: 7_000_000_000n,
+          type: 113,
           to: utils.L2_BASE_TOKEN_ADDRESS,
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
-          type: 113,
           customData: {
             paymasterParams: {
               paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
@@ -540,6 +545,7 @@ describe('Provider', () => {
     it('should return a DAI withdraw transaction', async () => {
       const tx = {
         type: 113,
+        value: 5n,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
@@ -556,6 +562,7 @@ describe('Provider', () => {
     it('should return a DAI withdraw transaction with paymaster parameters', async () => {
       const tx = {
         type: 113,
+        value: 5n,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
@@ -578,6 +585,25 @@ describe('Provider', () => {
           minimalAllowance: 1,
           innerInput: new Uint8Array(),
         }),
+      });
+      expect(result).to.be.deepEqualExcluding(tx, ['data']);
+    });
+
+    it('should return a Crown withdraw transaction', async () => {
+      if (!protocolVersionIsNew) {
+        return;
+      }
+      const tx = {
+        type: 113,
+        from: ADDRESS1,
+        to: (await provider.getDefaultBridgeAddresses()).sharedL2,
+        data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
+      };
+      const result = await provider.getWithdrawTx({
+        token: APPROVAL_TOKEN,
+        amount: 5,
+        to: ADDRESS1,
+        from: ADDRESS1,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['data']);
     });
@@ -1042,11 +1068,11 @@ describe('Provider', () => {
           from: ADDRESS1,
         });
       } catch (e) {
-        expect(
-          (e as Error).message
-            .toString()
-            .includes('insufficient balance for transfer')
-        ).to.be.true;
+        const revertString = !protocolVersionIsNew
+          ? 'insufficient balance for transfer'
+          : 'insufficient funds for gas + value.';
+        expect((e as Error).message.toString().includes(revertString)).to.be
+          .true;
       }
     });
   });

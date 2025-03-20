@@ -1,4 +1,4 @@
-name: Run tests
+name: Run tests v25
 on:
   push:
     branches: [ main, beta ]

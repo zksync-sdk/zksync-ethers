@@ -19,10 +19,16 @@ import {
 import {
   IERC20__factory,
   IEthToken__factory,
+  IL2AssetRouter,
+  IL2AssetRouter__factory,
   IL2Bridge,
   IL2Bridge__factory,
+  IL2NativeTokenVault,
+  IL2NativeTokenVault__factory,
   IL2SharedBridge,
   IL2SharedBridge__factory,
+  IBridgedStandardToken,
+  IBridgedStandardToken__factory,
 } from './typechain';
 import {
   Address,
@@ -65,6 +71,10 @@ import {
   getERC20DefaultBridgeData,
   getERC20BridgeCalldata,
   applyL1ToL2Alias,
+  L2_ASSET_ROUTER_ADDRESS,
+  L2_NATIVE_TOKEN_VAULT_ADDRESS,
+  encodeNTVTransferData,
+  PROTOCOL_VERSION_V26,
 } from './utils';
 import {Signer} from './signer';
 
@@ -109,6 +119,8 @@ export function JsonRpcApiProvider<
       sharedBridgeL1?: Address;
       sharedBridgeL2?: Address;
       baseToken?: Address;
+      l1Nullifier?: Address;
+      l1NativeTokenVault?: Address;
     } {
       throw new Error('Must be implemented by the derived class!');
     }
@@ -287,6 +299,14 @@ export function JsonRpcApiProvider<
      */
     async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
       return await this.send('zks_getProtocolVersion', [id]);
+    }
+
+    /**
+     * Returns whether the protocol version is new (v26 or higher).
+     */
+    async isProtocolVersionV26OrHigher(): Promise<boolean> {
+      const protocolVersion = await this.getProtocolVersion();
+      return protocolVersion.version_id >= PROTOCOL_VERSION_V26;
     }
 
     /**
@@ -485,6 +505,14 @@ export function JsonRpcApiProvider<
       };
     }
 
+    setL1NullifierAndNativeTokenVault(
+      l1Nullifier: Address,
+      l1NativeTokenVault: Address
+    ) {
+      this.contractAddresses().l1Nullifier = l1Nullifier;
+      this.contractAddresses().l1NativeTokenVault = l1NativeTokenVault;
+    }
+
     /**
      * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
      **
@@ -504,6 +532,21 @@ export function JsonRpcApiProvider<
         return IL2Bridge__factory.connect(address, this);
       }
       return IL2SharedBridge__factory.connect(address, this);
+    }
+
+    async connectL2NativeTokenVault(): Promise<IL2NativeTokenVault> {
+      return IL2NativeTokenVault__factory.connect(
+        L2_NATIVE_TOKEN_VAULT_ADDRESS,
+        this
+      );
+    }
+
+    async connectBridgedToken(token: Address): Promise<IBridgedStandardToken> {
+      return IBridgedStandardToken__factory.connect(token, this);
+    }
+
+    async connectL2AssetRouter(): Promise<IL2AssetRouter> {
+      return IL2AssetRouter__factory.connect(L2_ASSET_ROUTER_ADDRESS, this);
     }
 
     /**
@@ -768,18 +811,54 @@ export function JsonRpcApiProvider<
         return populatedTx;
       }
 
-      if (!tx.bridgeAddress) {
-        const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        tx.bridgeAddress = bridgeAddresses.sharedL2;
-      }
+      let populatedTx;
+      if (!(await this.isProtocolVersionV26OrHigher())) {
+        populatedTx = await this.getWithdrawTxPreGateway(tx);
+      } else {
+        const ntv = await this.connectL2NativeTokenVault();
+        const assetId = await ntv.assetId(tx.token);
+        const originChainId = await ntv.originChainId(assetId);
+        const l1ChainId = await this.getL1ChainId();
 
-      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-      const populatedTx = await bridge.withdraw.populateTransaction(
-        tx.to!,
-        tx.token,
-        tx.amount,
-        tx.overrides
-      );
+        const isTokenL1Native =
+          originChainId === BigInt(l1ChainId) ||
+          tx.token === ETH_ADDRESS_IN_CONTRACTS;
+        if (!tx.bridgeAddress) {
+          const bridgeAddresses = await this.getDefaultBridgeAddresses();
+          tx.bridgeAddress = isTokenL1Native
+            ? bridgeAddresses.sharedL2
+            : L2_ASSET_ROUTER_ADDRESS;
+        }
+        if (!isTokenL1Native) {
+          const bridge = await this.connectL2AssetRouter();
+          const chainId = Number((await this.getNetwork()).chainId);
+          const assetId = ethers.keccak256(
+            ethers.AbiCoder.defaultAbiCoder().encode(
+              ['uint256', 'address', 'address'],
+              [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
+            )
+          );
+          const assetData = encodeNTVTransferData(
+            BigInt(tx.amount),
+            tx.to!,
+            tx.token
+          );
+
+          populatedTx = await bridge.withdraw.populateTransaction(
+            assetId,
+            assetData,
+            tx.overrides
+          );
+        } else {
+          const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
+          populatedTx = await bridge.withdraw.populateTransaction(
+            tx.to!,
+            tx.token,
+            tx.amount,
+            tx.overrides
+          );
+        }
+      }
       if (tx.paymasterParams) {
         return {
           ...populatedTx,
@@ -789,6 +868,28 @@ export function JsonRpcApiProvider<
         };
       }
       return populatedTx;
+    }
+
+    async getWithdrawTxPreGateway(tx: {
+      amount: BigNumberish;
+      token?: Address;
+      from?: Address;
+      to?: Address;
+      bridgeAddress?: Address;
+      paymasterParams?: PaymasterParams;
+      overrides?: ethers.Overrides;
+    }): Promise<ethers.ContractTransaction> {
+      if (!tx.bridgeAddress) {
+        const bridgeAddresses = await this.getDefaultBridgeAddresses();
+        tx.bridgeAddress = bridgeAddresses.sharedL2;
+      }
+      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
+      return await bridge.withdraw.populateTransaction(
+        tx.to!,
+        tx.token!,
+        tx.amount,
+        tx.overrides!
+      );
     }
 
     /**
@@ -1152,9 +1253,7 @@ export function JsonRpcApiProvider<
         return await this.estimateCustomBridgeDepositL2Gas(
           l1BridgeAddress,
           l2BridgeAddress,
-          isAddressEq(token, LEGACY_ETH_ADDRESS)
-            ? ETH_ADDRESS_IN_CONTRACTS
-            : token,
+          token,
           amount,
           to,
           bridgeData,
@@ -1298,19 +1397,31 @@ export function JsonRpcApiProvider<
 export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   #connect: FetchRequest;
   protected _contractAddresses: {
+    bridgehubContract?: Address;
     mainContract?: Address;
     erc20BridgeL1?: Address;
     erc20BridgeL2?: Address;
     wethBridgeL1?: Address;
     wethBridgeL2?: Address;
+    sharedBridgeL1?: Address;
+    sharedBridgeL2?: Address;
+    baseToken?: Address;
+    l1Nullifier?: Address;
+    l1NativeTokenVault?: Address;
   };
 
   override contractAddresses(): {
+    bridgehubContract?: Address;
     mainContract?: Address;
     erc20BridgeL1?: Address;
     erc20BridgeL2?: Address;
     wethBridgeL1?: Address;
     wethBridgeL2?: Address;
+    sharedBridgeL1?: Address;
+    sharedBridgeL2?: Address;
+    baseToken?: Address;
+    l1Nullifier?: Address;
+    l1NativeTokenVault?: Address;
   } {
     return this._contractAddresses;
   }

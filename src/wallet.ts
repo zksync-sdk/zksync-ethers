@@ -14,6 +14,7 @@ import {
   Address,
   BalancesMap,
   Fee,
+  FinalizeL1DepositParams,
   FinalizeWithdrawalParams,
   FullDepositFee,
   PaymasterParams,
@@ -703,6 +704,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     index = 0
   ): Promise<FinalizeWithdrawalParams> {
     return super.getFinalizeWithdrawalParams(withdrawalHash, index);
+  }
+
+  override async getFinalizeDepositParams(
+    withdrawalHash: BytesLike,
+    index = 0
+  ): Promise<FinalizeL1DepositParams> {
+    return super.getFinalizeDepositParams(withdrawalHash, index);
   }
 
   /**
@@ -1492,7 +1500,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       populated.type = EIP712_TX_TYPE;
       populated.value ??= 0;
       populated.data ??= '0x';
-      populated.customData = this._fillCustomData(tx.customData);
+      populated.customData = this._fillCustomData(tx.customData ?? {});
       populated.nonce = populated.nonce ?? (await this.getNonce('pending'));
       populated.chainId =
         populated.chainId ?? (await this.provider.getNetwork()).chainId;
