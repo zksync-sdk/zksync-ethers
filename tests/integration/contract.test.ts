@@ -3,7 +3,6 @@ import '../custom-matchers';
 import {ContractFactory, Provider, Wallet, Contract} from '../../src';
 import {ethers} from 'ethers';
 import {PRIVATE_KEY1, DAI_L1, L2_CHAIN_URL} from '../utils';
-import {PROTOCOL_VERSION_V26} from '../../src/utils';
 const {expect} = chai;
 
 import Token from '../files/Token.json';
@@ -14,7 +13,6 @@ import Demo from '../files/Demo.json';
 describe('ContractFactory', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
-  let DAI_L1: string;
   describe('#constructor()', () => {
     it('`ContractFactory(abi, bytecode, runner)` should return a `ContractFactory` with `create` deployment', async () => {
       const abi = Token.abi;

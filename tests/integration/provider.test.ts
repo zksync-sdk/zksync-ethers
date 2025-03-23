@@ -13,8 +13,7 @@ import {
   L2_CHAIN_URL,
   L1_CHAIN_URL,
 } from '../utils';
-import {EIP712_TX_TYPE, PROTOCOL_VERSION_V25} from '../../src/utils';
-import {PROTOCOL_VERSION_V26} from '../../src/utils';
+import {EIP712_TX_TYPE} from '../../src/utils';
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);

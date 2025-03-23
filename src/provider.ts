@@ -74,7 +74,6 @@ import {
   L2_ASSET_ROUTER_ADDRESS,
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
   encodeNTVTransferData,
-  PROTOCOL_VERSION_V26,
 } from './utils';
 import {Signer} from './signer';
 

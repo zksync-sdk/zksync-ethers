@@ -11,7 +11,6 @@ import {
 import {TypedDataEncoder, hashMessage} from 'ethers';
 import {ADDRESS1, PRIVATE_KEY1, ADDRESS2, L2_CHAIN_URL} from '../utils';
 import {compareTransactionsWithTolerance} from '../utils';
-import {PROTOCOL_VERSION_V26} from '../../src/utils';
 
 const {expect} = chai;
 
@@ -127,8 +126,6 @@ describe('populateTransaction()', () => {
   const provider = new Provider(L2_CHAIN_URL);
 
   it('should populate `tx.from` to address derived from private key if it not set', async () => {
-    protocolVersionIsNew =
-      (await provider.getProtocolVersion()).version_id >= PROTOCOL_VERSION_V26;
     const tx: TransactionRequest = {
       chainId: 270,
       to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',

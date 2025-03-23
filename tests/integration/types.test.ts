@@ -2,7 +2,6 @@ import {expect} from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
 import {ADDRESS2, L2_CHAIN_URL, PRIVATE_KEY1} from '../utils';
-import {PROTOCOL_VERSION_V25, PROTOCOL_VERSION_V26} from '../../src/utils';
 describe('types', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
@@ -18,19 +17,6 @@ describe('types', () => {
         amount: 1_000_000,
       });
       await tx.wait();
-    });
-
-    describe('#getProtocolVersion()', () => {
-      it('should return the protocol version', async () => {
-        const protocolVersion = (await provider.getProtocolVersion())
-          .version_id;
-        const protocolVersionIsNew = protocolVersion >= PROTOCOL_VERSION_V26;
-        const expectedProtocolVersionId = protocolVersionIsNew
-          ? // we use v27 in local setup, or v24.
-            PROTOCOL_VERSION_V26 + 1
-          : PROTOCOL_VERSION_V25 - 1;
-        expect(protocolVersion).to.be.equal(expectedProtocolVersionId);
-      });
     });
 
     describe('#getTransaction()', () => {

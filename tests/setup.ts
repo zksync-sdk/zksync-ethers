@@ -6,7 +6,6 @@ import {
   IERC20__factory,
 } from '../src/typechain';
 import {DAI_L1} from './utils';
-import {PROTOCOL_VERSION_V26} from '../src/utils';
 
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';

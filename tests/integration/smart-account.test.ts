@@ -21,7 +21,6 @@ import {
   L2_CHAIN_URL,
   L1_CHAIN_URL,
 } from '../utils';
-import {PROTOCOL_VERSION_V26} from '../../src/utils';
 
 const {expect} = chai;
 
