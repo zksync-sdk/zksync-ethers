@@ -302,14 +302,6 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns whether the protocol version is new (v26 or higher).
-     */
-    async isProtocolVersionV26OrHigher(): Promise<boolean> {
-      const protocolVersion = await this.getProtocolVersion();
-      return protocolVersion.version_id >= PROTOCOL_VERSION_V26;
-    }
-
-    /**
      * Returns an estimate of the amount of gas required to submit a transaction from L1 to L2 as a bigint object.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-estimategasl1tol2 zks_estimateL1ToL2} JSON-RPC method.
@@ -812,52 +804,48 @@ export function JsonRpcApiProvider<
       }
 
       let populatedTx;
-      if (!(await this.isProtocolVersionV26OrHigher())) {
-        populatedTx = await this.getWithdrawTxPreGateway(tx);
+      const ntv = await this.connectL2NativeTokenVault();
+      const assetId = await ntv.assetId(tx.token);
+      const originChainId = await ntv.originChainId(assetId);
+      const l1ChainId = await this.getL1ChainId();
+
+      const isTokenL1Native =
+        originChainId === BigInt(l1ChainId) ||
+        tx.token === ETH_ADDRESS_IN_CONTRACTS;
+      if (!tx.bridgeAddress) {
+        const bridgeAddresses = await this.getDefaultBridgeAddresses();
+        tx.bridgeAddress = isTokenL1Native
+          ? bridgeAddresses.sharedL2
+          : L2_ASSET_ROUTER_ADDRESS;
+      }
+      if (!isTokenL1Native) {
+        const bridge = await this.connectL2AssetRouter();
+        const chainId = Number((await this.getNetwork()).chainId);
+        const assetId = ethers.keccak256(
+          ethers.AbiCoder.defaultAbiCoder().encode(
+            ['uint256', 'address', 'address'],
+            [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
+          )
+        );
+        const assetData = encodeNTVTransferData(
+          BigInt(tx.amount),
+          tx.to!,
+          tx.token
+        );
+
+        populatedTx = await bridge.withdraw.populateTransaction(
+          assetId,
+          assetData,
+          tx.overrides
+        );
       } else {
-        const ntv = await this.connectL2NativeTokenVault();
-        const assetId = await ntv.assetId(tx.token);
-        const originChainId = await ntv.originChainId(assetId);
-        const l1ChainId = await this.getL1ChainId();
-
-        const isTokenL1Native =
-          originChainId === BigInt(l1ChainId) ||
-          tx.token === ETH_ADDRESS_IN_CONTRACTS;
-        if (!tx.bridgeAddress) {
-          const bridgeAddresses = await this.getDefaultBridgeAddresses();
-          tx.bridgeAddress = isTokenL1Native
-            ? bridgeAddresses.sharedL2
-            : L2_ASSET_ROUTER_ADDRESS;
-        }
-        if (!isTokenL1Native) {
-          const bridge = await this.connectL2AssetRouter();
-          const chainId = Number((await this.getNetwork()).chainId);
-          const assetId = ethers.keccak256(
-            ethers.AbiCoder.defaultAbiCoder().encode(
-              ['uint256', 'address', 'address'],
-              [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
-            )
-          );
-          const assetData = encodeNTVTransferData(
-            BigInt(tx.amount),
-            tx.to!,
-            tx.token
-          );
-
-          populatedTx = await bridge.withdraw.populateTransaction(
-            assetId,
-            assetData,
-            tx.overrides
-          );
-        } else {
-          const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-          populatedTx = await bridge.withdraw.populateTransaction(
-            tx.to!,
-            tx.token,
-            tx.amount,
-            tx.overrides
-          );
-        }
+        const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
+        populatedTx = await bridge.withdraw.populateTransaction(
+          tx.to!,
+          tx.token,
+          tx.amount,
+          tx.overrides
+        );
       }
       if (tx.paymasterParams) {
         return {

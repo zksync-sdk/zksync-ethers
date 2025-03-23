@@ -7,8 +7,7 @@ import {
   ADDRESS1,
   PRIVATE_KEY1,
   ADDRESS2,
-  DAI_L1_V25,
-  DAI_L1_V26,
+  DAI_L1,
   APPROVAL_TOKEN,
   PAYMASTER,
   L2_CHAIN_URL,
@@ -20,16 +19,11 @@ describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
-  let protocolVersionIsNew: boolean;
-  let DAI_L1: string;
   let receipt: types.TransactionReceipt;
   let baseToken: string;
 
   before('setup', async function () {
     this.timeout(25_000);
-    protocolVersionIsNew =
-      (await provider.getProtocolVersion()).version_id > PROTOCOL_VERSION_V25;
-    DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
 
     baseToken = await provider.getBaseTokenContractAddress();
     const tx = await wallet.transfer({
@@ -590,9 +584,6 @@ describe('Provider', () => {
     });
 
     it('should return a Crown withdraw transaction', async () => {
-      if (!protocolVersionIsNew) {
-        return;
-      }
       const tx = {
         type: 113,
         from: ADDRESS1,
@@ -1068,9 +1059,7 @@ describe('Provider', () => {
           from: ADDRESS1,
         });
       } catch (e) {
-        const revertString = !protocolVersionIsNew
-          ? 'insufficient balance for transfer'
-          : 'insufficient funds for gas + value.';
+        const revertString = 'insufficient funds for gas + value.';
         expect((e as Error).message.toString().includes(revertString)).to.be
           .true;
       }

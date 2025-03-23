@@ -8,8 +8,7 @@ export const MNEMONIC1 =
 export const ADDRESS2 = '0xa61464658AfeAf65CccaaFD3a512b69A83B77618';
 export const PRIVATE_KEY2 =
   '0xac1e735be8536c6534bb4f17f06f6afc73b2b5ba84ac2cfb12f7461b20c0bbe3';
-export const DAI_L1_V25 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
-export const DAI_L1_V26 =
+export const DAI_L1 =
   process.env.CUSTOM_TOKEN_ADDRESS ||
   '0xDb6ca4Dd98d4F7248f7dEaE35204706e10492Ef7';
 export const DAI_L2 = '0xDb6ca4Dd98d4F7248f7dEaE35204706e10492Ef7';

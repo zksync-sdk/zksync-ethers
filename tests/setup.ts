@@ -5,7 +5,7 @@ import {
   IL2NativeTokenVault__factory,
   IERC20__factory,
 } from '../src/typechain';
-import {DAI_L1_V25, DAI_L1_V26} from './utils';
+import {DAI_L1} from './utils';
 import {PROTOCOL_VERSION_V26} from '../src/utils';
 
 import Token from './files/Token.json';
@@ -171,9 +171,6 @@ async function main() {
     );
   }
 
-  const protocolVersionIsNew: boolean =
-    await provider.isProtocolVersionV26OrHigher();
-  const DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
   const l2DAIAddress = await wallet.l2TokenAddress(DAI_L1);
   console.log(`DAI L1: ${DAI_L1}`);
   console.log(`DAI L2: ${l2DAIAddress}`);

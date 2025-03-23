@@ -15,8 +15,7 @@ import {
   PRIVATE_KEY1,
   MNEMONIC1,
   ADDRESS2,
-  DAI_L1_V25,
-  DAI_L1_V26,
+  DAI_L1,
   APPROVAL_TOKEN,
   PAYMASTER,
   L1_CHAIN_URL,
@@ -35,11 +34,6 @@ describe('Wallet', () => {
   const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
   let protocolVersionIsNew: boolean;
   let DAI_L1: string;
-
-  before('setup', async () => {
-    protocolVersionIsNew = await provider.isProtocolVersionV26OrHigher();
-    DAI_L1 = protocolVersionIsNew ? DAI_L1_V26 : DAI_L1_V25;
-  });
 
   describe('#constructor()', () => {
     it('`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider', async () => {
