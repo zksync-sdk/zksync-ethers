@@ -14,8 +14,6 @@ import {compareTransactionsWithTolerance} from '../utils';
 
 const {expect} = chai;
 
-let protocolVersionIsNew: boolean;
-
 describe('signPayloadWithECDSA()', () => {
   it('should return signature by signing EIP712 transaction hash', async () => {
     const tx: TransactionRequest = {
@@ -134,7 +132,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 0n,
-      gasLimit: protocolVersionIsNew ? 170_000n : 156_726n,
+      gasLimit: 170_000n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -167,7 +165,7 @@ describe('populateTransaction()', () => {
       type: 113,
       data: '0x',
       gasPrice: 100_000_000n,
-      gasLimit: protocolVersionIsNew ? 170_000n : 156_726n,
+      gasLimit: 170_000n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -201,7 +199,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 100_000_000n,
-      gasLimit: protocolVersionIsNew ? 170_000n : 156_726n,
+      gasLimit: 170_000n,
       customData: {
         factoryDeps: [],
       },

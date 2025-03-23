@@ -31,7 +31,6 @@ describe('Wallet', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider, ethProvider);
-  let protocolVersionIsNew: boolean;
 
   describe('#constructor()', () => {
     it('`Wallet(privateKey, provider)` should return a `Wallet` with L2 provider', async () => {
@@ -1640,9 +1639,6 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should withdraw Crown to the L1 network', async () => {
-      if (!protocolVersionIsNew) {
-        return;
-      }
       const amount = 5n;
       const l2Crown = APPROVAL_TOKEN;
       const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2Crown);
@@ -1668,9 +1664,6 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should deposit Crown to the L2 network', async () => {
-      if (!protocolVersionIsNew) {
-        return;
-      }
       const amount = 5n;
       const crownL2Address = APPROVAL_TOKEN;
       const bridgeContracts = await wallet.getL1BridgeContracts();
@@ -1717,9 +1710,6 @@ describe('Wallet', () => {
     }).timeout(90_000);
 
     it('should withdraw Crown to the L1 network using paymaster to cover fee', async () => {
-      if (!protocolVersionIsNew) {
-        return;
-      }
       const amount = 5n;
       const minimalAllowance = 1n;
       const l2Crown = APPROVAL_TOKEN;
