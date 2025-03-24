@@ -18,8 +18,8 @@ const {expect} = chai;
 
 import {ITestnetERC20Token__factory} from '../../src/typechain';
 import {VoidSigner} from '../../src/signer';
-let defaultMaxFeePerGas = 200_000_000n;
-let defaultMaxPriorityFeePerGas = 0n;
+const defaultMaxFeePerGas = 200_000_000n;
+const defaultMaxPriorityFeePerGas = 0n;
 
 describe('VoidSigner', () => {
   const provider = new Provider(L2_CHAIN_URL);

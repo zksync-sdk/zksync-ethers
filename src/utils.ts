@@ -1589,7 +1589,10 @@ export function isAddressEq(a: Address, b: Address): boolean {
 }
 
 /* Returns the assetId for a token in the Native Token Vault with specific origin chainId and address*/
-export function encodeNativeTokenVaultAssetId(chainId: bigint, address: string) {
+export function encodeNativeTokenVaultAssetId(
+  chainId: bigint,
+  address: string
+) {
   const abi = new AbiCoder();
   const hex = abi.encode(
     ['uint256', 'address', 'address'],

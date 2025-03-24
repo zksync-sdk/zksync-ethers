@@ -821,7 +821,10 @@ export function JsonRpcApiProvider<
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = encodeNativeTokenVaultAssetId(BigInt(chainId), tx.token);
+        const assetId = encodeNativeTokenVaultAssetId(
+          BigInt(chainId),
+          tx.token
+        );
         const assetData = encodeNativeTokenVaultTransferData(
           BigInt(tx.amount),
           tx.to!,

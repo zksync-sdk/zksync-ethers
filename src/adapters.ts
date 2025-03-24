@@ -1221,7 +1221,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         token,
         await this.getL1NativeTokenVault()
       );
-      const ntvData = encodeNativeTokenVaultTransferData(BigInt(amount), to, token);
+      const ntvData = encodeNativeTokenVaultTransferData(
+        BigInt(amount),
+        to,
+        token
+      );
 
       const secondBridgeCalldata = encodeSecondBridgeDataV1(
         ethers.hexlify(assetId),
