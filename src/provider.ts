@@ -811,10 +811,13 @@ export function JsonRpcApiProvider<
         tx.token === ETH_ADDRESS_IN_CONTRACTS;
       if (!tx.bridgeAddress) {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
+        // If the legacy L2SharedBridge is deployed we use it for l1 native tokens.
         tx.bridgeAddress = isTokenL1Native
           ? bridgeAddresses.sharedL2
           : L2_ASSET_ROUTER_ADDRESS;
       }
+      // For non L1 native tokens we need to use the AssetRouter.
+      // For L1 native tokens we can use the legacy withdraw method.
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
