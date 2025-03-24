@@ -1042,6 +1042,7 @@ export interface SmartAccountSigner {
   transactionBuilder?: TransactionBuilder;
 }
 
+/** Contains parameters for finalizing the L2->L2 deposit transaction. */
 export type FinalizeL1DepositParams = {
   chainId: BigNumberish;
   l2BatchNumber: BigNumberish;

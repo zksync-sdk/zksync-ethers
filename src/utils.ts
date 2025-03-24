@@ -1588,7 +1588,8 @@ export function isAddressEq(a: Address, b: Address): boolean {
   return a.toLowerCase() === b.toLowerCase();
 }
 
-export function encodeNTVAssetId(chainId: bigint, address: string) {
+/* Returns the assetId for a token in the Native Token Vault with specific origin chainId and address*/
+export function encodeNativeTokenVaultAssetId(chainId: bigint, address: string) {
   const abi = new AbiCoder();
   const hex = abi.encode(
     ['uint256', 'address', 'address'],
@@ -1600,7 +1601,7 @@ export function encodeNTVAssetId(chainId: bigint, address: string) {
 export async function ethAssetId(provider: ethers.Provider) {
   const network = await provider.getNetwork();
 
-  return encodeNTVAssetId(network.chainId, ETH_ADDRESS_IN_CONTRACTS);
+  return encodeNativeTokenVaultAssetId(network.chainId, ETH_ADDRESS_IN_CONTRACTS);
 }
 
 interface WithToken {
@@ -1615,6 +1616,7 @@ interface WithAssetId {
 // will continue to allow providing either token or assetId
 export type WithTokenOrAssetId = WithToken | WithAssetId;
 
+/* Resolves the assetId for a token or assetId */
 export async function resolveAssetId(
   info: WithTokenOrAssetId,
   ntvContract: IL1NativeTokenVault
@@ -1653,12 +1655,13 @@ export async function resolveAssetId(
     throw new Error('Can not derive assetId since chainId is not available');
   }
 
-  const ntvAssetId = encodeNTVAssetId(network.chainId, token);
+  const ntvAssetId = encodeNativeTokenVaultAssetId(network.chainId, token);
 
   return [ntvAssetId, true];
 }
 
-export function encodeNTVTransferData(
+/* Encodes the data for a transfer of a token through the Native Token Vault */
+export function encodeNativeTokenVaultTransferData(
   amount: bigint,
   receiver: Address,
   token: Address
@@ -1669,6 +1672,7 @@ export function encodeNTVTransferData(
   );
 }
 
+/* Encodes the new V1 encoding version of the AssetRouter data used in bridgehubDeposit */
 export function encodeSecondBridgeDataV1(
   assetId: string,
   transferData: string

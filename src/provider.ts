@@ -73,7 +73,8 @@ import {
   applyL1ToL2Alias,
   L2_ASSET_ROUTER_ADDRESS,
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
-  encodeNTVTransferData,
+  encodeNativeTokenVaultTransferData,
+  encodeNativeTokenVaultAssetId,
 } from './utils';
 import {Signer} from './signer';
 
@@ -496,7 +497,7 @@ export function JsonRpcApiProvider<
       };
     }
 
-    setL1NullifierAndNativeTokenVault(
+    _setL1NullifierAndNativeTokenVault(
       l1Nullifier: Address,
       l1NativeTokenVault: Address
     ) {
@@ -530,10 +531,6 @@ export function JsonRpcApiProvider<
         L2_NATIVE_TOKEN_VAULT_ADDRESS,
         this
       );
-    }
-
-    async connectBridgedToken(token: Address): Promise<IBridgedStandardToken> {
-      return IBridgedStandardToken__factory.connect(token, this);
     }
 
     async connectL2AssetRouter(): Promise<IL2AssetRouter> {
@@ -803,6 +800,7 @@ export function JsonRpcApiProvider<
       }
 
       let populatedTx;
+      // we get the tokens data, assetId and originChainId
       const ntv = await this.connectL2NativeTokenVault();
       const assetId = await ntv.assetId(tx.token);
       const originChainId = await ntv.originChainId(assetId);
@@ -820,13 +818,8 @@ export function JsonRpcApiProvider<
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = ethers.keccak256(
-          ethers.AbiCoder.defaultAbiCoder().encode(
-            ['uint256', 'address', 'address'],
-            [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
-          )
-        );
-        const assetData = encodeNTVTransferData(
+        const assetId = encodeNativeTokenVaultAssetId(BigInt(chainId), tx.token);
+        const assetData = encodeNativeTokenVaultTransferData(
           BigInt(tx.amount),
           tx.to!,
           tx.token
@@ -855,28 +848,6 @@ export function JsonRpcApiProvider<
         };
       }
       return populatedTx;
-    }
-
-    async getWithdrawTxPreGateway(tx: {
-      amount: BigNumberish;
-      token?: Address;
-      from?: Address;
-      to?: Address;
-      bridgeAddress?: Address;
-      paymasterParams?: PaymasterParams;
-      overrides?: ethers.Overrides;
-    }): Promise<ethers.ContractTransaction> {
-      if (!tx.bridgeAddress) {
-        const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        tx.bridgeAddress = bridgeAddresses.sharedL2;
-      }
-      const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-      return await bridge.withdraw.populateTransaction(
-        tx.to!,
-        tx.token!,
-        tx.amount,
-        tx.overrides!
-      );
     }
 
     /**

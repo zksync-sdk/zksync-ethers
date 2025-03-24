@@ -29,7 +29,7 @@ import {
   isAddressEq,
   L2_BASE_TOKEN_ADDRESS,
   resolveAssetId,
-  encodeNTVTransferData,
+  encodeNativeTokenVaultTransferData,
   encodeSecondBridgeDataV1,
 } from './utils';
 import {
@@ -128,7 +128,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         );
         l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
         l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
-        await this._providerL2().setL1NullifierAndNativeTokenVault(
+        await this._providerL2()._setL1NullifierAndNativeTokenVault(
           l1Nullifier,
           l1NativeTokenVault
         );
@@ -956,7 +956,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       await checkBaseCost(baseCost, mintValue);
       overrides.value ??= 0;
 
-      const secondBridgeCalldata = await this.getSecondBridgeCalldata(
+      const secondBridgeCalldata = await this._getSecondBridgeCalldata(
         token,
         amount,
         to
@@ -1074,7 +1074,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const mintValue = baseCost + BigInt(operatorTip);
       await checkBaseCost(baseCost, mintValue);
 
-      const secondBridgeCalldata = await this.getSecondBridgeCalldata(
+      const secondBridgeCalldata = await this._getSecondBridgeCalldata(
         ETH_ADDRESS_IN_CONTRACTS,
         amount,
         to
@@ -1127,7 +1127,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         gasPerPubdataByte,
       } = tx;
 
-      const secondBridgeCalldata = await this.getSecondBridgeCalldata(
+      const secondBridgeCalldata = await this._getSecondBridgeCalldata(
         token,
         amount,
         to
@@ -1212,7 +1212,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
-    async getSecondBridgeCalldata(
+    async _getSecondBridgeCalldata(
       token: Address,
       amount: BigNumberish,
       to: Address
@@ -1221,7 +1221,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         {token},
         await this.getL1NativeTokenVault()
       );
-      const ntvData = encodeNTVTransferData(BigInt(amount), to, token);
+      const ntvData = encodeNativeTokenVaultTransferData(BigInt(amount), to, token);
 
       const secondBridgeCalldata = encodeSecondBridgeDataV1(
         ethers.hexlify(assetId),
@@ -1569,7 +1569,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     /**
      * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
-     * withdrawal transaction's log on the L2 network. This struct is deprecated in favor of {@link getFinalizeDepositParams}.
+     * withdrawal transaction's log on the L2 network. This struct is @deprecated in favor of {@link getFinalizeDepositParams}.
      *
      * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
      * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
@@ -1696,46 +1696,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
-    async finalizeWithdrawalPreGateway(
-      finalizeWithdrawalParams: FinalizeWithdrawalParams,
-      overrides?: ethers.Overrides
-    ) {
-      let l1Bridge: IL1Bridge | IL1SharedBridge;
-      if (isAddressEq(finalizeWithdrawalParams.sender, L2_BASE_TOKEN_ADDRESS)) {
-        l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else if (
-        !(await this._providerL2().isL2BridgeLegacy(
-          finalizeWithdrawalParams.sender
-        ))
-      ) {
-        const l2Bridge = IL2SharedBridge__factory.connect(
-          finalizeWithdrawalParams.sender,
-          this._providerL2()
-        );
-        const bridgeAddress = await l2Bridge.l1SharedBridge();
-        l1Bridge = IL1SharedBridge__factory.connect(
-          bridgeAddress,
-          this._signerL1()
-        );
-      } else {
-        const l2Bridge = IL2Bridge__factory.connect(
-          finalizeWithdrawalParams.sender,
-          this._providerL2()
-        );
-        const bridgeAddress = await l2Bridge.l1Bridge();
-        l1Bridge = IL1Bridge__factory.connect(bridgeAddress, this._signerL1());
-      }
-      return await l1Bridge.finalizeWithdrawal(
-        (await this._providerL2().getNetwork()).chainId as BigNumberish,
-        finalizeWithdrawalParams.l1BatchNumber as BigNumberish,
-        finalizeWithdrawalParams.l2MessageIndex as BigNumberish,
-        finalizeWithdrawalParams.l2TxNumberInBlock as BigNumberish,
-        finalizeWithdrawalParams.message,
-        finalizeWithdrawalParams.proof,
-        overrides ?? {}
-      );
-    }
-
     /**
      * Returns whether the withdrawal transaction is finalized on the L1 network.
      *
@@ -1841,7 +1801,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
         // todo: generally, providing token address is not required for the NTV
         // this sdk does it, but we should support the case even when it is not given
-        assetData = encodeNTVTransferData(
+        assetData = encodeNativeTokenVaultTransferData(
           calldata['_amount'],
           calldata['_l2Receiver'],
           calldata['_l1Token']
