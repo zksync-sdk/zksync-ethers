@@ -1598,39 +1598,11 @@ export function encodeNativeTokenVaultAssetId(chainId: bigint, address: string) 
   return ethers.keccak256(hex);
 }
 
-export async function ethAssetId(provider: ethers.Provider) {
-  const network = await provider.getNetwork();
-
-  return encodeNativeTokenVaultAssetId(network.chainId, ETH_ADDRESS_IN_CONTRACTS);
-}
-
-interface WithToken {
-  token: Address;
-}
-
-interface WithAssetId {
-  assetId: BytesLike;
-}
-
-// For backwards compatibility and easier interface lots of methods
-// will continue to allow providing either token or assetId
-export type WithTokenOrAssetId = WithToken | WithAssetId;
-
-/* Resolves the assetId for a token or assetId */
+/* Resolves the assetId for a token */
 export async function resolveAssetId(
-  info: WithTokenOrAssetId,
+  token: Address,
   ntvContract: IL1NativeTokenVault
-): Promise<[BytesLike, boolean]> {
-  const potentialAssetId = (info as any).assetId;
-  if (potentialAssetId) {
-    return [potentialAssetId, false];
-  }
-
-  let token = (info as any).token as Address;
-  if (!token) {
-    throw new Error('Neither token nor assetId were provided');
-  }
-
+): Promise<BytesLike> {
   if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
     token = ETH_ADDRESS_IN_CONTRACTS;
   }
@@ -1639,7 +1611,7 @@ export async function resolveAssetId(
   const assetIdFromNTV = await ntvContract.assetId(token);
 
   if (assetIdFromNTV && assetIdFromNTV !== ethers.ZeroHash) {
-    return [assetIdFromNTV, false];
+    return assetIdFromNTV;
   }
 
   // Okay, the token have not been registered within the Native token vault.
@@ -1657,7 +1629,7 @@ export async function resolveAssetId(
 
   const ntvAssetId = encodeNativeTokenVaultAssetId(network.chainId, token);
 
-  return [ntvAssetId, true];
+  return ntvAssetId;
 }
 
 /* Encodes the data for a transfer of a token through the Native Token Vault */

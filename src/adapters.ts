@@ -1217,8 +1217,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       amount: BigNumberish,
       to: Address
     ): Promise<string> {
-      const [assetId, _] = await resolveAssetId(
-        {token},
+      const assetId = await resolveAssetId(
+        token,
         await this.getL1NativeTokenVault()
       );
       const ntvData = encodeNativeTokenVaultTransferData(BigInt(amount), to, token);
