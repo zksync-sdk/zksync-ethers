@@ -1601,7 +1601,9 @@ export function encodeNativeTokenVaultAssetId(
   return ethers.keccak256(hex);
 }
 
-/* Resolves the assetId for a token */
+/**
+ * Resolves the assetId for a token
+ **/
 export async function resolveAssetId(
   token: Address,
   ntvContract: IL1NativeTokenVault
@@ -1635,7 +1637,14 @@ export async function resolveAssetId(
   return ntvAssetId;
 }
 
-/* Encodes the data for a transfer of a token through the Native Token Vault */
+/**
+ * Encodes the data for a transfer of a token through the Native Token Vault
+ *
+ * @param {bigint} amount The amount of tokens to transfer
+ * @param {Address} receiver The address that will receive the tokens
+ * @param {Address} token The address of the token being transferred
+ * @returns {string} The ABI-encoded transfer data
+ **/
 export function encodeNativeTokenVaultTransferData(
   amount: bigint,
   receiver: Address,
@@ -1647,8 +1656,13 @@ export function encodeNativeTokenVaultTransferData(
   );
 }
 
-/* Encodes the new V1 encoding version of the AssetRouter data used in bridgehubDeposit */
-export function encodeSecondBridgeDataV1(
+/**
+ * Encodes asset transfer data for BridgeHub contract, using v1 encoding scheme (introduced in v26 upgrade).
+ * Can be utilized to encode deposit initiation data.
+ *
+ * @param {string} assetId - encoded token asset ID
+ * @param {string} transferData - encoded transfer data, see `encodeNativeTokenVaultTransferData`
+ */ export function encodeSecondBridgeDataV1(
   assetId: string,
   transferData: string
 ) {
