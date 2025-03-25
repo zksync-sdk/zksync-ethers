@@ -1042,7 +1042,11 @@ export interface SmartAccountSigner {
   transactionBuilder?: TransactionBuilder;
 }
 
-/** Contains parameters for finalizing the L2->L2 deposit transaction. */
+/**
+ * Contains parameters for finalizing the L2->L1 deposit transaction.
+ * Pre V26 withdrawals were special kind of transaction,
+ * but starting from v26 any cross-chain token movement is called a deposit, regardless of direction
+ */
 export type FinalizeL1DepositParams = {
   chainId: BigNumberish;
   l2BatchNumber: BigNumberish;
