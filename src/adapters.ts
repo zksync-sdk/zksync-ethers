@@ -1616,7 +1616,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     /**
      * Returns the {@link FinalizeDepositParams parameters} required for finalizing a L2->L1 deposit from the
      * deposit transaction's log on the L2 network.
-     * This function supersedes {@link getFinalizeWithdrawalParams} with V26, as now L2 native token bridging is also supported.
+     * This function supersedes {@link getFinalizeWithdrawalParams} with V26, 
+     * as now L2 native token bridging is also supported.
      * Pre V26 withdrawals were special kind of transaction,
      * but starting from v26 any cross-chain token movement is called a deposit, regardless of direction
      * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
