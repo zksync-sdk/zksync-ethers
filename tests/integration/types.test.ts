@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
 import {ADDRESS2, L2_CHAIN_URL, PRIVATE_KEY1} from '../utils';
+
 describe('types', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);

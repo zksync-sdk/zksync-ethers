@@ -27,16 +27,16 @@ box.
 
 To begin, it is useful to have a basic understanding of the types of objects available and what they are responsible for, at a high level:
 
-- `Provider` provides connection to the ZKsync Era blockchain, which allows querying the blockchain state, such as account, block or transaction details,
-  querying event logs or evaluating read-only code using call. Additionally, the client facilitates writing to the blockchain by sending
-  transactions.
-- `Wallet` wraps all operations that interact with an account. An account generally has a private key, which can be used to sign a variety of
-  types of payloads. It provides easy usage of the most common features.
+-   `Provider` provides connection to the ZKsync Era blockchain, which allows querying the blockchain state, such as account, block or transaction details,
+    querying event logs or evaluating read-only code using call. Additionally, the client facilitates writing to the blockchain by sending
+    transactions.
+-   `Wallet` wraps all operations that interact with an account. An account generally has a private key, which can be used to sign a variety of
+    types of payloads. It provides easy usage of the most common features.
 
 ## 🛠 Prerequisites
 
-- `node: >= 18` ([installation guide](https://nodejs.org/en/download/package-manager))
-- `ethers: ^6.7.1`
+-   `node: >= 18` ([installation guide](https://nodejs.org/en/download/package-manager))
+-   `ethers: ^6.7.1`
 
 ## 📥 Installation & Setup
 
@@ -52,11 +52,11 @@ The complete examples with various use cases are available [here](https://github
 ### Connect to the ZKsync Era network:
 
 ```ts
-import {Provider, utils, types} from 'zksync-ethers';
-import {ethers} from 'ethers';
+import { Provider, utils, types } from "zksync-ethers";
+import { ethers } from "ethers";
 
 const provider = Provider.getDefaultProvider(types.Network.Sepolia); // ZKsync Era testnet (L2)
-const ethProvider = ethers.getDefaultProvider('sepolia'); // Sepolia testnet (L1)
+const ethProvider = ethers.getDefaultProvider("sepolia"); // Sepolia testnet (L1)
 ```
 
 ### Get the latest block number
@@ -68,7 +68,7 @@ const blockNumber = await provider.getBlockNumber();
 ### Get the latest block
 
 ```ts
-const block = await provider.getBlock('latest');
+const block = await provider.getBlock("latest");
 ```
 
 ### Create a wallet
@@ -94,9 +94,9 @@ Transfer funds among accounts on L2 network.
 const receiver = Wallet.createRandom();
 
 const transfer = await wallet.transfer({
-  to: receiver,
-  token: utils.ETH_ADDRESS,
-  amount: ethers.parseEther('1.0'),
+    to: receiver,
+    token: utils.ETH_ADDRESS,
+    amount: ethers.parseEther("1.0"),
 });
 ```
 
@@ -106,8 +106,8 @@ Transfer funds from L1 to L2 network.
 
 ```ts
 const deposit = await wallet.deposit({
-  token: utils.ETH_ADDRESS,
-  amount: ethers.parseEther('1.0'),
+    token: utils.ETH_ADDRESS,
+    amount: ethers.parseEther("1.0"),
 });
 ```
 
@@ -117,8 +117,8 @@ Transfer funds from L2 to L1 network.
 
 ```ts
 const withdrawal = await wallet.withdraw({
-  token: utils.ETH_ADDRESS,
-  amount: ethers.parseEther('1.0'),
+    token: utils.ETH_ADDRESS,
+    amount: ethers.parseEther("1.0"),
 });
 ```
 

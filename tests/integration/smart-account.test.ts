@@ -25,6 +25,7 @@ import {
 const {expect} = chai;
 
 import MultisigAccount from '../files/TwoUserMultisig.json';
+
 describe('SmartAccount', async () => {
   const provider = new Provider(L2_CHAIN_URL);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
@@ -34,8 +35,8 @@ describe('SmartAccount', async () => {
     provider
   );
 
-  describe('#constructor()', async () => {
-    it('`SmartAccount(address, {address, secret}, provider)` should return a `SmartAccount` with signer and provider', async () => {
+  describe('#constructor()', () => {
+    it('`SmartAccount(address, {address, secret}, provider)` should return a `SmartAccount` with signer and provider', () => {
       const account = new SmartAccount(
         {address: ADDRESS1, secret: PRIVATE_KEY1},
         provider
@@ -142,7 +143,7 @@ describe('SmartAccount', async () => {
         type: utils.EIP712_TX_TYPE,
         from: ADDRESS1,
         nonce: await account.getNonce('pending'),
-        gasLimit: 155_974n,
+        gasLimit: 156_726n,
         chainId: 270n,
         data: '0x',
         customData: {gasPerPubdata: 50_000, factoryDeps: []},
@@ -597,6 +598,7 @@ describe('SmartAccount', async () => {
         });
         await withdrawTx.waitFinalize();
         expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
         const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
           withdrawTx.hash
         );
@@ -605,7 +607,7 @@ describe('SmartAccount', async () => {
         expect(result).not.to.be.null;
         expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
           .to.be.true;
-      }).timeout(900_000);
+      }).timeout(90_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000n;
