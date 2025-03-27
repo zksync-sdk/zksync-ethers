@@ -1,10 +1,15 @@
 import {Provider, Wallet, ContractFactory, Contract, utils} from '../src';
 import {ethers, Typed} from 'ethers';
-import {ITestnetERC20Token__factory} from '../src/typechain';
+import {
+  ITestnetERC20Token__factory,
+  IL2NativeTokenVault__factory,
+  IERC20__factory,
+} from '../src/typechain';
+import {DAI_L1} from './utils';
 
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
-import {L1_CHAIN_URL, L2_CHAIN_URL} from './utils';
+import {L1_CHAIN_URL, L2_CHAIN_URL, NTV_ADDRESS} from './utils';
 
 const PRIVATE_KEY =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
@@ -13,8 +18,6 @@ const provider = new Provider(L2_CHAIN_URL);
 const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-
-const DAI_L1 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
 
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
@@ -108,6 +111,26 @@ async function sendTokenToL2(l1TokenAddress: string) {
   console.log(`Send funds tx: ${receipt.hash}`);
 }
 
+/*
+Prepare L2 native bridging: register token and approve NTV.
+*/
+async function prepareL2NativeBridging(l2TokenAddress: string) {
+  const crownContract = IERC20__factory.connect(
+    l2TokenAddress,
+    wallet._signerL2()
+  );
+  const ntv = IL2NativeTokenVault__factory.connect(NTV_ADDRESS, wallet);
+  const ntvRegisterTx = await ntv.registerToken(l2TokenAddress);
+  await ntvRegisterTx.wait();
+  console.log('Crown token registered with ntv');
+
+  const tokenApprovalTx = await crownContract.approve(
+    NTV_ADDRESS,
+    await wallet.getBalance(l2TokenAddress)
+  );
+  await tokenApprovalTx.wait();
+}
+
 async function main() {
   const baseToken = await wallet.getBaseToken();
   console.log(`Wallet address: ${await wallet.getAddress()}`);
@@ -168,6 +191,9 @@ async function main() {
   console.log(`Paymaster: ${paymaster}`);
   console.log(`Paymaster ETH balance: ${await provider.getBalance(paymaster)}`);
   console.log(`Wallet Crown balance: ${await wallet.getBalance(token)}`);
+  console.log(`Crown token address: ${token}.`);
+
+  await prepareL2NativeBridging(token);
 }
 
 main()
