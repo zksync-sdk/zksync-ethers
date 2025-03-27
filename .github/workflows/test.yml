@@ -34,36 +34,16 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
+          git checkout 2ba19fa60e46c46bbf24495674971405c538f555
           ./start-zk-chains.sh
           popd
-      - name: Extract custom token address
-        run: |
-          echo "Waiting for token deployment..."
-          until docker exec local-setup-zksync-1 test -f /configs/erc20.yaml; do
-            echo "Token config file not found yet, checking again in 5 seconds..."
-            sleep 5
-          done
-
-          echo "Extracting deployed token address from inside zksync container..."
-          CUSTOM_TOKEN_ADDRESS=$(docker exec local-setup-zksync-1 awk -F": " '/tokens:/ {found_tokens=1} found_tokens && /DAI:/ {found_dai=1} found_dai && /address:/ {print $2; exit}' /configs/erc20.yaml)
-
-          if [ -z "$CUSTOM_TOKEN_ADDRESS" ]; then
-            echo "❌ Error: Could not retrieve token address. Exiting."
-            exit 1
-          fi
-
-          echo "Custom token address: $CUSTOM_TOKEN_ADDRESS"
-          # Export the variable so subsequent steps have access to it
-          echo "CUSTOM_TOKEN_ADDRESS=$CUSTOM_TOKEN_ADDRESS" >> $GITHUB_ENV
       - name: Prepare environment
         env:
           IS_ETH_CHAIN: true
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
         run: yarn test:prepare
       - name: Run tests
         env:
           IS_ETH_CHAIN: true
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
         run: yarn test
 
   non-eth-based-chain-test:
@@ -89,34 +69,14 @@ jobs:
         run: |
           git clone https://github.com/matter-labs/local-setup.git
           pushd local-setup
+          git checkout 2ba19fa60e46c46bbf24495674971405c538f555
           ./start-zk-chains.sh
           popd
-      - name: Extract custom token address
-        run: |
-          echo "Waiting for token deployment..."
-          until docker exec local-setup-zksync-1 test -f /configs/erc20.yaml; do
-            echo "Token config file not found yet, checking again in 5 seconds..."
-            sleep 5
-          done
-
-          echo "Extracting deployed token address from inside zksync container..."
-          CUSTOM_TOKEN_ADDRESS=$(docker exec local-setup-zksync-1 awk -F": " '/tokens:/ {found_tokens=1} found_tokens && /DAI:/ {found_dai=1} found_dai && /address:/ {print $2; exit}' /configs/erc20.yaml)
-
-          if [ -z "$CUSTOM_TOKEN_ADDRESS" ]; then
-            echo "❌ Error: Could not retrieve token address. Exiting."
-            exit 1
-          fi
-
-          echo "Custom token address: $CUSTOM_TOKEN_ADDRESS"
-          # Export the variable so subsequent steps have access to it
-          echo "CUSTOM_TOKEN_ADDRESS=$CUSTOM_TOKEN_ADDRESS" >> $GITHUB_ENV
       - name: Prepare environment
         env:
           IS_ETH_CHAIN: false
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
         run: yarn test:prepare
       - name: Run tests
         env:
           IS_ETH_CHAIN: false
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
         run: yarn test
