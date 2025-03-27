@@ -27,7 +27,6 @@ import {
   ETH_ADDRESS_IN_CONTRACTS,
   LEGACY_ETH_ADDRESS,
   isAddressEq,
-  L2_BASE_TOKEN_ADDRESS,
   resolveAssetId,
   encodeNativeTokenVaultTransferData,
   encodeSecondBridgeDataV1,
@@ -48,7 +47,6 @@ import {
   IZkSyncHyperchain__factory,
   IL2SharedBridge__factory,
   IL2SharedBridge,
-  IL1Bridge,
   IL1Nullifier,
   IL1AssetRouter,
   IL1AssetRouter__factory,
@@ -67,7 +65,6 @@ import {
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
-  LogProof,
 } from './types';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
