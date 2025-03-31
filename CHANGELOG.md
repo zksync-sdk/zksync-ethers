@@ -1,3 +1,16 @@
+# [6.17.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.2...v6.17.0) (2025-03-31)
+
+
+### Features
+
+* **adapter:** squashed all changes ([0dbd059](https://github.com/zksync-sdk/zksync-ethers/commit/0dbd059cbc62c1a15e30a728246e64a5ee792c61))
+* support v26, remove support for v25 ([#243](https://github.com/zksync-sdk/zksync-ethers/issues/243)) ([55803e8](https://github.com/zksync-sdk/zksync-ethers/commit/55803e8963256f5270f44d2ac9163af1b6c86654))
+
+
+### Reverts
+
+* Revert "feat: support v26, remove support for v25 (#243)" (#244) ([ebaefba](https://github.com/zksync-sdk/zksync-ethers/commit/ebaefbab1a9d0fb4f0aed2384cffafd65bf67189)), closes [#243](https://github.com/zksync-sdk/zksync-ethers/issues/243) [#244](https://github.com/zksync-sdk/zksync-ethers/issues/244)
+
 ## [6.16.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.1...v6.16.2) (2025-03-18)
 
 
