@@ -18,7 +18,7 @@ import {
   eip712TxHash,
   isAddressEq,
 } from './utils';
-import {Provider} from './provider';
+import { Provider } from './provider';
 
 /** 0x-prefixed, hex encoded, ethereum account address. */
 export type Address = string;
@@ -114,6 +114,15 @@ export type DeploymentType =
   | 'createAccount'
   | 'create2'
   | 'create2Account';
+
+/** Merkle root target for interop log proofs */
+export type LogProofTarget =
+  /** L2's ChainBatchRoot */
+  | 'chain'
+  /** Gateway's MessageRoot */
+  | 'gw_message_root'
+  /** Gateway's ChainBatchRoot. Fallback behaviour, used for withdrawals */
+  | 'gw_chain_batch_root'
 
 /** Bridged token. */
 export interface Token {
@@ -273,7 +282,7 @@ export class TransactionResponse extends ethers.TransactionResponse {
   }
 
   override toJSON(): any {
-    const {l1BatchNumber, l1BatchTxIndex} = this;
+    const { l1BatchNumber, l1BatchTxIndex } = this;
 
     return {
       ...super.toJSON(),
@@ -325,7 +334,7 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
   }
 
   override toJSON(): any {
-    const {l1BatchNumber, l1BatchTxIndex, l2ToL1Logs} = this;
+    const { l1BatchNumber, l1BatchTxIndex, l2ToL1Logs } = this;
     return {
       ...super.toJSON(),
       l1BatchNumber,
@@ -361,7 +370,7 @@ export class Block extends ethers.Block {
   }
 
   override toJSON(): any {
-    const {l1BatchNumber, l1BatchTimestamp} = this;
+    const { l1BatchNumber, l1BatchTimestamp } = this;
     return {
       ...super.toJSON(),
       l1BatchNumber,
@@ -444,7 +453,7 @@ export class Log extends ethers.Log {
   }
 
   override toJSON(): any {
-    const {l1BatchNumber} = this;
+    const { l1BatchNumber } = this;
     return {
       ...super.toJSON(),
       l1BatchNumber,
@@ -539,7 +548,7 @@ export class Transaction extends ethers.Transaction {
             'unsigned transaction cannot define from',
             'tx',
             tx
-            );
+          );
         }
         assertArgument(
           isAddressEq(result.from!, tx.from),
@@ -558,7 +567,7 @@ export class Transaction extends ethers.Transaction {
             tx
           );
           assertArgument(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
-        } 
+        }
       }
 
       return result;
@@ -580,7 +589,7 @@ export class Transaction extends ethers.Transaction {
   }
 
   override toJSON(): any {
-    const {customData} = this;
+    const { customData } = this;
     return {
       ...super.toJSON(),
       type: !this.#type ? this.type : this.#type,
@@ -682,7 +691,7 @@ export interface PriorityOpResponse extends TransactionResponse {
  * A map  with token addresses as keys and their corresponding balances as values.
  * Each key-value pair represents the balance of a specific token held by the account.
  */
-export type BalancesMap = {[key: string]: bigint};
+export type BalancesMap = { [key: string]: bigint };
 
 /** Represents deployment information. */
 export interface DeploymentInfo {
@@ -944,18 +953,18 @@ export interface FinalizeWithdrawalParams {
 }
 
 export interface FinalizeWithdrawalParamsWithoutProof {
-    /** The L2 batch number where the withdrawal was processed. */
-    l1BatchNumber: number | null;
-    // /** The position in the L2 logs Merkle tree of the l2Log that was sent with the message. */
-    // l2MessageIndex: number;
-    /** The L2 transaction number in the batch, in which the log was sent. */
-    l2TxNumberInBlock: number | null;
-    /** The L2 withdraw data, stored in an L2 -> L1 message. */
-    message: any;
-    /** The L2 address which sent the log. */
-    sender: string;
-//     /** The Merkle proof of the inclusion L2 -> L1 message about withdrawal initialization. */
-//     proof: string[];
+  /** The L2 batch number where the withdrawal was processed. */
+  l1BatchNumber: number | null;
+  // /** The position in the L2 logs Merkle tree of the l2Log that was sent with the message. */
+  // l2MessageIndex: number;
+  /** The L2 transaction number in the batch, in which the log was sent. */
+  l2TxNumberInBlock: number | null;
+  /** The L2 withdraw data, stored in an L2 -> L1 message. */
+  message: any;
+  /** The L2 address which sent the log. */
+  sender: string;
+  //     /** The Merkle proof of the inclusion L2 -> L1 message about withdrawal initialization. */
+  //     proof: string[];
 }
 
 /** Represents storage proof. */

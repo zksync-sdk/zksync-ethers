@@ -55,6 +55,7 @@ import {
   ProtocolVersion,
   FeeParams,
   TransactionWithDetailedOutput,
+  LogProofTarget,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -76,7 +77,7 @@ import {
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
   encodeNTVTransferData,
 } from './utils';
-import {Signer} from './signer';
+import { Signer } from './signer';
 
 import {
   formatLog,
@@ -85,7 +86,7 @@ import {
   formatTransactionReceipt,
   formatFee,
 } from './format';
-import {makeError} from 'ethers';
+import { makeError } from 'ethers';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -230,7 +231,7 @@ export function JsonRpcApiProvider<
       } else {
         try {
           const token = IERC20__factory.connect(tokenAddress, this);
-          return await token.balanceOf(address, {blockTag});
+          return await token.balanceOf(address, { blockTag });
         } catch {
           return 0n;
         }
@@ -348,21 +349,23 @@ export function JsonRpcApiProvider<
      *
      * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
      * @param [index] The index of the L2 to L1 log in the transaction.
+     * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+     * @param [logProofTarget] Merkle proof target for interop.
      */
     async getLogProof(
       txHash: BytesLike,
       index?: number,
       precommitLogIndex?: number,
-      extendeduntilChainId?: number
+      logProofTarget?: LogProofTarget,
     ): Promise<LogProof | null> {
-      if (extendeduntilChainId) {
-        return await this.send('zks_getL2ToL1LogProofUntilChainId', [
+      if (logProofTarget) {
+        return await this.send('zks_getL2ToL1LogProofUntilTarget', [
           ethers.hexlify(txHash),
           index,
-          extendeduntilChainId.toString(16),
+          logProofTarget,
           precommitLogIndex,
         ]);
-      } else if (precommitLogIndex) { 
+      } else if (precommitLogIndex) {
         return await this.send('zks_getL2ToL1LogProofPrecommit', [
           ethers.hexlify(txHash),
           index,
@@ -601,7 +604,7 @@ export function JsonRpcApiProvider<
         start,
         limit,
       ]);
-      return tokens.map(token => ({address: token.l2Address, ...token}));
+      return tokens.map(token => ({ address: token.l2Address, ...token }));
     }
 
     /**
@@ -757,7 +760,7 @@ export function JsonRpcApiProvider<
       paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
-      const {...tx} = transaction;
+      const { ...tx } = transaction;
       tx.token ??= L2_BASE_TOKEN_ADDRESS;
       if (
         isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
@@ -908,7 +911,7 @@ export function JsonRpcApiProvider<
       paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
-      const {...tx} = transaction;
+      const { ...tx } = transaction;
       if (!tx.token) {
         tx.token = L2_BASE_TOKEN_ADDRESS;
       } else if (
@@ -1056,7 +1059,7 @@ export function JsonRpcApiProvider<
     override async broadcastTransaction(
       signedTx: string
     ): Promise<TransactionResponse> {
-      const {blockNumber, hash} = await resolveProperties({
+      const { blockNumber, hash } = await resolveProperties({
         blockNumber: this.getBlockNumber(),
         hash: this._perform({
           method: 'broadcastTransaction',
@@ -1108,7 +1111,7 @@ export function JsonRpcApiProvider<
     async getPriorityOpResponse(
       l1TxResponse: ethers.TransactionResponse
     ): Promise<PriorityOpResponse> {
-      const l2Response = {...l1TxResponse} as PriorityOpResponse;
+      const l2Response = { ...l1TxResponse } as PriorityOpResponse;
 
       l2Response.waitL1Commit = l1TxResponse.wait.bind(
         l1TxResponse
@@ -1152,7 +1155,7 @@ export function JsonRpcApiProvider<
      * @throws {Error} If log proof can not be found.
      */
     async getPriorityOpConfirmation(txHash: string, index = 0) {
-      const {l2ToL1LogIndex, l2ToL1Log, l1BatchTxId} =
+      const { l2ToL1LogIndex, l2ToL1Log, l1BatchTxId } =
         await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
       const proof = await this.getLogProof(txHash, l2ToL1LogIndex);
       return {
@@ -1319,7 +1322,7 @@ export function JsonRpcApiProvider<
         gasPerPubdata: transaction.gasPerPubdataByte,
       };
       if (transaction.factoryDeps) {
-        Object.assign(customData, {factoryDeps: transaction.factoryDeps});
+        Object.assign(customData, { factoryDeps: transaction.factoryDeps });
       }
 
       return await this.estimateGasL1({
@@ -1368,7 +1371,7 @@ export function JsonRpcApiProvider<
           ),
         };
       }
-      if (tx.customData.merkleProof)  {
+      if (tx.customData.merkleProof) {
         result.eip712Meta.merkleProof = Array.from(
           ethers.getBytes(tx.customData.merkleProof)
         )
@@ -1432,14 +1435,14 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     const isLocalNetwork =
       typeof url === 'string'
         ? url.includes('localhost') ||
-          url.includes('127.0.0.1') ||
-          url.includes('0.0.0.0')
+        url.includes('127.0.0.1') ||
+        url.includes('0.0.0.0')
         : url.url.includes('localhost') ||
-          url.url.includes('127.0.0.1') ||
-          url.url.includes('0.0.0.0');
+        url.url.includes('127.0.0.1') ||
+        url.url.includes('0.0.0.0');
 
     const optionsWithDisabledCache = isLocalNetwork
-      ? {...options, cacheTimeout: -1}
+      ? { ...options, cacheTimeout: -1 }
       : options;
 
     super(url, network, optionsWithDisabledCache);
@@ -1671,9 +1674,9 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     txHash: BytesLike,
     index?: number,
     precommitLogIndex?: number,
-    extendeduntilChainId?: number,
+    logProofTarget?: LogProofTarget,
   ): Promise<LogProof | null> {
-    return super.getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId);
+    return super.getLogProof(txHash, index, precommitLogIndex, logProofTarget);
   }
 
   /**
@@ -2488,11 +2491,11 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   }
 
   override getRpcError(payload: JsonRpcPayload, _error: JsonRpcError): Error {
-    const {error} = _error;
+    const { error } = _error;
     const message = _error.error.message ?? 'Execution reverted';
     const code = _error.error.code ?? 0;
     // @ts-ignore
-    return makeError(message, code, {payload, error});
+    return makeError(message, code, { payload, error });
   }
 
   override async _send(
@@ -2595,18 +2598,18 @@ export class BrowserProvider extends JsonRpcApiProvider(
       method: string,
       params: Array<any> | Record<string, any>
     ) => {
-      const payload = {method, params};
-      this.emit('debug', {action: 'sendEip1193Request', payload});
+      const payload = { method, params };
+      this.emit('debug', { action: 'sendEip1193Request', payload });
       try {
         const result = await ethereum.request(payload);
-        this.emit('debug', {action: 'receiveEip1193Result', result});
+        this.emit('debug', { action: 'receiveEip1193Result', result });
         return result;
       } catch (e: any) {
         const error = new Error(e.message);
         (<any>error).code = e.code;
         (<any>error).data = e.data;
         (<any>error).payload = payload;
-        this.emit('debug', {action: 'receiveEip1193Error', error});
+        this.emit('debug', { action: 'receiveEip1193Error', error });
         throw error;
       }
     };
@@ -3640,12 +3643,12 @@ export class BrowserProvider extends JsonRpcApiProvider(
 
     try {
       const result = await this.#request(payload.method, payload.params || []);
-      return [{id: payload.id, result}];
+      return [{ id: payload.id, result }];
     } catch (e: any) {
       return [
         {
           id: payload.id,
-          error: {code: e.code, data: e.data, message: e.message},
+          error: { code: e.code, data: e.data, message: e.message },
         },
       ];
     }
@@ -3728,7 +3731,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
         await this.#request('eth_requestAccounts', []);
       } catch (error: any) {
         const payload = error.payload;
-        throw this.getRpcError(payload, {id: payload.id, error});
+        throw this.getRpcError(payload, { id: payload.id, error });
       }
     }
 

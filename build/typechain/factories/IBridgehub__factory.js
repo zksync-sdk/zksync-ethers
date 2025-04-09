@@ -7,6 +7,27 @@ exports.IBridgehub__factory = void 0;
 const ethers_1 = require("ethers");
 const _abi = [
     {
+        type: "constructor",
+        inputs: [
+            {
+                name: "_l1ChainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "_owner",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "_maxNumberOfZKChains",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        stateMutability: "nonpayable",
+    },
+    {
         type: "function",
         name: "L1_CHAIN_ID",
         inputs: [],
@@ -21,7 +42,27 @@ const _abi = [
     },
     {
         type: "function",
+        name: "MAX_NUMBER_OF_ZK_CHAINS",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
         name: "acceptAdmin",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "acceptOwnership",
         inputs: [],
         outputs: [],
         stateMutability: "nonpayable",
@@ -70,7 +111,7 @@ const _abi = [
         name: "assetIdIsRegistered",
         inputs: [
             {
-                name: "_baseTokenAssetId",
+                name: "baseTokenAssetId",
                 type: "bytes32",
                 internalType: "bytes32",
             },
@@ -99,19 +140,6 @@ const _abi = [
     },
     {
         type: "function",
-        name: "assetTracker",
-        inputs: [],
-        outputs: [
-            {
-                name: "",
-                type: "address",
-                internalType: "contract IAssetTracker",
-            },
-        ],
-        stateMutability: "view",
-    },
-    {
-        type: "function",
         name: "baseToken",
         inputs: [
             {
@@ -134,7 +162,7 @@ const _abi = [
         name: "baseTokenAssetId",
         inputs: [
             {
-                name: "_chainId",
+                name: "chainId",
                 type: "uint256",
                 internalType: "uint256",
             },
@@ -153,12 +181,12 @@ const _abi = [
         name: "bridgeBurn",
         inputs: [
             {
-                name: "_chainId",
+                name: "_settlementChainId",
                 type: "uint256",
                 internalType: "uint256",
             },
             {
-                name: "_msgValue",
+                name: "_l2MsgValue",
                 type: "uint256",
                 internalType: "uint256",
             },
@@ -180,7 +208,7 @@ const _abi = [
         ],
         outputs: [
             {
-                name: "_bridgeMintData",
+                name: "bridgehubMintData",
                 type: "bytes",
                 internalType: "bytes",
             },
@@ -192,7 +220,7 @@ const _abi = [
         name: "bridgeMint",
         inputs: [
             {
-                name: "_chainId",
+                name: "",
                 type: "uint256",
                 internalType: "uint256",
             },
@@ -202,7 +230,7 @@ const _abi = [
                 internalType: "bytes32",
             },
             {
-                name: "_data",
+                name: "_bridgehubMintData",
                 type: "bytes",
                 internalType: "bytes",
             },
@@ -215,7 +243,7 @@ const _abi = [
         name: "bridgeRecoverFailedTransfer",
         inputs: [
             {
-                name: "_chainId",
+                name: "",
                 type: "uint256",
                 internalType: "uint256",
             },
@@ -243,7 +271,7 @@ const _abi = [
         name: "chainTypeManager",
         inputs: [
             {
-                name: "_chainId",
+                name: "chainId",
                 type: "uint256",
                 internalType: "uint256",
             },
@@ -262,7 +290,7 @@ const _abi = [
         name: "chainTypeManagerIsRegistered",
         inputs: [
             {
-                name: "_chainTypeManager",
+                name: "chainTypeManager",
                 type: "address",
                 internalType: "address",
             },
@@ -318,7 +346,7 @@ const _abi = [
         ],
         outputs: [
             {
-                name: "chainId",
+                name: "",
                 type: "uint256",
                 internalType: "uint256",
             },
@@ -330,14 +358,14 @@ const _abi = [
         name: "ctmAssetIdFromAddress",
         inputs: [
             {
-                name: "_ctmAddress",
+                name: "ctmAddress",
                 type: "address",
                 internalType: "address",
             },
         ],
         outputs: [
             {
-                name: "",
+                name: "ctmAssetId",
                 type: "bytes32",
                 internalType: "bytes32",
             },
@@ -368,14 +396,14 @@ const _abi = [
         name: "ctmAssetIdToAddress",
         inputs: [
             {
-                name: "_assetInfo",
+                name: "ctmAssetId",
                 type: "bytes32",
                 internalType: "bytes32",
             },
         ],
         outputs: [
             {
-                name: "",
+                name: "ctmAddress",
                 type: "address",
                 internalType: "address",
             },
@@ -384,7 +412,7 @@ const _abi = [
     },
     {
         type: "function",
-        name: "forwardTransactionOnGatewayWithBalanceChange",
+        name: "forwardTransactionOnGateway",
         inputs: [
             {
                 name: "_chainId",
@@ -400,21 +428,6 @@ const _abi = [
                 name: "_expirationTimestamp",
                 type: "uint64",
                 internalType: "uint64",
-            },
-            {
-                name: "_baseTokenAmount",
-                type: "uint256",
-                internalType: "uint256",
-            },
-            {
-                name: "_assetId",
-                type: "bytes32",
-                internalType: "bytes32",
-            },
-            {
-                name: "_amount",
-                type: "uint256",
-                internalType: "uint256",
             },
         ],
         outputs: [],
@@ -439,7 +452,7 @@ const _abi = [
         inputs: [],
         outputs: [
             {
-                name: "",
+                name: "chainAddresses",
                 type: "address[]",
                 internalType: "address[]",
             },
@@ -458,12 +471,32 @@ const _abi = [
         ],
         outputs: [
             {
-                name: "",
+                name: "chainAddress",
                 type: "address",
                 internalType: "address",
             },
         ],
         stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "initialize",
+        inputs: [
+            {
+                name: "_owner",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "initializeV2",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
     },
     {
         type: "function",
@@ -547,6 +580,59 @@ const _abi = [
                 name: "",
                 type: "bool",
                 internalType: "bool",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "owner",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "pause",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "pauseMigration",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "paused",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "bool",
+                internalType: "bool",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "pendingOwner",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "address",
+                internalType: "address",
             },
         ],
         stateMutability: "view",
@@ -737,7 +823,7 @@ const _abi = [
                 internalType: "uint256",
             },
             {
-                name: "_hyperchain",
+                name: "_zkChain",
                 type: "address",
                 internalType: "address",
             },
@@ -786,6 +872,13 @@ const _abi = [
                 internalType: "address",
             },
         ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "renounceOwnership",
+        inputs: [],
         outputs: [],
         stateMutability: "nonpayable",
     },
@@ -1027,7 +1120,7 @@ const _abi = [
         name: "setAddresses",
         inputs: [
             {
-                name: "_sharedBridge",
+                name: "_assetRouter",
                 type: "address",
                 internalType: "address",
             },
@@ -1043,11 +1136,6 @@ const _abi = [
             },
             {
                 name: "_interopCenter",
-                type: "address",
-                internalType: "address",
-            },
-            {
-                name: "_assetTracker",
                 type: "address",
                 internalType: "address",
             },
@@ -1091,14 +1179,14 @@ const _abi = [
         name: "settlementLayer",
         inputs: [
             {
-                name: "_chainId",
+                name: "chainId",
                 type: "uint256",
                 internalType: "uint256",
             },
         ],
         outputs: [
             {
-                name: "",
+                name: "activeSettlementLayerChainId",
                 type: "uint256",
                 internalType: "uint256",
             },
@@ -1107,17 +1195,44 @@ const _abi = [
     },
     {
         type: "function",
+        name: "transferOwnership",
+        inputs: [
+            {
+                name: "newOwner",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "unpause",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "unpauseMigration",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
         name: "whitelistedSettlementLayers",
         inputs: [
             {
-                name: "_chainId",
+                name: "chainId",
                 type: "uint256",
                 internalType: "uint256",
             },
         ],
         outputs: [
             {
-                name: "",
+                name: "isWhitelistedSettlementLayer",
                 type: "bool",
                 internalType: "bool",
             },
@@ -1264,6 +1379,19 @@ const _abi = [
     },
     {
         type: "event",
+        name: "Initialized",
+        inputs: [
+            {
+                name: "version",
+                type: "uint8",
+                indexed: false,
+                internalType: "uint8",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
         name: "MigrationFinalized",
         inputs: [
             {
@@ -1377,6 +1505,57 @@ const _abi = [
     },
     {
         type: "event",
+        name: "OwnershipTransferStarted",
+        inputs: [
+            {
+                name: "previousOwner",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+            {
+                name: "newOwner",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "OwnershipTransferred",
+        inputs: [
+            {
+                name: "previousOwner",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+            {
+                name: "newOwner",
+                type: "address",
+                indexed: true,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "Paused",
+        inputs: [
+            {
+                name: "account",
+                type: "address",
+                indexed: false,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
         name: "SettlementLayerRegistered",
         inputs: [
             {
@@ -1393,6 +1572,317 @@ const _abi = [
             },
         ],
         anonymous: false,
+    },
+    {
+        type: "event",
+        name: "Unpaused",
+        inputs: [
+            {
+                name: "account",
+                type: "address",
+                indexed: false,
+                internalType: "address",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "error",
+        name: "AlreadyCurrentSL",
+        inputs: [
+            {
+                name: "blockChainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "AssetHandlerNotRegistered",
+        inputs: [
+            {
+                name: "assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "AssetIdAlreadyRegistered",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "AssetIdNotSupported",
+        inputs: [
+            {
+                name: "assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "BridgeHubAlreadyRegistered",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "CTMAlreadyRegistered",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "CTMNotRegistered",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ChainIdAlreadyExists",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ChainIdAlreadyPresent",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ChainIdCantBeCurrentChain",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ChainIdMismatch",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ChainIdNotRegistered",
+        inputs: [
+            {
+                name: "chainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ChainIdTooBig",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ChainNotLegacy",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ChainNotPresentInCTM",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "EmptyAssetId",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "HyperchainNotRegistered",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "IncorrectBridgeHubAddress",
+        inputs: [
+            {
+                name: "bridgehub",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "IncorrectChainAssetId",
+        inputs: [
+            {
+                name: "assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+            {
+                name: "assetIdFromChainId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "IncorrectSender",
+        inputs: [
+            {
+                name: "prevMsgSender",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "chainAdmin",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "MigrationPaused",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "NoCTMForAssetId",
+        inputs: [
+            {
+                name: "assetId",
+                type: "bytes32",
+                internalType: "bytes32",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "NonEmptyMsgValue",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "NotAssetRouter",
+        inputs: [
+            {
+                name: "msgSender",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "sharedBridge",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "NotCurrentSL",
+        inputs: [
+            {
+                name: "settlementLayerChainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "blockChainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "NotInGatewayMode",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "NotInitializedReentrancyGuard",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "NotL1",
+        inputs: [
+            {
+                name: "l1ChainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "blockChainId",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "NotRelayedSender",
+        inputs: [
+            {
+                name: "msgSender",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "settlementLayerRelaySender",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "Reentrancy",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "SLNotWhitelisted",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "SettlementLayersMustSettleOnL1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "SharedBridgeNotSet",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "SlotOccupied",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "Unauthorized",
+        inputs: [
+            {
+                name: "caller",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ZKChainLimitReached",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ZeroAddress",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ZeroChainId",
+        inputs: [],
     },
 ];
 class IBridgehub__factory {
