@@ -1,7 +1,7 @@
 import { EIP712Signer } from './signer';
 import { Provider } from './provider';
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, Overrides, ProgressCallback } from 'ethers';
-import { Address, BalancesMap, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, LogProofTarget, TransactionLike, TransactionRequest, TransactionResponse } from './types';
+import { Address, BalancesMap, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IL2SharedBridge, IZkSyncHyperchain } from './typechain';
 declare const Wallet_base: {
     new (...args: any[]): {
@@ -354,7 +354,7 @@ declare const Wallet_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
@@ -991,7 +991,7 @@ export declare class Wallet extends Wallet_base {
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
-    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<FinalizeWithdrawalParams>;
+    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<FinalizeWithdrawalParams>;
     /**
      * @inheritDoc
      *

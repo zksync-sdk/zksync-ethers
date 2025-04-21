@@ -73,14 +73,6 @@ export type Eip712Meta = {
 export type BlockTag = BigNumberish | string | 'committed' | 'finalized' | 'latest' | 'earliest' | 'pending' | 'l1_committed';
 /** Pipe-delimited choice of deployment types. */
 export type DeploymentType = 'create' | 'createAccount' | 'create2' | 'create2Account';
-/** Merkle root target for interop log proofs */
-export type LogProofTarget = 
-/** L2's ChainBatchRoot */
-'chain'
-/** Gateway's MessageRoot */
- | 'gw_message_root'
-/** Gateway's ChainBatchRoot. Fallback behaviour, used for withdrawals */
- | 'gw_chain_batch_root';
 /** Bridged token. */
 export interface Token {
     /** Token address on L1. */

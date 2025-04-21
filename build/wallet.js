@@ -567,8 +567,8 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
-    async getFinalizeWithdrawalParams(withdrawalHash, index = 0, precommitLogIndex = 0, logProofTarget) {
-        return super.getFinalizeWithdrawalParams(withdrawalHash, index, precommitLogIndex, logProofTarget);
+    async getFinalizeWithdrawalParams(withdrawalHash, index = 0, precommitLogIndex = 0, extendeduntilChainId) {
+        return super.getFinalizeWithdrawalParams(withdrawalHash, index, precommitLogIndex, extendeduntilChainId);
     }
     /**
      * @inheritDoc

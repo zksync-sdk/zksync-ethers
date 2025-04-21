@@ -1,6 +1,6 @@
-import { EIP712Signer } from './signer';
-import { Provider } from './provider';
-import { EIP712_TX_TYPE, INTEROP_TX_TYPE, serializeEip712 } from './utils';
+import {EIP712Signer} from './signer';
+import {Provider} from './provider';
+import {EIP712_TX_TYPE, INTEROP_TX_TYPE, serializeEip712} from './utils';
 import {
   BigNumberish,
   BlockTag,
@@ -18,12 +18,11 @@ import {
   FullDepositFee,
   PaymasterParams,
   PriorityOpResponse,
-  LogProofTarget,
   TransactionLike,
   TransactionRequest,
   TransactionResponse,
 } from './types';
-import { AdapterL1, AdapterL2 } from './adapters';
+import {AdapterL1, AdapterL2} from './adapters';
 import {
   IBridgehub,
   IL1ERC20Bridge,
@@ -701,10 +700,10 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async getFinalizeWithdrawalParams(
     withdrawalHash: BytesLike,
     index = 0,
-    precommitLogIndex = 0,
-    logProofTarget?: LogProofTarget,
+    precommitLogIndex = 0,  
+    extendeduntilChainId?: number,
   ): Promise<FinalizeWithdrawalParams> {
-    return super.getFinalizeWithdrawalParams(withdrawalHash, index, precommitLogIndex, logProofTarget);
+    return super.getFinalizeWithdrawalParams(withdrawalHash, index, precommitLogIndex, extendeduntilChainId);
   }
 
   /**
@@ -818,7 +817,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
     overrides?: Overrides;
-  }): Promise<{ token: Address; allowance: BigNumberish }> {
+  }): Promise<{token: Address; allowance: BigNumberish}> {
     return super.getRequestExecuteAllowanceParams(transaction);
   }
 
