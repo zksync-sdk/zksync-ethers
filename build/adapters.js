@@ -814,13 +814,15 @@ function AdapterL1(Base) {
          * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
          * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
          * withdrawal you want to finalize.
+         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+         * @param [logProofTarget] Merkle proof target for interop.
          * @throws {Error} If log proof can not be found.
          */
-        async getFinalizeWithdrawalParams(withdrawalHash, index = 0, precommitLogIndex = 0, extendeduntilChainId) {
+        async getFinalizeWithdrawalParams(withdrawalHash, index = 0, precommitLogIndex = 0, logProofTarget) {
             const { log, l1BatchTxId } = await this._getWithdrawalLog(withdrawalHash, index);
             const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
             const sender = ethers_1.ethers.dataSlice(log.topics[1], 12);
-            const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex, precommitLogIndex, extendeduntilChainId);
+            const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex, precommitLogIndex, logProofTarget);
             if (!proof) {
                 throw new Error('Log proof not found!');
             }

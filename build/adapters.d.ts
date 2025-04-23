@@ -1,7 +1,7 @@
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, TransactionRequest as EthersTransactionRequest } from 'ethers';
 import { Provider } from './provider';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IZkSyncHyperchain, IL2SharedBridge } from './typechain';
-import { Address, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FinalizeWithdrawalParamsWithoutProof, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
+import { Address, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FinalizeWithdrawalParamsWithoutProof, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
 type Constructor<T = {}> = new (...args: any[]) => T;
 interface TxSender {
     sendTransaction(tx: EthersTransactionRequest): Promise<ethers.TransactionResponse>;
@@ -528,9 +528,11 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
          * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
          * withdrawal you want to finalize.
+         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+         * @param [logProofTarget] Merkle proof target for interop.
          * @throws {Error} If log proof can not be found.
          */
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParamsWithoutProof>;
         /**
          * Returns L1 Nullifier address.

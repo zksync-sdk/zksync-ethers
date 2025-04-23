@@ -51,6 +51,7 @@ import {
   PaymasterParams,
   StorageProof,
   LogProof,
+  LogProofTarget,
   Token,
   ProtocolVersion,
   FeeParams,
@@ -348,21 +349,23 @@ export function JsonRpcApiProvider<
      *
      * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
      * @param [index] The index of the L2 to L1 log in the transaction.
+     * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+     * @param [logProofTarget] Merkle proof target for interop.
      */
     async getLogProof(
       txHash: BytesLike,
       index?: number,
       precommitLogIndex?: number,
-      extendeduntilChainId?: number
+      logProofTarget?: LogProofTarget
     ): Promise<LogProof | null> {
-      if (extendeduntilChainId) {
-        return await this.send('zks_getL2ToL1LogProofUntilChainId', [
+      if (logProofTarget) {
+        return await this.send('zks_getL2ToL1LogProofUntilTarget', [
           ethers.hexlify(txHash),
           index,
-          extendeduntilChainId.toString(16),
+          logProofTarget,
           precommitLogIndex,
         ]);
-      } else if (precommitLogIndex) { 
+      } else if (precommitLogIndex) {
         return await this.send('zks_getL2ToL1LogProofPrecommit', [
           ethers.hexlify(txHash),
           index,
@@ -1070,9 +1073,9 @@ export function JsonRpcApiProvider<
         // throw new Error('@TODO: the returned hash did not match!');
       }
 
-      let result = this._wrapTransactionResponse(<any>tx).replaceableTransaction(
-        blockNumber
-      );
+      const result = this._wrapTransactionResponse(
+        <any>tx
+      ).replaceableTransaction(blockNumber);
       result.realInteropHash = hash;
       return result;
     }
@@ -1368,10 +1371,10 @@ export function JsonRpcApiProvider<
           ),
         };
       }
-      if (tx.customData.merkleProof)  {
+      if (tx.customData.merkleProof) {
         result.eip712Meta.merkleProof = Array.from(
           ethers.getBytes(tx.customData.merkleProof)
-        )
+        );
       }
       if (tx.customData.fullFee) {
         result.eip712Meta.fullFee = ethers.toBeHex(tx.customData.fullFee);
@@ -1671,9 +1674,9 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     txHash: BytesLike,
     index?: number,
     precommitLogIndex?: number,
-    extendeduntilChainId?: number,
+    logProofTarget?: LogProofTarget
   ): Promise<LogProof | null> {
-    return super.getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId);
+    return super.getLogProof(txHash, index, precommitLogIndex, logProofTarget);
   }
 
   /**

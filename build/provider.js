@@ -222,13 +222,15 @@ function JsonRpcApiProvider(ProviderType) {
          *
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
+         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+         * @param [logProofTarget] Merkle proof target for interop.
          */
-        async getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId) {
-            if (extendeduntilChainId) {
-                return await this.send('zks_getL2ToL1LogProofUntilChainId', [
+        async getLogProof(txHash, index, precommitLogIndex, logProofTarget) {
+            if (logProofTarget) {
+                return await this.send('zks_getL2ToL1LogProofUntilTarget', [
                     ethers_1.ethers.hexlify(txHash),
                     index,
-                    extendeduntilChainId.toString(16),
+                    logProofTarget,
                     precommitLogIndex,
                 ]);
             }
@@ -783,7 +785,7 @@ function JsonRpcApiProvider(ProviderType) {
             if (tx.hash !== hash && tx.type !== utils_1.INTEROP_TX_TYPE) {
                 // throw new Error('@TODO: the returned hash did not match!');
             }
-            let result = this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
+            const result = this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
             result.realInteropHash = hash;
             return result;
         }
@@ -1241,8 +1243,8 @@ class Provider extends JsonRpcApiProvider(ethers_1.ethers.JsonRpcProvider) {
      * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
      * console.log(`Log ${utils.toJSON(await provider.getLogProof(tx, 0))}`);
      */
-    async getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId) {
-        return super.getLogProof(txHash, index, precommitLogIndex, extendeduntilChainId);
+    async getLogProof(txHash, index, precommitLogIndex, logProofTarget) {
+        return super.getLogProof(txHash, index, precommitLogIndex, logProofTarget);
     }
     /**
      * @inheritDoc

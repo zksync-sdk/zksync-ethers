@@ -195,7 +195,7 @@ export const EIP712_TX_TYPE = 0x71;
  *
  * @constant
  */
-export const INTEROP_TX_TYPE = 0xFD;
+export const INTEROP_TX_TYPE = 0xfd;
 
 /**
  * Represents a priority transaction operation on L2.
@@ -598,10 +598,10 @@ export function serializeEip712(
     fields.push(meta.fullFee);
   }
   if (meta.toMint) {
-      fields.push(meta.toMint);
+    fields.push(meta.toMint);
   }
   if (meta.refundRecipient) {
-      fields.push(meta.refundRecipient);
+    fields.push(meta.refundRecipient);
   }
 
   const txType = transaction.type || EIP712_TX_TYPE;

@@ -68,6 +68,7 @@ import {
   FinalizeWithdrawalParams,
   FinalizeWithdrawalParamsWithoutProof,
   FullDepositFee,
+  LogProofTarget,
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
@@ -724,7 +725,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       customBridgeData?: BytesLike;
     }): Promise<PriorityOpResponse> {
       const tx = await this._getDepositETHOnETHBasedChainTx(transaction);
-      
+
       const baseGasLimit = await this.estimateGasRequestExecute(tx);
       const gasLimit = scaleGasLimit(baseGasLimit);
 
@@ -1506,13 +1507,15 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
      * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
      * withdrawal you want to finalize.
+     * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+     * @param [logProofTarget] Merkle proof target for interop.
      * @throws {Error} If log proof can not be found.
      */
     async getFinalizeWithdrawalParams(
       withdrawalHash: BytesLike,
       index = 0,
       precommitLogIndex = 0,
-      extendeduntilChainId?: number,
+      logProofTarget?: LogProofTarget
     ): Promise<FinalizeWithdrawalParams> {
       const {log, l1BatchTxId} = await this._getWithdrawalLog(
         withdrawalHash,
@@ -1527,7 +1530,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         withdrawalHash,
         l2ToL1LogIndex,
         precommitLogIndex,
-        extendeduntilChainId
+        logProofTarget
       );
       if (!proof) {
         throw new Error('Log proof not found!');

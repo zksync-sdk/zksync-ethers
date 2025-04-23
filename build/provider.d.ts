@@ -1,6 +1,6 @@
 import { ethers, BigNumberish, BytesLike, BlockTag, Filter, FilterByBlockHash, TransactionRequest as EthersTransactionRequest, JsonRpcTransactionRequest, Networkish, Eip1193Provider, JsonRpcError, JsonRpcResult, JsonRpcPayload } from 'ethers';
 import { IL2AssetRouter, IL2Bridge, IL2NativeTokenVault, IL2SharedBridge, IBridgedStandardToken } from './typechain';
-import { Address, TransactionResponse, TransactionRequest, TransactionStatus, PriorityOpResponse, BalancesMap, TransactionReceipt, Block, Log, TransactionDetails, BlockDetails, ContractAccountInfo, Network as ZkSyncNetwork, BatchDetails, Fee, RawBlockTransaction, PaymasterParams, StorageProof, LogProof, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput } from './types';
+import { Address, TransactionResponse, TransactionRequest, TransactionStatus, PriorityOpResponse, BalancesMap, TransactionReceipt, Block, Log, TransactionDetails, BlockDetails, ContractAccountInfo, Network as ZkSyncNetwork, BatchDetails, Fee, RawBlockTransaction, PaymasterParams, StorageProof, LogProof, LogProofTarget, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput } from './types';
 import { Signer } from './signer';
 type Constructor<T = {}> = new (...args: any[]) => T;
 export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiProvider>>(ProviderType: TBase): {
@@ -130,8 +130,10 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          *
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
+         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+         * @param [logProofTarget] Merkle proof target for interop.
          */
-        getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<LogProof | null>;
+        getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -719,8 +721,10 @@ declare const Provider_base: {
          *
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
+         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+         * @param [logProofTarget] Merkle proof target for interop.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, extendeduntilChainId?: number | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, logProofTarget?: LogProofTarget | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -1379,7 +1383,7 @@ export declare class Provider extends Provider_base {
      * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
      * console.log(`Log ${utils.toJSON(await provider.getLogProof(tx, 0))}`);
      */
-    getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<LogProof | null>;
+    getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<LogProof | null>;
     /**
      * @inheritDoc
      *
@@ -2164,8 +2168,10 @@ declare const BrowserProvider_base: {
          *
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
+         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
+         * @param [logProofTarget] Merkle proof target for interop.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, extendeduntilChainId?: number | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, logProofTarget?: LogProofTarget | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
