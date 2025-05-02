@@ -268,7 +268,9 @@ class Transaction extends ethers_1.ethers.Transaction {
         _Transaction_from.set(this, void 0);
     }
     get type() {
-        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE ? __classPrivateFieldGet(this, _Transaction_type, "f") : super.type;
+        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE
+            ? __classPrivateFieldGet(this, _Transaction_type, "f")
+            : super.type;
     }
     set type(value) {
         switch (value) {
@@ -339,13 +341,17 @@ class Transaction extends ethers_1.ethers.Transaction {
         }
     }
     get serialized() {
-        if (!this.customData && __classPrivateFieldGet(this, _Transaction_type, "f") !== utils_1.EIP712_TX_TYPE && __classPrivateFieldGet(this, _Transaction_type, "f") !== utils_1.INTEROP_TX_TYPE) {
+        if (!this.customData &&
+            __classPrivateFieldGet(this, _Transaction_type, "f") !== utils_1.EIP712_TX_TYPE &&
+            __classPrivateFieldGet(this, _Transaction_type, "f") !== utils_1.INTEROP_TX_TYPE) {
             return super.serialized;
         }
         return (0, utils_1.serializeEip712)(this, this.signature);
     }
     get unsignedSerialized() {
-        if (!this.customData && this.type !== utils_1.EIP712_TX_TYPE && this.type !== utils_1.INTEROP_TX_TYPE) {
+        if (!this.customData &&
+            this.type !== utils_1.EIP712_TX_TYPE &&
+            this.type !== utils_1.INTEROP_TX_TYPE) {
             return super.unsignedSerialized;
         }
         return (0, utils_1.serializeEip712)(this);
@@ -377,7 +383,9 @@ class Transaction extends ethers_1.ethers.Transaction {
         }
     }
     get from() {
-        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE ? __classPrivateFieldGet(this, _Transaction_from, "f") : super.from;
+        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE
+            ? __classPrivateFieldGet(this, _Transaction_from, "f")
+            : super.from;
     }
     set from(value) {
         __classPrivateFieldSet(this, _Transaction_from, value, "f");

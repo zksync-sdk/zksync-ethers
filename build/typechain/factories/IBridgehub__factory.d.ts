@@ -2,6 +2,22 @@ import { type ContractRunner } from "ethers";
 import type { IBridgehub, IBridgehubInterface } from "../IBridgehub";
 export declare class IBridgehub__factory {
     static readonly abi: readonly [{
+        readonly type: "constructor";
+        readonly inputs: readonly [{
+            readonly name: "_l1ChainId";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }, {
+            readonly name: "_owner";
+            readonly type: "address";
+            readonly internalType: "address";
+        }, {
+            readonly name: "_maxNumberOfZKChains";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }];
+        readonly stateMutability: "nonpayable";
+    }, {
         readonly type: "function";
         readonly name: "L1_CHAIN_ID";
         readonly inputs: readonly [];
@@ -13,7 +29,23 @@ export declare class IBridgehub__factory {
         readonly stateMutability: "view";
     }, {
         readonly type: "function";
+        readonly name: "MAX_NUMBER_OF_ZK_CHAINS";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [{
+            readonly name: "";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }];
+        readonly stateMutability: "view";
+    }, {
+        readonly type: "function";
         readonly name: "acceptAdmin";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
+        readonly name: "acceptOwnership";
         readonly inputs: readonly [];
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
@@ -51,7 +83,7 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "assetIdIsRegistered";
         readonly inputs: readonly [{
-            readonly name: "_baseTokenAssetId";
+            readonly name: "baseTokenAssetId";
             readonly type: "bytes32";
             readonly internalType: "bytes32";
         }];
@@ -73,16 +105,6 @@ export declare class IBridgehub__factory {
         readonly stateMutability: "view";
     }, {
         readonly type: "function";
-        readonly name: "assetTracker";
-        readonly inputs: readonly [];
-        readonly outputs: readonly [{
-            readonly name: "";
-            readonly type: "address";
-            readonly internalType: "contract IAssetTracker";
-        }];
-        readonly stateMutability: "view";
-    }, {
-        readonly type: "function";
         readonly name: "baseToken";
         readonly inputs: readonly [{
             readonly name: "_chainId";
@@ -99,7 +121,7 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "baseTokenAssetId";
         readonly inputs: readonly [{
-            readonly name: "_chainId";
+            readonly name: "chainId";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }];
@@ -113,11 +135,11 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "bridgeBurn";
         readonly inputs: readonly [{
-            readonly name: "_chainId";
+            readonly name: "_settlementChainId";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }, {
-            readonly name: "_msgValue";
+            readonly name: "_l2MsgValue";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }, {
@@ -134,7 +156,7 @@ export declare class IBridgehub__factory {
             readonly internalType: "bytes";
         }];
         readonly outputs: readonly [{
-            readonly name: "_bridgeMintData";
+            readonly name: "bridgehubMintData";
             readonly type: "bytes";
             readonly internalType: "bytes";
         }];
@@ -143,7 +165,7 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "bridgeMint";
         readonly inputs: readonly [{
-            readonly name: "_chainId";
+            readonly name: "";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }, {
@@ -151,7 +173,7 @@ export declare class IBridgehub__factory {
             readonly type: "bytes32";
             readonly internalType: "bytes32";
         }, {
-            readonly name: "_data";
+            readonly name: "_bridgehubMintData";
             readonly type: "bytes";
             readonly internalType: "bytes";
         }];
@@ -161,7 +183,7 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "bridgeRecoverFailedTransfer";
         readonly inputs: readonly [{
-            readonly name: "_chainId";
+            readonly name: "";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }, {
@@ -183,7 +205,7 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "chainTypeManager";
         readonly inputs: readonly [{
-            readonly name: "_chainId";
+            readonly name: "chainId";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }];
@@ -197,7 +219,7 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "chainTypeManagerIsRegistered";
         readonly inputs: readonly [{
-            readonly name: "_chainTypeManager";
+            readonly name: "chainTypeManager";
             readonly type: "address";
             readonly internalType: "address";
         }];
@@ -240,7 +262,7 @@ export declare class IBridgehub__factory {
             readonly internalType: "bytes[]";
         }];
         readonly outputs: readonly [{
-            readonly name: "chainId";
+            readonly name: "";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }];
@@ -249,12 +271,12 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "ctmAssetIdFromAddress";
         readonly inputs: readonly [{
-            readonly name: "_ctmAddress";
+            readonly name: "ctmAddress";
             readonly type: "address";
             readonly internalType: "address";
         }];
         readonly outputs: readonly [{
-            readonly name: "";
+            readonly name: "ctmAssetId";
             readonly type: "bytes32";
             readonly internalType: "bytes32";
         }];
@@ -277,19 +299,19 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "ctmAssetIdToAddress";
         readonly inputs: readonly [{
-            readonly name: "_assetInfo";
+            readonly name: "ctmAssetId";
             readonly type: "bytes32";
             readonly internalType: "bytes32";
         }];
         readonly outputs: readonly [{
-            readonly name: "";
+            readonly name: "ctmAddress";
             readonly type: "address";
             readonly internalType: "address";
         }];
         readonly stateMutability: "view";
     }, {
         readonly type: "function";
-        readonly name: "forwardTransactionOnGatewayWithBalanceChange";
+        readonly name: "forwardTransactionOnGateway";
         readonly inputs: readonly [{
             readonly name: "_chainId";
             readonly type: "uint256";
@@ -302,18 +324,6 @@ export declare class IBridgehub__factory {
             readonly name: "_expirationTimestamp";
             readonly type: "uint64";
             readonly internalType: "uint64";
-        }, {
-            readonly name: "_baseTokenAmount";
-            readonly type: "uint256";
-            readonly internalType: "uint256";
-        }, {
-            readonly name: "_assetId";
-            readonly type: "bytes32";
-            readonly internalType: "bytes32";
-        }, {
-            readonly name: "_amount";
-            readonly type: "uint256";
-            readonly internalType: "uint256";
         }];
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
@@ -332,7 +342,7 @@ export declare class IBridgehub__factory {
         readonly name: "getAllZKChains";
         readonly inputs: readonly [];
         readonly outputs: readonly [{
-            readonly name: "";
+            readonly name: "chainAddresses";
             readonly type: "address[]";
             readonly internalType: "address[]";
         }];
@@ -346,11 +356,27 @@ export declare class IBridgehub__factory {
             readonly internalType: "uint256";
         }];
         readonly outputs: readonly [{
-            readonly name: "";
+            readonly name: "chainAddress";
             readonly type: "address";
             readonly internalType: "address";
         }];
         readonly stateMutability: "view";
+    }, {
+        readonly type: "function";
+        readonly name: "initialize";
+        readonly inputs: readonly [{
+            readonly name: "_owner";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
+        readonly name: "initializeV2";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
     }, {
         readonly type: "function";
         readonly name: "interopCenter";
@@ -415,6 +441,48 @@ export declare class IBridgehub__factory {
             readonly name: "";
             readonly type: "bool";
             readonly internalType: "bool";
+        }];
+        readonly stateMutability: "view";
+    }, {
+        readonly type: "function";
+        readonly name: "owner";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [{
+            readonly name: "";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+        readonly stateMutability: "view";
+    }, {
+        readonly type: "function";
+        readonly name: "pause";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
+        readonly name: "pauseMigration";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
+        readonly name: "paused";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [{
+            readonly name: "";
+            readonly type: "bool";
+            readonly internalType: "bool";
+        }];
+        readonly stateMutability: "view";
+    }, {
+        readonly type: "function";
+        readonly name: "pendingOwner";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [{
+            readonly name: "";
+            readonly type: "address";
+            readonly internalType: "address";
         }];
         readonly stateMutability: "view";
     }, {
@@ -561,7 +629,7 @@ export declare class IBridgehub__factory {
             readonly type: "uint256";
             readonly internalType: "uint256";
         }, {
-            readonly name: "_hyperchain";
+            readonly name: "_zkChain";
             readonly type: "address";
             readonly internalType: "address";
         }];
@@ -599,6 +667,12 @@ export declare class IBridgehub__factory {
             readonly type: "address";
             readonly internalType: "address";
         }];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
+        readonly name: "renounceOwnership";
+        readonly inputs: readonly [];
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
     }, {
@@ -785,7 +859,7 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "setAddresses";
         readonly inputs: readonly [{
-            readonly name: "_sharedBridge";
+            readonly name: "_assetRouter";
             readonly type: "address";
             readonly internalType: "address";
         }, {
@@ -798,10 +872,6 @@ export declare class IBridgehub__factory {
             readonly internalType: "contract IMessageRoot";
         }, {
             readonly name: "_interopCenter";
-            readonly type: "address";
-            readonly internalType: "address";
-        }, {
-            readonly name: "_assetTracker";
             readonly type: "address";
             readonly internalType: "address";
         }];
@@ -835,26 +905,48 @@ export declare class IBridgehub__factory {
         readonly type: "function";
         readonly name: "settlementLayer";
         readonly inputs: readonly [{
-            readonly name: "_chainId";
+            readonly name: "chainId";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }];
         readonly outputs: readonly [{
-            readonly name: "";
+            readonly name: "activeSettlementLayerChainId";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }];
         readonly stateMutability: "view";
     }, {
         readonly type: "function";
+        readonly name: "transferOwnership";
+        readonly inputs: readonly [{
+            readonly name: "newOwner";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
+        readonly name: "unpause";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
+        readonly name: "unpauseMigration";
+        readonly inputs: readonly [];
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+    }, {
+        readonly type: "function";
         readonly name: "whitelistedSettlementLayers";
         readonly inputs: readonly [{
-            readonly name: "_chainId";
+            readonly name: "chainId";
             readonly type: "uint256";
             readonly internalType: "uint256";
         }];
         readonly outputs: readonly [{
-            readonly name: "";
+            readonly name: "isWhitelistedSettlementLayer";
             readonly type: "bool";
             readonly internalType: "bool";
         }];
@@ -971,6 +1063,16 @@ export declare class IBridgehub__factory {
         readonly anonymous: false;
     }, {
         readonly type: "event";
+        readonly name: "Initialized";
+        readonly inputs: readonly [{
+            readonly name: "version";
+            readonly type: "uint8";
+            readonly indexed: false;
+            readonly internalType: "uint8";
+        }];
+        readonly anonymous: false;
+    }, {
+        readonly type: "event";
         readonly name: "MigrationFinalized";
         readonly inputs: readonly [{
             readonly name: "chainId";
@@ -1061,6 +1163,46 @@ export declare class IBridgehub__factory {
         readonly anonymous: false;
     }, {
         readonly type: "event";
+        readonly name: "OwnershipTransferStarted";
+        readonly inputs: readonly [{
+            readonly name: "previousOwner";
+            readonly type: "address";
+            readonly indexed: true;
+            readonly internalType: "address";
+        }, {
+            readonly name: "newOwner";
+            readonly type: "address";
+            readonly indexed: true;
+            readonly internalType: "address";
+        }];
+        readonly anonymous: false;
+    }, {
+        readonly type: "event";
+        readonly name: "OwnershipTransferred";
+        readonly inputs: readonly [{
+            readonly name: "previousOwner";
+            readonly type: "address";
+            readonly indexed: true;
+            readonly internalType: "address";
+        }, {
+            readonly name: "newOwner";
+            readonly type: "address";
+            readonly indexed: true;
+            readonly internalType: "address";
+        }];
+        readonly anonymous: false;
+    }, {
+        readonly type: "event";
+        readonly name: "Paused";
+        readonly inputs: readonly [{
+            readonly name: "account";
+            readonly type: "address";
+            readonly indexed: false;
+            readonly internalType: "address";
+        }];
+        readonly anonymous: false;
+    }, {
+        readonly type: "event";
         readonly name: "SettlementLayerRegistered";
         readonly inputs: readonly [{
             readonly name: "chainId";
@@ -1074,6 +1216,244 @@ export declare class IBridgehub__factory {
             readonly internalType: "bool";
         }];
         readonly anonymous: false;
+    }, {
+        readonly type: "event";
+        readonly name: "Unpaused";
+        readonly inputs: readonly [{
+            readonly name: "account";
+            readonly type: "address";
+            readonly indexed: false;
+            readonly internalType: "address";
+        }];
+        readonly anonymous: false;
+    }, {
+        readonly type: "error";
+        readonly name: "AlreadyCurrentSL";
+        readonly inputs: readonly [{
+            readonly name: "blockChainId";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "AssetHandlerNotRegistered";
+        readonly inputs: readonly [{
+            readonly name: "assetId";
+            readonly type: "bytes32";
+            readonly internalType: "bytes32";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "AssetIdAlreadyRegistered";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "AssetIdNotSupported";
+        readonly inputs: readonly [{
+            readonly name: "assetId";
+            readonly type: "bytes32";
+            readonly internalType: "bytes32";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "BridgeHubAlreadyRegistered";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "CTMAlreadyRegistered";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "CTMNotRegistered";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainIdAlreadyExists";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainIdAlreadyPresent";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainIdCantBeCurrentChain";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainIdMismatch";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainIdNotRegistered";
+        readonly inputs: readonly [{
+            readonly name: "chainId";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainIdTooBig";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainNotLegacy";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ChainNotPresentInCTM";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "EmptyAssetId";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "HyperchainNotRegistered";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "IncorrectBridgeHubAddress";
+        readonly inputs: readonly [{
+            readonly name: "bridgehub";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "IncorrectChainAssetId";
+        readonly inputs: readonly [{
+            readonly name: "assetId";
+            readonly type: "bytes32";
+            readonly internalType: "bytes32";
+        }, {
+            readonly name: "assetIdFromChainId";
+            readonly type: "bytes32";
+            readonly internalType: "bytes32";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "IncorrectSender";
+        readonly inputs: readonly [{
+            readonly name: "prevMsgSender";
+            readonly type: "address";
+            readonly internalType: "address";
+        }, {
+            readonly name: "chainAdmin";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "MigrationPaused";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "NoCTMForAssetId";
+        readonly inputs: readonly [{
+            readonly name: "assetId";
+            readonly type: "bytes32";
+            readonly internalType: "bytes32";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "NonEmptyMsgValue";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "NotAssetRouter";
+        readonly inputs: readonly [{
+            readonly name: "msgSender";
+            readonly type: "address";
+            readonly internalType: "address";
+        }, {
+            readonly name: "sharedBridge";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "NotCurrentSL";
+        readonly inputs: readonly [{
+            readonly name: "settlementLayerChainId";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }, {
+            readonly name: "blockChainId";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "NotInGatewayMode";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "NotInitializedReentrancyGuard";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "NotL1";
+        readonly inputs: readonly [{
+            readonly name: "l1ChainId";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }, {
+            readonly name: "blockChainId";
+            readonly type: "uint256";
+            readonly internalType: "uint256";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "NotRelayedSender";
+        readonly inputs: readonly [{
+            readonly name: "msgSender";
+            readonly type: "address";
+            readonly internalType: "address";
+        }, {
+            readonly name: "settlementLayerRelaySender";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "Reentrancy";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "SLNotWhitelisted";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "SettlementLayersMustSettleOnL1";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "SharedBridgeNotSet";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "SlotOccupied";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "Unauthorized";
+        readonly inputs: readonly [{
+            readonly name: "caller";
+            readonly type: "address";
+            readonly internalType: "address";
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "ZKChainLimitReached";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ZeroAddress";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ZeroChainId";
+        readonly inputs: readonly [];
     }];
     static createInterface(): IBridgehubInterface;
     static connect(address: string, runner?: ContractRunner | null): IBridgehub;

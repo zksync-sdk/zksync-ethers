@@ -164,7 +164,7 @@ exports.EIP712_TX_TYPE = 0x71;
  *
  * @constant
  */
-exports.INTEROP_TX_TYPE = 0xFD;
+exports.INTEROP_TX_TYPE = 0xfd;
 /**
  * Represents a priority transaction operation on L2.
  *

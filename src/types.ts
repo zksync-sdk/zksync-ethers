@@ -115,6 +115,15 @@ export type DeploymentType =
   | 'create2'
   | 'create2Account';
 
+/** Merkle root target for interop log proofs */
+export type LogProofTarget =
+  /** L2's ChainBatchRoot */
+  | 'chain'
+  /** Gateway's MessageRoot */
+  | 'gw_message_root'
+  /** Gateway's ChainBatchRoot. Fallback behaviour, used for withdrawals */
+  | 'gw_chain_batch_root';
+
 /** Bridged token. */
 export interface Token {
   /** Token address on L1. */
@@ -486,7 +495,9 @@ export class Transaction extends ethers.Transaction {
   #from?: null | string;
 
   override get type(): number | null {
-    return this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE ? this.#type : super.type;
+    return this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE
+      ? this.#type
+      : super.type;
   }
 
   override set type(value: number | string | null) {
@@ -539,7 +550,7 @@ export class Transaction extends ethers.Transaction {
             'unsigned transaction cannot define from',
             'tx',
             tx
-            );
+          );
         }
         assertArgument(
           isAddressEq(result.from!, tx.from),
@@ -558,7 +569,7 @@ export class Transaction extends ethers.Transaction {
             tx
           );
           assertArgument(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
-        } 
+        }
       }
 
       return result;
@@ -566,14 +577,22 @@ export class Transaction extends ethers.Transaction {
   }
 
   override get serialized(): string {
-    if (!this.customData && this.#type !== EIP712_TX_TYPE && this.#type !== INTEROP_TX_TYPE) {
+    if (
+      !this.customData &&
+      this.#type !== EIP712_TX_TYPE &&
+      this.#type !== INTEROP_TX_TYPE
+    ) {
       return super.serialized;
     }
     return serializeEip712(this, this.signature!);
   }
 
   override get unsignedSerialized(): string {
-    if (!this.customData && this.type !== EIP712_TX_TYPE && this.type !== INTEROP_TX_TYPE) {
+    if (
+      !this.customData &&
+      this.type !== EIP712_TX_TYPE &&
+      this.type !== INTEROP_TX_TYPE
+    ) {
       return super.unsignedSerialized;
     }
     return serializeEip712(this);
@@ -614,7 +633,9 @@ export class Transaction extends ethers.Transaction {
   }
 
   override get from(): string | null {
-    return this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE ? this.#from! : super.from;
+    return this.#type === EIP712_TX_TYPE || this.#type === INTEROP_TX_TYPE
+      ? this.#from!
+      : super.from;
   }
   override set from(value: string | null) {
     this.#from = value;
@@ -944,18 +965,18 @@ export interface FinalizeWithdrawalParams {
 }
 
 export interface FinalizeWithdrawalParamsWithoutProof {
-    /** The L2 batch number where the withdrawal was processed. */
-    l1BatchNumber: number | null;
-    // /** The position in the L2 logs Merkle tree of the l2Log that was sent with the message. */
-    // l2MessageIndex: number;
-    /** The L2 transaction number in the batch, in which the log was sent. */
-    l2TxNumberInBlock: number | null;
-    /** The L2 withdraw data, stored in an L2 -> L1 message. */
-    message: any;
-    /** The L2 address which sent the log. */
-    sender: string;
-//     /** The Merkle proof of the inclusion L2 -> L1 message about withdrawal initialization. */
-//     proof: string[];
+  /** The L2 batch number where the withdrawal was processed. */
+  l1BatchNumber: number | null;
+  // /** The position in the L2 logs Merkle tree of the l2Log that was sent with the message. */
+  // l2MessageIndex: number;
+  /** The L2 transaction number in the batch, in which the log was sent. */
+  l2TxNumberInBlock: number | null;
+  /** The L2 withdraw data, stored in an L2 -> L1 message. */
+  message: any;
+  /** The L2 address which sent the log. */
+  sender: string;
+  //     /** The Merkle proof of the inclusion L2 -> L1 message about withdrawal initialization. */
+  //     proof: string[];
 }
 
 /** Represents storage proof. */

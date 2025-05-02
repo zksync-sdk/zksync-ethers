@@ -1,7 +1,7 @@
 import { EIP712Signer } from './signer';
 import { Provider } from './provider';
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, Overrides, ProgressCallback } from 'ethers';
-import { Address, BalancesMap, FinalizeWithdrawalParams, FullDepositFee, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
+import { Address, BalancesMap, FinalizeWithdrawalParams, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IL2SharedBridge, IZkSyncHyperchain } from './typechain';
 declare const Wallet_base: {
     new (...args: any[]): {
@@ -294,7 +294,22 @@ declare const Wallet_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
-            overrides?: ethers.Overrides | undefined;
+            overrides?: ethers.Overrides | undefined; /**
+             * Creates a new `Wallet` with the `provider` as L1 provider and a private key that is built from the mnemonic passphrase.
+             *
+             * @param mnemonic The mnemonic of the private key.
+             * @param [provider] The provider instance for connecting to a L1 network.
+             *
+             * @example
+             *
+             * import { Wallet, Provider, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const MNEMONIC = "stuff slice staff easily soup parent arm payment cotton hammer scatter struggle";
+             *
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = Wallet.fromMnemonic(MNEMONIC, ethProvider);
+             */
         }): Promise<{
             token: string;
             amount: BigNumberish;
@@ -354,7 +369,7 @@ declare const Wallet_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
@@ -991,7 +1006,7 @@ export declare class Wallet extends Wallet_base {
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
-    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, extendeduntilChainId?: number): Promise<FinalizeWithdrawalParams>;
+    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<FinalizeWithdrawalParams>;
     /**
      * @inheritDoc
      *
