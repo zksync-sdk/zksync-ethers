@@ -563,6 +563,13 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
+        /**
+         * Returns the range of blocks contained within a batch given by batch number.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
+         *
+         * @param l1BatchNumber The L1 batch number.
+         */
         call(_tx: ethers.TransactionRequest): Promise<string>;
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;
@@ -1154,6 +1161,13 @@ declare const Provider_base: {
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
+        /**
+         * Returns the range of blocks contained within a batch given by batch number.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
+         *
+         * @param l1BatchNumber The L1 batch number.
+         */
         call(_tx: ethers.TransactionRequest): Promise<string>;
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;
@@ -2601,6 +2615,13 @@ declare const BrowserProvider_base: {
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
+        /**
+         * Returns the range of blocks contained within a batch given by batch number.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
+         *
+         * @param l1BatchNumber The L1 batch number.
+         */
         call(_tx: ethers.TransactionRequest): Promise<string>;
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;

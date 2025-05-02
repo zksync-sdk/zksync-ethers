@@ -358,25 +358,12 @@ export function JsonRpcApiProvider<
       precommitLogIndex?: number,
       logProofTarget?: LogProofTarget
     ): Promise<LogProof | null> {
-      if (logProofTarget) {
-        return await this.send('zks_getL2ToL1LogProofUntilTarget', [
-          ethers.hexlify(txHash),
-          index,
-          logProofTarget,
-          precommitLogIndex,
-        ]);
-      } else if (precommitLogIndex) {
-        return await this.send('zks_getL2ToL1LogProofPrecommit', [
-          ethers.hexlify(txHash),
-          index,
-          precommitLogIndex,
-        ]);
-      } else {
-        return await this.send('zks_getL2ToL1LogProof', [
-          ethers.hexlify(txHash),
-          index,
-        ]);
-      }
+      return await this.send('zks_getL2ToL1LogProof', [
+        ethers.hexlify(txHash),
+        index,
+        logProofTarget,
+        precommitLogIndex,
+      ]);
     }
 
     /**

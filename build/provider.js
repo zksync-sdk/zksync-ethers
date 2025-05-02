@@ -226,27 +226,12 @@ function JsonRpcApiProvider(ProviderType) {
          * @param [logProofTarget] Merkle proof target for interop.
          */
         async getLogProof(txHash, index, precommitLogIndex, logProofTarget) {
-            if (logProofTarget) {
-                return await this.send('zks_getL2ToL1LogProofUntilTarget', [
-                    ethers_1.ethers.hexlify(txHash),
-                    index,
-                    logProofTarget,
-                    precommitLogIndex,
-                ]);
-            }
-            else if (precommitLogIndex) {
-                return await this.send('zks_getL2ToL1LogProofPrecommit', [
-                    ethers_1.ethers.hexlify(txHash),
-                    index,
-                    precommitLogIndex,
-                ]);
-            }
-            else {
-                return await this.send('zks_getL2ToL1LogProof', [
-                    ethers_1.ethers.hexlify(txHash),
-                    index,
-                ]);
-            }
+            return await this.send('zks_getL2ToL1LogProof', [
+                ethers_1.ethers.hexlify(txHash),
+                index,
+                logProofTarget,
+                precommitLogIndex,
+            ]);
         }
         /**
          * Returns the range of blocks contained within a batch given by batch number.
