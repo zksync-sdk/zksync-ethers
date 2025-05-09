@@ -182,6 +182,10 @@ export class SmartAccount extends AbstractSigner {
   }
 
   /**
+   * @deprecated Underlying JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+   *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+   *  or other token APIs from providers like Alchemy or QuickNode.
+   *
    * Returns all token balances of the account.
    *
    * @example
