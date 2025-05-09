@@ -711,6 +711,8 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated JSON-RPC endpoint has been destabilized and is now available as `unstable_sendRawTransactionWithDetailedOutput`.
+     *
      * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
      * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
      * but with some extra data returned from it.
