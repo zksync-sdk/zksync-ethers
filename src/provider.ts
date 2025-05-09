@@ -291,6 +291,8 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated JSON-RPC endpoint has been removed. Use `eth_protocolVersion` to fetch current protocol semantic version.
+     *
      * Return the protocol version.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
