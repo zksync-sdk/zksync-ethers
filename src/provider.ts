@@ -563,6 +563,10 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+     *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+     *  or other token APIs from providers like Alchemy or QuickNode.
+     *
      * Returns all balances for confirmed tokens given by an account address.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
