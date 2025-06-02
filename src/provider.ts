@@ -27,8 +27,6 @@ import {
   IL2NativeTokenVault__factory,
   IL2SharedBridge,
   IL2SharedBridge__factory,
-  IBridgedStandardToken,
-  IBridgedStandardToken__factory,
 } from './typechain';
 import {
   Address,
@@ -55,6 +53,7 @@ import {
   ProtocolVersion,
   FeeParams,
   TransactionWithDetailedOutput,
+  InteropMode,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -352,14 +351,17 @@ export function JsonRpcApiProvider<
      *
      * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
      * @param [index] The index of the L2 to L1 log in the transaction.
+     * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
      */
     async getLogProof(
       txHash: BytesLike,
-      index?: number
+      index?: number,
+      interopMode?: InteropMode
     ): Promise<LogProof | null> {
       return await this.send('zks_getL2ToL1LogProof', [
         ethers.hexlify(txHash),
         index,
+        interopMode,
       ]);
     }
 
@@ -1656,9 +1658,10 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getLogProof(
     txHash: BytesLike,
-    index?: number
+    index?: number,
+    interopMode?: InteropMode
   ): Promise<LogProof | null> {
-    return super.getLogProof(txHash, index);
+    return super.getLogProof(txHash, index, interopMode);
   }
 
   /**
