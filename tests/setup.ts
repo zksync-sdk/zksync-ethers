@@ -107,6 +107,7 @@ async function sendTokenToL2(l1TokenAddress: string) {
     approveBaseERC20: true,
     refundRecipient: await wallet.getAddress(),
   });
+  console.log(`Deposit tx: ${priorityOpResponse.hash}`);
   const receipt = await priorityOpResponse.waitFinalize();
   console.log(`Send funds tx: ${receipt.hash}`);
 }
@@ -142,6 +143,7 @@ async function main() {
   console.log(`L2 base token balance before: ${await wallet.getBalance()}`);
 
   await mintTokensOnL1(baseToken);
+  console.log('Minted tokens on L1', baseToken);
   await sendTokenToL2(baseToken);
 
   console.log(

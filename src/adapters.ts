@@ -27,7 +27,6 @@ import {
   ETH_ADDRESS_IN_CONTRACTS,
   LEGACY_ETH_ADDRESS,
   isAddressEq,
-  L2_BASE_TOKEN_ADDRESS,
   resolveAssetId,
   encodeNativeTokenVaultTransferData,
   encodeSecondBridgeDataV1,
@@ -48,7 +47,6 @@ import {
   IZkSyncHyperchain__factory,
   IL2SharedBridge__factory,
   IL2SharedBridge,
-  IL1Bridge,
   IL1Nullifier,
   IL1AssetRouter,
   IL1AssetRouter__factory,
@@ -64,10 +62,10 @@ import {
   Eip712Meta,
   FinalizeWithdrawalParams,
   FullDepositFee,
+  InteropMode,
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
-  LogProof,
 } from './types';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -453,6 +451,25 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           },
         ];
       }
+    }
+
+    async getNativeTokenVaultL1(): Promise<IL1NativeTokenVault> {
+      // FIXME: maybe makes sense to provide an API to do it in one call
+      const bridgeContracts =
+        await this._providerL2().getDefaultBridgeAddresses();
+
+      const sharedBridge = bridgeContracts.sharedL1;
+      const l1AssetRouter = IL1AssetRouter__factory.connect(
+        sharedBridge,
+        this._providerL1()
+      );
+
+      const l1NtvAddress = await l1AssetRouter.nativeTokenVault();
+
+      return IL1NativeTokenVault__factory.connect(
+        l1NtvAddress,
+        this._providerL1()
+      );
     }
 
     /**
@@ -1577,11 +1594,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
      * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
      * withdrawal you want to finalize.
+     * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
      * @throws {Error} If log proof can not be found.
      */
     async getFinalizeWithdrawalParams(
       withdrawalHash: BytesLike,
-      index = 0
+      index = 0,
+      interopMode?: InteropMode
     ): Promise<FinalizeWithdrawalParams> {
       const {log, l1BatchTxId} = await this._getWithdrawalLog(
         withdrawalHash,
@@ -1594,7 +1613,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const sender = ethers.dataSlice(log.topics[1], 12);
       const proof = await this._providerL2().getLogProof(
         withdrawalHash,
-        l2ToL1LogIndex
+        l2ToL1LogIndex,
+        interopMode
       );
       if (!proof) {
         throw new Error('Log proof not found!');
@@ -1659,6 +1679,19 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         message,
         merkleProof: proof.proof,
       };
+    }
+
+    /**
+     * Returns L1 Nullifier address.
+     *
+     * @returns A promise that resolves to the address of the L1 Nullifier address
+     */
+    async getL1NullifierAddress(): Promise<Address> {
+      const addresses = await this._providerL2().getDefaultBridgeAddresses();
+      return await IL1AssetRouter__factory.connect(
+        addresses.sharedL1,
+        this._signerL1()
+      ).L1_NULLIFIER();
     }
 
     /**

@@ -1671,3 +1671,41 @@ export function encodeNativeTokenVaultTransferData(
 
   return ethers.concat(['0x01', data]);
 }
+
+export function encodeNTVAssetId(chainId: bigint, address: string) {
+  const abi = new AbiCoder();
+  const hex = abi.encode(
+    ['uint256', 'address', 'address'],
+    [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, address]
+  );
+  return ethers.keccak256(hex);
+}
+
+export async function ethAssetId(provider: ethers.Provider) {
+  const network = await provider.getNetwork();
+
+  return encodeNTVAssetId(network.chainId, ETH_ADDRESS_IN_CONTRACTS);
+}
+
+interface WithToken {
+  token: Address;
+}
+
+interface WithAssetId {
+  assetId: BytesLike;
+}
+
+// For backwards compatibility and easier interface lots of methods
+// will continue to allow providing either token or assetId
+export type WithTokenOrAssetId = WithToken | WithAssetId;
+
+export function encodeNTVTransferData(
+  amount: bigint,
+  receiver: Address,
+  token: Address
+) {
+  return new AbiCoder().encode(
+    ['uint256', 'address', 'address'],
+    [amount, receiver, token]
+  );
+}
