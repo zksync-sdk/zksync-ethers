@@ -14,12 +14,10 @@ import {
   L1_CHAIN_URL,
 } from '../utils';
 import {EIP712_TX_TYPE} from '../../src/utils';
-
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
-
   let receipt: types.TransactionReceipt;
   let baseToken: string;
 
@@ -320,7 +318,7 @@ describe('Provider', () => {
       const result = await provider.l1TokenAddress(
         await provider.l2TokenAddress(DAI_L1)
       );
-      expect(result).to.be.equal(DAI_L1);
+      expect(result.toLowerCase()).to.equal(DAI_L1.toLowerCase());
     });
   });
 
@@ -540,6 +538,7 @@ describe('Provider', () => {
     it('should return a DAI withdraw transaction', async () => {
       const tx = {
         type: 113,
+        value: 5n,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
@@ -556,6 +555,7 @@ describe('Provider', () => {
     it('should return a DAI withdraw transaction with paymaster parameters', async () => {
       const tx = {
         type: 113,
+        value: 5n,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
@@ -1058,12 +1058,10 @@ describe('Provider', () => {
           from: ADDRESS1,
         });
       } catch (e) {
-        expect(
-          (e as Error).message
-            .toString()
-            .includes('insufficient balance for transfer')
-        ).to.be.true;
+        const revertString = 'insufficient funds for gas + value.';
+        expect((e as Error).message.toString().includes(revertString)).to.be
+          .true;
       }
     });
   });
-});  
+});

@@ -14,6 +14,7 @@ import {
   Address,
   BalancesMap,
   Fee,
+  FinalizeL1DepositParams,
   FinalizeWithdrawalParams,
   FullDepositFee,
   LogProofTarget,
@@ -415,14 +416,15 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async getDepositAllowanceParams(
     token: Address,
-    amount: BigNumberish
+    amount: BigNumberish,
+    overrides?: ethers.Overrides
   ): Promise<
     {
       token: Address;
       allowance: BigNumberish;
     }[]
   > {
-    return super.getDepositAllowanceParams(token, amount);
+    return super.getDepositAllowanceParams(token, amount, overrides);
   }
 
   /**
@@ -710,6 +712,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       precommitLogIndex,
       logProofTarget
     );
+  }
+
+  override async getFinalizeDepositParams(
+    withdrawalHash: BytesLike,
+    index = 0
+  ): Promise<FinalizeL1DepositParams> {
+    return super.getFinalizeDepositParams(withdrawalHash, index);
   }
 
   /**
@@ -1475,7 +1484,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       !tx.customData ||
       !tx.customData.gasPerPubdata ||
       (!populated.gasPrice &&
-        (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))
+        (!populated.maxFeePerGas ||
+          populated.maxPriorityFeePerGas === null ||
+          populated.maxPriorityFeePerGas === undefined))
     ) {
       fee = await this.provider.estimateFee(populated);
       populated.gasLimit ??= fee.gasLimit;

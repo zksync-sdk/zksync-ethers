@@ -113,7 +113,7 @@ const _formatBlock = object({
     timestamp: ethers_1.getNumber,
     nonce: allowNull(formatData),
     difficulty: ethers_1.getBigInt,
-    totalDifficulty: ethers_1.getBigInt,
+    totalDifficulty: allowNull(ethers_1.getBigInt),
     gasLimit: ethers_1.getBigInt,
     gasUsed: ethers_1.getBigInt,
     miner: allowNull(ethers_1.getAddress),

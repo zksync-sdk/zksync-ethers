@@ -14,7 +14,7 @@ import {
 } from './types';
 import {Provider} from './provider';
 import {EIP712Signer} from './signer';
-import {IERC20__factory} from './typechain';
+import {IERC20__factory, IL1NativeTokenVault} from './typechain';
 import IZkSyncABI from '../abi/IZkSyncHyperchain.json';
 import IBridgehubABI from '../abi/IBridgehub.json';
 import IContractDeployerABI from '../abi/IContractDeployer.json';
@@ -32,116 +32,116 @@ export {EIP712_TYPES} from './signer';
 
 /**
  * The ABI for the `ZKsync` interface.
- * @constant
+ * @readonly
  */
 export const ZKSYNC_MAIN_ABI = new ethers.Interface(IZkSyncABI);
 
 /**
  * The ABI of the `Bridgehub` interface.
- * @constant
+ * @readonly
  */
 export const BRIDGEHUB_ABI = new ethers.Interface(IBridgehubABI);
 
 /**
  * The ABI for the `IContractDeployer` interface, which is utilized for deploying smart contracts.
- * @constant
+ * @readonly
  */
 export const CONTRACT_DEPLOYER = new ethers.Interface(IContractDeployerABI);
 
 /**
  * The ABI for the `Contract2Factory` interface, which is utilized for deploying smart contracts using CREATE2 and CREATE2ACCOUNT.
- * @constant
+ * @readonly
  */
 export const CONTRACT_2_FACTORY = new ethers.Interface(Contract2FactoryABI);
 
 /**
  * The ABI for the `IL1Messenger` interface, which is utilized for sending messages from the L2 to L1.
- * @constant
+ * @readonly
  */
 export const L1_MESSENGER = new ethers.Interface(IL1MessengerABI);
 
 /**
  * The ABI for the `IERC20` interface, which is utilized for interacting with ERC20 tokens.
- * @constant
+ * @readonly
  */
 export const IERC20 = new ethers.Interface(IERC20ABI);
 
 /**
  * The ABI for the `IERC1271` interface, which is utilized for signature validation by contracts.
- * @constant
+ * @readonly
  */
 export const IERC1271 = new ethers.Interface(IERC1271ABI);
 
 /**
  * The ABI for the `IL1Bridge` interface, which is utilized for transferring ERC20 tokens from L1 to L2.
- * @constant
+ * @readonly
  */
 export const L1_BRIDGE_ABI = new ethers.Interface(IL1BridgeABI);
 
 /**
  * The ABI for the `IL2Bridge` interface, which is utilized for transferring ERC20 tokens from L2 to L1.
- * @constant
+ * @readonly
  */
 export const L2_BRIDGE_ABI = new ethers.Interface(IL2BridgeABI);
 
 /**
  * The ABI for the `INonceHolder` interface, which is utilized for managing deployment nonces.
- * @constant
+ * @readonly
  */
 export const NONCE_HOLDER_ABI = new ethers.Interface(INonceHolderABI);
 
 /**
  * The address of the L1 `ETH` token.
- * @constant
+ * @readonly
  */
 export const ETH_ADDRESS: Address =
   '0x0000000000000000000000000000000000000000';
 
 /**
  * The address of the L1 `ETH` token.
- * @constant
+ * @readonly
  */
 export const LEGACY_ETH_ADDRESS: Address =
   '0x0000000000000000000000000000000000000000';
 
 /**
  * In the contracts the zero address can not be used, use one instead
- * @constant
+ * @readonly
  */
 export const ETH_ADDRESS_IN_CONTRACTS: Address =
   '0x0000000000000000000000000000000000000001';
 
 /**
  * The formal address for the `Bootloader`.
- * @constant
+ * @readonly
  */
 export const BOOTLOADER_FORMAL_ADDRESS: Address =
   '0x0000000000000000000000000000000000008001';
 
 /**
  * The address of the Contract deployer.
- * @constant
+ * @readonly
  */
 export const CONTRACT_DEPLOYER_ADDRESS: Address =
   '0x0000000000000000000000000000000000008006';
 
 /**
  * The address of the Contract2Factory.
- * @constant
+ * @readonly
  */
 export const CONTRACT_2_FACTORY_ADDRESS: Address =
   '0x0000000000000000000000000000000000010000';
 
 /**
  * The address of the L1 messenger.
- * @constant
+ * @readonly
  */
 export const L1_MESSENGER_ADDRESS: Address =
   '0x0000000000000000000000000000000000008008';
 
 /**
  * The address of the L2 `ETH` token.
- * @constant
+ * @readonly
  * @deprecated In favor of {@link L2_BASE_TOKEN_ADDRESS}.
  */
 export const L2_ETH_TOKEN_ADDRESS: Address =
@@ -149,21 +149,21 @@ export const L2_ETH_TOKEN_ADDRESS: Address =
 
 /**
  * The address of the base token.
- * @constant
+ * @readonly
  */
 export const L2_BASE_TOKEN_ADDRESS =
   '0x000000000000000000000000000000000000800a';
 
 /**
  * The address of the Nonce holder.
- * @constant
+ * @readonly
  */
 export const NONCE_HOLDER_ADDRESS: Address =
   '0x0000000000000000000000000000000000008003';
 
 /**
  * Used for applying and undoing aliases on addresses during bridging from L1 to L2.
- * @constant
+ * @readonly
  */
 export const L1_TO_L2_ALIAS_OFFSET: Address =
   '0x1111000000000000000000000000000000001111';
@@ -179,35 +179,35 @@ export const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address =
  * This predefined constant serves as a standardized indicator to signal successful
  * signature validation by the contract.
  *
- * @constant
+ * @readonly
  */
 export const EIP1271_MAGIC_VALUE = '0x1626ba7e';
 
 /**
  * Represents an EIP712 transaction type.
  *
- * @constant
+ * @readonly
  */
 export const EIP712_TX_TYPE = 0x71;
 
 /**
  * Represents an interoperability transaction type.
  *
- * @constant
+ * @readonly
  */
 export const INTEROP_TX_TYPE = 0xfd;
 
 /**
  * Represents a priority transaction operation on L2.
  *
- * @constant
+ * @readonly
  */
 export const PRIORITY_OPERATION_L2_TX_TYPE = 0xff;
 
 /**
  * The maximum bytecode length in bytes that can be deployed.
  *
- * @constant
+ * @readonly
  */
 export const MAX_BYTECODE_LEN_BYTES: number = ((1 << 16) - 1) * 32;
 
@@ -217,7 +217,7 @@ export const MAX_BYTECODE_LEN_BYTES: number = ((1 << 16) - 1) * 32;
  * This constant is part of a coefficient calculation to adjust the gas limit to account for variations
  * in the SDK estimation, ensuring the transaction will be accepted.
  *
- * @constant
+ * @readonly
  */
 export const L1_FEE_ESTIMATION_COEF_NUMERATOR = 12;
 
@@ -227,7 +227,7 @@ export const L1_FEE_ESTIMATION_COEF_NUMERATOR = 12;
  * This constant is part of a coefficient calculation to adjust the gas limit to account for variations
  * in the SDK estimation, ensuring the transaction will be accepted.
  *
- * @constant
+ * @readonly
  */
 export const L1_FEE_ESTIMATION_COEF_DENOMINATOR = 10;
 
@@ -235,15 +235,15 @@ export const L1_FEE_ESTIMATION_COEF_DENOMINATOR = 10;
  * Gas limit used for displaying the error messages when the
  * users do not have enough fee when depositing ERC20 token from L1 to L2.
  *
- * @constant
+ * @readonly
  */
-export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 400_000;
+export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 1_000_000;
 
 /**
  * Gas limit used for displaying the error messages when the
  * users do not have enough fee when depositing `ETH` token from L1 to L2.
  *
- * @constant
+ * @readonly
  */
 export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200_000;
 
@@ -252,7 +252,7 @@ export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200_000;
  * This value is utilized when inserting a default value for type 2
  * and EIP712 type transactions.
  *
- * @constant
+ * @readonly
  */
 // It is a realistic value, but it is large enough to fill into any batch regardless of the pubdata price.
 export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50_000;
@@ -260,7 +260,7 @@ export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50_000;
 /**
  * The `L1->L2` transactions are required to have the following gas per pubdata byte.
  *
- * @constant
+ * @readonly
  */
 export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
 
@@ -1385,9 +1385,6 @@ export async function isTypedDataSignatureCorrect(
  * @param from The sender address on the L1 network.
  * @param gasPerPubdataByte The current gas per byte of pubdata.
  *
- * @see
- * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
- *
  * @example
  *
  * import { Provider, utils, types } from "zksync-ethers";
@@ -1497,9 +1494,6 @@ export function scaleGasLimit(gasLimit: bigint): bigint {
  * @param from The sender address on the L1 network.
  * @param gasPerPubdataByte The current gas per byte of pubdata.
  * @param l2Value The `msg.value` of L2 transaction.
- *
- * @see
- * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
  *
  * @example
  *
@@ -1612,6 +1606,90 @@ export function isAddressEq(a: Address, b: Address): boolean {
   return a.toLowerCase() === b.toLowerCase();
 }
 
+/* Returns the assetId for a token in the Native Token Vault with specific origin chainId and address*/
+export function encodeNativeTokenVaultAssetId(
+  chainId: bigint,
+  address: string
+) {
+  const abi = new AbiCoder();
+  const hex = abi.encode(
+    ['uint256', 'address', 'address'],
+    [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, address]
+  );
+  return ethers.keccak256(hex);
+}
+
+/**
+ * Resolves the assetId for a token
+ **/
+export async function resolveAssetId(
+  token: Address,
+  ntvContract: IL1NativeTokenVault
+): Promise<BytesLike> {
+  if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+    token = ETH_ADDRESS_IN_CONTRACTS;
+  }
+
+  // In case only token is provided, we expect that it is a token inside Native Token Vault
+  const assetIdFromNTV = await ntvContract.assetId(token);
+
+  if (assetIdFromNTV && assetIdFromNTV !== ethers.ZeroHash) {
+    return assetIdFromNTV;
+  }
+
+  // Okay, the token have not been registered within the Native token vault.
+  // There are two cases when it is possible:
+  // - The token is native to L1 (it may or may not be bridged), but it has not been
+  // registered within NTV after the Gateway upgrade. We assume that this is not the case
+  // as the SDK is expected to work only after the full migration is done.
+  // - The token is native to the current chain and it has never been bridged.
+
+  const network = await ntvContract.runner?.provider?.getNetwork();
+
+  if (!network) {
+    throw new Error('Can not derive assetId since chainId is not available');
+  }
+
+  const ntvAssetId = encodeNativeTokenVaultAssetId(network.chainId, token);
+
+  return ntvAssetId;
+}
+
+/**
+ * Encodes the data for a transfer of a token through the Native Token Vault
+ *
+ * @param {bigint} amount The amount of tokens to transfer
+ * @param {Address} receiver The address that will receive the tokens
+ * @param {Address} token The address of the token being transferred
+ * @returns {string} The ABI-encoded transfer data
+ **/
+export function encodeNativeTokenVaultTransferData(
+  amount: bigint,
+  receiver: Address,
+  token: Address
+) {
+  return new AbiCoder().encode(
+    ['uint256', 'address', 'address'],
+    [amount, receiver, token]
+  );
+}
+
+/**
+ * Encodes asset transfer data for BridgeHub contract, using v1 encoding scheme (introduced in v26 upgrade).
+ * Can be utilized to encode deposit initiation data.
+ *
+ * @param {string} assetId - encoded token asset ID
+ * @param {string} transferData - encoded transfer data, see `encodeNativeTokenVaultTransferData`
+ */ export function encodeSecondBridgeDataV1(
+  assetId: string,
+  transferData: string
+) {
+  const abi = new AbiCoder();
+  const data = abi.encode(['bytes32', 'bytes'], [assetId, transferData]);
+
+  return ethers.concat(['0x01', data]);
+}
+
 export function encodeNTVAssetId(chainId: bigint, address: string) {
   const abi = new AbiCoder();
   const hex = abi.encode(
@@ -1639,49 +1717,6 @@ interface WithAssetId {
 // will continue to allow providing either token or assetId
 export type WithTokenOrAssetId = WithToken | WithAssetId;
 
-export async function resolveAssetId(
-  info: WithTokenOrAssetId,
-  ntvContract: ethers.Contract
-): Promise<[BytesLike, boolean]> {
-  const potentialAssetId = (info as any).assetId;
-  if (potentialAssetId) {
-    return [potentialAssetId, false];
-  }
-
-  let token = (info as any).token as Address;
-  if (!token) {
-    throw new Error('Neither token nor assetId were provided');
-  }
-
-  if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
-    token = ETH_ADDRESS_IN_CONTRACTS;
-  }
-
-  // In case only token is provided, we expect that it is a token inside Native Token Vault
-  const assetIdFromNTV = await ntvContract.assetId(token);
-
-  if (assetIdFromNTV && assetIdFromNTV !== ethers.ZeroHash) {
-    return [assetIdFromNTV, false];
-  }
-
-  // Okay, the token have not been registered within the Native token vault.
-  // There are two cases when it is possible:
-  // - The token is native to L1 (it may or may not be bridged), but it has not been
-  // registered within NTV after the Gateway upgrade. We assume that this is not the case
-  // as the SDK is expected to work only after the full migration is done.
-  // - The token is native to the current chain and it has never been bridged.
-
-  const network = await ntvContract.runner?.provider?.getNetwork();
-
-  if (!network) {
-    throw new Error('Can not derive assetId since chainId is not available');
-  }
-
-  const ntvAssetId = encodeNTVAssetId(network.chainId, token);
-
-  return [ntvAssetId, true];
-}
-
 export function encodeNTVTransferData(
   amount: bigint,
   receiver: Address,
@@ -1691,14 +1726,4 @@ export function encodeNTVTransferData(
     ['uint256', 'address', 'address'],
     [amount, receiver, token]
   );
-}
-
-export function encodeSecondBridgeDataV1(
-  assetId: string,
-  transferData: string
-) {
-  const abi = new AbiCoder();
-  const data = abi.encode(['bytes32', 'bytes'], [assetId, transferData]);
-
-  return ethers.concat(['0x01', data]);
 }

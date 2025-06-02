@@ -168,6 +168,8 @@ function JsonRpcApiProvider(ProviderType) {
             return await sharedBridge.l1TokenAddress(token);
         }
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `eth_protocolVersion` to fetch current protocol semantic version.
+         *
          * Return the protocol version.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
@@ -330,6 +332,10 @@ function JsonRpcApiProvider(ProviderType) {
                 sharedL2: this.contractAddresses().sharedBridgeL2,
             };
         }
+        _setL1NullifierAndNativeTokenVault(l1Nullifier, l1NativeTokenVault) {
+            this.contractAddresses().l1Nullifier = l1Nullifier;
+            this.contractAddresses().l1NativeTokenVault = l1NativeTokenVault;
+        }
         /**
          * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
          **
@@ -348,11 +354,8 @@ function JsonRpcApiProvider(ProviderType) {
             }
             return typechain_1.IL2SharedBridge__factory.connect(address, this);
         }
-        async connectL2NTV() {
+        async connectL2NativeTokenVault() {
             return typechain_1.IL2NativeTokenVault__factory.connect(utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, this);
-        }
-        async connectBridgedToken(token) {
-            return typechain_1.IBridgedStandardToken__factory.connect(token, this);
         }
         async connectL2AssetRouter() {
             return typechain_1.IL2AssetRouter__factory.connect(utils_1.L2_ASSET_ROUTER_ADDRESS, this);
@@ -382,6 +385,10 @@ function JsonRpcApiProvider(ProviderType) {
             return true;
         }
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+         *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+         *  or other token APIs from providers like Alchemy or QuickNode.
+         *
          * Returns all balances for confirmed tokens given by an account address.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
@@ -396,6 +403,8 @@ function JsonRpcApiProvider(ProviderType) {
             return balances;
         }
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use third-party APIs such as Coingecko or {@link https://tokenlists.org}.
+         *
          * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
@@ -503,6 +512,8 @@ function JsonRpcApiProvider(ProviderType) {
             return await this.send('zks_getProof', [address, keys, l1BatchNumber]);
         }
         /**
+         * @deprecated JSON-RPC endpoint has been destabilized and is now available as `unstable_sendRawTransactionWithDetailedOutput`.
+         *
          * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
          * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
          * but with some extra data returned from it.
@@ -572,7 +583,9 @@ function JsonRpcApiProvider(ProviderType) {
                 }
                 return populatedTx;
             }
-            const ntv = await this.connectL2NTV();
+            let populatedTx;
+            // we get the tokens data, assetId and originChainId
+            const ntv = await this.connectL2NativeTokenVault();
             const assetId = await ntv.assetId(tx.token);
             const originChainId = await ntv.originChainId(assetId);
             const l1ChainId = await this.getL1ChainId();
@@ -580,16 +593,18 @@ function JsonRpcApiProvider(ProviderType) {
                 tx.token === utils_1.ETH_ADDRESS_IN_CONTRACTS;
             if (!tx.bridgeAddress) {
                 const bridgeAddresses = await this.getDefaultBridgeAddresses();
+                // If the legacy L2SharedBridge is deployed we use it for l1 native tokens.
                 tx.bridgeAddress = isTokenL1Native
                     ? bridgeAddresses.sharedL2
                     : utils_1.L2_ASSET_ROUTER_ADDRESS;
             }
-            let populatedTx;
+            // For non L1 native tokens we need to use the AssetRouter.
+            // For L1 native tokens we can use the legacy withdraw method.
             if (!isTokenL1Native) {
                 const bridge = await this.connectL2AssetRouter();
                 const chainId = Number((await this.getNetwork()).chainId);
-                const assetId = ethers_1.ethers.keccak256(ethers_1.ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address'], [chainId, utils_1.L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]));
-                const assetData = (0, utils_1.encodeNTVTransferData)(BigInt(tx.amount), tx.to, tx.token);
+                const assetId = (0, utils_1.encodeNativeTokenVaultAssetId)(BigInt(chainId), tx.token);
+                const assetData = (0, utils_1.encodeNativeTokenVaultTransferData)(BigInt(tx.amount), tx.to, tx.token);
                 populatedTx = await bridge.withdraw.populateTransaction(assetId, assetData, tx.overrides);
             }
             else {
@@ -856,15 +871,11 @@ function JsonRpcApiProvider(ProviderType) {
          * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
          *
          * @param providerL1 The Ethers provider for the L1 network.
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param token The address of the token to be bridged.
          * @param amount The deposit amount.
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         async estimateDefaultBridgeDepositL2Gas(providerL1, token, amount, to, from, gasPerPubdataByte) {
             // If the `from` address is not provided, we use a random address, because
@@ -895,7 +906,6 @@ function JsonRpcApiProvider(ProviderType) {
         /**
          * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
          *
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param l1BridgeAddress The address of the custom L1 bridge.
          * @param l2BridgeAddress The address of the custom L2 bridge.
          * @param token The address of the token to be bridged.
@@ -905,9 +915,6 @@ function JsonRpcApiProvider(ProviderType) {
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         async estimateCustomBridgeDepositL2Gas(l1BridgeAddress, l2BridgeAddress, token, amount, to, bridgeData, from, gasPerPubdataByte, l2Value) {
             const calldata = await (0, utils_1.getERC20BridgeCalldata)(token, from, to, amount, bridgeData);

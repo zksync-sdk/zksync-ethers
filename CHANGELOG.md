@@ -1,3 +1,51 @@
+# [6.17.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.2...v6.17.0) (2025-03-31)
+
+
+### Features
+
+* **adapter:** squashed all changes ([0dbd059](https://github.com/zksync-sdk/zksync-ethers/commit/0dbd059cbc62c1a15e30a728246e64a5ee792c61))
+* support v26, remove support for v25 ([#243](https://github.com/zksync-sdk/zksync-ethers/issues/243)) ([55803e8](https://github.com/zksync-sdk/zksync-ethers/commit/55803e8963256f5270f44d2ac9163af1b6c86654))
+
+
+### Reverts
+
+* Revert "feat: support v26, remove support for v25 (#243)" (#244) ([ebaefba](https://github.com/zksync-sdk/zksync-ethers/commit/ebaefbab1a9d0fb4f0aed2384cffafd65bf67189)), closes [#243](https://github.com/zksync-sdk/zksync-ethers/issues/243) [#244](https://github.com/zksync-sdk/zksync-ethers/issues/244)
+
+## [6.16.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.1...v6.16.2) (2025-03-18)
+
+
+### Bug Fixes
+
+* increase l2 gas limit ([0da8fdb](https://github.com/zksync-sdk/zksync-ethers/commit/0da8fdb3508c412bbfff09fdd56a0b2e0833e31b))
+
+## [6.16.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.0...v6.16.1) (2025-02-12)
+
+
+### Bug Fixes
+
+* **signer:** fix `sendTransaction` populating from address ([2f18080](https://github.com/zksync-sdk/zksync-ethers/commit/2f1808059cc8451a5b2e86cd189a33dd1a9ebde3))
+
+# [6.16.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.4...v6.16.0) (2025-01-30)
+
+
+### Features
+
+* **adapter:** add `overrides` param to `getDepositAllowanceParams` ([a67fc7c](https://github.com/zksync-sdk/zksync-ethers/commit/a67fc7c772e18f9feae79cf8b0037dfb6d428082))
+
+## [6.15.4](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.3...v6.15.4) (2025-01-17)
+
+
+### Bug Fixes
+
+* `populateTransaction` estimate fee only if necessary ([8c85348](https://github.com/zksync-sdk/zksync-ethers/commit/8c85348fe4a323f1d37c350d8d9963ffe1de1788))
+
+## [6.15.3](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.2...v6.15.3) (2024-12-06)
+
+
+### Bug Fixes
+
+* allow null for `totalDifficulty` ([4681d5b](https://github.com/zksync-sdk/zksync-ethers/commit/4681d5b887f652e1f7d050b4c40f80763169e110))
+
 ## [6.15.2](https://github.com/zksync-sdk/zksync-ethers/compare/v6.15.1...v6.15.2) (2024-12-02)
 
 

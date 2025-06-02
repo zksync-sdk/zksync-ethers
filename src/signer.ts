@@ -73,7 +73,7 @@ export class EIP712Signer {
    * const PRIVATE_KEY = "<PRIVATE_KEY>";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
+   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY), Number((await provider.getNetwork()).chainId));
    */
   constructor(
     private ethSigner: ethers.Signer,
@@ -647,7 +647,15 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   override async sendTransaction(
     transaction: TransactionRequest
   ): Promise<TransactionResponse> {
+    if (!transaction.type) {
+      transaction.type = EIP712_TX_TYPE;
+    }
+    const address = await this.getAddress();
+    transaction.from ??= address;
     const tx = await this.populateFeeData(transaction);
+    if (!isAddressEq(await ethers.resolveAddress(tx.from!), address)) {
+      throw new Error('Transaction `from` address mismatch!');
+    }
 
     if (
       tx.type === null ||
@@ -655,11 +663,6 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
       tx.type === EIP712_TX_TYPE ||
       tx.customData
     ) {
-      const address = await this.getAddress();
-      tx.from ??= address;
-      if (!isAddressEq(await ethers.resolveAddress(tx.from), address)) {
-        throw new Error('Transaction `from` address mismatch!');
-      }
       const zkTx: TransactionLike = {
         type: tx.type ?? EIP712_TX_TYPE,
         value: tx.value ?? 0,
@@ -697,7 +700,10 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     }
     if (
       !tx.gasLimit ||
-      (!tx.gasPrice && (!tx.maxFeePerGas || !tx.maxPriorityFeePerGas))
+      (!tx.gasPrice &&
+        (!tx.maxFeePerGas ||
+          tx.maxPriorityFeePerGas === null ||
+          tx.maxPriorityFeePerGas === undefined))
     ) {
       const fee = await this.providerL2!.estimateFee(tx);
       tx.gasLimit ??= fee.gasLimit;
@@ -1101,14 +1107,15 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
    */
   override async getDepositAllowanceParams(
     token: Address,
-    amount: BigNumberish
+    amount: BigNumberish,
+    overrides?: ethers.Overrides
   ): Promise<
     {
       token: Address;
       allowance: BigNumberish;
     }[]
   > {
-    return super.getDepositAllowanceParams(token, amount);
+    return super.getDepositAllowanceParams(token, amount, overrides);
   }
 
   /**

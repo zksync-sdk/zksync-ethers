@@ -1,7 +1,7 @@
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, TransactionRequest as EthersTransactionRequest } from 'ethers';
 import { Provider } from './provider';
-import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IZkSyncHyperchain, IL2SharedBridge } from './typechain';
-import { Address, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FinalizeWithdrawalParamsWithoutProof, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
+import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IZkSyncHyperchain, IL2SharedBridge, IL1Nullifier, IL1AssetRouter, IL1NativeTokenVault } from './typechain';
+import { Address, FinalizeL1DepositParams, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FinalizeWithdrawalParamsWithoutProof, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
 type Constructor<T = {}> = new (...args: any[]) => T;
 interface TxSender {
     sendTransaction(tx: EthersTransactionRequest): Promise<ethers.TransactionResponse>;
@@ -22,6 +22,19 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          */
         _signerL1(): ethers.Signer;
         /**
+         * Returns the addresses of the default ZKsync Era bridge contracts on both L1 and L2, and some L1 specific contracts.
+         */
+        getDefaultBridgeAddresses(): Promise<{
+            erc20L1: string;
+            erc20L2: string;
+            wethL1: string;
+            wethL2: string;
+            sharedL1: string;
+            sharedL2: string;
+            l1Nullifier: string;
+            l1NativeTokenVault: string;
+        }>;
+        /**
          * Returns `Contract` wrapper of the ZKsync Era smart contract.
          */
         getMainContract(): Promise<IZkSyncHyperchain>;
@@ -39,6 +52,18 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             weth: IL1ERC20Bridge;
             shared: IL1SharedBridge;
         }>;
+        /**
+         * Returns the L1 asset router contract, used for handling cross chain calls.
+         */
+        getL1AssetRouter(address?: string): Promise<IL1AssetRouter>;
+        /**
+         * Returns the L1 native token vault contract, used for interacting with tokens.
+         */
+        getL1NativeTokenVault(): Promise<IL1NativeTokenVault>;
+        /**
+         * Returns the L1 Nullifier contract, used for replay protection for failed deposits and withdrawals.
+         */
+        getL1Nullifier(): Promise<IL1Nullifier>;
         /**
          * Returns the address of the base token on L1.
          */
@@ -115,8 +140,10 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          *
          * @param token The address of the token to deposit.
          * @param amount The amount of the token to deposit.
+         * @param overrides Transaction's overrides for deposit which may be used to pass
+         * L1 `gasLimit`, `gasPrice`, `value`, etc.
          */
-        getDepositAllowanceParams(token: Address, amount: BigNumberish): Promise<{
+        getDepositAllowanceParams(token: Address, amount: BigNumberish, overrides?: ethers.Overrides): Promise<{
             token: Address;
             allowance: BigNumberish;
         }[]>;
@@ -131,7 +158,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * use the {@link getAllowanceL1} method.
          *
          * @param transaction The transaction object containing deposit details.
-         * @param transaction.token The address of the token to deposit. ETH by default.
+         * @param transaction.token The address of the token to deposit.
          * @param transaction.amount The amount of the token to deposit.
          * @param [transaction.to] The address that will receive the deposited tokens on L2.
          * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
@@ -260,14 +287,14 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * - Depositing any token (including ETH) on a non-ETH-based chain.
          *
          * @param transaction The transaction details.
-         * @param transaction.token The address of the token to deposit. ETH by default.
+         * @param transaction.token The address of the token to deposit.
          * @param transaction.amount The amount of the token to deposit.
          * @param [transaction.to] The address that will receive the deposited tokens on L2.
          * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
          * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
          * base cost of the transaction.
          * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
-         * Defaults to the default ZKsync Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+         * Defaults to the default ZKsync Era bridge (`L1SharedBridge`).
          * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
          * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
          * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
@@ -291,14 +318,14 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * Returns a populated deposit transaction.
          *
          * @param transaction The transaction details.
-         * @param transaction.token The address of the token to deposit. ETH by default.
+         * @param transaction.token The address of the token to deposit.
          * @param transaction.amount The amount of the token to deposit.
          * @param [transaction.to] The address that will receive the deposited tokens on L2.
          * @param [transaction.operatorTip] (currently not used) If the ETH value passed with the transaction is not
          * explicitly stated in the overrides, this field will be equal to the tip the operator will receive on top of the
          * base cost of the transaction.
          * @param [transaction.bridgeAddress] The address of the bridge contract to be used. Defaults to the default ZKsync
-         * Era bridge (either `L1EthBridge` or `L1Erc20Bridge`).
+         * Era bridge (`L1SharedBridge`).
          * @param [transaction.l2GasLimit] Maximum amount of L2 gas that the transaction can consume during execution on L2.
          * @param [transaction.gasPerPubdataByte] The L2 gas price for each published L1 calldata byte.
          * @param [transaction.customBridgeData] Additional data that can be sent to a bridge.
@@ -417,6 +444,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             mintValue: BigNumberish;
             l2Value: BigNumberish;
         }>;
+        _getSecondBridgeCalldata(token: Address, amount: BigNumberish, to: Address): Promise<string>;
         _getDepositTxWithDefaults(transaction: {
             token: Address;
             amount: BigNumberish;
@@ -523,7 +551,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         /**
          * Returns the {@link FinalizeWithdrawalParams parameters} required for finalizing a withdrawal from the
-         * withdrawal transaction's log on the L1 network.
+         * withdrawal transaction's log on the L2 network. This struct is @deprecated in favor of {@link getFinalizeDepositParams}.
          *
          * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
          * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
@@ -533,6 +561,19 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * @throws {Error} If log proof can not be found.
          */
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<FinalizeWithdrawalParams>;
+        /**
+         * Returns the {@link FinalizeDepositParams parameters} required for finalizing a L2->L1 deposit from the
+         * deposit transaction's log on the L2 network.
+         * This function supersedes {@link getFinalizeWithdrawalParams} with V26,
+         * as now L2 native token bridging is also supported.
+         * Pre V26 withdrawals were special kind of transaction,
+         * but starting from v26 any cross-chain token movement is called a deposit, regardless of direction
+         * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
+         * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
+         * withdrawal you want to finalize.
+         * @throws {Error} If log proof can not be found.
+         */
+        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParamsWithoutProof>;
         /**
          * Returns L1 Nullifier address.
@@ -704,6 +745,10 @@ export declare function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBa
          */
         getBalance(token?: Address, blockTag?: BlockTag): Promise<bigint>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+         *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+         *  or other token APIs from providers like Alchemy or QuickNode.
+         *
          * Returns all token balances of the account.
          */
         getAllBalances(): Promise<BalancesMap>;

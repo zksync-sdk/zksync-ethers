@@ -209,7 +209,9 @@ export const populateTransactionECDSA: TransactionBuilder = async (
   if (
     !populatedTx.gasLimit ||
     (!populatedTx.gasPrice &&
-      (!populatedTx.maxFeePerGas || !populatedTx.maxPriorityFeePerGas))
+      (!populatedTx.maxFeePerGas ||
+        populatedTx.maxPriorityFeePerGas === null ||
+        populatedTx.maxPriorityFeePerGas === undefined))
   ) {
     let fromToUse = populatedTx.from;
     const isContractAccount =

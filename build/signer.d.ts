@@ -26,7 +26,7 @@ export declare class EIP712Signer {
      * const PRIVATE_KEY = "<PRIVATE_KEY>";
      *
      * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-     * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
+     * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY), Number((await provider.getNetwork()).chainId));
      */
     constructor(ethSigner: ethers.Signer, chainId: number | Promise<number>);
     /**
@@ -547,6 +547,16 @@ declare const L1Signer_base: {
         _providerL2(): Provider;
         _providerL1(): ethers.Provider;
         _signerL1(): ethers.Signer;
+        getDefaultBridgeAddresses(): Promise<{
+            erc20L1: string;
+            erc20L2: string;
+            wethL1: string;
+            wethL2: string;
+            sharedL1: string;
+            sharedL2: string;
+            l1Nullifier: string;
+            l1NativeTokenVault: string;
+        }>;
         getMainContract(): Promise<IZkSyncHyperchain>;
         getBridgehubContract(): Promise<IBridgehub>;
         getL1BridgeContracts(): Promise<{
@@ -554,6 +564,9 @@ declare const L1Signer_base: {
             weth: IL1ERC20Bridge;
             shared: IL1SharedBridge;
         }>;
+        getL1AssetRouter(address?: string | undefined): Promise<import("./typechain").IL1AssetRouter>;
+        getL1NativeTokenVault(): Promise<import("./typechain").IL1NativeTokenVault>;
+        getL1Nullifier(): Promise<import("./typechain").IL1Nullifier>;
         getBaseToken(): Promise<string>;
         isETHBasedChain(): Promise<boolean>;
         getBalanceL1(token?: string | undefined, blockTag?: BlockTag | undefined): Promise<bigint>;
@@ -568,7 +581,7 @@ declare const L1Signer_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             gasPrice?: BigNumberish | undefined;
         }): Promise<bigint>;
-        getDepositAllowanceParams(token: string, amount: BigNumberish): Promise<{
+        getDepositAllowanceParams(token: string, amount: BigNumberish, overrides?: ethers.Overrides | undefined): Promise<{
             token: string;
             allowance: BigNumberish;
         }[]>;
@@ -775,23 +788,7 @@ declare const L1Signer_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
-            overrides?: ethers.Overrides | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const params = await signer.finalizeWithdrawalParams(WITHDRAWAL_HASH);
-             */
+            overrides?: ethers.Overrides | undefined;
         }): Promise<{
             token: string;
             amount: BigNumberish;
@@ -808,6 +805,7 @@ declare const L1Signer_base: {
             mintValue: BigNumberish;
             l2Value: BigNumberish;
         }>;
+        _getSecondBridgeCalldata(token: string, amount: BigNumberish, to: string): Promise<string>;
         _getDepositTxWithDefaults(transaction: {
             token: string;
             amount: BigNumberish;
@@ -840,23 +838,7 @@ declare const L1Signer_base: {
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
-            refundRecipient?: string | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-             * const claimFailedDepositTx = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
-             */
+            refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
         }): Promise<BigNumberish>;
         _getL2GasLimitFromCustomBridge(transaction: {
@@ -895,6 +877,7 @@ declare const L1Signer_base: {
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: import("./types").LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
@@ -1279,7 +1262,7 @@ export declare class L1Signer extends L1Signer_base {
      *    )
      * ).wait();
      */
-    getDepositAllowanceParams(token: Address, amount: BigNumberish): Promise<{
+    getDepositAllowanceParams(token: Address, amount: BigNumberish, overrides?: ethers.Overrides): Promise<{
         token: Address;
         allowance: BigNumberish;
     }[]>;
@@ -1950,6 +1933,16 @@ declare const L1VoidSigner_base: {
         _providerL2(): Provider;
         _providerL1(): ethers.Provider;
         _signerL1(): ethers.Signer;
+        getDefaultBridgeAddresses(): Promise<{
+            erc20L1: string;
+            erc20L2: string;
+            wethL1: string;
+            wethL2: string;
+            sharedL1: string;
+            sharedL2: string;
+            l1Nullifier: string;
+            l1NativeTokenVault: string;
+        }>;
         getMainContract(): Promise<IZkSyncHyperchain>;
         getBridgehubContract(): Promise<IBridgehub>;
         getL1BridgeContracts(): Promise<{
@@ -1957,6 +1950,9 @@ declare const L1VoidSigner_base: {
             weth: IL1ERC20Bridge;
             shared: IL1SharedBridge;
         }>;
+        getL1AssetRouter(address?: string | undefined): Promise<import("./typechain").IL1AssetRouter>;
+        getL1NativeTokenVault(): Promise<import("./typechain").IL1NativeTokenVault>;
+        getL1Nullifier(): Promise<import("./typechain").IL1Nullifier>;
         getBaseToken(): Promise<string>;
         isETHBasedChain(): Promise<boolean>;
         getBalanceL1(token?: string | undefined, blockTag?: BlockTag | undefined): Promise<bigint>;
@@ -1971,7 +1967,7 @@ declare const L1VoidSigner_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             gasPrice?: BigNumberish | undefined;
         }): Promise<bigint>;
-        getDepositAllowanceParams(token: string, amount: BigNumberish): Promise<{
+        getDepositAllowanceParams(token: string, amount: BigNumberish, overrides?: ethers.Overrides | undefined): Promise<{
             token: string;
             allowance: BigNumberish;
         }[]>;
@@ -2178,23 +2174,7 @@ declare const L1VoidSigner_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
-            overrides?: ethers.Overrides | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const params = await signer.finalizeWithdrawalParams(WITHDRAWAL_HASH);
-             */
+            overrides?: ethers.Overrides | undefined;
         }): Promise<{
             token: string;
             amount: BigNumberish;
@@ -2211,6 +2191,7 @@ declare const L1VoidSigner_base: {
             mintValue: BigNumberish;
             l2Value: BigNumberish;
         }>;
+        _getSecondBridgeCalldata(token: string, amount: BigNumberish, to: string): Promise<string>;
         _getDepositTxWithDefaults(transaction: {
             token: string;
             amount: BigNumberish;
@@ -2243,23 +2224,7 @@ declare const L1VoidSigner_base: {
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
-            refundRecipient?: string | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const FAILED_DEPOSIT_HASH = "<FAILED_DEPOSIT_TX_HASH>";
-             * const claimFailedDepositTx = await signer.claimFailedDeposit(FAILED_DEPOSIT_HASH);
-             */
+            refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
         }): Promise<BigNumberish>;
         _getL2GasLimitFromCustomBridge(transaction: {
@@ -2298,6 +2263,7 @@ declare const L1VoidSigner_base: {
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: import("./types").LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;

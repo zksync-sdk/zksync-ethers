@@ -37,7 +37,7 @@ class EIP712Signer {
      * const PRIVATE_KEY = "<PRIVATE_KEY>";
      *
      * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-     * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
+     * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY), Number((await provider.getNetwork()).chainId));
      */
     constructor(ethSigner, chainId) {
         this.ethSigner = ethSigner;
@@ -550,16 +550,19 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
      * });
      */
     async sendTransaction(transaction) {
+        if (!transaction.type) {
+            transaction.type = utils_1.EIP712_TX_TYPE;
+        }
+        const address = await this.getAddress();
+        transaction.from ?? (transaction.from = address);
         const tx = await this.populateFeeData(transaction);
+        if (!(0, utils_1.isAddressEq)(await ethers_1.ethers.resolveAddress(tx.from), address)) {
+            throw new Error('Transaction `from` address mismatch!');
+        }
         if (tx.type === null ||
             tx.type === undefined ||
             tx.type === utils_1.EIP712_TX_TYPE ||
             tx.customData) {
-            const address = await this.getAddress();
-            tx.from ?? (tx.from = address);
-            if (!(0, utils_1.isAddressEq)(await ethers_1.ethers.resolveAddress(tx.from), address)) {
-                throw new Error('Transaction `from` address mismatch!');
-            }
             const zkTx = {
                 type: tx.type ?? utils_1.EIP712_TX_TYPE,
                 value: tx.value ?? 0,
@@ -589,7 +592,10 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
             throw new Error('Initialize provider L2');
         }
         if (!tx.gasLimit ||
-            (!tx.gasPrice && (!tx.maxFeePerGas || !tx.maxPriorityFeePerGas))) {
+            (!tx.gasPrice &&
+                (!tx.maxFeePerGas ||
+                    tx.maxPriorityFeePerGas === null ||
+                    tx.maxPriorityFeePerGas === undefined))) {
             const fee = await this.providerL2.estimateFee(tx);
             tx.gasLimit ?? (tx.gasLimit = fee.gasLimit);
             if (!tx.gasPrice && tx.type === 0) {
@@ -953,8 +959,8 @@ class L1Signer extends (0, adapters_1.AdapterL1)(ethers_1.ethers.JsonRpcSigner) 
      *    )
      * ).wait();
      */
-    async getDepositAllowanceParams(token, amount) {
-        return super.getDepositAllowanceParams(token, amount);
+    async getDepositAllowanceParams(token, amount, overrides) {
+        return super.getDepositAllowanceParams(token, amount, overrides);
     }
     /**
      * @inheritDoc

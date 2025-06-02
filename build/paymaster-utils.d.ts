@@ -3,7 +3,7 @@ import { Address, ApprovalBasedPaymasterInput, GeneralPaymasterInput, PaymasterI
 /**
  * The ABI for the `IPaymasterFlow` interface, which is utilized
  * for encoding input parameters for paymaster flows.
- * @constant
+ * @readonly
  */
 export declare const PAYMASTER_FLOW_ABI: ethers.Interface;
 /**

@@ -343,8 +343,8 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      *    )
      * ).wait();
      */
-    async getDepositAllowanceParams(token, amount) {
-        return super.getDepositAllowanceParams(token, amount);
+    async getDepositAllowanceParams(token, amount, overrides) {
+        return super.getDepositAllowanceParams(token, amount, overrides);
     }
     /**
      * @inheritDoc
@@ -569,6 +569,9 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
      */
     async getFinalizeWithdrawalParams(withdrawalHash, index = 0, precommitLogIndex = 0, logProofTarget) {
         return super.getFinalizeWithdrawalParams(withdrawalHash, index, precommitLogIndex, logProofTarget);
+    }
+    async getFinalizeDepositParams(withdrawalHash, index = 0) {
+        return super.getFinalizeDepositParams(withdrawalHash, index);
     }
     /**
      * @inheritDoc
@@ -1207,7 +1210,9 @@ class Wallet extends (0, adapters_1.AdapterL2)((0, adapters_1.AdapterL1)(ethers_
             !tx.customData ||
             !tx.customData.gasPerPubdata ||
             (!populated.gasPrice &&
-                (!populated.maxFeePerGas || !populated.maxPriorityFeePerGas))) {
+                (!populated.maxFeePerGas ||
+                    populated.maxPriorityFeePerGas === null ||
+                    populated.maxPriorityFeePerGas === undefined))) {
             fee = await this.provider.estimateFee(populated);
             populated.gasLimit ?? (populated.gasLimit = fee.gasLimit);
             if (!populated.gasPrice && populated.type === 0) {

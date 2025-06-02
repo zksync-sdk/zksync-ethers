@@ -1,7 +1,7 @@
 import { EIP712Signer } from './signer';
 import { Provider } from './provider';
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, Overrides, ProgressCallback } from 'ethers';
-import { Address, BalancesMap, FinalizeWithdrawalParams, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
+import { Address, BalancesMap, FinalizeL1DepositParams, FinalizeWithdrawalParams, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IL2SharedBridge, IZkSyncHyperchain } from './typechain';
 declare const Wallet_base: {
     new (...args: any[]): {
@@ -39,6 +39,16 @@ declare const Wallet_base: {
         _providerL2(): Provider;
         _providerL1(): ethers.Provider;
         _signerL1(): ethers.Signer;
+        getDefaultBridgeAddresses(): Promise<{
+            erc20L1: string;
+            erc20L2: string;
+            wethL1: string;
+            wethL2: string;
+            sharedL1: string;
+            sharedL2: string;
+            l1Nullifier: string;
+            l1NativeTokenVault: string;
+        }>;
         getMainContract(): Promise<IZkSyncHyperchain>;
         getBridgehubContract(): Promise<IBridgehub>;
         getL1BridgeContracts(): Promise<{
@@ -46,6 +56,9 @@ declare const Wallet_base: {
             weth: IL1ERC20Bridge;
             shared: IL1SharedBridge;
         }>;
+        getL1AssetRouter(address?: string | undefined): Promise<import("./typechain").IL1AssetRouter>;
+        getL1NativeTokenVault(): Promise<import("./typechain").IL1NativeTokenVault>;
+        getL1Nullifier(): Promise<import("./typechain").IL1Nullifier>;
         getBaseToken(): Promise<string>;
         isETHBasedChain(): Promise<boolean>;
         getBalanceL1(token?: string | undefined, blockTag?: BlockTag | undefined): Promise<bigint>;
@@ -60,7 +73,7 @@ declare const Wallet_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             gasPrice?: BigNumberish | undefined;
         }): Promise<bigint>;
-        getDepositAllowanceParams(token: string, amount: BigNumberish): Promise<{
+        getDepositAllowanceParams(token: string, amount: BigNumberish, overrides?: ethers.Overrides | undefined): Promise<{
             token: string;
             allowance: BigNumberish;
         }[]>;
@@ -107,7 +120,23 @@ declare const Wallet_base: {
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
-            refundRecipient?: string | undefined;
+            refundRecipient?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
+             * const isFinalized = await wallet.isWithdrawalFinalized(WITHDRAWAL_HASH);
+             */
             overrides?: ethers.Overrides | undefined;
             approveOverrides?: ethers.Overrides | undefined;
             approveBaseOverrides?: ethers.Overrides | undefined;
@@ -284,6 +313,7 @@ declare const Wallet_base: {
             mintValue: BigNumberish;
             l2Value: BigNumberish;
         }>;
+        _getSecondBridgeCalldata(token: string, amount: BigNumberish, to: string): Promise<string>;
         _getDepositTxWithDefaults(transaction: {
             token: string;
             amount: BigNumberish;
@@ -294,22 +324,7 @@ declare const Wallet_base: {
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
             refundRecipient?: string | undefined;
-            overrides?: ethers.Overrides | undefined; /**
-             * Creates a new `Wallet` with the `provider` as L1 provider and a private key that is built from the mnemonic passphrase.
-             *
-             * @param mnemonic The mnemonic of the private key.
-             * @param [provider] The provider instance for connecting to a L1 network.
-             *
-             * @example
-             *
-             * import { Wallet, Provider, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const MNEMONIC = "stuff slice staff easily soup parent arm payment cotton hammer scatter struggle";
-             *
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = Wallet.fromMnemonic(MNEMONIC, ethProvider);
-             */
+            overrides?: ethers.Overrides | undefined;
         }): Promise<{
             token: string;
             amount: BigNumberish;
@@ -370,6 +385,7 @@ declare const Wallet_base: {
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
@@ -747,7 +763,7 @@ export declare class Wallet extends Wallet_base {
      *    )
      * ).wait();
      */
-    getDepositAllowanceParams(token: Address, amount: BigNumberish): Promise<{
+    getDepositAllowanceParams(token: Address, amount: BigNumberish, overrides?: ethers.Overrides): Promise<{
         token: Address;
         allowance: BigNumberish;
     }[]>;
@@ -1007,6 +1023,7 @@ export declare class Wallet extends Wallet_base {
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
     getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<FinalizeWithdrawalParams>;
+    getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParams>;
     /**
      * @inheritDoc
      *

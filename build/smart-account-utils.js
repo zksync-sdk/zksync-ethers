@@ -188,7 +188,9 @@ const populateTransactionECDSA = async (tx, secret, provider) => {
     }
     if (!populatedTx.gasLimit ||
         (!populatedTx.gasPrice &&
-            (!populatedTx.maxFeePerGas || !populatedTx.maxPriorityFeePerGas))) {
+            (!populatedTx.maxFeePerGas ||
+                populatedTx.maxPriorityFeePerGas === null ||
+                populatedTx.maxPriorityFeePerGas === undefined))) {
         let fromToUse = populatedTx.from;
         const isContractAccount = ethers_1.ethers.getBytes(await provider.getCode(populatedTx.from)).length !== 0;
         if (isContractAccount) {

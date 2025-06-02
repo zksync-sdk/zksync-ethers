@@ -27,8 +27,6 @@ import {
   IL2NativeTokenVault__factory,
   IL2SharedBridge,
   IL2SharedBridge__factory,
-  IBridgedStandardToken,
-  IBridgedStandardToken__factory,
 } from './typechain';
 import {
   Address,
@@ -75,7 +73,8 @@ import {
   applyL1ToL2Alias,
   L2_ASSET_ROUTER_ADDRESS,
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
-  encodeNTVTransferData,
+  encodeNativeTokenVaultTransferData,
+  encodeNativeTokenVaultAssetId,
 } from './utils';
 import {Signer} from './signer';
 
@@ -120,6 +119,8 @@ export function JsonRpcApiProvider<
       sharedBridgeL1?: Address;
       sharedBridgeL2?: Address;
       baseToken?: Address;
+      l1Nullifier?: Address;
+      l1NativeTokenVault?: Address;
     } {
       throw new Error('Must be implemented by the derived class!');
     }
@@ -290,6 +291,8 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated JSON-RPC endpoint has been removed. Use `eth_protocolVersion` to fetch current protocol semantic version.
+     *
      * Return the protocol version.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
@@ -502,6 +505,14 @@ export function JsonRpcApiProvider<
       };
     }
 
+    _setL1NullifierAndNativeTokenVault(
+      l1Nullifier: Address,
+      l1NativeTokenVault: Address
+    ) {
+      this.contractAddresses().l1Nullifier = l1Nullifier;
+      this.contractAddresses().l1NativeTokenVault = l1NativeTokenVault;
+    }
+
     /**
      * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
      **
@@ -523,15 +534,11 @@ export function JsonRpcApiProvider<
       return IL2SharedBridge__factory.connect(address, this);
     }
 
-    async connectL2NTV(): Promise<IL2NativeTokenVault> {
+    async connectL2NativeTokenVault(): Promise<IL2NativeTokenVault> {
       return IL2NativeTokenVault__factory.connect(
         L2_NATIVE_TOKEN_VAULT_ADDRESS,
         this
       );
-    }
-
-    async connectBridgedToken(token: Address): Promise<IBridgedStandardToken> {
-      return IBridgedStandardToken__factory.connect(token, this);
     }
 
     async connectL2AssetRouter(): Promise<IL2AssetRouter> {
@@ -564,6 +571,10 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+     *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+     *  or other token APIs from providers like Alchemy or QuickNode.
+     *
      * Returns all balances for confirmed tokens given by an account address.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
@@ -579,6 +590,8 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated JSON-RPC endpoint has been removed. Use third-party APIs such as Coingecko or {@link https://tokenlists.org}.
+     *
      * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
@@ -704,6 +717,8 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * @deprecated JSON-RPC endpoint has been destabilized and is now available as `unstable_sendRawTransactionWithDetailedOutput`.
+     *
      * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
      * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
      * but with some extra data returned from it.
@@ -799,7 +814,10 @@ export function JsonRpcApiProvider<
         }
         return populatedTx;
       }
-      const ntv = await this.connectL2NTV();
+
+      let populatedTx;
+      // we get the tokens data, assetId and originChainId
+      const ntv = await this.connectL2NativeTokenVault();
       const assetId = await ntv.assetId(tx.token);
       const originChainId = await ntv.originChainId(assetId);
       const l1ChainId = await this.getL1ChainId();
@@ -809,22 +827,21 @@ export function JsonRpcApiProvider<
         tx.token === ETH_ADDRESS_IN_CONTRACTS;
       if (!tx.bridgeAddress) {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
+        // If the legacy L2SharedBridge is deployed we use it for l1 native tokens.
         tx.bridgeAddress = isTokenL1Native
           ? bridgeAddresses.sharedL2
           : L2_ASSET_ROUTER_ADDRESS;
       }
-
-      let populatedTx;
+      // For non L1 native tokens we need to use the AssetRouter.
+      // For L1 native tokens we can use the legacy withdraw method.
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = ethers.keccak256(
-          ethers.AbiCoder.defaultAbiCoder().encode(
-            ['uint256', 'address', 'address'],
-            [chainId, L2_NATIVE_TOKEN_VAULT_ADDRESS, tx.token]
-          )
+        const assetId = encodeNativeTokenVaultAssetId(
+          BigInt(chainId),
+          tx.token
         );
-        const assetData = encodeNTVTransferData(
+        const assetData = encodeNativeTokenVaultTransferData(
           BigInt(tx.amount),
           tx.to!,
           tx.token
@@ -1178,15 +1195,11 @@ export function JsonRpcApiProvider<
      * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
      *
      * @param providerL1 The Ethers provider for the L1 network.
-     * @param providerL2 The ZKsync provider for the L2 network.
      * @param token The address of the token to be bridged.
      * @param amount The deposit amount.
      * @param to The recipient address on the L2 network.
      * @param from The sender address on the L1 network.
      * @param gasPerPubdataByte The current gas per byte of pubdata.
-     *
-     * @see
-     * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
      */
     async estimateDefaultBridgeDepositL2Gas(
       providerL1: ethers.Provider,
@@ -1236,7 +1249,6 @@ export function JsonRpcApiProvider<
     /**
      * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
      *
-     * @param providerL2 The ZKsync provider for the L2 network.
      * @param l1BridgeAddress The address of the custom L1 bridge.
      * @param l2BridgeAddress The address of the custom L2 bridge.
      * @param token The address of the token to be bridged.
@@ -1246,9 +1258,6 @@ export function JsonRpcApiProvider<
      * @param from The sender address on the L1 network.
      * @param gasPerPubdataByte The current gas per byte of pubdata.
      * @param l2Value The `msg.value` of L2 transaction.
-     *
-     * @see
-     * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
      */
     async estimateCustomBridgeDepositL2Gas(
       l1BridgeAddress: Address,
@@ -1386,19 +1395,31 @@ export function JsonRpcApiProvider<
 export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   #connect: FetchRequest;
   protected _contractAddresses: {
+    bridgehubContract?: Address;
     mainContract?: Address;
     erc20BridgeL1?: Address;
     erc20BridgeL2?: Address;
     wethBridgeL1?: Address;
     wethBridgeL2?: Address;
+    sharedBridgeL1?: Address;
+    sharedBridgeL2?: Address;
+    baseToken?: Address;
+    l1Nullifier?: Address;
+    l1NativeTokenVault?: Address;
   };
 
   override contractAddresses(): {
+    bridgehubContract?: Address;
     mainContract?: Address;
     erc20BridgeL1?: Address;
     erc20BridgeL2?: Address;
     wethBridgeL1?: Address;
     wethBridgeL2?: Address;
+    sharedBridgeL1?: Address;
+    sharedBridgeL2?: Address;
+    baseToken?: Address;
+    l1Nullifier?: Address;
+    l1NativeTokenVault?: Address;
   } {
     return this._contractAddresses;
   }

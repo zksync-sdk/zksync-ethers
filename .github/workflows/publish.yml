@@ -36,3 +36,44 @@ jobs:
           npm run types
           npm run build
           npm publish --tag ${{ inputs.tag }} 
+
+  docs-build:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    name: Build TypeDoc Documentation
+    runs-on: ubuntu-latest
+    needs: zksync
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: yarn install
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Generate documentation
+        run: yarn docs
+      - name: Upload docs artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  docs-deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: docs-build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

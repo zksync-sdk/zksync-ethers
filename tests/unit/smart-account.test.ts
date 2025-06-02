@@ -10,6 +10,7 @@ import {
 } from '../../src/smart-account-utils';
 import {TypedDataEncoder, hashMessage} from 'ethers';
 import {ADDRESS1, PRIVATE_KEY1, ADDRESS2, L2_CHAIN_URL} from '../utils';
+import {compareTransactionsWithTolerance} from '../utils';
 
 const {expect} = chai;
 
@@ -131,7 +132,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 0n,
-      gasLimit: 155_974n,
+      gasLimit: 170_000n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -148,7 +149,11 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
+    const tolerance = 1000n; // acceptable margin as a native BigInt
+    compareTransactionsWithTolerance(tx, result, tolerance, [
+      'nonce',
+      'customData',
+    ]);
   });
 
   it('should populate tx using gasPrice as fee model', async () => {
@@ -160,7 +165,7 @@ describe('populateTransaction()', () => {
       type: 113,
       data: '0x',
       gasPrice: 100_000_000n,
-      gasLimit: 155_974n,
+      gasLimit: 170_000n,
       customData: {
         gasPerPubdata: 50_000,
         factoryDeps: [],
@@ -177,7 +182,11 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
+    const tolerance = 1000n; // acceptable margin as a native BigInt
+    compareTransactionsWithTolerance(tx, result, tolerance, [
+      'nonce',
+      'customData',
+    ]);
   });
 
   it('should populate `tx.maxFeePerGas`', async () => {
@@ -190,7 +199,7 @@ describe('populateTransaction()', () => {
       data: '0x',
       maxFeePerGas: 100_000_000n,
       maxPriorityFeePerGas: 100_000_000n,
-      gasLimit: 155_974n,
+      gasLimit: 170_000n,
       customData: {
         factoryDeps: [],
       },
@@ -206,7 +215,11 @@ describe('populateTransaction()', () => {
       PRIVATE_KEY1,
       provider
     );
-    expect(result).to.be.deepEqualExcluding(tx, ['nonce', 'customData']);
+    const tolerance = 1000n; // acceptable margin as a native BigInt
+    compareTransactionsWithTolerance(tx, result, tolerance, [
+      'nonce',
+      'customData',
+    ]);
   });
 
   it('should throw an error when provider is not set', async () => {

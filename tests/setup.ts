@@ -5,6 +5,7 @@ import {
   IL2NativeTokenVault__factory,
   IERC20__factory,
 } from '../src/typechain';
+import {DAI_L1} from './utils';
 
 import Token from './files/Token.json';
 import Paymaster from './files/Paymaster.json';
@@ -17,8 +18,6 @@ const provider = new Provider(L2_CHAIN_URL);
 const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-
-const DAI_L1 = '0x70a0F165d6f8054d0d0CF8dFd4DD2005f0AF6B55';
 
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
@@ -142,10 +141,9 @@ async function main() {
     `L1 base token balance before: ${await wallet.getBalanceL1(baseToken)}`
   );
   console.log(`L2 base token balance before: ${await wallet.getBalance()}`);
-  
 
   await mintTokensOnL1(baseToken);
-  console.log(`Minted tokens on L1`, baseToken);
+  console.log('Minted tokens on L1', baseToken);
   await sendTokenToL2(baseToken);
 
   console.log(

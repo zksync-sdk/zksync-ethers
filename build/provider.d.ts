@@ -1,5 +1,5 @@
 import { ethers, BigNumberish, BytesLike, BlockTag, Filter, FilterByBlockHash, TransactionRequest as EthersTransactionRequest, JsonRpcTransactionRequest, Networkish, Eip1193Provider, JsonRpcError, JsonRpcResult, JsonRpcPayload } from 'ethers';
-import { IL2AssetRouter, IL2Bridge, IL2NativeTokenVault, IL2SharedBridge, IBridgedStandardToken } from './typechain';
+import { IL2AssetRouter, IL2Bridge, IL2NativeTokenVault, IL2SharedBridge } from './typechain';
 import { Address, TransactionResponse, TransactionRequest, TransactionStatus, PriorityOpResponse, BalancesMap, TransactionReceipt, Block, Log, TransactionDetails, BlockDetails, ContractAccountInfo, Network as ZkSyncNetwork, BatchDetails, Fee, RawBlockTransaction, PaymasterParams, StorageProof, LogProof, LogProofTarget, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput } from './types';
 import { Signer } from './signer';
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -25,6 +25,8 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
             sharedBridgeL1?: Address;
             sharedBridgeL2?: Address;
             baseToken?: Address;
+            l1Nullifier?: Address;
+            l1NativeTokenVault?: Address;
         };
         _getBlockTag(blockTag?: BlockTag): string | Promise<string>;
         _wrapLog(value: any): Log;
@@ -92,6 +94,8 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          */
         l1TokenAddress(token: Address): Promise<string>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `eth_protocolVersion` to fetch current protocol semantic version.
+         *
          * Return the protocol version.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
@@ -186,6 +190,7 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
             sharedL1: string;
             sharedL2: string;
         }>;
+        _setL1NullifierAndNativeTokenVault(l1Nullifier: Address, l1NativeTokenVault: Address): void;
         /**
          * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
          **
@@ -199,8 +204,7 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * const l2Bridge = await provider.connectL2Bridge("<L2_BRIDGE_ADDRESS>");
          */
         connectL2Bridge(address: Address): Promise<IL2SharedBridge | IL2Bridge>;
-        connectL2NTV(): Promise<IL2NativeTokenVault>;
-        connectBridgedToken(token: Address): Promise<IBridgedStandardToken>;
+        connectL2NativeTokenVault(): Promise<IL2NativeTokenVault>;
         connectL2AssetRouter(): Promise<IL2AssetRouter>;
         /**
          * Returns true if passed bridge address is legacy and false if its shared bridge.
@@ -217,6 +221,10 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          */
         isL2BridgeLegacy(address: Address): Promise<boolean>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+         *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+         *  or other token APIs from providers like Alchemy or QuickNode.
+         *
          * Returns all balances for confirmed tokens given by an account address.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
@@ -225,6 +233,8 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          */
         getAllAccountBalances(address: Address): Promise<BalancesMap>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use third-party APIs such as Coingecko or {@link https://tokenlists.org}.
+         *
          * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
@@ -305,6 +315,8 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          */
         getProof(address: Address, keys: string[], l1BatchNumber: number): Promise<StorageProof>;
         /**
+         * @deprecated JSON-RPC endpoint has been destabilized and is now available as `unstable_sendRawTransactionWithDetailedOutput`.
+         *
          * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
          * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
          * but with some extra data returned from it.
@@ -474,21 +486,16 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
          *
          * @param providerL1 The Ethers provider for the L1 network.
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param token The address of the token to be bridged.
          * @param amount The deposit amount.
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         estimateDefaultBridgeDepositL2Gas(providerL1: ethers.Provider, token: Address, amount: BigNumberish, to: Address, from?: Address, gasPerPubdataByte?: BigNumberish): Promise<bigint>;
         /**
          * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
          *
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param l1BridgeAddress The address of the custom L1 bridge.
          * @param l2BridgeAddress The address of the custom L2 bridge.
          * @param token The address of the token to be bridged.
@@ -498,9 +505,6 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         estimateCustomBridgeDepositL2Gas(l1BridgeAddress: Address, l2BridgeAddress: Address, token: Address, amount: BigNumberish, to: Address, bridgeData: BytesLike, from: Address, gasPerPubdataByte?: BigNumberish, l2Value?: BigNumberish): Promise<bigint>;
         /**
@@ -563,13 +567,6 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
-        /**
-         * Returns the range of blocks contained within a batch given by batch number.
-         *
-         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
-         *
-         * @param l1BatchNumber The L1 batch number.
-         */
         call(_tx: ethers.TransactionRequest): Promise<string>;
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;
@@ -623,6 +620,8 @@ declare const Provider_base: {
             sharedBridgeL1?: string | undefined;
             sharedBridgeL2?: string | undefined;
             baseToken?: string | undefined;
+            l1Nullifier?: string | undefined;
+            l1NativeTokenVault?: string | undefined;
         };
         _getBlockTag(blockTag?: ethers.BlockTag | undefined): string | Promise<string>;
         _wrapLog(value: any): Log;
@@ -690,6 +689,8 @@ declare const Provider_base: {
          */
         l1TokenAddress(token: string): Promise<string>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `eth_protocolVersion` to fetch current protocol semantic version.
+         *
          * Return the protocol version.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
@@ -784,6 +785,7 @@ declare const Provider_base: {
             sharedL1: string;
             sharedL2: string;
         }>;
+        _setL1NullifierAndNativeTokenVault(l1Nullifier: string, l1NativeTokenVault: string): void;
         /**
          * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
          **
@@ -797,8 +799,7 @@ declare const Provider_base: {
          * const l2Bridge = await provider.connectL2Bridge("<L2_BRIDGE_ADDRESS>");
          */
         connectL2Bridge(address: string): Promise<IL2Bridge | IL2SharedBridge>;
-        connectL2NTV(): Promise<IL2NativeTokenVault>;
-        connectBridgedToken(token: string): Promise<IBridgedStandardToken>;
+        connectL2NativeTokenVault(): Promise<IL2NativeTokenVault>;
         connectL2AssetRouter(): Promise<IL2AssetRouter>;
         /**
          * Returns true if passed bridge address is legacy and false if its shared bridge.
@@ -815,6 +816,10 @@ declare const Provider_base: {
          */
         isL2BridgeLegacy(address: string): Promise<boolean>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+         *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+         *  or other token APIs from providers like Alchemy or QuickNode.
+         *
          * Returns all balances for confirmed tokens given by an account address.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
@@ -823,6 +828,8 @@ declare const Provider_base: {
          */
         getAllAccountBalances(address: string): Promise<BalancesMap>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use third-party APIs such as Coingecko or {@link https://tokenlists.org}.
+         *
          * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
@@ -903,6 +910,8 @@ declare const Provider_base: {
          */
         getProof(address: string, keys: string[], l1BatchNumber: number): Promise<StorageProof>;
         /**
+         * @deprecated JSON-RPC endpoint has been destabilized and is now available as `unstable_sendRawTransactionWithDetailedOutput`.
+         *
          * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
          * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
          * but with some extra data returned from it.
@@ -1072,21 +1081,16 @@ declare const Provider_base: {
          * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
          *
          * @param providerL1 The Ethers provider for the L1 network.
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param token The address of the token to be bridged.
          * @param amount The deposit amount.
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         estimateDefaultBridgeDepositL2Gas(providerL1: ethers.Provider, token: string, amount: ethers.BigNumberish, to: string, from?: string | undefined, gasPerPubdataByte?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**
          * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
          *
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param l1BridgeAddress The address of the custom L1 bridge.
          * @param l2BridgeAddress The address of the custom L2 bridge.
          * @param token The address of the token to be bridged.
@@ -1096,9 +1100,6 @@ declare const Provider_base: {
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         estimateCustomBridgeDepositL2Gas(l1BridgeAddress: string, l2BridgeAddress: string, token: string, amount: ethers.BigNumberish, to: string, bridgeData: ethers.BytesLike, from: string, gasPerPubdataByte?: ethers.BigNumberish | undefined, l2Value?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**
@@ -1161,13 +1162,6 @@ declare const Provider_base: {
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
-        /**
-         * Returns the range of blocks contained within a batch given by batch number.
-         *
-         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
-         *
-         * @param l1BatchNumber The L1 batch number.
-         */
         call(_tx: ethers.TransactionRequest): Promise<string>;
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;
@@ -1206,18 +1200,30 @@ declare const Provider_base: {
 export declare class Provider extends Provider_base {
     #private;
     protected _contractAddresses: {
+        bridgehubContract?: Address;
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
         wethBridgeL1?: Address;
         wethBridgeL2?: Address;
+        sharedBridgeL1?: Address;
+        sharedBridgeL2?: Address;
+        baseToken?: Address;
+        l1Nullifier?: Address;
+        l1NativeTokenVault?: Address;
     };
     contractAddresses(): {
+        bridgehubContract?: Address;
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
         wethBridgeL1?: Address;
         wethBridgeL2?: Address;
+        sharedBridgeL1?: Address;
+        sharedBridgeL2?: Address;
+        baseToken?: Address;
+        l1Nullifier?: Address;
+        l1NativeTokenVault?: Address;
     };
     /**
      * Creates a new `Provider` instance for connecting to an L2 network.
@@ -2077,6 +2083,8 @@ declare const BrowserProvider_base: {
             sharedBridgeL1?: string | undefined;
             sharedBridgeL2?: string | undefined;
             baseToken?: string | undefined;
+            l1Nullifier?: string | undefined;
+            l1NativeTokenVault?: string | undefined;
         };
         _getBlockTag(blockTag?: ethers.BlockTag | undefined): string | Promise<string>;
         _wrapLog(value: any): Log;
@@ -2144,6 +2152,8 @@ declare const BrowserProvider_base: {
          */
         l1TokenAddress(token: string): Promise<string>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `eth_protocolVersion` to fetch current protocol semantic version.
+         *
          * Return the protocol version.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
@@ -2238,6 +2248,7 @@ declare const BrowserProvider_base: {
             sharedL1: string;
             sharedL2: string;
         }>;
+        _setL1NullifierAndNativeTokenVault(l1Nullifier: string, l1NativeTokenVault: string): void;
         /**
          * Returns contract wrapper. If given address is shared bridge address it returns Il2SharedBridge and if its legacy it returns Il2Bridge.
          **
@@ -2251,8 +2262,7 @@ declare const BrowserProvider_base: {
          * const l2Bridge = await provider.connectL2Bridge("<L2_BRIDGE_ADDRESS>");
          */
         connectL2Bridge(address: string): Promise<IL2Bridge | IL2SharedBridge>;
-        connectL2NTV(): Promise<IL2NativeTokenVault>;
-        connectBridgedToken(token: string): Promise<IBridgedStandardToken>;
+        connectL2NativeTokenVault(): Promise<IL2NativeTokenVault>;
         connectL2AssetRouter(): Promise<IL2AssetRouter>;
         /**
          * Returns true if passed bridge address is legacy and false if its shared bridge.
@@ -2269,6 +2279,10 @@ declare const BrowserProvider_base: {
          */
         isL2BridgeLegacy(address: string): Promise<boolean>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
+         *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
+         *  or other token APIs from providers like Alchemy or QuickNode.
+         *
          * Returns all balances for confirmed tokens given by an account address.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
@@ -2277,6 +2291,8 @@ declare const BrowserProvider_base: {
          */
         getAllAccountBalances(address: string): Promise<BalancesMap>;
         /**
+         * @deprecated JSON-RPC endpoint has been removed. Use third-party APIs such as Coingecko or {@link https://tokenlists.org}.
+         *
          * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
          *
          * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
@@ -2357,6 +2373,8 @@ declare const BrowserProvider_base: {
          */
         getProof(address: string, keys: string[], l1BatchNumber: number): Promise<StorageProof>;
         /**
+         * @deprecated JSON-RPC endpoint has been destabilized and is now available as `unstable_sendRawTransactionWithDetailedOutput`.
+         *
          * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
          * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
          * but with some extra data returned from it.
@@ -2526,21 +2544,16 @@ declare const BrowserProvider_base: {
          * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
          *
          * @param providerL1 The Ethers provider for the L1 network.
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param token The address of the token to be bridged.
          * @param amount The deposit amount.
          * @param to The recipient address on the L2 network.
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#default-bridges Default bridges documentation}.
          */
         estimateDefaultBridgeDepositL2Gas(providerL1: ethers.Provider, token: string, amount: ethers.BigNumberish, to: string, from?: string | undefined, gasPerPubdataByte?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**
          * Returns an estimation of the L2 gas required for token bridging via the custom ERC20 bridge.
          *
-         * @param providerL2 The ZKsync provider for the L2 network.
          * @param l1BridgeAddress The address of the custom L1 bridge.
          * @param l2BridgeAddress The address of the custom L2 bridge.
          * @param token The address of the token to be bridged.
@@ -2550,9 +2563,6 @@ declare const BrowserProvider_base: {
          * @param from The sender address on the L1 network.
          * @param gasPerPubdataByte The current gas per byte of pubdata.
          * @param l2Value The `msg.value` of L2 transaction.
-         *
-         * @see
-         * {@link https://docs.zksync.io/build/developer-reference/bridging-asset.html#custom-bridges-on-l1-and-l2 Custom bridges documentation}.
          */
         estimateCustomBridgeDepositL2Gas(l1BridgeAddress: string, l2BridgeAddress: string, token: string, amount: ethers.BigNumberish, to: string, bridgeData: ethers.BytesLike, from: string, gasPerPubdataByte?: ethers.BigNumberish | undefined, l2Value?: ethers.BigNumberish | undefined): Promise<bigint>;
         /**
@@ -2615,13 +2625,6 @@ declare const BrowserProvider_base: {
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
-        /**
-         * Returns the range of blocks contained within a batch given by batch number.
-         *
-         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
-         *
-         * @param l1BatchNumber The L1 batch number.
-         */
         call(_tx: ethers.TransactionRequest): Promise<string>;
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;

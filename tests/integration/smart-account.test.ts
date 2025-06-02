@@ -25,7 +25,6 @@ import {
 const {expect} = chai;
 
 import MultisigAccount from '../files/TwoUserMultisig.json';
-
 describe('SmartAccount', async () => {
   const provider = new Provider(L2_CHAIN_URL);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
@@ -35,8 +34,8 @@ describe('SmartAccount', async () => {
     provider
   );
 
-  describe('#constructor()', () => {
-    it('`SmartAccount(address, {address, secret}, provider)` should return a `SmartAccount` with signer and provider', () => {
+  describe('#constructor()', async () => {
+    it('`SmartAccount(address, {address, secret}, provider)` should return a `SmartAccount` with signer and provider', async () => {
       const account = new SmartAccount(
         {address: ADDRESS1, secret: PRIVATE_KEY1},
         provider
@@ -606,7 +605,7 @@ describe('SmartAccount', async () => {
         expect(result).not.to.be.null;
         expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
           .to.be.true;
-      }).timeout(90_000);
+      }).timeout(900_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000n;

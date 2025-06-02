@@ -679,7 +679,12 @@ export interface SmartAccountSigner {
     /** Custom method for populating transaction requests. */
     transactionBuilder?: TransactionBuilder;
 }
-export type FinalizeL1DepositParamsStruct = {
+/**
+ * Contains parameters for finalizing the L2->L1 deposit transaction.
+ * Pre V26 withdrawals were special kind of transaction,
+ * but starting from v26 any cross-chain token movement is called a deposit, regardless of direction
+ */
+export type FinalizeL1DepositParams = {
     chainId: BigNumberish;
     l2BatchNumber: BigNumberish;
     l2MessageIndex: BigNumberish;

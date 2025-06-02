@@ -9,7 +9,7 @@ const IPaymasterFlow_json_1 = __importDefault(require("../abi/IPaymasterFlow.jso
 /**
  * The ABI for the `IPaymasterFlow` interface, which is utilized
  * for encoding input parameters for paymaster flows.
- * @constant
+ * @readonly
  */
 exports.PAYMASTER_FLOW_ABI = new ethers_1.ethers.Interface(IPaymasterFlow_json_1.default);
 /**

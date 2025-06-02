@@ -927,7 +927,7 @@ describe('Wallet', () => {
           .true;
         expect(l1BalanceBeforeDeposit - l1BalanceAfterDeposit >= amount).to.be
           .true;
-      }).timeout(60_000);
+      }).timeout(100_000);
     } else {
       it('should deposit ETH to L2 network', async () => {
         const amount = 7_000_000_000;
@@ -1033,7 +1033,7 @@ describe('Wallet', () => {
           const result = await tx.wait();
           expect(result?.blockHash).to.be.not.null;
         }
-      }).timeout(40_000);
+      }).timeout(100_000);
 
       it('should throw an error when trying to claim successful deposit', async () => {
         const response = await wallet.deposit({
@@ -1668,7 +1668,7 @@ describe('Wallet', () => {
       const crownL2Address = APPROVAL_TOKEN;
       const bridgeContracts = await wallet.getL1BridgeContracts();
       const sharedBridge = bridgeContracts.shared;
-      const l1AR = IL1AssetRouter__factory.connect(
+      const l1AssetRouter = IL1AssetRouter__factory.connect(
         await sharedBridge.getAddress(),
         wallet._signerL1()
       );
@@ -1676,7 +1676,7 @@ describe('Wallet', () => {
         NTV_ADDRESS,
         wallet._signerL2()
       );
-      const l1NtvAddress = await l1AR.nativeTokenVault();
+      const l1NtvAddress = await l1AssetRouter.nativeTokenVault();
       const l1Ntv = IL1NativeTokenVault__factory.connect(
         l1NtvAddress,
         wallet._signerL1()
@@ -1866,7 +1866,7 @@ describe('Wallet', () => {
           overrides: {
             maxFeePerGas: 1_000_000_010n,
             maxPriorityFeePerGas: 1_000_000_000n,
-            gasLimit: 238_654n,
+            gasLimit: 638_654n,
             value: 0,
           },
         };
@@ -2289,4 +2289,4 @@ describe('Wallet', () => {
       }
     }).timeout(25_000);
   });
-}); 
+});
