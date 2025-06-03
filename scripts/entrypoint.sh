@@ -20,7 +20,6 @@ solc --base-path l1-contracts/  \
   --include-path l1-contracts/node_modules/ \
   -o l1-abi \
   --abi \
-  l1-contracts/contracts/bridgehub/IBridgehub.sol \
   l1-contracts/contracts/bridge/interfaces/IL1SharedBridge.sol \
   l1-contracts/contracts/state-transition/chain-interfaces/IZkSyncHyperchain.sol \
   l1-contracts/contracts/dev-contracts/interfaces/ITestnetERC20Token.sol \
@@ -43,6 +42,22 @@ solc --base-path system-contracts \
   system-contracts/contracts/interfaces/IL1Messenger.sol \
   system-contracts/contracts/interfaces/INonceHolder.sol \
   system-contracts/contracts/interfaces/IPaymasterFlow.sol
+
+curl https://binaries.soliditylang.org/linux-amd64/solc-linux-amd64-v0.8.24+commit.e11b9ed9 -o /usr/local/bin/solc
+chmod +x /usr/local/bin/solc
+
+git checkout 14961f1efecac1030139c4cf0655b14135197772
+
+echo "Install dependencies"
+yarn install
+
+echo "Generate updated Bridgehub ABI"
+solc --base-path l1-contracts/  \
+  --include-path l1-contracts/node_modules/ \
+  -o l1-abi \
+  --abi \
+  l1-contracts/contracts/bridgehub/IBridgehub.sol \
+  --overwrite
 
 mkdir abi /abi
 mv l1-abi/* system-contracts-abi/* l2-abi/* abi
