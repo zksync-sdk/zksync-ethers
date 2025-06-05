@@ -780,12 +780,10 @@ function JsonRpcApiProvider(ProviderType) {
                 network: this.getNetwork(),
             });
             const tx = types_1.Transaction.from(signedTx);
-            if (tx.hash !== hash && tx.type !== utils_1.INTEROP_TX_TYPE) {
-                // throw new Error('@TODO: the returned hash did not match!');
+            if (tx.hash !== hash) {
+                throw new Error('@TODO: the returned hash did not match!');
             }
-            const result = this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
-            result.realInteropHash = hash;
-            return result;
+            return this._wrapTransactionResponse(tx).replaceableTransaction(blockNumber);
         }
         /**
          * Returns a L2 transaction response from L1 transaction response.
@@ -984,18 +982,6 @@ function JsonRpcApiProvider(ProviderType) {
                     paymaster: ethers_1.ethers.hexlify(tx.customData.paymasterParams.paymaster),
                     paymasterInput: Array.from(ethers_1.ethers.getBytes(tx.customData.paymasterParams.paymasterInput)),
                 };
-            }
-            if (tx.customData.merkleProof) {
-                result.eip712Meta.merkleProof = Array.from(ethers_1.ethers.getBytes(tx.customData.merkleProof));
-            }
-            if (tx.customData.fullFee) {
-                result.eip712Meta.fullFee = ethers_1.ethers.toBeHex(tx.customData.fullFee);
-            }
-            if (tx.customData.toMint) {
-                result.eip712Meta.toMint = ethers_1.ethers.toBeHex(tx.customData.toMint);
-            }
-            if (tx.customData.refundRecipient) {
-                result.eip712Meta.refundRecipient = ethers_1.ethers.toBeHex(tx.customData.refundRecipient);
             }
             return result;
         }

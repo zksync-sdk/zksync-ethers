@@ -53,14 +53,6 @@ export type Eip712Meta = {
     customSignature?: BytesLike;
     /** Parameters for configuring the custom paymaster for the transaction. */
     paymasterParams?: PaymasterParams;
-    /** Merkle proof for xL2 transactions */
-    merkleProof?: BytesLike;
-    /** Full fee for xL2 transactions */
-    fullFee?: BigNumberish;
-    /** to mint value */
-    toMint?: BigNumberish;
-    /** refund recipient */
-    refundRecipient?: BigNumberish;
 };
 /**
  * Specifies a specific block. This can be represented by:
@@ -162,7 +154,6 @@ export declare class TransactionResponse extends ethers.TransactionResponse {
     readonly l1BatchNumber: null | number;
     /** The transaction index within the batch on the L1 network. */
     readonly l1BatchTxIndex: null | number;
-    realInteropHash: string | null;
     constructor(params: any, provider: ethers.Provider);
     /**
      * Waits for this transaction to be mined and have a specified number of confirmation blocks.
@@ -562,16 +553,6 @@ export interface FinalizeWithdrawalParams {
     sender: string;
     /** The Merkle proof of the inclusion L2 -> L1 message about withdrawal initialization. */
     proof: string[];
-}
-export interface FinalizeWithdrawalParamsWithoutProof {
-    /** The L2 batch number where the withdrawal was processed. */
-    l1BatchNumber: number | null;
-    /** The L2 transaction number in the batch, in which the log was sent. */
-    l2TxNumberInBlock: number | null;
-    /** The L2 withdraw data, stored in an L2 -> L1 message. */
-    message: any;
-    /** The L2 address which sent the log. */
-    sender: string;
 }
 /** Represents storage proof. */
 export interface StorageProof {

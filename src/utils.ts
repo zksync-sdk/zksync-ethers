@@ -191,13 +191,6 @@ export const EIP1271_MAGIC_VALUE = '0x1626ba7e';
 export const EIP712_TX_TYPE = 0x71;
 
 /**
- * Represents an interoperability transaction type.
- *
- * @readonly
- */
-export const INTEROP_TX_TYPE = 0xfd;
-
-/**
  * Represents a priority transaction operation on L2.
  *
  * @readonly
@@ -591,21 +584,10 @@ export function serializeEip712(
     fields.push([]);
   }
 
-  if (meta.merkleProof) {
-    fields.push(meta.merkleProof);
-  }
-  if (meta.fullFee) {
-    fields.push(meta.fullFee);
-  }
-  if (meta.toMint) {
-    fields.push(meta.toMint);
-  }
-  if (meta.refundRecipient) {
-    fields.push(meta.refundRecipient);
-  }
-
-  const txType = transaction.type || EIP712_TX_TYPE;
-  return ethers.concat([new Uint8Array([txType]), ethers.encodeRlp(fields)]);
+  return ethers.concat([
+    new Uint8Array([EIP712_TX_TYPE]),
+    ethers.encodeRlp(fields),
+  ]);
 }
 
 /**
@@ -735,7 +717,7 @@ export function parseEip712(payload: ethers.BytesLike): TransactionLike {
   const bytes = ethers.getBytes(payload);
   const raw = ethers.decodeRlp(bytes.slice(1)) as string[];
   const transaction: TransactionLike = {
-    type: bytes[0] === INTEROP_TX_TYPE ? INTEROP_TX_TYPE : EIP712_TX_TYPE,
+    type: EIP712_TX_TYPE,
     nonce: Number(handleNumber(raw[0])),
     maxPriorityFeePerGas: handleNumber(raw[1]),
     maxFeePerGas: handleNumber(raw[2]),

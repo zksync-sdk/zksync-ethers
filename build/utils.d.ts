@@ -128,12 +128,6 @@ export declare const EIP1271_MAGIC_VALUE = "0x1626ba7e";
  */
 export declare const EIP712_TX_TYPE = 113;
 /**
- * Represents an interoperability transaction type.
- *
- * @readonly
- */
-export declare const INTEROP_TX_TYPE = 253;
-/**
  * Represents a priority transaction operation on L2.
  *
  * @readonly

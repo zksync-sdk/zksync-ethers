@@ -43,7 +43,22 @@ declare const Wallet_base: {
             erc20L1: string;
             erc20L2: string;
             wethL1: string;
-            wethL2: string;
+            wethL2: string; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const l1BridgeContracts = await wallet.getL1BridgeContracts();
+             */
             sharedL1: string;
             sharedL2: string;
             l1Nullifier: string;
@@ -53,7 +68,24 @@ declare const Wallet_base: {
         getBridgehubContract(): Promise<IBridgehub>;
         getL1BridgeContracts(): Promise<{
             erc20: IL1ERC20Bridge;
-            weth: IL1ERC20Bridge;
+            weth: IL1ERC20Bridge; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const tokenL1 = "0x5C221E77624690fff6dd741493D735a17716c26B";
+             *
+             * console.log(`Token L2 address: ${await wallet.l2TokenAddress(tokenL1)}`);
+             */
             shared: IL1SharedBridge;
         }>;
         getL1AssetRouter(address?: string | undefined): Promise<import("./typechain").IL1AssetRouter>;
@@ -83,7 +115,26 @@ declare const Wallet_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            bridgeAddress?: string | undefined;
+            bridgeAddress?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Wallet, Provider, types, utils } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+             *
+             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+             * const ethProvider = ethers.getDefaultProvider("sepolia");
+             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+             *
+             * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+             * const tx = await wallet.getDepositTx({
+             *   token: tokenL1,
+             *   amount: "10_000_000n,
+             * });
+             */
             approveERC20?: boolean | undefined;
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
@@ -370,7 +421,6 @@ declare const Wallet_base: {
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: "proof_based_gw" | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParams>;
-        getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;

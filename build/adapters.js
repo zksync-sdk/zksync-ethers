@@ -878,7 +878,6 @@ function AdapterL1(Base) {
          * @param withdrawalHash Hash of the L2 transaction where the withdrawal was initiated.
          * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
          * withdrawal you want to finalize.
-         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
          * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
          * @throws {Error} If log proof can not be found.
          */
@@ -930,21 +929,6 @@ function AdapterL1(Base) {
                 l2TxNumberInBatch: l1BatchTxId,
                 message,
                 merkleProof: proof.proof,
-            };
-        }
-        async getFinalizeWithdrawalParamsWithoutProof(withdrawalHash, index = 0) {
-            const { log, l1BatchTxId } = await this._getWithdrawalLog(withdrawalHash, index);
-            // const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
-            //   withdrawalHash,
-            //   index
-            // );
-            const sender = ethers_1.ethers.dataSlice(log.topics[1], 12);
-            const message = ethers_1.ethers.AbiCoder.defaultAbiCoder().decode(['bytes'], log.data)[0];
-            return {
-                l1BatchNumber: log.l1BatchNumber,
-                l2TxNumberInBlock: l1BatchTxId,
-                message,
-                sender,
             };
         }
         /**

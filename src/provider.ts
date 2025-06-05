@@ -61,7 +61,6 @@ import {
   CONTRACT_DEPLOYER,
   sleep,
   EIP712_TX_TYPE,
-  INTEROP_TX_TYPE,
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   BOOTLOADER_FORMAL_ADDRESS,
   ETH_ADDRESS_IN_CONTRACTS,
@@ -1070,15 +1069,13 @@ export function JsonRpcApiProvider<
       });
 
       const tx = Transaction.from(signedTx);
-      if (tx.hash !== hash && tx.type !== INTEROP_TX_TYPE) {
-        // throw new Error('@TODO: the returned hash did not match!');
+      if (tx.hash !== hash) {
+        throw new Error('@TODO: the returned hash did not match!');
       }
 
-      const result = this._wrapTransactionResponse(
-        <any>tx
-      ).replaceableTransaction(blockNumber);
-      result.realInteropHash = hash;
-      return result;
+      return this._wrapTransactionResponse(<any>tx).replaceableTransaction(
+        blockNumber
+      );
     }
 
     /**
@@ -1363,22 +1360,6 @@ export function JsonRpcApiProvider<
             ethers.getBytes(tx.customData.paymasterParams.paymasterInput)
           ),
         };
-      }
-      if (tx.customData.merkleProof) {
-        result.eip712Meta.merkleProof = Array.from(
-          ethers.getBytes(tx.customData.merkleProof)
-        );
-      }
-      if (tx.customData.fullFee) {
-        result.eip712Meta.fullFee = ethers.toBeHex(tx.customData.fullFee);
-      }
-      if (tx.customData.toMint) {
-        result.eip712Meta.toMint = ethers.toBeHex(tx.customData.toMint);
-      }
-      if (tx.customData.refundRecipient) {
-        result.eip712Meta.refundRecipient = ethers.toBeHex(
-          tx.customData.refundRecipient
-        );
       }
       return result;
     }

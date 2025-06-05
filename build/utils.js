@@ -17,8 +17,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.undoL1ToL2Alias = exports.applyL1ToL2Alias = exports.getL2HashFromPriorityOp = exports.eip712TxHash = exports.parseEip712 = exports.hashBytecode = exports.serializeEip712 = exports.checkBaseCost = exports.createAddress = exports.create2Address = exports.getDeployedContracts = exports.getHashedL2ToL1Msg = exports.layer1TxDefaults = exports.sleep = exports.isETH = exports.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = exports.DEFAULT_GAS_PER_PUBDATA_LIMIT = exports.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = exports.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = exports.L1_FEE_ESTIMATION_COEF_DENOMINATOR = exports.L1_FEE_ESTIMATION_COEF_NUMERATOR = exports.MAX_BYTECODE_LEN_BYTES = exports.PRIORITY_OPERATION_L2_TX_TYPE = exports.INTEROP_TX_TYPE = exports.EIP712_TX_TYPE = exports.EIP1271_MAGIC_VALUE = exports.L2_NATIVE_TOKEN_VAULT_ADDRESS = exports.L2_ASSET_ROUTER_ADDRESS = exports.L1_TO_L2_ALIAS_OFFSET = exports.NONCE_HOLDER_ADDRESS = exports.L2_BASE_TOKEN_ADDRESS = exports.L2_ETH_TOKEN_ADDRESS = exports.L1_MESSENGER_ADDRESS = exports.CONTRACT_2_FACTORY_ADDRESS = exports.CONTRACT_DEPLOYER_ADDRESS = exports.BOOTLOADER_FORMAL_ADDRESS = exports.ETH_ADDRESS_IN_CONTRACTS = exports.LEGACY_ETH_ADDRESS = exports.ETH_ADDRESS = exports.NONCE_HOLDER_ABI = exports.L2_BRIDGE_ABI = exports.L1_BRIDGE_ABI = exports.IERC1271 = exports.IERC20 = exports.L1_MESSENGER = exports.CONTRACT_2_FACTORY = exports.CONTRACT_DEPLOYER = exports.BRIDGEHUB_ABI = exports.ZKSYNC_MAIN_ABI = exports.EIP712_TYPES = void 0;
-exports.encodeNTVTransferData = exports.ethAssetId = exports.encodeNTVAssetId = exports.encodeSecondBridgeDataV1 = exports.encodeNativeTokenVaultTransferData = exports.resolveAssetId = exports.encodeNativeTokenVaultAssetId = exports.isAddressEq = exports.toJSON = exports.estimateCustomBridgeDepositL2Gas = exports.scaleGasLimit = exports.estimateDefaultBridgeDepositL2Gas = exports.isTypedDataSignatureCorrect = exports.isMessageSignatureCorrect = exports.getERC20BridgeCalldata = exports.getERC20DefaultBridgeData = void 0;
+exports.getERC20DefaultBridgeData = exports.undoL1ToL2Alias = exports.applyL1ToL2Alias = exports.getL2HashFromPriorityOp = exports.eip712TxHash = exports.parseEip712 = exports.hashBytecode = exports.serializeEip712 = exports.checkBaseCost = exports.createAddress = exports.create2Address = exports.getDeployedContracts = exports.getHashedL2ToL1Msg = exports.layer1TxDefaults = exports.sleep = exports.isETH = exports.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = exports.DEFAULT_GAS_PER_PUBDATA_LIMIT = exports.L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = exports.L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = exports.L1_FEE_ESTIMATION_COEF_DENOMINATOR = exports.L1_FEE_ESTIMATION_COEF_NUMERATOR = exports.MAX_BYTECODE_LEN_BYTES = exports.PRIORITY_OPERATION_L2_TX_TYPE = exports.EIP712_TX_TYPE = exports.EIP1271_MAGIC_VALUE = exports.L2_NATIVE_TOKEN_VAULT_ADDRESS = exports.L2_ASSET_ROUTER_ADDRESS = exports.L1_TO_L2_ALIAS_OFFSET = exports.NONCE_HOLDER_ADDRESS = exports.L2_BASE_TOKEN_ADDRESS = exports.L2_ETH_TOKEN_ADDRESS = exports.L1_MESSENGER_ADDRESS = exports.CONTRACT_2_FACTORY_ADDRESS = exports.CONTRACT_DEPLOYER_ADDRESS = exports.BOOTLOADER_FORMAL_ADDRESS = exports.ETH_ADDRESS_IN_CONTRACTS = exports.LEGACY_ETH_ADDRESS = exports.ETH_ADDRESS = exports.NONCE_HOLDER_ABI = exports.L2_BRIDGE_ABI = exports.L1_BRIDGE_ABI = exports.IERC1271 = exports.IERC20 = exports.L1_MESSENGER = exports.CONTRACT_2_FACTORY = exports.CONTRACT_DEPLOYER = exports.BRIDGEHUB_ABI = exports.ZKSYNC_MAIN_ABI = exports.EIP712_TYPES = void 0;
+exports.encodeNTVTransferData = exports.ethAssetId = exports.encodeNTVAssetId = exports.encodeSecondBridgeDataV1 = exports.encodeNativeTokenVaultTransferData = exports.resolveAssetId = exports.encodeNativeTokenVaultAssetId = exports.isAddressEq = exports.toJSON = exports.estimateCustomBridgeDepositL2Gas = exports.scaleGasLimit = exports.estimateDefaultBridgeDepositL2Gas = exports.isTypedDataSignatureCorrect = exports.isMessageSignatureCorrect = exports.getERC20BridgeCalldata = void 0;
 const ethers_1 = require("ethers");
 const types_1 = require("./types");
 const signer_1 = require("./signer");
@@ -159,12 +159,6 @@ exports.EIP1271_MAGIC_VALUE = '0x1626ba7e';
  * @readonly
  */
 exports.EIP712_TX_TYPE = 0x71;
-/**
- * Represents an interoperability transaction type.
- *
- * @readonly
- */
-exports.INTEROP_TX_TYPE = 0xfd;
 /**
  * Represents a priority transaction operation on L2.
  *
@@ -498,20 +492,10 @@ function serializeEip712(transaction, signature) {
     else {
         fields.push([]);
     }
-    if (meta.merkleProof) {
-        fields.push(meta.merkleProof);
-    }
-    if (meta.fullFee) {
-        fields.push(meta.fullFee);
-    }
-    if (meta.toMint) {
-        fields.push(meta.toMint);
-    }
-    if (meta.refundRecipient) {
-        fields.push(meta.refundRecipient);
-    }
-    const txType = transaction.type || exports.EIP712_TX_TYPE;
-    return ethers_1.ethers.concat([new Uint8Array([txType]), ethers_1.ethers.encodeRlp(fields)]);
+    return ethers_1.ethers.concat([
+        new Uint8Array([exports.EIP712_TX_TYPE]),
+        ethers_1.ethers.encodeRlp(fields),
+    ]);
 }
 exports.serializeEip712 = serializeEip712;
 /**
@@ -623,7 +607,7 @@ function parseEip712(payload) {
     const bytes = ethers_1.ethers.getBytes(payload);
     const raw = ethers_1.ethers.decodeRlp(bytes.slice(1));
     const transaction = {
-        type: bytes[0] === exports.INTEROP_TX_TYPE ? exports.INTEROP_TX_TYPE : exports.EIP712_TX_TYPE,
+        type: exports.EIP712_TX_TYPE,
         nonce: Number(handleNumber(raw[0])),
         maxPriorityFeePerGas: handleNumber(raw[1]),
         maxFeePerGas: handleNumber(raw[2]),

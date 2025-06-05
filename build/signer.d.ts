@@ -760,7 +760,26 @@ declare const L1Signer_base: {
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
-            refundRecipient?: string | undefined;
+            refundRecipient?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+             * const tx = await signer.getDepositTx({
+             *   token: tokenL1,
+             *   amount: 10_000_000n,
+             * });
+             */
             overrides?: ethers.Overrides | undefined;
         }): Promise<{
             tx: ethers.ContractTransaction;
@@ -878,7 +897,6 @@ declare const L1Signer_base: {
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: "proof_based_gw" | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParams>;
-        getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;
@@ -2146,7 +2164,26 @@ declare const L1VoidSigner_base: {
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
             customBridgeData?: BytesLike | undefined;
-            refundRecipient?: string | undefined;
+            refundRecipient?: string | undefined; /**
+             * @inheritDoc
+             *
+             * @example
+             *
+             * import { Provider, L1Signer, types } from "zksync-ethers";
+             * import { ethers } from "ethers";
+             *
+             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
+             * const signer = L1Signer.from(
+             *     await browserProvider.getSigner(),
+             *     Provider.getDefaultProvider(types.Network.Sepolia)
+             * );
+             *
+             * const tokenL1 = "0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be";
+             * const tx = await signer.getDepositTx({
+             *   token: tokenL1,
+             *   amount: 10_000_000n,
+             * });
+             */
             overrides?: ethers.Overrides | undefined;
         }): Promise<{
             tx: ethers.ContractTransaction;
@@ -2264,7 +2301,6 @@ declare const L1VoidSigner_base: {
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
         getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: "proof_based_gw" | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParams>;
-        getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
         finalizeWithdrawal(withdrawalHash: BytesLike, index?: number, overrides?: ethers.Overrides | undefined): Promise<ContractTransactionResponse>;
         isWithdrawalFinalized(withdrawalHash: BytesLike, index?: number): Promise<boolean>;

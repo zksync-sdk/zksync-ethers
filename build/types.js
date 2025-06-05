@@ -268,18 +268,13 @@ class Transaction extends ethers_1.ethers.Transaction {
         _Transaction_from.set(this, void 0);
     }
     get type() {
-        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE
-            ? __classPrivateFieldGet(this, _Transaction_type, "f")
-            : super.type;
+        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE ? __classPrivateFieldGet(this, _Transaction_type, "f") : super.type;
     }
     set type(value) {
         switch (value) {
             case utils_1.EIP712_TX_TYPE:
             case 'eip-712':
                 __classPrivateFieldSet(this, _Transaction_type, utils_1.EIP712_TX_TYPE, "f");
-                break;
-            case utils_1.INTEROP_TX_TYPE:
-                __classPrivateFieldSet(this, _Transaction_type, utils_1.INTEROP_TX_TYPE, "f");
                 break;
             default:
                 super.type = value;
@@ -288,7 +283,7 @@ class Transaction extends ethers_1.ethers.Transaction {
     static from(tx) {
         if (typeof tx === 'string') {
             const payload = ethers_1.ethers.getBytes(tx);
-            if (payload[0] !== utils_1.EIP712_TX_TYPE && payload[0] !== utils_1.INTEROP_TX_TYPE) {
+            if (payload[0] !== utils_1.EIP712_TX_TYPE) {
                 return Transaction.from(ethers_1.ethers.Transaction.from(tx));
             }
             else {
@@ -297,8 +292,8 @@ class Transaction extends ethers_1.ethers.Transaction {
         }
         else {
             const result = new Transaction();
-            if (tx.type === utils_1.EIP712_TX_TYPE || tx.type === utils_1.INTEROP_TX_TYPE) {
-                result.type = tx.type;
+            if (tx.type === utils_1.EIP712_TX_TYPE) {
+                result.type = utils_1.EIP712_TX_TYPE;
                 result.customData = tx.customData;
                 result.from = tx.from;
             }
@@ -326,32 +321,24 @@ class Transaction extends ethers_1.ethers.Transaction {
                 result.signature = ethers_1.Signature.from(tx.signature);
             result.accessList = null;
             if (tx.from) {
-                if (tx.type !== utils_1.INTEROP_TX_TYPE) {
-                    (0, ethers_1.assertArgument)(result.isSigned(), 'unsigned transaction cannot define from', 'tx', tx);
-                }
+                (0, ethers_1.assertArgument)(result.isSigned(), 'unsigned transaction cannot define from', 'tx', tx);
                 (0, ethers_1.assertArgument)((0, utils_1.isAddressEq)(result.from, tx.from), 'from mismatch', 'tx', tx);
             }
             if (tx.hash) {
-                if (tx.type !== utils_1.INTEROP_TX_TYPE) {
-                    (0, ethers_1.assertArgument)(result.isSigned(), 'unsigned transaction cannot define hash', 'tx', tx);
-                    (0, ethers_1.assertArgument)(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
-                }
+                (0, ethers_1.assertArgument)(result.isSigned(), 'unsigned transaction cannot define hash', 'tx', tx);
+                (0, ethers_1.assertArgument)(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
             }
             return result;
         }
     }
     get serialized() {
-        if (!this.customData &&
-            __classPrivateFieldGet(this, _Transaction_type, "f") !== utils_1.EIP712_TX_TYPE &&
-            __classPrivateFieldGet(this, _Transaction_type, "f") !== utils_1.INTEROP_TX_TYPE) {
+        if (!this.customData && __classPrivateFieldGet(this, _Transaction_type, "f") !== utils_1.EIP712_TX_TYPE) {
             return super.serialized;
         }
         return (0, utils_1.serializeEip712)(this, this.signature);
     }
     get unsignedSerialized() {
-        if (!this.customData &&
-            this.type !== utils_1.EIP712_TX_TYPE &&
-            this.type !== utils_1.INTEROP_TX_TYPE) {
+        if (!this.customData && this.type !== utils_1.EIP712_TX_TYPE) {
             return super.unsignedSerialized;
         }
         return (0, utils_1.serializeEip712)(this);
@@ -368,12 +355,12 @@ class Transaction extends ethers_1.ethers.Transaction {
         return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE ? 'zksync' : super.typeName;
     }
     isSigned() {
-        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE
+        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE
             ? this.customData?.customSignature !== null
             : super.isSigned();
     }
     get hash() {
-        if (__classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE) {
+        if (__classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE) {
             return this.customData?.customSignature !== null
                 ? (0, utils_1.eip712TxHash)(this)
                 : null;
@@ -383,9 +370,7 @@ class Transaction extends ethers_1.ethers.Transaction {
         }
     }
     get from() {
-        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE || __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.INTEROP_TX_TYPE
-            ? __classPrivateFieldGet(this, _Transaction_from, "f")
-            : super.from;
+        return __classPrivateFieldGet(this, _Transaction_type, "f") === utils_1.EIP712_TX_TYPE ? __classPrivateFieldGet(this, _Transaction_from, "f") : super.from;
     }
     set from(value) {
         __classPrivateFieldSet(this, _Transaction_from, value, "f");
