@@ -17,7 +17,7 @@ import {
   FinalizeL1DepositParams,
   FinalizeWithdrawalParams,
   FullDepositFee,
-  LogProofTarget,
+  InteropMode,
   PaymasterParams,
   PriorityOpResponse,
   TransactionLike,
@@ -703,14 +703,12 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async getFinalizeWithdrawalParams(
     withdrawalHash: BytesLike,
     index = 0,
-    precommitLogIndex = 0,
-    logProofTarget?: LogProofTarget
+    interopMode?: InteropMode
   ): Promise<FinalizeWithdrawalParams> {
     return super.getFinalizeWithdrawalParams(
       withdrawalHash,
       index,
-      precommitLogIndex,
-      logProofTarget
+      interopMode
     );
   }
 

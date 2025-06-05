@@ -1,7 +1,7 @@
 import { EIP712Signer } from './signer';
 import { Provider } from './provider';
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, Overrides, ProgressCallback } from 'ethers';
-import { Address, BalancesMap, FinalizeL1DepositParams, FinalizeWithdrawalParams, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
+import { Address, BalancesMap, FinalizeL1DepositParams, FinalizeWithdrawalParams, FullDepositFee, InteropMode, PaymasterParams, PriorityOpResponse, TransactionLike, TransactionRequest, TransactionResponse } from './types';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IL2SharedBridge, IZkSyncHyperchain } from './typechain';
 declare const Wallet_base: {
     new (...args: any[]): {
@@ -120,23 +120,7 @@ declare const Wallet_base: {
             approveBaseERC20?: boolean | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
-            refundRecipient?: string | undefined; /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Wallet, Provider, types, utils } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-             *
-             * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-             * const ethProvider = ethers.getDefaultProvider("sepolia");
-             * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const isFinalized = await wallet.isWithdrawalFinalized(WITHDRAWAL_HASH);
-             */
+            refundRecipient?: string | undefined;
             overrides?: ethers.Overrides | undefined;
             approveOverrides?: ethers.Overrides | undefined;
             approveBaseOverrides?: ethers.Overrides | undefined;
@@ -384,7 +368,7 @@ declare const Wallet_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: "proof_based_gw" | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
@@ -1022,7 +1006,7 @@ export declare class Wallet extends Wallet_base {
      * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
      * const params = await wallet.finalizeWithdrawalParams(WITHDRAWAL_HASH);
      */
-    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<FinalizeWithdrawalParams>;
+    getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: InteropMode): Promise<FinalizeWithdrawalParams>;
     getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeL1DepositParams>;
     /**
      * @inheritDoc

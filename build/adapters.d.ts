@@ -1,7 +1,7 @@
 import { BigNumberish, BlockTag, BytesLike, ContractTransactionResponse, ethers, TransactionRequest as EthersTransactionRequest } from 'ethers';
 import { Provider } from './provider';
 import { IBridgehub, IL1ERC20Bridge, IL1SharedBridge, IL2Bridge, IZkSyncHyperchain, IL2SharedBridge, IL1Nullifier, IL1AssetRouter, IL1NativeTokenVault } from './typechain';
-import { Address, FinalizeL1DepositParams, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FinalizeWithdrawalParamsWithoutProof, FullDepositFee, LogProofTarget, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
+import { Address, FinalizeL1DepositParams, BalancesMap, Eip712Meta, FinalizeWithdrawalParams, FinalizeWithdrawalParamsWithoutProof, FullDepositFee, InteropMode, PaymasterParams, PriorityOpResponse, TransactionResponse } from './types';
 type Constructor<T = {}> = new (...args: any[]) => T;
 interface TxSender {
     sendTransaction(tx: EthersTransactionRequest): Promise<ethers.TransactionResponse>;
@@ -557,10 +557,10 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
          * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
          * withdrawal you want to finalize.
          * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
-         * @param [logProofTarget] Merkle proof target for interop.
+         * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
          * @throws {Error} If log proof can not be found.
          */
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: InteropMode): Promise<FinalizeWithdrawalParams>;
         /**
          * Returns the {@link FinalizeDepositParams parameters} required for finalizing a L2->L1 deposit from the
          * deposit transaction's log on the L2 network.

@@ -49,11 +49,11 @@ import {
   PaymasterParams,
   StorageProof,
   LogProof,
-  LogProofTarget,
   Token,
   ProtocolVersion,
   FeeParams,
   TransactionWithDetailedOutput,
+  InteropMode,
 } from './types';
 import {
   getL2HashFromPriorityOp,
@@ -352,20 +352,17 @@ export function JsonRpcApiProvider<
      *
      * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
      * @param [index] The index of the L2 to L1 log in the transaction.
-     * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
-     * @param [logProofTarget] Merkle proof target for interop.
+     * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
      */
     async getLogProof(
       txHash: BytesLike,
       index?: number,
-      precommitLogIndex?: number,
-      logProofTarget?: LogProofTarget
+      interopMode?: InteropMode
     ): Promise<LogProof | null> {
       return await this.send('zks_getL2ToL1LogProof', [
         ethers.hexlify(txHash),
         index,
-        logProofTarget,
-        precommitLogIndex,
+        interopMode,
       ]);
     }
 
@@ -1681,10 +1678,9 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   override async getLogProof(
     txHash: BytesLike,
     index?: number,
-    precommitLogIndex?: number,
-    logProofTarget?: LogProofTarget
+    interopMode?: InteropMode
   ): Promise<LogProof | null> {
-    return super.getLogProof(txHash, index, precommitLogIndex, logProofTarget);
+    return super.getLogProof(txHash, index, interopMode);
   }
 
   /**

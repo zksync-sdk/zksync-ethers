@@ -63,7 +63,7 @@ import {
   FinalizeWithdrawalParams,
   FinalizeWithdrawalParamsWithoutProof,
   FullDepositFee,
-  LogProofTarget,
+  InteropMode,
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
@@ -1598,14 +1598,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @param [index=0] In case there were multiple withdrawals in one transaction, you may pass an index of the
      * withdrawal you want to finalize.
      * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
-     * @param [logProofTarget] Merkle proof target for interop.
+     * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
      * @throws {Error} If log proof can not be found.
      */
     async getFinalizeWithdrawalParams(
       withdrawalHash: BytesLike,
       index = 0,
-      precommitLogIndex = 0,
-      logProofTarget?: LogProofTarget
+      interopMode?: InteropMode
     ): Promise<FinalizeWithdrawalParams> {
       const {log, l1BatchTxId} = await this._getWithdrawalLog(
         withdrawalHash,
@@ -1619,8 +1618,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const proof = await this._providerL2().getLogProof(
         withdrawalHash,
         l2ToL1LogIndex,
-        precommitLogIndex,
-        logProofTarget
+        interopMode
       );
       if (!proof) {
         throw new Error('Log proof not found!');

@@ -876,7 +876,7 @@ declare const L1Signer_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: import("./types").LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: "proof_based_gw" | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;
@@ -2262,7 +2262,7 @@ declare const L1VoidSigner_base: {
             l2ToL1Log: import("./types").L2ToL1Log;
         }>;
         finalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number): Promise<FinalizeWithdrawalParams>;
-        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: import("./types").LogProofTarget | undefined): Promise<FinalizeWithdrawalParams>;
+        getFinalizeWithdrawalParams(withdrawalHash: BytesLike, index?: number, interopMode?: "proof_based_gw" | undefined): Promise<FinalizeWithdrawalParams>;
         getFinalizeDepositParams(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeL1DepositParams>;
         getFinalizeWithdrawalParamsWithoutProof(withdrawalHash: BytesLike, index?: number): Promise<import("./types").FinalizeWithdrawalParamsWithoutProof>;
         getL1NullifierAddress(): Promise<string>;

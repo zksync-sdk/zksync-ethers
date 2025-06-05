@@ -1,6 +1,6 @@
 import { ethers, BigNumberish, BytesLike, BlockTag, Filter, FilterByBlockHash, TransactionRequest as EthersTransactionRequest, JsonRpcTransactionRequest, Networkish, Eip1193Provider, JsonRpcError, JsonRpcResult, JsonRpcPayload } from 'ethers';
 import { IL2AssetRouter, IL2Bridge, IL2NativeTokenVault, IL2SharedBridge } from './typechain';
-import { Address, TransactionResponse, TransactionRequest, TransactionStatus, PriorityOpResponse, BalancesMap, TransactionReceipt, Block, Log, TransactionDetails, BlockDetails, ContractAccountInfo, Network as ZkSyncNetwork, BatchDetails, Fee, RawBlockTransaction, PaymasterParams, StorageProof, LogProof, LogProofTarget, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput } from './types';
+import { Address, TransactionResponse, TransactionRequest, TransactionStatus, PriorityOpResponse, BalancesMap, TransactionReceipt, Block, Log, TransactionDetails, BlockDetails, ContractAccountInfo, Network as ZkSyncNetwork, BatchDetails, Fee, RawBlockTransaction, PaymasterParams, StorageProof, LogProof, Token, ProtocolVersion, FeeParams, TransactionWithDetailedOutput, InteropMode } from './types';
 import { Signer } from './signer';
 type Constructor<T = {}> = new (...args: any[]) => T;
 export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.JsonRpcApiProvider>>(ProviderType: TBase): {
@@ -134,10 +134,9 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
          *
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
-         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
-         * @param [logProofTarget] Merkle proof target for interop.
+         * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
          */
-        getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<LogProof | null>;
+        getLogProof(txHash: BytesLike, index?: number, interopMode?: InteropMode): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -567,7 +566,13 @@ export declare function JsonRpcApiProvider<TBase extends Constructor<ethers.Json
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
-        call(_tx: ethers.TransactionRequest): Promise<string>;
+        call(_tx: ethers.TransactionRequest): Promise<string>; /**
+         * Returns the range of blocks contained within a batch given by batch number.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
+         *
+         * @param l1BatchNumber The L1 batch number.
+         */
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;
         getStorage(address: ethers.AddressLike, _position: ethers.BigNumberish, blockTag?: ethers.BlockTag | undefined): Promise<string>;
@@ -729,10 +734,9 @@ declare const Provider_base: {
          *
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
-         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
-         * @param [logProofTarget] Merkle proof target for interop.
+         * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, logProofTarget?: LogProofTarget | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, interopMode?: "proof_based_gw" | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -1162,7 +1166,13 @@ declare const Provider_base: {
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
-        call(_tx: ethers.TransactionRequest): Promise<string>;
+        call(_tx: ethers.TransactionRequest): Promise<string>; /**
+         * Returns the range of blocks contained within a batch given by batch number.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
+         *
+         * @param l1BatchNumber The L1 batch number.
+         */
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;
         getStorage(address: ethers.AddressLike, _position: ethers.BigNumberish, blockTag?: ethers.BlockTag | undefined): Promise<string>;
@@ -1403,7 +1413,7 @@ export declare class Provider extends Provider_base {
      * const tx = "0x2a1c6c74b184965c0cb015aae9ea134fd96215d2e4f4979cfec12563295f610e";
      * console.log(`Log ${utils.toJSON(await provider.getLogProof(tx, 0))}`);
      */
-    getLogProof(txHash: BytesLike, index?: number, precommitLogIndex?: number, logProofTarget?: LogProofTarget): Promise<LogProof | null>;
+    getLogProof(txHash: BytesLike, index?: number, interopMode?: InteropMode): Promise<LogProof | null>;
     /**
      * @inheritDoc
      *
@@ -2192,10 +2202,9 @@ declare const BrowserProvider_base: {
          *
          * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
          * @param [index] The index of the L2 to L1 log in the transaction.
-         * @param [precommitLogIndex=0] Index of the L2 event log in the precommit block.
-         * @param [logProofTarget] Merkle proof target for interop.
+         * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
          */
-        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, precommitLogIndex?: number | undefined, logProofTarget?: LogProofTarget | undefined): Promise<LogProof | null>;
+        getLogProof(txHash: ethers.BytesLike, index?: number | undefined, interopMode?: "proof_based_gw" | undefined): Promise<LogProof | null>;
         /**
          * Returns the range of blocks contained within a batch given by batch number.
          *
@@ -2625,7 +2634,13 @@ declare const BrowserProvider_base: {
         getNetwork(): Promise<ethers.Network>;
         getFeeData(): Promise<ethers.FeeData>;
         estimateGas(_tx: ethers.TransactionRequest): Promise<bigint>;
-        call(_tx: ethers.TransactionRequest): Promise<string>;
+        call(_tx: ethers.TransactionRequest): Promise<string>; /**
+         * Returns the range of blocks contained within a batch given by batch number.
+         *
+         * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
+         *
+         * @param l1BatchNumber The L1 batch number.
+         */
         getTransactionCount(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<number>;
         getCode(address: ethers.AddressLike, blockTag?: ethers.BlockTag | undefined): Promise<string>;
         getStorage(address: ethers.AddressLike, _position: ethers.BigNumberish, blockTag?: ethers.BlockTag | undefined): Promise<string>;
