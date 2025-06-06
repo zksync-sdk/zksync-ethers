@@ -469,7 +469,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return IL1NativeTokenVault__factory.connect(
         l1NtvAddress,
         this._providerL1()
-      )
+      );
     }
 
     /**
