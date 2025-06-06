@@ -453,7 +453,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
     }
 
-    async getNativeTokenVaultL1(): Promise<ethers.Contract> {
+    async getNativeTokenVaultL1(): Promise<IL1NativeTokenVault> {
       // FIXME: maybe makes sense to provide an API to do it in one call
       const bridgeContracts =
         await this._providerL2().getDefaultBridgeAddresses();
@@ -469,9 +469,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return IL1NativeTokenVault__factory.connect(
         l1NtvAddress,
         this._providerL1()
-        // FIXME: unfortunately this is the sort of transformation we need to make
-        // most likely typechain is from other ethers version
-      ) as any as ethers.Contract;
+      )
     }
 
     /**
