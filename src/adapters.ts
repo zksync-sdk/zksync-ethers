@@ -459,12 +459,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         await this._providerL2().getDefaultBridgeAddresses();
 
       const sharedBridge = bridgeContracts.sharedL1;
-      const l1AR = IL1AssetRouter__factory.connect(
+      const l1AssetRouter = IL1AssetRouter__factory.connect(
         sharedBridge,
         this._providerL1()
       );
 
-      const l1NtvAddress = await l1AR.nativeTokenVault();
+      const l1NtvAddress = await l1AssetRouter.nativeTokenVault();
 
       return IL1NativeTokenVault__factory.connect(
         l1NtvAddress,
