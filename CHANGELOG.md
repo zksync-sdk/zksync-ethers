@@ -1,3 +1,19 @@
+# [6.18.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.17.0...v6.18.0) (2025-06-17)
+
+
+### Bug Fixes
+
+* reduce the interop support for v29 ([ec7956e](https://github.com/zksync-sdk/zksync-ethers/commit/ec7956e1026bb81259c4d50d47c92e15fb3901de))
+
+
+### Features
+
+* deprecate `AdapterL2.getAllBalances` ([2e99421](https://github.com/zksync-sdk/zksync-ethers/commit/2e9942109fe1a9e5928b0f77282f38f6995a2fca))
+* deprecate `Provider.getAllAccountBalances` and `SmartAccount.getAllBalances` ([11ffd97](https://github.com/zksync-sdk/zksync-ethers/commit/11ffd977289fb217570b4973ea38e43d9af73f77))
+* deprecate `Provider.getConfirmedTokens` ([3ecca46](https://github.com/zksync-sdk/zksync-ethers/commit/3ecca46b153a92eb0fffcf42491ebbb7c6257e4c))
+* deprecate `Provider.getProtocolVersion` ([92774b7](https://github.com/zksync-sdk/zksync-ethers/commit/92774b7316e40db3ba79814d10aac48c52182479))
+* deprecate `Provider.sendRawTransactionWithDetailedOutput` ([31fb72d](https://github.com/zksync-sdk/zksync-ethers/commit/31fb72d1c62e2183fba1babad1d52b545b78e5a4))
+
 # [6.17.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.16.2...v6.17.0) (2025-03-31)
 
 
