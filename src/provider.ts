@@ -345,6 +345,13 @@ export function JsonRpcApiProvider<
     }
 
     /**
+     * Returns an estimate (best guess) of the gas per pubdata to use in a transaction.
+     */
+    async getGasPerPubdata(): Promise<bigint> {
+      return await this.send('unstable_gasPerPubdata', []);
+    }
+
+    /**
      * Returns the proof for a transaction's L2 to L1 log sent via the `L1Messenger` system contract.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl2tol1logproof zks_getL2ToL1LogProof} JSON-RPC method.

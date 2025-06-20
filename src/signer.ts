@@ -6,6 +6,7 @@ import {
   ethers,
   Overrides,
   copyRequest,
+  resolveProperties,
 } from 'ethers';
 import {Provider} from './provider';
 import {
@@ -698,30 +699,44 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     if (!this.providerL2) {
       throw new Error('Initialize provider L2');
     }
+    const {gasLimit, gasPrice, gasPerPubdata} = await resolveProperties({
+      gasLimit: (async () =>
+        tx.gasLimit ?? (await this.provider.estimateGas(transaction)))(),
+      gasPrice: (async () =>
+        tx.gasPrice ??
+        tx.maxFeePerGas ??
+        (await this.provider.getGasPrice()))(),
+      gasPerPubdata: (async () => {
+        if (
+          tx.type === null ||
+          tx.type === undefined ||
+          tx.type === EIP712_TX_TYPE ||
+          tx.customData
+        ) {
+          return (
+            tx.customData?.gasPerPubdata ??
+            (await this.provider.getGasPerPubdata())
+          );
+        }
+        return undefined;
+      })(),
+    });
+
+    tx.gasLimit = gasLimit;
+    if (!tx.gasPrice && tx.type === 0) {
+      tx.gasPrice = gasPrice;
+    } else if (!tx.gasPrice && tx.type !== 0) {
+      tx.maxFeePerGas = gasPrice;
+      tx.maxPriorityFeePerGas ??= BigInt(0);
+    }
     if (
-      !tx.gasLimit ||
-      (!tx.gasPrice &&
-        (!tx.maxFeePerGas ||
-          tx.maxPriorityFeePerGas === null ||
-          tx.maxPriorityFeePerGas === undefined))
+      tx.type === null ||
+      tx.type === undefined ||
+      tx.type === EIP712_TX_TYPE ||
+      tx.customData
     ) {
-      const fee = await this.providerL2!.estimateFee(tx);
-      tx.gasLimit ??= fee.gasLimit;
-      if (!tx.gasPrice && tx.type === 0) {
-        tx.gasPrice = fee.maxFeePerGas;
-      } else if (!tx.gasPrice && tx.type !== 0) {
-        tx.maxFeePerGas ??= fee.maxFeePerGas;
-        tx.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
-      }
-      if (
-        tx.type === null ||
-        tx.type === undefined ||
-        tx.type === EIP712_TX_TYPE ||
-        tx.customData
-      ) {
-        tx.customData ??= {};
-        tx.customData.gasPerPubdata = fee.gasPerPubdataLimit;
-      }
+      tx.customData ??= {};
+      tx.customData.gasPerPubdata = gasPerPubdata;
     }
     return tx;
   }
