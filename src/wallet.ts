@@ -9,6 +9,7 @@ import {
   ethers,
   Overrides,
   ProgressCallback,
+  resolveProperties,
 } from 'ethers';
 import {
   Address,
@@ -1476,24 +1477,34 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
       );
     }
-    let fee: Fee;
-    if (
-      !populated.gasLimit ||
-      !tx.customData ||
-      !tx.customData.gasPerPubdata ||
-      (!populated.gasPrice &&
-        (!populated.maxFeePerGas ||
-          populated.maxPriorityFeePerGas === null ||
-          populated.maxPriorityFeePerGas === undefined))
-    ) {
-      fee = await this.provider.estimateFee(populated);
-      populated.gasLimit ??= fee.gasLimit;
-      if (!populated.gasPrice && populated.type === 0) {
-        populated.gasPrice = fee.maxFeePerGas;
-      } else if (!populated.gasPrice && populated.type !== 0) {
-        populated.maxFeePerGas ??= fee.maxFeePerGas;
-        populated.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
-      }
+    const {gasLimit, gasPrice, gasPerPubdata} = await resolveProperties({
+      gasLimit: (async () =>
+        populated.gasLimit ?? (await this.provider.estimateGas(populated)))(),
+      gasPrice: (async () =>
+        tx.gasPrice ??
+        tx.maxFeePerGas ??
+        (await this.provider.getGasPrice()))(),
+      gasPerPubdata: (async () => {
+        if (
+          tx.type === null ||
+          tx.type === undefined ||
+          tx.type === EIP712_TX_TYPE ||
+          tx.customData
+        ) {
+          return (
+            tx.customData?.gasPerPubdata ??
+            (await this.provider.getGasPerPubdata())
+          );
+        }
+        return undefined;
+      })(),
+    });
+    populated.gasLimit = gasLimit;
+    if (!populated.gasPrice && populated.type === 0) {
+      populated.gasPrice = gasPrice;
+    } else if (!populated.gasPrice && populated.type !== 0) {
+      populated.maxFeePerGas = gasPrice;
+      populated.maxPriorityFeePerGas ??= BigInt(0);
     }
     if (
       tx.type === null ||
@@ -1502,7 +1513,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
       tx.customData
     ) {
       tx.customData ??= {};
-      tx.customData.gasPerPubdata ??= fee!.gasPerPubdataLimit;
+      tx.customData.gasPerPubdata = gasPerPubdata;
       populated.type = EIP712_TX_TYPE;
       populated.value ??= 0;
       populated.data ??= '0x';
