@@ -348,7 +348,7 @@ export function JsonRpcApiProvider<
      * Returns an estimate (best guess) of the gas per pubdata to use in a transaction.
      */
     async getGasPerPubdata(): Promise<bigint> {
-      return await this.send('unstable_gasPerPubdata', []);
+      return await this.send('zks_gasPerPubdata', []);
     }
 
     /**

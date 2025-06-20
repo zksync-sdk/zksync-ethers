@@ -218,7 +218,7 @@ export function JsonRpcApiProvider(ProviderType) {
          * Returns an estimate (best guess) of the gas per pubdata to use in a transaction.
          */
         async getGasPerPubdata() {
-            return await this.send('unstable_gasPerPubdata', []);
+            return await this.send('zks_gasPerPubdata', []);
         }
         /**
          * Returns the proof for a transaction's L2 to L1 log sent via the `L1Messenger` system contract.
