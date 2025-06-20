@@ -783,23 +783,6 @@ declare const L1Signer_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const finalizeWithdrawTx = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
-             */
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;
@@ -2185,23 +2168,6 @@ declare const L1VoidSigner_base: {
             amount: BigNumberish;
             to?: string | undefined;
             operatorTip?: BigNumberish | undefined;
-            /**
-             * @inheritDoc
-             *
-             * @example
-             *
-             * import { Provider, L1Signer, types } from "zksync-ethers";
-             * import { ethers } from "ethers";
-             *
-             * const browserProvider = new ethers.BrowserProvider(window.ethereum);
-             * const signer = L1Signer.from(
-             *     await browserProvider.getSigner(),
-             *     Provider.getDefaultProvider(types.Network.Sepolia)
-             * );
-             *
-             * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-             * const finalizeWithdrawTx = await signer.finalizeWithdrawal(WITHDRAWAL_HASH);
-             */
             bridgeAddress?: string | undefined;
             l2GasLimit?: BigNumberish | undefined;
             gasPerPubdataByte?: BigNumberish | undefined;

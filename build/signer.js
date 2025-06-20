@@ -602,7 +602,7 @@ class Signer extends (0, adapters_1.AdapterL2)(ethers_1.ethers.JsonRpcSigner) {
                     tx.type === utils_1.EIP712_TX_TYPE ||
                     tx.customData) {
                     return (tx.customData?.gasPerPubdata ??
-                        (await this.provider.getGasPerPubdata()));
+                        (await this.providerL2.getGasPerPubdata()));
                 }
                 return undefined;
             })(),

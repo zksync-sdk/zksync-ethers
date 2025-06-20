@@ -715,7 +715,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
         ) {
           return (
             tx.customData?.gasPerPubdata ??
-            (await this.provider.getGasPerPubdata())
+            (await this.providerL2!.getGasPerPubdata())
           );
         }
         return undefined;

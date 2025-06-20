@@ -598,7 +598,7 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
                     tx.type === EIP712_TX_TYPE ||
                     tx.customData) {
                     return (tx.customData?.gasPerPubdata ??
-                        (await this.provider.getGasPerPubdata()));
+                        (await this.providerL2.getGasPerPubdata()));
                 }
                 return undefined;
             })(),
