@@ -74,6 +74,7 @@ import {
   L2_NATIVE_TOKEN_VAULT_ADDRESS,
   encodeNativeTokenVaultTransferData,
   encodeNativeTokenVaultAssetId,
+  DEFAULT_GAS_PER_PUBDATA_LIMIT,
 } from './utils';
 import {Signer} from './signer';
 
@@ -342,6 +343,18 @@ export function JsonRpcApiProvider<
     async getGasPrice(): Promise<bigint> {
       const feeData = await this.getFeeData();
       return feeData.gasPrice!;
+    }
+
+    /**
+     * Returns an estimate (best guess) of the gas per pubdata to use in a transaction.
+     */
+    async getGasPerPubdata(): Promise<bigint> {
+      return await this.send('zks_gasPerPubdata', []).catch(_ => {
+        // Presuming `zks_gasPerPubdata` is not available on this environment yet.
+        // Using default value.
+        // TODO: Remove this workaround when all chains have been upgraded
+        return BigInt(DEFAULT_GAS_PER_PUBDATA_LIMIT);
+      });
     }
 
     /**

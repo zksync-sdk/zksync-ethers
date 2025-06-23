@@ -1,5 +1,5 @@
 import {ethers, SigningKey} from 'ethers';
-import {EIP712_TX_TYPE} from './utils';
+import {EIP712_TX_TYPE, resolveFeeData} from './utils';
 import {TransactionLike, TransactionBuilder, PayloadSigner} from './types';
 
 /**
@@ -221,16 +221,20 @@ export const populateTransactionECDSA: TransactionBuilder = async (
       // In order to estimation gas, the transaction's from value is replaced with signer's address.
       fromToUse = new ethers.Wallet(secret).address;
     }
-    const fee = await provider.estimateFee({
-      ...populatedTx,
-      from: fromToUse,
-    });
-
-    populatedTx.gasLimit ??= fee.gasLimit;
-    populatedTx.customData.gasPerPubdata ??= fee.gasPerPubdataLimit;
-    if (!populatedTx.gasPrice) {
-      populatedTx.maxFeePerGas ??= fee.maxFeePerGas;
-      populatedTx.maxPriorityFeePerGas ??= fee.maxPriorityFeePerGas;
+    const {gasLimit, gasPrice, gasPerPubdata} = await resolveFeeData(
+      {
+        ...populatedTx,
+        from: fromToUse,
+      } as TransactionLike,
+      provider
+    );
+    populatedTx.gasLimit = gasLimit;
+    populatedTx.customData.gasPerPubdata = gasPerPubdata;
+    if (!populatedTx.gasPrice && populatedTx.type === 0) {
+      populatedTx.gasPrice = gasPrice;
+    } else if (!populatedTx.gasPrice && tx.type !== 0) {
+      populatedTx.maxFeePerGas = gasPrice;
+      populatedTx.maxPriorityFeePerGas ??= BigInt(0);
     }
   }
 

@@ -1,4 +1,11 @@
-import {AbiCoder, BigNumberish, BytesLike, ethers, SignatureLike} from 'ethers';
+import {
+  AbiCoder,
+  BigNumberish,
+  BytesLike,
+  ethers,
+  SignatureLike,
+  resolveProperties,
+} from 'ethers';
 import {
   Address,
   DeploymentInfo,
@@ -563,7 +570,7 @@ export function serializeEip712(
 
   // Add meta
   fields.push(
-    ethers.toBeArray(meta.gasPerPubdata || DEFAULT_GAS_PER_PUBDATA_LIMIT)
+    ethers.toBeArray(meta.gasPerPubdata ?? DEFAULT_GAS_PER_PUBDATA_LIMIT)
   );
   fields.push((meta.factoryDeps ?? []).map(dep => ethers.hexlify(dep)));
 
@@ -1708,4 +1715,37 @@ export function encodeNTVTransferData(
     ['uint256', 'address', 'address'],
     [amount, receiver, token]
   );
+}
+
+export async function resolveFeeData(
+  tx: TransactionLike,
+  provider: Provider,
+  providerL2?: Provider
+): Promise<{
+  gasLimit: BigNumberish;
+  gasPrice: BigNumberish;
+  gasPerPubdata: BigNumberish | undefined;
+}> {
+  // Race all requests against each other so that ethers batches them if it can
+  return await resolveProperties({
+    gasLimit: (async () => tx.gasLimit ?? (await provider.estimateGas(tx)))(),
+    gasPrice: (async () =>
+      tx.gasPrice ?? tx.maxFeePerGas ?? (await provider.getGasPrice()))(),
+    gasPerPubdata: (async () => {
+      if (
+        tx.type === null ||
+        tx.type === undefined ||
+        tx.type === EIP712_TX_TYPE ||
+        tx.customData
+      ) {
+        return (
+          tx.customData?.gasPerPubdata ??
+          // `zks_gasPerPubdata` should not go through proxied provider if
+          // there is one (e.g. MetaMask does not forward `zks` requests).
+          (await (providerL2 ?? provider).getGasPerPubdata())
+        );
+      }
+      return undefined;
+    })(),
+  });
 }
