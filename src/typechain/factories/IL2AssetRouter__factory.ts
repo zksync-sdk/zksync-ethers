@@ -20,12 +20,18 @@ const _abi = [
       },
       {
         indexed: true,
+        internalType: "bytes32",
+        name: "additionalData",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
         internalType: "address",
-        name: "_assetAddress",
+        name: "assetDeploymentTracker",
         type: "address",
       },
     ],
-    name: "AssetHandlerRegistered",
+    name: "AssetDeploymentTrackerRegistered",
     type: "event",
   },
   {
@@ -40,23 +46,11 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "assetHandlerAddress",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "additionalData",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "assetDeploymentTracker",
+        name: "_assetHandlerAddress",
         type: "address",
       },
     ],
-    name: "AssetHandlerRegisteredInitial",
+    name: "AssetHandlerRegistered",
     type: "event",
   },
   {
@@ -228,6 +222,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "L1_ASSET_ROUTER",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "bytes32",
@@ -266,20 +273,40 @@ const _abi = [
     ],
     name: "finalizeDeposit",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
-    inputs: [],
-    name: "l1AssetRouter",
-    outputs: [
+    inputs: [
       {
         internalType: "address",
-        name: "",
+        name: "_l1Sender",
         type: "address",
       },
+      {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "_data",
+        type: "bytes",
+      },
     ],
-    stateMutability: "view",
+    name: "finalizeDepositLegacyBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -296,7 +323,7 @@ const _abi = [
       },
       {
         internalType: "address",
-        name: "_assetAddress",
+        name: "_assetHandlerAddress",
         type: "address",
       },
     ],
@@ -330,6 +357,19 @@ const _abi = [
         name: "_assetId",
         type: "bytes32",
       },
+    ],
+    name: "setLegacyTokenAssetHandler",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "_assetId",
+        type: "bytes32",
+      },
       {
         internalType: "bytes",
         name: "_transferData",
@@ -337,7 +377,13 @@ const _abi = [
       },
     ],
     name: "withdraw",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },

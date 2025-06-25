@@ -10,115 +10,29 @@ import type {
 
 const _abi = [
   {
+    anonymous: false,
     inputs: [
       {
-        internalType: "address",
-        name: "_l1WethAddress",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_bridgehub",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Nullifier",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_eraChainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_eraDiamondProxy",
-        type: "address",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "addr",
-        type: "address",
-      },
-    ],
-    name: "AddressAlreadyUsed",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
+        indexed: true,
         internalType: "bytes32",
         name: "assetId",
         type: "bytes32",
       },
-    ],
-    name: "AssetHandlerDoesNotExist",
-    type: "error",
-  },
-  {
-    inputs: [
       {
+        indexed: true,
         internalType: "bytes32",
-        name: "assetId",
+        name: "additionalData",
         type: "bytes32",
       },
-    ],
-    name: "AssetIdNotSupported",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NotInitializedReentrancyGuard",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "Reentrancy",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "SlotOccupied",
-    type: "error",
-  },
-  {
-    inputs: [
       {
+        indexed: false,
         internalType: "address",
-        name: "token",
+        name: "assetDeploymentTracker",
         type: "address",
       },
     ],
-    name: "TokenNotSupported",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "caller",
-        type: "address",
-      },
-    ],
-    name: "Unauthorized",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "UnsupportedEncodingVersion",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "ZeroAddress",
-    type: "error",
+    name: "AssetDeploymentTrackerRegistered",
+    type: "event",
   },
   {
     anonymous: false,
@@ -157,42 +71,11 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "_assetAddress",
+        name: "_assetHandlerAddress",
         type: "address",
       },
     ],
     name: "AssetHandlerRegistered",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "assetId",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "assetHandlerAddress",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "additionalData",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "assetDeploymentTracker",
-        type: "address",
-      },
-    ],
-    name: "AssetHandlerRegisteredInitial",
     type: "event",
   },
   {
@@ -386,19 +269,6 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: "uint8",
-        name: "version",
-        type: "uint8",
-      },
-    ],
-    name: "Initialized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
         indexed: true,
         internalType: "uint256",
         name: "chainId",
@@ -425,7 +295,7 @@ const _abi = [
       {
         indexed: false,
         internalType: "address",
-        name: "l1Asset",
+        name: "l1Token",
         type: "address",
       },
       {
@@ -439,70 +309,6 @@ const _abi = [
     type: "event",
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferStarted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "Paused",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "Unpaused",
-    type: "event",
-  },
-  {
     inputs: [],
     name: "BRIDGE_HUB",
     outputs: [
@@ -510,32 +316,6 @@ const _abi = [
         internalType: "contract IBridgehub",
         name: "",
         type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "ERA_CHAIN_ID",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "L1_CHAIN_ID",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -568,36 +348,10 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "acceptOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "bytes32",
-        name: "assetId",
-        type: "bytes32",
-      },
-    ],
-    name: "assetDeploymentTracker",
-    outputs: [
-      {
-        internalType: "address",
-        name: "assetDeploymentTracker",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "assetId",
+        name: "_assetId",
         type: "bytes32",
       },
     ],
@@ -605,7 +359,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address",
-        name: "assetHandlerAddress",
+        name: "",
         type: "address",
       },
     ],
@@ -808,59 +562,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "_chainId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_depositSender",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_l1Token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "_l2TxHash",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2BatchNumber",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2MessageIndex",
-        type: "uint256",
-      },
-      {
-        internalType: "uint16",
-        name: "_l2TxNumberInBatch",
-        type: "uint16",
-      },
-      {
-        internalType: "bytes32[]",
-        name: "_merkleProof",
-        type: "bytes32[]",
-      },
-    ],
-    name: "claimFailedDeposit",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "address",
         name: "_originalCaller",
         type: "address",
@@ -927,7 +628,7 @@ const _abi = [
     ],
     name: "finalizeDeposit",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -1000,19 +701,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_owner",
-        type: "address",
-      },
-    ],
-    name: "initialize",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint256",
         name: "_chainId",
         type: "uint256",
@@ -1040,11 +728,17 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "legacyBridge",
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_chainId",
+        type: "uint256",
+      },
+    ],
+    name: "l2BridgeAddress",
     outputs: [
       {
-        internalType: "contract IL1ERC20Bridge",
+        internalType: "address",
         name: "",
         type: "address",
       },
@@ -1063,59 +757,6 @@ const _abi = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "pause",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "paused",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "pendingOwner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1206,26 +847,6 @@ const _abi = [
         type: "bool",
       },
     ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "unpause",
-    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },

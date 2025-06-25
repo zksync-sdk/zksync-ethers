@@ -27,17 +27,20 @@ export interface IL1NativeTokenVaultInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "ASSET_ROUTER"
+      | "L1_CHAIN_ID"
       | "L1_NULLIFIER"
       | "WETH_TOKEN"
       | "assetId"
-      | "calculateAssetId"
+      | "bridgeCheckCounterpartAddress"
       | "calculateCreate2TokenAddress"
       | "chainBalance"
+      | "ensureTokenIsRegistered"
       | "getERC20Getters"
       | "originChainId"
       | "registerEthToken"
       | "registerToken"
       | "tokenAddress"
+      | "tryRegisterTokenFromBurnData"
   ): FunctionFragment;
 
   getEvent(
@@ -46,6 +49,10 @@ export interface IL1NativeTokenVaultInterface extends Interface {
 
   encodeFunctionData(
     functionFragment: "ASSET_ROUTER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "L1_CHAIN_ID",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -61,8 +68,8 @@ export interface IL1NativeTokenVaultInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "calculateAssetId",
-    values: [BigNumberish, AddressLike]
+    functionFragment: "bridgeCheckCounterpartAddress",
+    values: [BigNumberish, BytesLike, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "calculateCreate2TokenAddress",
@@ -71,6 +78,10 @@ export interface IL1NativeTokenVaultInterface extends Interface {
   encodeFunctionData(
     functionFragment: "chainBalance",
     values: [BigNumberish, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ensureTokenIsRegistered",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getERC20Getters",
@@ -92,9 +103,17 @@ export interface IL1NativeTokenVaultInterface extends Interface {
     functionFragment: "tokenAddress",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "tryRegisterTokenFromBurnData",
+    values: [BytesLike, BytesLike]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "ASSET_ROUTER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "L1_CHAIN_ID",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -104,7 +123,7 @@ export interface IL1NativeTokenVaultInterface extends Interface {
   decodeFunctionResult(functionFragment: "WETH_TOKEN", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "assetId", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "calculateAssetId",
+    functionFragment: "bridgeCheckCounterpartAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -113,6 +132,10 @@ export interface IL1NativeTokenVaultInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "chainBalance",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ensureTokenIsRegistered",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -133,6 +156,10 @@ export interface IL1NativeTokenVaultInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "tokenAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tryRegisterTokenFromBurnData",
     data: BytesLike
   ): Result;
 }
@@ -213,15 +240,22 @@ export interface IL1NativeTokenVault extends BaseContract {
 
   ASSET_ROUTER: TypedContractMethod<[], [string], "view">;
 
+  L1_CHAIN_ID: TypedContractMethod<[], [bigint], "view">;
+
   L1_NULLIFIER: TypedContractMethod<[], [string], "view">;
 
   WETH_TOKEN: TypedContractMethod<[], [string], "view">;
 
   assetId: TypedContractMethod<[token: AddressLike], [string], "view">;
 
-  calculateAssetId: TypedContractMethod<
-    [_chainId: BigNumberish, _tokenAddress: AddressLike],
-    [string],
+  bridgeCheckCounterpartAddress: TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _assetId: BytesLike,
+      _originalCaller: AddressLike,
+      _assetHandlerAddressOnCounterpart: AddressLike
+    ],
+    [void],
     "view"
   >;
 
@@ -235,6 +269,12 @@ export interface IL1NativeTokenVault extends BaseContract {
     [_chainId: BigNumberish, _assetId: BytesLike],
     [bigint],
     "view"
+  >;
+
+  ensureTokenIsRegistered: TypedContractMethod<
+    [_nativeToken: AddressLike],
+    [string],
+    "nonpayable"
   >;
 
   getERC20Getters: TypedContractMethod<
@@ -255,6 +295,12 @@ export interface IL1NativeTokenVault extends BaseContract {
 
   tokenAddress: TypedContractMethod<[assetId: BytesLike], [string], "view">;
 
+  tryRegisterTokenFromBurnData: TypedContractMethod<
+    [_burnData: BytesLike, _expectedAssetId: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -262,6 +308,9 @@ export interface IL1NativeTokenVault extends BaseContract {
   getFunction(
     nameOrSignature: "ASSET_ROUTER"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "L1_CHAIN_ID"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "L1_NULLIFIER"
   ): TypedContractMethod<[], [string], "view">;
@@ -272,10 +321,15 @@ export interface IL1NativeTokenVault extends BaseContract {
     nameOrSignature: "assetId"
   ): TypedContractMethod<[token: AddressLike], [string], "view">;
   getFunction(
-    nameOrSignature: "calculateAssetId"
+    nameOrSignature: "bridgeCheckCounterpartAddress"
   ): TypedContractMethod<
-    [_chainId: BigNumberish, _tokenAddress: AddressLike],
-    [string],
+    [
+      _chainId: BigNumberish,
+      _assetId: BytesLike,
+      _originalCaller: AddressLike,
+      _assetHandlerAddressOnCounterpart: AddressLike
+    ],
+    [void],
     "view"
   >;
   getFunction(
@@ -292,6 +346,9 @@ export interface IL1NativeTokenVault extends BaseContract {
     [bigint],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "ensureTokenIsRegistered"
+  ): TypedContractMethod<[_nativeToken: AddressLike], [string], "nonpayable">;
   getFunction(
     nameOrSignature: "getERC20Getters"
   ): TypedContractMethod<
@@ -311,6 +368,13 @@ export interface IL1NativeTokenVault extends BaseContract {
   getFunction(
     nameOrSignature: "tokenAddress"
   ): TypedContractMethod<[assetId: BytesLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "tryRegisterTokenFromBurnData"
+  ): TypedContractMethod<
+    [_burnData: BytesLike, _expectedAssetId: BytesLike],
+    [void],
+    "nonpayable"
+  >;
 
   getEvent(
     key: "BridgedTokenBeaconUpdated"
