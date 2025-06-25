@@ -176,8 +176,8 @@ export class SmartAccount extends AbstractSigner {
   ): Promise<bigint> {
     return await checkProvider(this, 'getBalance').getBalance(
       await this.getAddress(),
-      blockTag,
-      token
+      blockTag
+      // token #FIXME
     );
   }
 

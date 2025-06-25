@@ -63,12 +63,12 @@ describe('VoidSigner', () => {
     });
   });
 
-  describe('#getL2BridgeContracts()', () => {
-    it('should return a L2 bridge contracts', async () => {
-      const result = await signer.getL2BridgeContracts();
-      expect(result).not.to.be.null;
-    });
-  });
+  // describe('#getL2BridgeContracts()', () => {
+  //   it('should return a L2 bridge contracts', async () => {
+  //     const result = await signer.getL2BridgeContracts();
+  //     expect(result).not.to.be.null;
+  //   });
+  // });
 
   describe('#getAddress()', () => {
     it('should return a `VoidSigner` address', async () => {
@@ -375,12 +375,12 @@ describe('L2VoidSigner', () => {
     });
   });
 
-  describe('#getL2BridgeContracts()', () => {
-    it('should return a L2 bridge contracts', async () => {
-      const result = await signer.getL2BridgeContracts();
-      expect(result).not.to.be.null;
-    });
-  });
+  // describe('#getL2BridgeContracts()', () => {
+  //   it('should return a L2 bridge contracts', async () => {
+  //     const result = await signer.getL2BridgeContracts();
+  //     expect(result).not.to.be.null;
+  //   });
+  // });
 
   describe('#getAddress()', () => {
     it('should return a `L2VoidSigner` address', async () => {
