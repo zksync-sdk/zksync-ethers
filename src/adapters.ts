@@ -13,7 +13,7 @@ import {
   checkBaseCost,
   DEFAULT_GAS_PER_PUBDATA_LIMIT,
   estimateCustomBridgeDepositL2Gas,
-  estimateDefaultBridgeDepositL2Gas,
+  // estimateDefaultBridgeDepositL2Gas,
   getERC20DefaultBridgeData,
   isETH,
   L1_MESSENGER_ADDRESS,
@@ -30,6 +30,12 @@ import {
   resolveAssetId,
   encodeNativeTokenVaultTransferData,
   encodeSecondBridgeDataV1,
+  L2_ASSET_ROUTER_ADDRESS,
+  L2_BASE_TOKEN_ADDRESS,
+  getL2HashFromPriorityOp,
+  sleep,
+  EIP712_TX_TYPE,
+  encodeNativeTokenVaultAssetId,
 } from './utils';
 import {
   IBridgehub,
@@ -54,6 +60,8 @@ import {
   IAssetRouterBase__factory,
   IL1NativeTokenVault__factory,
   IL1NativeTokenVault,
+  IL2AssetRouter__factory,
+  IEthToken__factory,
 } from './typechain';
 import {
   Address,
@@ -66,6 +74,7 @@ import {
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
+  TransactionStatus,
 } from './types';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -114,25 +123,36 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       l1Nullifier: string;
       l1NativeTokenVault: string;
     }> {
-      await this._providerL2().getDefaultBridgeAddresses();
-      const addresses = await this._providerL2().contractAddresses();
-      let l1Nullifier: Address;
-      let l1NativeTokenVault: Address;
-      if (!addresses.l1Nullifier) {
-        // todo return these values from server instead
-        const l1AssetRouter = await this.getL1AssetRouter(
-          (await this._providerL2().getDefaultBridgeAddresses()).sharedL1!
-        );
-        l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
-        l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
-        await this._providerL2()._setL1NullifierAndNativeTokenVault(
+      if (!this._providerL2().contractAddresses().sharedBridgeL1) {
+        const bridgehub = await this.getBridgehubContract();
+
+        const sharedL1 = await bridgehub.sharedBridge();
+        // const erc20L1 = await bridgehub.legacyBridge(); #FIXME the method does not exist in Bridgehub ABI
+        const erc20L1 = ethers.ZeroAddress;
+        const sharedL2 = L2_ASSET_ROUTER_ADDRESS;
+        const erc20L2 = L2_ASSET_ROUTER_ADDRESS;
+        const wethL1 = ethers.ZeroAddress;
+        const wethL2 = ethers.ZeroAddress;
+        const l1AssetRouter = await this.getL1AssetRouter(sharedL1);
+        const l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
+        const l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
+
+        this._providerL2().setContractAddresses({
+          bridgehubContract:
+            this._providerL2().contractAddresses().bridgehubContract,
+          erc20BridgeL1: erc20L1,
+          erc20BridgeL2: erc20L2,
+          wethBridgeL1: wethL1,
+          wethBridgeL2: wethL2,
+          sharedBridgeL1: sharedL1,
+          sharedBridgeL2: sharedL2,
           l1Nullifier,
-          l1NativeTokenVault
-        );
-      } else {
-        l1Nullifier = addresses.l1Nullifier;
-        l1NativeTokenVault = addresses.l1NativeTokenVault!;
+          l1NativeTokenVault,
+        });
       }
+
+      const addresses = this._providerL2().contractAddresses();
+
       return {
         erc20L1: addresses.erc20BridgeL1!,
         erc20L2: addresses.erc20BridgeL2!,
@@ -140,16 +160,29 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         wethL2: addresses.wethBridgeL2!,
         sharedL1: addresses.sharedBridgeL1!,
         sharedL2: addresses.sharedBridgeL2!,
-        l1Nullifier: l1Nullifier!,
-        l1NativeTokenVault: l1NativeTokenVault!,
+        l1Nullifier: addresses.l1Nullifier!,
+        l1NativeTokenVault: addresses.l1NativeTokenVault!,
       };
+    }
+
+    /**
+     * Returns the main ZKsync Era smart contract address.
+     */
+    async getMainContractAddress(): Promise<Address> {
+      if (!this._providerL2().contractAddresses().mainContract) {
+        const chainId = (await this._providerL2().getNetwork()).chainId;
+        const bridgehub = await this.getBridgehubContract();
+        this._providerL2().contractAddresses().mainContract =
+          await bridgehub.getZKChain(chainId);
+      }
+      return this._providerL2().contractAddresses().mainContract!;
     }
 
     /**
      * Returns `Contract` wrapper of the ZKsync Era smart contract.
      */
     async getMainContract(): Promise<IZkSyncHyperchain> {
-      const address = await this._providerL2().getMainContractAddress();
+      const address = await this.getMainContractAddress();
       return IZkSyncHyperchain__factory.connect(address, this._signerL1());
     }
 
@@ -171,7 +204,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       weth: IL1ERC20Bridge;
       shared: IL1SharedBridge;
     }> {
-      const addresses = await this._providerL2().getDefaultBridgeAddresses();
+      const addresses = await this.getDefaultBridgeAddresses();
       return {
         erc20: IL1ERC20Bridge__factory.connect(
           addresses.erc20L1,
@@ -230,16 +263,30 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * Returns the address of the base token on L1.
      */
     async getBaseToken(): Promise<string> {
-      const bridgehub = await this.getBridgehubContract();
-      const chainId = (await this._providerL2().getNetwork()).chainId;
-      return await bridgehub.baseToken(chainId);
+      if (!this._providerL2().contractAddresses().baseToken) {
+        const bridgehub = await this.getBridgehubContract();
+        const chainId = (await this._providerL2().getNetwork()).chainId;
+        this._providerL2().contractAddresses().baseToken =
+          await bridgehub.baseToken(chainId);
+      }
+      return this._providerL2().contractAddresses().baseToken!;
     }
 
     /**
      * Returns whether the chain is ETH-based.
      */
     async isETHBasedChain(): Promise<boolean> {
-      return this._providerL2().isEthBasedChain();
+      return isAddressEq(await this.getBaseToken(), ETH_ADDRESS_IN_CONTRACTS);
+    }
+
+    /**
+     * Returns whether the `token` is the base token.
+     */
+    async isBaseToken(token: Address): Promise<boolean> {
+      return (
+        isAddressEq(token, await this.getBaseToken()) ||
+        isAddressEq(token, L2_BASE_TOKEN_ADDRESS)
+      );
     }
 
     /**
@@ -301,9 +348,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @remarks Only works for tokens bridged on default ZKsync Era bridges.
      *
      * @param token The address of the token on L1.
+     * @param bridgeAddress The address of custom bridge, which will be used to get l2 token address.
      */
-    async l2TokenAddress(token: Address): Promise<string> {
-      return this._providerL2().l2TokenAddress(token);
+    async l2TokenAddress(
+      token: Address,
+      bridgeAddress?: Address
+    ): Promise<string> {
+      if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+        token = ETH_ADDRESS_IN_CONTRACTS;
+      }
+
+      const baseToken = await this.getBaseToken();
+      if (isAddressEq(token, baseToken)) {
+        return L2_BASE_TOKEN_ADDRESS;
+      }
+
+      bridgeAddress ??= (await this.getDefaultBridgeAddresses()).sharedL2;
+
+      return await (
+        await this._providerL2().connectL2Bridge(bridgeAddress)
+      ).l2TokenAddress(token);
     }
 
     /**
@@ -315,7 +379,17 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @param token The address of the token on L2.
      */
     async l1TokenAddress(token: Address): Promise<string> {
-      return this._providerL2().l1TokenAddress(token);
+      if (isAddressEq(token, LEGACY_ETH_ADDRESS)) {
+        return LEGACY_ETH_ADDRESS;
+      }
+
+      const bridgeAddresses = await this.getDefaultBridgeAddresses();
+
+      const sharedBridge = IL2Bridge__factory.connect(
+        bridgeAddresses.sharedL2,
+        this._providerL2()
+      );
+      return await sharedBridge.l1TokenAddress(token);
     }
 
     /**
@@ -455,8 +529,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     async getNativeTokenVaultL1(): Promise<IL1NativeTokenVault> {
       // FIXME: maybe makes sense to provide an API to do it in one call
-      const bridgeContracts =
-        await this._providerL2().getDefaultBridgeAddresses();
+      const bridgeContracts = await this.getDefaultBridgeAddresses();
 
       const sharedBridge = bridgeContracts.sharedL1;
       const l1AssetRouter = IL1AssetRouter__factory.connect(
@@ -621,7 +694,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       tx.gasLimit ??= gasLimit;
 
-      return await this._providerL2().getPriorityOpResponse(
+      return await this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(tx)
       );
     }
@@ -733,7 +806,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       tx.gasLimit ??= gasLimit;
 
-      return await this._providerL2().getPriorityOpResponse(
+      return await this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(tx)
       );
     }
@@ -786,7 +859,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       tx.gasLimit ??= gasLimit;
 
-      return await this._providerL2().getPriorityOpResponse(
+      return await this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(tx)
       );
     }
@@ -1314,9 +1387,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (transaction.bridgeAddress) {
         return await this._getL2GasLimitFromCustomBridge(transaction);
       } else {
-        return await estimateDefaultBridgeDepositL2Gas(
+        return await this.estimateDefaultBridgeDepositL2Gas(
           this._providerL1(),
-          this._providerL2(),
           transaction.token,
           transaction.amount,
           transaction.to!,
@@ -1687,7 +1759,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @returns A promise that resolves to the address of the L1 Nullifier address
      */
     async getL1NullifierAddress(): Promise<Address> {
-      const addresses = await this._providerL2().getDefaultBridgeAddresses();
+      const addresses = await this.getDefaultBridgeAddresses();
       return await IL1AssetRouter__factory.connect(
         addresses.sharedL1,
         this._signerL1()
@@ -1932,7 +2004,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.Overrides;
     }): Promise<PriorityOpResponse> {
       const requestExecuteTx = await this.getRequestExecuteTx(transaction);
-      return this._providerL2().getPriorityOpResponse(
+      return this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(requestExecuteTx)
       );
     }
@@ -2134,6 +2206,399 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         overrides
       );
     }
+
+    /**
+     * Returns an estimation of the L2 gas required for token bridging via the default ERC20 bridge.
+     *
+     * @param providerL1 The Ethers provider for the L1 network.
+     * @param token The address of the token to be bridged.
+     * @param amount The deposit amount.
+     * @param to The recipient address on the L2 network.
+     * @param from The sender address on the L1 network.
+     * @param gasPerPubdataByte The current gas per byte of pubdata.
+     */
+    async estimateDefaultBridgeDepositL2Gas(
+      providerL1: ethers.Provider,
+      token: Address,
+      amount: BigNumberish,
+      to: Address,
+      from?: Address,
+      gasPerPubdataByte?: BigNumberish
+    ): Promise<bigint> {
+      // If the `from` address is not provided, we use a random address, because
+      // due to storage slot aggregation, the gas estimation will depend on the address
+      // and so estimation for the zero address may be smaller than for the sender.
+      from ??= ethers.Wallet.createRandom().address;
+      token = isAddressEq(token, LEGACY_ETH_ADDRESS)
+        ? ETH_ADDRESS_IN_CONTRACTS
+        : token;
+      if (await this.isBaseToken(token)) {
+        return await this._providerL2().estimateL1ToL2Execute({
+          contractAddress: to,
+          gasPerPubdataByte: gasPerPubdataByte,
+          caller: from,
+          calldata: '0x',
+          l2Value: amount,
+        });
+      } else {
+        const bridgeAddresses = await this.getDefaultBridgeAddresses();
+
+        const value = 0;
+        const l1BridgeAddress = bridgeAddresses.sharedL1;
+        const l2BridgeAddress = bridgeAddresses.sharedL2;
+        const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
+
+        return await this._providerL2().estimateCustomBridgeDepositL2Gas(
+          l1BridgeAddress,
+          l2BridgeAddress,
+          token,
+          amount,
+          to,
+          bridgeData,
+          from,
+          gasPerPubdataByte,
+          value
+        );
+      }
+    }
+
+    /**
+     * Returns a L2 transaction response from L1 transaction response.
+     *
+     * @param l1TxResponse The L1 transaction response.
+     */
+    async getL2TransactionFromPriorityOp(
+      l1TxResponse: ethers.TransactionResponse
+    ): Promise<TransactionResponse> {
+      const receipt = await l1TxResponse.wait();
+      const l2Hash = getL2HashFromPriorityOp(
+        receipt as ethers.TransactionReceipt,
+        await this.getMainContractAddress()
+      );
+
+      let status = null;
+      do {
+        status = await this._providerL2().getTransactionStatus(l2Hash);
+        await sleep(this._providerL2().pollingInterval);
+      } while (status === TransactionStatus.NotFound);
+
+      return await this._providerL2().getTransaction(l2Hash);
+    }
+
+    /**
+     * Returns a {@link PriorityOpResponse} from L1 transaction response.
+     *
+     * @param l1TxResponse The L1 transaction response.
+     */
+    async getPriorityOpResponse(
+      l1TxResponse: ethers.TransactionResponse
+    ): Promise<PriorityOpResponse> {
+      const l2Response = {...l1TxResponse} as PriorityOpResponse;
+
+      l2Response.waitL1Commit = l1TxResponse.wait.bind(
+        l1TxResponse
+      ) as PriorityOpResponse['waitL1Commit'];
+      l2Response.wait = async () => {
+        const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
+        return await l2Tx.wait();
+      };
+      l2Response.waitFinalize = async () => {
+        const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
+        return await l2Tx.waitFinalize();
+      };
+
+      return l2Response;
+    }
+
+    /**
+     * Initiates the withdrawal process which withdraws ETH or any ERC20 token
+     * from the associated account on L2 network to the target account on L1 network.
+     *
+     * @param transaction Withdrawal transaction request.
+     * @param transaction.amount The amount of the token to withdraw.
+     * @param transaction.token The address of the token. Defaults to ETH.
+     * @param [transaction.to] The address of the recipient on L1.
+     * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
+     * @param [transaction.paymasterParams] Paymaster parameters.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A Promise resolving to a withdrawal transaction response.
+     */
+    async withdraw(transaction: {
+      amount: BigNumberish;
+      token: Address;
+      to?: Address;
+      bridgeAddress?: Address;
+      paymasterParams?: PaymasterParams;
+      overrides?: ethers.Overrides;
+    }): Promise<TransactionResponse> {
+      const withdrawTx = await this.getWithdrawTx({
+        from: await this.getAddress(),
+        ...transaction,
+      });
+      return (await this.sendTransaction(withdrawTx)) as TransactionResponse;
+    }
+
+    /**
+     * Returns the populated withdrawal transaction.
+     *
+     * @param transaction The transaction details.
+     * @param transaction.amount The amount of token.
+     * @param transaction.token The token address.
+     * @param [transaction.from] The sender's address.
+     * @param [transaction.to] The recipient's address.
+     * @param [transaction.bridgeAddress] The bridge address.
+     * @param [transaction.paymasterParams] Paymaster parameters.
+     * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
+     */
+    async getWithdrawTx(transaction: {
+      amount: BigNumberish;
+      token?: Address;
+      from?: Address;
+      to?: Address;
+      bridgeAddress?: Address;
+      paymasterParams?: PaymasterParams;
+      overrides?: ethers.Overrides;
+    }): Promise<EthersTransactionRequest> {
+      const {...tx} = transaction;
+      tx.token ??= L2_BASE_TOKEN_ADDRESS;
+      if (
+        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+        isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)
+      ) {
+        tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
+      }
+
+      if (
+        (tx.to === null || tx.to === undefined) &&
+        (tx.from === null || tx.from === undefined)
+      ) {
+        throw new Error('Withdrawal target address is undefined!');
+      }
+
+      tx.to ??= tx.from;
+      tx.overrides ??= {};
+      tx.overrides.from ??= tx.from;
+      tx.overrides.type ??= EIP712_TX_TYPE;
+
+      if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
+        if (!tx.overrides.value) {
+          tx.overrides.value = tx.amount;
+        }
+        const passedValue = BigInt(tx.overrides.value);
+
+        if (passedValue !== BigInt(tx.amount)) {
+          // To avoid users shooting themselves into the foot, we will always use the amount to withdraw
+          // as the value
+
+          throw new Error('The tx.value is not equal to the value withdrawn!');
+        }
+
+        const ethL2Token = IEthToken__factory.connect(
+          L2_BASE_TOKEN_ADDRESS,
+          this._providerL2()
+        );
+        const populatedTx = await ethL2Token.withdraw.populateTransaction(
+          tx.to!,
+          tx.overrides
+        );
+        if (tx.paymasterParams) {
+          return {
+            ...populatedTx,
+            customData: {
+              paymasterParams: tx.paymasterParams,
+            },
+          };
+        }
+        return populatedTx;
+      }
+
+      let populatedTx;
+      // we get the tokens data, assetId and originChainId
+      const ntv = await this._providerL2().connectL2NativeTokenVault();
+      const assetId = await ntv.assetId(tx.token);
+      const originChainId = await ntv.originChainId(assetId);
+      const l1ChainId = await this._providerL2().getL1ChainId();
+
+      const isTokenL1Native =
+        originChainId === BigInt(l1ChainId) ||
+        tx.token === ETH_ADDRESS_IN_CONTRACTS;
+      if (!tx.bridgeAddress) {
+        const bridgeAddresses = await this.getDefaultBridgeAddresses();
+        // If the legacy L2SharedBridge is deployed we use it for l1 native tokens.
+        tx.bridgeAddress = isTokenL1Native
+          ? bridgeAddresses.sharedL2
+          : L2_ASSET_ROUTER_ADDRESS;
+      }
+      // For non L1 native tokens we need to use the AssetRouter.
+      // For L1 native tokens we can use the legacy withdraw method.
+      if (!isTokenL1Native) {
+        const bridge = await this._providerL2().connectL2AssetRouter();
+        const chainId = Number((await this._providerL2().getNetwork()).chainId);
+        const assetId = encodeNativeTokenVaultAssetId(
+          BigInt(chainId),
+          tx.token
+        );
+        const assetData = encodeNativeTokenVaultTransferData(
+          BigInt(tx.amount),
+          tx.to!,
+          tx.token
+        );
+
+        populatedTx = await bridge.withdraw.populateTransaction(
+          assetId,
+          assetData,
+          tx.overrides
+        );
+      } else {
+        const bridge = await this._providerL2().connectL2Bridge(
+          tx.bridgeAddress!
+        );
+        populatedTx = await bridge.withdraw.populateTransaction(
+          tx.to!,
+          tx.token,
+          tx.amount,
+          tx.overrides
+        );
+      }
+      if (tx.paymasterParams) {
+        return {
+          ...populatedTx,
+          customData: {
+            paymasterParams: tx.paymasterParams,
+          },
+        };
+      }
+      return populatedTx;
+    }
+
+    async estimateGasWithdraw(transaction: {
+      token: Address;
+      amount: BigNumberish;
+      from?: Address;
+      to?: Address;
+      bridgeAddress?: Address;
+      paymasterParams?: PaymasterParams;
+      overrides?: ethers.Overrides;
+    }): Promise<bigint> {
+      const withdrawTx = await this.getWithdrawTx(transaction);
+      return await this._providerL2().estimateGas(withdrawTx);
+    }
+
+    /**
+     * Transfer ETH or any ERC20 token within the same interface.
+     *
+     * @param transaction Transfer transaction request.
+     * @param transaction.to The address of the recipient.
+     * @param transaction.amount The amount of the token to transfer.
+     * @param [transaction.token] The address of the token. Defaults to ETH.
+     * @param [transaction.paymasterParams] Paymaster parameters.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A Promise resolving to a transfer transaction response.
+     */
+    async transfer(transaction: {
+      to: Address;
+      amount: BigNumberish;
+      token?: Address;
+      paymasterParams?: PaymasterParams;
+      overrides?: ethers.Overrides;
+    }): Promise<TransactionResponse> {
+      const transferTx = await this.getTransferTx({
+        from: await this.getAddress(),
+        ...transaction,
+      });
+      return (await this.sendTransaction(transferTx)) as TransactionResponse;
+    }
+
+    /**
+     * Returns the populated transfer transaction.
+     *
+     * @param transaction Transfer transaction request.
+     * @param transaction.to The address of the recipient.
+     * @param transaction.amount The amount of the token to transfer.
+     * @param [transaction.token] The address of the token. Defaults to ETH.
+     * @param [transaction.paymasterParams] Paymaster parameters.
+     * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
+     */
+    async getTransferTx(transaction: {
+      to: Address;
+      amount: BigNumberish;
+      from?: Address;
+      token?: Address;
+      paymasterParams?: PaymasterParams;
+      overrides?: ethers.Overrides;
+    }): Promise<EthersTransactionRequest> {
+      const {...tx} = transaction;
+      if (!tx.token) {
+        tx.token = L2_BASE_TOKEN_ADDRESS;
+      } else if (
+        isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
+        isAddressEq(tx.token, ETH_ADDRESS_IN_CONTRACTS)
+      ) {
+        tx.token = await this.l2TokenAddress(ETH_ADDRESS_IN_CONTRACTS);
+      }
+
+      tx.overrides ??= {};
+      tx.overrides.from ??= tx.from;
+      tx.overrides.type ??= EIP712_TX_TYPE;
+
+      if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
+        if (tx.paymasterParams) {
+          return {
+            ...tx.overrides,
+            type: EIP712_TX_TYPE,
+            to: tx.to,
+            value: tx.amount,
+            customData: {
+              paymasterParams: tx.paymasterParams,
+            },
+          };
+        }
+
+        return {
+          ...tx.overrides,
+          to: tx.to,
+          value: tx.amount,
+        };
+      } else {
+        const token = IERC20__factory.connect(tx.token, this._providerL2());
+        const populatedTx = await token.transfer.populateTransaction(
+          tx.to,
+          tx.amount,
+          tx.overrides
+        );
+        if (tx.paymasterParams) {
+          return {
+            ...populatedTx,
+            customData: {
+              paymasterParams: tx.paymasterParams,
+            },
+          };
+        }
+        return populatedTx;
+      }
+    }
+
+    async getL2BridgeContracts(): Promise<{
+      erc20: IL2Bridge;
+      weth: IL2Bridge;
+      shared: IL2SharedBridge;
+    }> {
+      const addresses = await this.getDefaultBridgeAddresses();
+      return {
+        erc20: IL2Bridge__factory.connect(
+          addresses.erc20L2,
+          this._providerL2()
+        ),
+        weth: IL2Bridge__factory.connect(
+          addresses.wethL2 || addresses.erc20L2,
+          this._providerL2()
+        ),
+        shared: IL2SharedBridge__factory.connect(
+          addresses.sharedL2,
+          this._providerL2()
+        ),
+      };
+    }
   };
 }
 
@@ -2196,24 +2661,24 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     /**
      * Returns L2 bridge contracts.
      */
-    async getL2BridgeContracts(): Promise<{
-      erc20: IL2Bridge;
-      weth: IL2Bridge;
-      shared: IL2SharedBridge;
-    }> {
-      const addresses = await this._providerL2().getDefaultBridgeAddresses();
-      return {
-        erc20: IL2Bridge__factory.connect(addresses.erc20L2, this._signerL2()),
-        weth: IL2Bridge__factory.connect(
-          addresses.wethL2 || addresses.erc20L2,
-          this._signerL2()
-        ),
-        shared: IL2SharedBridge__factory.connect(
-          addresses.sharedL2,
-          this._signerL2()
-        ),
-      };
-    }
+    // async getL2BridgeContracts(): Promise<{
+    //   erc20: IL2Bridge;
+    //   weth: IL2Bridge;
+    //   shared: IL2SharedBridge;
+    // }> {
+    //   const addresses = await this._providerL2().getDefaultBridgeAddresses();
+    //   return {
+    //     erc20: IL2Bridge__factory.connect(addresses.erc20L2, this._signerL2()),
+    //     weth: IL2Bridge__factory.connect(
+    //       addresses.wethL2 || addresses.erc20L2,
+    //       this._signerL2()
+    //     ),
+    //     shared: IL2SharedBridge__factory.connect(
+    //       addresses.sharedL2,
+    //       this._signerL2()
+    //     ),
+    //   };
+    // }
 
     _fillCustomData(data: Eip712Meta): Eip712Meta {
       const customData = {...data};

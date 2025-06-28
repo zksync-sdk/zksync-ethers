@@ -1392,52 +1392,52 @@ export async function isTypedDataSignatureCorrect(
  * );
  * // gas = 355_704
  */
-export async function estimateDefaultBridgeDepositL2Gas(
-  providerL1: ethers.Provider,
-  providerL2: Provider,
-  token: Address,
-  amount: BigNumberish,
-  to: Address,
-  from?: Address,
-  gasPerPubdataByte?: BigNumberish
-): Promise<bigint> {
-  // If the `from` address is not provided, we use a random address, because
-  // due to storage slot aggregation, the gas estimation will depend on the address
-  // and so estimation for the zero address may be smaller than for the sender.
-  from ??= ethers.Wallet.createRandom().address;
-  token = isAddressEq(token, LEGACY_ETH_ADDRESS)
-    ? ETH_ADDRESS_IN_CONTRACTS
-    : token;
-  if (await providerL2.isBaseToken(token)) {
-    return await providerL2.estimateL1ToL2Execute({
-      contractAddress: to,
-      gasPerPubdataByte: gasPerPubdataByte,
-      caller: from,
-      calldata: '0x',
-      l2Value: amount,
-    });
-  } else {
-    const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
-
-    const value = 0;
-    const l1BridgeAddress = bridgeAddresses.sharedL1;
-    const l2BridgeAddress = bridgeAddresses.sharedL2;
-    const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
-
-    return await estimateCustomBridgeDepositL2Gas(
-      providerL2,
-      l1BridgeAddress,
-      l2BridgeAddress,
-      token,
-      amount,
-      to,
-      bridgeData,
-      from,
-      gasPerPubdataByte,
-      value
-    );
-  }
-}
+// export async function estimateDefaultBridgeDepositL2Gas(
+//   providerL1: ethers.Provider,
+//   providerL2: Provider,
+//   token: Address,
+//   amount: BigNumberish,
+//   to: Address,
+//   from?: Address,
+//   gasPerPubdataByte?: BigNumberish
+// ): Promise<bigint> {
+//   // If the `from` address is not provided, we use a random address, because
+//   // due to storage slot aggregation, the gas estimation will depend on the address
+//   // and so estimation for the zero address may be smaller than for the sender.
+//   from ??= ethers.Wallet.createRandom().address;
+//   token = isAddressEq(token, LEGACY_ETH_ADDRESS)
+//     ? ETH_ADDRESS_IN_CONTRACTS
+//     : token;
+//   if (await providerL2.isBaseToken(token)) {
+//     return await providerL2.estimateL1ToL2Execute({
+//       contractAddress: to,
+//       gasPerPubdataByte: gasPerPubdataByte,
+//       caller: from,
+//       calldata: '0x',
+//       l2Value: amount,
+//     });
+//   } else {
+//     const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
+//
+//     const value = 0;
+//     const l1BridgeAddress = bridgeAddresses.sharedL1;
+//     const l2BridgeAddress = bridgeAddresses.sharedL2;
+//     const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
+//
+//     return await estimateCustomBridgeDepositL2Gas(
+//       providerL2,
+//       l1BridgeAddress,
+//       l2BridgeAddress,
+//       token,
+//       amount,
+//       to,
+//       bridgeData,
+//       from,
+//       gasPerPubdataByte,
+//       value
+//     );
+//   }
+// }
 
 /**
  * Scales the provided gas limit using a coefficient to ensure acceptance of L1->L2 transactions.

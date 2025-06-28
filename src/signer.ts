@@ -343,13 +343,13 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    *
    * const l2BridgeContracts = await signer.getL2BridgeContracts();
    */
-  override async getL2BridgeContracts(): Promise<{
-    erc20: IL2Bridge;
-    weth: IL2Bridge;
-    shared: IL2SharedBridge;
-  }> {
-    return super.getL2BridgeContracts();
-  }
+  // override async getL2BridgeContracts(): Promise<{
+  //   erc20: IL2Bridge;
+  //   weth: IL2Bridge;
+  //   shared: IL2SharedBridge;
+  // }> {
+  //   return super.getL2BridgeContracts();
+  // }
 
   /**
    * @inheritDoc

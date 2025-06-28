@@ -107,67 +107,67 @@ describe('utils', () => {
     });
   });
 
-  describe('#estimateDefaultBridgeDepositL2Gas()', () => {
-    if (IS_ETH_BASED) {
-      it('should return estimation for ETH token', async () => {
-        const result = await utils.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          provider,
-          utils.ETH_ADDRESS,
-          ethers.parseEther('1'),
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-
-      it('should return estimation for DAI token', async () => {
-        const result = await utils.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          provider,
-          DAI_L1,
-          5,
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-    } else {
-      it('should return estimation for ETH token', async () => {
-        const result = await utils.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          provider,
-          utils.LEGACY_ETH_ADDRESS,
-          ethers.parseEther('1'),
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-
-      it('should return estimation for base token', async () => {
-        const result = await utils.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          provider,
-          await provider.getBaseTokenContractAddress(),
-          ethers.parseEther('1'),
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-
-      it('should return estimation for DAI token', async () => {
-        const result = await utils.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          provider,
-          DAI_L1,
-          5,
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-    }
-  });
+  // describe('#estimateDefaultBridgeDepositL2Gas()', () => {
+  //   if (IS_ETH_BASED) {
+  //     it('should return estimation for ETH token', async () => {
+  //       const result = await utils.estimateDefaultBridgeDepositL2Gas(
+  //         ethProvider,
+  //         provider,
+  //         utils.ETH_ADDRESS,
+  //         ethers.parseEther('1'),
+  //         ADDRESS2,
+  //         ADDRESS1
+  //       );
+  //       expect(result > 0n).to.be.true;
+  //     });
+  //
+  //     it('should return estimation for DAI token', async () => {
+  //       const result = await utils.estimateDefaultBridgeDepositL2Gas(
+  //         ethProvider,
+  //         provider,
+  //         DAI_L1,
+  //         5,
+  //         ADDRESS2,
+  //         ADDRESS1
+  //       );
+  //       expect(result > 0n).to.be.true;
+  //     });
+  //   } else {
+  //     it('should return estimation for ETH token', async () => {
+  //       const result = await utils.estimateDefaultBridgeDepositL2Gas(
+  //         ethProvider,
+  //         provider,
+  //         utils.LEGACY_ETH_ADDRESS,
+  //         ethers.parseEther('1'),
+  //         ADDRESS2,
+  //         ADDRESS1
+  //       );
+  //       expect(result > 0n).to.be.true;
+  //     });
+  //
+  //     it('should return estimation for base token', async () => {
+  //       const result = await utils.estimateDefaultBridgeDepositL2Gas(
+  //         ethProvider,
+  //         provider,
+  //         await provider.getBaseTokenContractAddress(),
+  //         ethers.parseEther('1'),
+  //         ADDRESS2,
+  //         ADDRESS1
+  //       );
+  //       expect(result > 0n).to.be.true;
+  //     });
+  //
+  //     it('should return estimation for DAI token', async () => {
+  //       const result = await utils.estimateDefaultBridgeDepositL2Gas(
+  //         ethProvider,
+  //         provider,
+  //         DAI_L1,
+  //         5,
+  //         ADDRESS2,
+  //         ADDRESS1
+  //       );
+  //       expect(result > 0n).to.be.true;
+  //     });
+  //   }
+  // });
 });
