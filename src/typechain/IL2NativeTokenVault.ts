@@ -27,22 +27,46 @@ export interface IL2NativeTokenVaultInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "ASSET_ROUTER"
+      | "BASE_TOKEN_ASSET_ID"
+      | "L1_CHAIN_ID"
+      | "L2_LEGACY_SHARED_BRIDGE"
       | "WETH_TOKEN"
+      | "acceptOwnership"
       | "assetId"
-      | "calculateAssetId"
+      | "bridgeBurn"
+      | "bridgeMint"
+      | "bridgedTokenBeacon"
       | "calculateCreate2TokenAddress"
+      | "ensureTokenIsRegistered"
       | "getERC20Getters"
       | "l2TokenAddress"
       | "originChainId"
+      | "owner"
+      | "pause"
+      | "paused"
+      | "pendingOwner"
       | "registerToken"
+      | "renounceOwnership"
+      | "setLegacyTokenAssetId"
       | "tokenAddress"
+      | "tokenDataOriginChainId"
+      | "transferOwnership"
+      | "tryRegisterTokenFromBurnData"
+      | "unpause"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "BridgeBurn"
+      | "BridgeMint"
       | "BridgedTokenBeaconUpdated"
       | "FinalizeDeposit"
+      | "Initialized"
       | "L2TokenBeaconUpdated"
+      | "OwnershipTransferStarted"
+      | "OwnershipTransferred"
+      | "Paused"
+      | "Unpaused"
       | "WithdrawalInitiated"
   ): EventFragment;
 
@@ -51,7 +75,23 @@ export interface IL2NativeTokenVaultInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "BASE_TOKEN_ASSET_ID",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "L1_CHAIN_ID",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "L2_LEGACY_SHARED_BRIDGE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "WETH_TOKEN",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "acceptOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -59,12 +99,24 @@ export interface IL2NativeTokenVaultInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "calculateAssetId",
-    values: [BigNumberish, AddressLike]
+    functionFragment: "bridgeBurn",
+    values: [BigNumberish, BigNumberish, BytesLike, AddressLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgeMint",
+    values: [BigNumberish, BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgedTokenBeacon",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "calculateCreate2TokenAddress",
     values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ensureTokenIsRegistered",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getERC20Getters",
@@ -78,27 +130,77 @@ export interface IL2NativeTokenVaultInterface extends Interface {
     functionFragment: "originChainId",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: "pause", values?: undefined): string;
+  encodeFunctionData(functionFragment: "paused", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "pendingOwner",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "registerToken",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setLegacyTokenAssetId",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "tokenAddress",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "tokenDataOriginChainId",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tryRegisterTokenFromBurnData",
+    values: [BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
 
   decodeFunctionResult(
     functionFragment: "ASSET_ROUTER",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "WETH_TOKEN", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "assetId", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "calculateAssetId",
+    functionFragment: "BASE_TOKEN_ASSET_ID",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "L1_CHAIN_ID",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "L2_LEGACY_SHARED_BRIDGE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "WETH_TOKEN", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "acceptOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "assetId", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "bridgeBurn", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "bridgeMint", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "bridgedTokenBeacon",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "calculateCreate2TokenAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ensureTokenIsRegistered",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -113,14 +215,95 @@ export interface IL2NativeTokenVaultInterface extends Interface {
     functionFragment: "originChainId",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "pendingOwner",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "registerToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setLegacyTokenAssetId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "tokenAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "tokenDataOriginChainId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tryRegisterTokenFromBurnData",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
+}
+
+export namespace BridgeBurnEvent {
+  export type InputTuple = [
+    chainId: BigNumberish,
+    assetId: BytesLike,
+    sender: AddressLike,
+    receiver: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    chainId: bigint,
+    assetId: string,
+    sender: string,
+    receiver: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    chainId: bigint;
+    assetId: string;
+    sender: string;
+    receiver: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace BridgeMintEvent {
+  export type InputTuple = [
+    chainId: BigNumberish,
+    assetId: BytesLike,
+    receiver: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    chainId: bigint,
+    assetId: string,
+    receiver: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    chainId: bigint;
+    assetId: string;
+    receiver: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace BridgedTokenBeaconUpdatedEvent {
@@ -167,6 +350,18 @@ export namespace FinalizeDepositEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace InitializedEvent {
+  export type InputTuple = [version: BigNumberish];
+  export type OutputTuple = [version: bigint];
+  export interface OutputObject {
+    version: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace L2TokenBeaconUpdatedEvent {
   export type InputTuple = [
     l2TokenBeacon: AddressLike,
@@ -179,6 +374,56 @@ export namespace L2TokenBeaconUpdatedEvent {
   export interface OutputObject {
     l2TokenBeacon: string;
     l2TokenProxyBytecodeHash: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferStartedEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace PausedEvent {
+  export type InputTuple = [account: AddressLike];
+  export type OutputTuple = [account: string];
+  export interface OutputObject {
+    account: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UnpausedEvent {
+  export type InputTuple = [account: AddressLike];
+  export type OutputTuple = [account: string];
+  export interface OutputObject {
+    account: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -256,20 +501,48 @@ export interface IL2NativeTokenVault extends BaseContract {
 
   ASSET_ROUTER: TypedContractMethod<[], [string], "view">;
 
+  BASE_TOKEN_ASSET_ID: TypedContractMethod<[], [string], "view">;
+
+  L1_CHAIN_ID: TypedContractMethod<[], [bigint], "view">;
+
+  L2_LEGACY_SHARED_BRIDGE: TypedContractMethod<[], [string], "view">;
+
   WETH_TOKEN: TypedContractMethod<[], [string], "view">;
 
-  assetId: TypedContractMethod<[token: AddressLike], [string], "view">;
+  acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
-  calculateAssetId: TypedContractMethod<
-    [_chainId: BigNumberish, _tokenAddress: AddressLike],
+  assetId: TypedContractMethod<[tokenAddress: AddressLike], [string], "view">;
+
+  bridgeBurn: TypedContractMethod<
+    [
+      _chainId: BigNumberish,
+      _l2MsgValue: BigNumberish,
+      _assetId: BytesLike,
+      _originalCaller: AddressLike,
+      _data: BytesLike
+    ],
+    [string],
+    "payable"
+  >;
+
+  bridgeMint: TypedContractMethod<
+    [_chainId: BigNumberish, _assetId: BytesLike, _data: BytesLike],
+    [void],
+    "payable"
+  >;
+
+  bridgedTokenBeacon: TypedContractMethod<[], [string], "view">;
+
+  calculateCreate2TokenAddress: TypedContractMethod<
+    [_tokenOriginChainId: BigNumberish, _nonNativeToken: AddressLike],
     [string],
     "view"
   >;
 
-  calculateCreate2TokenAddress: TypedContractMethod<
-    [_originChainId: BigNumberish, _originToken: AddressLike],
+  ensureTokenIsRegistered: TypedContractMethod<
+    [_nativeToken: AddressLike],
     [string],
-    "view"
+    "nonpayable"
   >;
 
   getERC20Getters: TypedContractMethod<
@@ -286,13 +559,49 @@ export interface IL2NativeTokenVault extends BaseContract {
 
   originChainId: TypedContractMethod<[assetId: BytesLike], [bigint], "view">;
 
+  owner: TypedContractMethod<[], [string], "view">;
+
+  pause: TypedContractMethod<[], [void], "nonpayable">;
+
+  paused: TypedContractMethod<[], [boolean], "view">;
+
+  pendingOwner: TypedContractMethod<[], [string], "view">;
+
   registerToken: TypedContractMethod<
-    [_l1Token: AddressLike],
+    [_nativeToken: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  setLegacyTokenAssetId: TypedContractMethod<
+    [_l2TokenAddress: AddressLike],
     [void],
     "nonpayable"
   >;
 
   tokenAddress: TypedContractMethod<[assetId: BytesLike], [string], "view">;
+
+  tokenDataOriginChainId: TypedContractMethod<
+    [_erc20Data: BytesLike],
+    [bigint],
+    "view"
+  >;
+
+  transferOwnership: TypedContractMethod<
+    [newOwner: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  tryRegisterTokenFromBurnData: TypedContractMethod<
+    [_burnData: BytesLike, _expectedAssetId: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+
+  unpause: TypedContractMethod<[], [void], "nonpayable">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -302,25 +611,56 @@ export interface IL2NativeTokenVault extends BaseContract {
     nameOrSignature: "ASSET_ROUTER"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "BASE_TOKEN_ASSET_ID"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "L1_CHAIN_ID"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "L2_LEGACY_SHARED_BRIDGE"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "WETH_TOKEN"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "assetId"
-  ): TypedContractMethod<[token: AddressLike], [string], "view">;
+    nameOrSignature: "acceptOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "calculateAssetId"
+    nameOrSignature: "assetId"
+  ): TypedContractMethod<[tokenAddress: AddressLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "bridgeBurn"
   ): TypedContractMethod<
-    [_chainId: BigNumberish, _tokenAddress: AddressLike],
+    [
+      _chainId: BigNumberish,
+      _l2MsgValue: BigNumberish,
+      _assetId: BytesLike,
+      _originalCaller: AddressLike,
+      _data: BytesLike
+    ],
     [string],
-    "view"
+    "payable"
   >;
+  getFunction(
+    nameOrSignature: "bridgeMint"
+  ): TypedContractMethod<
+    [_chainId: BigNumberish, _assetId: BytesLike, _data: BytesLike],
+    [void],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "bridgedTokenBeacon"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "calculateCreate2TokenAddress"
   ): TypedContractMethod<
-    [_originChainId: BigNumberish, _originToken: AddressLike],
+    [_tokenOriginChainId: BigNumberish, _nonNativeToken: AddressLike],
     [string],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "ensureTokenIsRegistered"
+  ): TypedContractMethod<[_nativeToken: AddressLike], [string], "nonpayable">;
   getFunction(
     nameOrSignature: "getERC20Getters"
   ): TypedContractMethod<
@@ -335,12 +675,60 @@ export interface IL2NativeTokenVault extends BaseContract {
     nameOrSignature: "originChainId"
   ): TypedContractMethod<[assetId: BytesLike], [bigint], "view">;
   getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "pause"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "paused"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "pendingOwner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "registerToken"
-  ): TypedContractMethod<[_l1Token: AddressLike], [void], "nonpayable">;
+  ): TypedContractMethod<[_nativeToken: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "renounceOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setLegacyTokenAssetId"
+  ): TypedContractMethod<[_l2TokenAddress: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "tokenAddress"
   ): TypedContractMethod<[assetId: BytesLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "tokenDataOriginChainId"
+  ): TypedContractMethod<[_erc20Data: BytesLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "transferOwnership"
+  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "tryRegisterTokenFromBurnData"
+  ): TypedContractMethod<
+    [_burnData: BytesLike, _expectedAssetId: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "unpause"
+  ): TypedContractMethod<[], [void], "nonpayable">;
 
+  getEvent(
+    key: "BridgeBurn"
+  ): TypedContractEvent<
+    BridgeBurnEvent.InputTuple,
+    BridgeBurnEvent.OutputTuple,
+    BridgeBurnEvent.OutputObject
+  >;
+  getEvent(
+    key: "BridgeMint"
+  ): TypedContractEvent<
+    BridgeMintEvent.InputTuple,
+    BridgeMintEvent.OutputTuple,
+    BridgeMintEvent.OutputObject
+  >;
   getEvent(
     key: "BridgedTokenBeaconUpdated"
   ): TypedContractEvent<
@@ -356,11 +744,46 @@ export interface IL2NativeTokenVault extends BaseContract {
     FinalizeDepositEvent.OutputObject
   >;
   getEvent(
+    key: "Initialized"
+  ): TypedContractEvent<
+    InitializedEvent.InputTuple,
+    InitializedEvent.OutputTuple,
+    InitializedEvent.OutputObject
+  >;
+  getEvent(
     key: "L2TokenBeaconUpdated"
   ): TypedContractEvent<
     L2TokenBeaconUpdatedEvent.InputTuple,
     L2TokenBeaconUpdatedEvent.OutputTuple,
     L2TokenBeaconUpdatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferStarted"
+  ): TypedContractEvent<
+    OwnershipTransferStartedEvent.InputTuple,
+    OwnershipTransferStartedEvent.OutputTuple,
+    OwnershipTransferStartedEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferred"
+  ): TypedContractEvent<
+    OwnershipTransferredEvent.InputTuple,
+    OwnershipTransferredEvent.OutputTuple,
+    OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "Paused"
+  ): TypedContractEvent<
+    PausedEvent.InputTuple,
+    PausedEvent.OutputTuple,
+    PausedEvent.OutputObject
+  >;
+  getEvent(
+    key: "Unpaused"
+  ): TypedContractEvent<
+    UnpausedEvent.InputTuple,
+    UnpausedEvent.OutputTuple,
+    UnpausedEvent.OutputObject
   >;
   getEvent(
     key: "WithdrawalInitiated"
@@ -371,6 +794,28 @@ export interface IL2NativeTokenVault extends BaseContract {
   >;
 
   filters: {
+    "BridgeBurn(uint256,bytes32,address,address,uint256)": TypedContractEvent<
+      BridgeBurnEvent.InputTuple,
+      BridgeBurnEvent.OutputTuple,
+      BridgeBurnEvent.OutputObject
+    >;
+    BridgeBurn: TypedContractEvent<
+      BridgeBurnEvent.InputTuple,
+      BridgeBurnEvent.OutputTuple,
+      BridgeBurnEvent.OutputObject
+    >;
+
+    "BridgeMint(uint256,bytes32,address,uint256)": TypedContractEvent<
+      BridgeMintEvent.InputTuple,
+      BridgeMintEvent.OutputTuple,
+      BridgeMintEvent.OutputObject
+    >;
+    BridgeMint: TypedContractEvent<
+      BridgeMintEvent.InputTuple,
+      BridgeMintEvent.OutputTuple,
+      BridgeMintEvent.OutputObject
+    >;
+
     "BridgedTokenBeaconUpdated(address,bytes32)": TypedContractEvent<
       BridgedTokenBeaconUpdatedEvent.InputTuple,
       BridgedTokenBeaconUpdatedEvent.OutputTuple,
@@ -393,6 +838,17 @@ export interface IL2NativeTokenVault extends BaseContract {
       FinalizeDepositEvent.OutputObject
     >;
 
+    "Initialized(uint8)": TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+    Initialized: TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+
     "L2TokenBeaconUpdated(address,bytes32)": TypedContractEvent<
       L2TokenBeaconUpdatedEvent.InputTuple,
       L2TokenBeaconUpdatedEvent.OutputTuple,
@@ -402,6 +858,50 @@ export interface IL2NativeTokenVault extends BaseContract {
       L2TokenBeaconUpdatedEvent.InputTuple,
       L2TokenBeaconUpdatedEvent.OutputTuple,
       L2TokenBeaconUpdatedEvent.OutputObject
+    >;
+
+    "OwnershipTransferStarted(address,address)": TypedContractEvent<
+      OwnershipTransferStartedEvent.InputTuple,
+      OwnershipTransferStartedEvent.OutputTuple,
+      OwnershipTransferStartedEvent.OutputObject
+    >;
+    OwnershipTransferStarted: TypedContractEvent<
+      OwnershipTransferStartedEvent.InputTuple,
+      OwnershipTransferStartedEvent.OutputTuple,
+      OwnershipTransferStartedEvent.OutputObject
+    >;
+
+    "OwnershipTransferred(address,address)": TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+    OwnershipTransferred: TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+
+    "Paused(address)": TypedContractEvent<
+      PausedEvent.InputTuple,
+      PausedEvent.OutputTuple,
+      PausedEvent.OutputObject
+    >;
+    Paused: TypedContractEvent<
+      PausedEvent.InputTuple,
+      PausedEvent.OutputTuple,
+      PausedEvent.OutputObject
+    >;
+
+    "Unpaused(address)": TypedContractEvent<
+      UnpausedEvent.InputTuple,
+      UnpausedEvent.OutputTuple,
+      UnpausedEvent.OutputObject
+    >;
+    Unpaused: TypedContractEvent<
+      UnpausedEvent.InputTuple,
+      UnpausedEvent.OutputTuple,
+      UnpausedEvent.OutputObject
     >;
 
     "WithdrawalInitiated(address,address,address,uint256)": TypedContractEvent<

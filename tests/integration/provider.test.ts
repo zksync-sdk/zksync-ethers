@@ -19,12 +19,10 @@ describe('Provider', () => {
   const wallet = new Wallet(PRIVATE_KEY1, provider);
   const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
   let receipt: types.TransactionReceipt;
-  let baseToken: string;
 
   before('setup', async function () {
     this.timeout(25_000);
 
-    baseToken = await provider.getBaseTokenContractAddress();
     const tx = await wallet.transfer({
       token: utils.LEGACY_ETH_ADDRESS,
       to: ADDRESS2,
@@ -139,14 +137,6 @@ describe('Provider', () => {
     it('should return confirmed tokens', async () => {
       const result = await provider.getConfirmedTokens();
       expect(result).to.have.lengthOf(1);
-    });
-  });
-
-  describe('#getAllAccountBalances()', () => {
-    it('should return the all balances of the account at `address`', async () => {
-      const result = await provider.getAllAccountBalances(ADDRESS1);
-      const expected = IS_ETH_BASED ? 2 : 3;
-      expect(Object.keys(result)).to.have.lengthOf(expected);
     });
   });
 
@@ -290,11 +280,6 @@ describe('Provider', () => {
   });
 
   describe('#l2TokenAddress()', () => {
-    it('should return the L2 base address', async () => {
-      const result = await provider.l2TokenAddress(baseToken);
-      expect(result).to.be.equal(utils.L2_BASE_TOKEN_ADDRESS);
-    });
-
     it('should return the L2 ETH address', async () => {
       if (!IS_ETH_BASED) {
         const result = await provider.l2TokenAddress(utils.LEGACY_ETH_ADDRESS);
@@ -973,17 +958,6 @@ describe('Provider', () => {
         const result = await provider.estimateDefaultBridgeDepositL2Gas(
           ethProvider,
           utils.LEGACY_ETH_ADDRESS,
-          ethers.parseEther('1'),
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-
-      it('should return estimation for base token', async () => {
-        const result = await provider.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          await provider.getBaseTokenContractAddress(),
           ethers.parseEther('1'),
           ADDRESS2,
           ADDRESS1

@@ -178,14 +178,6 @@ describe('Wallet', () => {
     });
   });
 
-  describe('#getAllBalances()', () => {
-    it('should return the all balances', async () => {
-      const result = await wallet.getAllBalances();
-      const expected = IS_ETH_BASED ? 2 : 3;
-      expect(Object.keys(result)).to.have.lengthOf(expected);
-    });
-  });
-
   describe('#getL2BridgeContracts()', () => {
     it('should return a L2 bridge contracts', async () => {
       const result = await wallet.getL2BridgeContracts();

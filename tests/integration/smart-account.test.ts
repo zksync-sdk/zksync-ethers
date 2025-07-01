@@ -119,14 +119,6 @@ describe('SmartAccount', async () => {
     });
   });
 
-  describe('#getAllBalances()', () => {
-    it('should return all balances', async () => {
-      const result = await account.getAllBalances();
-      const expected = IS_ETH_BASED ? 2 : 3;
-      expect(Object.keys(result)).to.have.lengthOf(expected);
-    });
-  });
-
   describe('#getDeploymentNonce()', () => {
     it('should return the deployment nonce', async () => {
       const result = await account.getDeploymentNonce();

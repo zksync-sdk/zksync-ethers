@@ -56,6 +56,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "L1_CHAIN_ID",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "L1_NULLIFIER",
     outputs: [
       {
@@ -107,19 +120,23 @@ const _abi = [
         type: "uint256",
       },
       {
+        internalType: "bytes32",
+        name: "_assetId",
+        type: "bytes32",
+      },
+      {
         internalType: "address",
-        name: "_tokenAddress",
+        name: "_originalCaller",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_assetHandlerAddressOnCounterpart",
         type: "address",
       },
     ],
-    name: "calculateAssetId",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
+    name: "bridgeCheckCounterpartAddress",
+    outputs: [],
     stateMutability: "view",
     type: "function",
   },
@@ -169,6 +186,25 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_nativeToken",
+        type: "address",
+      },
+    ],
+    name: "ensureTokenIsRegistered",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -251,6 +287,24 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes",
+        name: "_burnData",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes32",
+        name: "_expectedAssetId",
+        type: "bytes32",
+      },
+    ],
+    name: "tryRegisterTokenFromBurnData",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ] as const;

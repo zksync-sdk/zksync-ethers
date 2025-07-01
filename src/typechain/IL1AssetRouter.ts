@@ -49,46 +49,33 @@ export interface IL1AssetRouterInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "BRIDGE_HUB"
-      | "ERA_CHAIN_ID"
-      | "L1_CHAIN_ID"
       | "L1_NULLIFIER"
       | "L1_WETH_TOKEN"
-      | "acceptOwnership"
-      | "assetDeploymentTracker"
       | "assetHandlerAddress"
       | "bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes)"
       | "bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes,bytes32,uint256,uint256,uint16,bytes32[])"
       | "bridgehubConfirmL2Transaction"
       | "bridgehubDeposit"
       | "bridgehubDepositBaseToken"
-      | "claimFailedDeposit"
       | "depositLegacyErc20Bridge"
       | "finalizeDeposit"
       | "finalizeWithdrawal"
       | "getDepositCalldata"
-      | "initialize"
       | "isWithdrawalFinalized"
-      | "legacyBridge"
+      | "l2BridgeAddress"
       | "nativeTokenVault"
-      | "owner"
-      | "pause"
-      | "paused"
-      | "pendingOwner"
-      | "renounceOwnership"
       | "setAssetDeploymentTracker"
       | "setAssetHandlerAddressThisChain"
       | "setL1Erc20Bridge"
       | "setNativeTokenVault"
       | "transferFundsToNTV"
-      | "transferOwnership"
-      | "unpause"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "AssetDeploymentTrackerRegistered"
       | "AssetDeploymentTrackerSet"
       | "AssetHandlerRegistered"
-      | "AssetHandlerRegisteredInitial"
       | "BridgehubDepositBaseTokenInitiated"
       | "BridgehubDepositFinalized"
       | "BridgehubDepositInitiated"
@@ -96,24 +83,11 @@ export interface IL1AssetRouterInterface extends Interface {
       | "BridgehubWithdrawalInitiated"
       | "ClaimedFailedDepositAssetRouter"
       | "DepositFinalizedAssetRouter"
-      | "Initialized"
       | "LegacyDepositInitiated"
-      | "OwnershipTransferStarted"
-      | "OwnershipTransferred"
-      | "Paused"
-      | "Unpaused"
   ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "BRIDGE_HUB",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ERA_CHAIN_ID",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "L1_CHAIN_ID",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -123,14 +97,6 @@ export interface IL1AssetRouterInterface extends Interface {
   encodeFunctionData(
     functionFragment: "L1_WETH_TOKEN",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "acceptOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "assetDeploymentTracker",
-    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "assetHandlerAddress",
@@ -167,20 +133,6 @@ export interface IL1AssetRouterInterface extends Interface {
     values: [BigNumberish, BytesLike, AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "claimFailedDeposit",
-    values: [
-      BigNumberish,
-      AddressLike,
-      AddressLike,
-      BigNumberish,
-      BytesLike,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BytesLike[]
-    ]
-  ): string;
-  encodeFunctionData(
     functionFragment: "depositLegacyErc20Bridge",
     values: [
       AddressLike,
@@ -212,30 +164,15 @@ export interface IL1AssetRouterInterface extends Interface {
     values: [AddressLike, BytesLike, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "isWithdrawalFinalized",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "legacyBridge",
-    values?: undefined
+    functionFragment: "l2BridgeAddress",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "nativeTokenVault",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(functionFragment: "pause", values?: undefined): string;
-  encodeFunctionData(functionFragment: "paused", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "pendingOwner",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -258,35 +195,14 @@ export interface IL1AssetRouterInterface extends Interface {
     functionFragment: "transferFundsToNTV",
     values: [BytesLike, BigNumberish, AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
 
   decodeFunctionResult(functionFragment: "BRIDGE_HUB", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "ERA_CHAIN_ID",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "L1_CHAIN_ID",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "L1_NULLIFIER",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "L1_WETH_TOKEN",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "acceptOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "assetDeploymentTracker",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -314,10 +230,6 @@ export interface IL1AssetRouterInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "claimFailedDeposit",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "depositLegacyErc20Bridge",
     data: BytesLike
   ): Result;
@@ -333,28 +245,16 @@ export interface IL1AssetRouterInterface extends Interface {
     functionFragment: "getDepositCalldata",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isWithdrawalFinalized",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "legacyBridge",
+    functionFragment: "l2BridgeAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "nativeTokenVault",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "pendingOwner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -377,11 +277,28 @@ export interface IL1AssetRouterInterface extends Interface {
     functionFragment: "transferFundsToNTV",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
+}
+
+export namespace AssetDeploymentTrackerRegisteredEvent {
+  export type InputTuple = [
+    assetId: BytesLike,
+    additionalData: BytesLike,
+    assetDeploymentTracker: AddressLike
+  ];
+  export type OutputTuple = [
+    assetId: string,
+    additionalData: string,
+    assetDeploymentTracker: string
+  ];
+  export interface OutputObject {
+    assetId: string;
+    additionalData: string;
+    assetDeploymentTracker: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace AssetDeploymentTrackerSetEvent {
@@ -407,36 +324,14 @@ export namespace AssetDeploymentTrackerSetEvent {
 }
 
 export namespace AssetHandlerRegisteredEvent {
-  export type InputTuple = [assetId: BytesLike, _assetAddress: AddressLike];
-  export type OutputTuple = [assetId: string, _assetAddress: string];
-  export interface OutputObject {
-    assetId: string;
-    _assetAddress: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace AssetHandlerRegisteredInitialEvent {
   export type InputTuple = [
     assetId: BytesLike,
-    assetHandlerAddress: AddressLike,
-    additionalData: BytesLike,
-    assetDeploymentTracker: AddressLike
+    _assetHandlerAddress: AddressLike
   ];
-  export type OutputTuple = [
-    assetId: string,
-    assetHandlerAddress: string,
-    additionalData: string,
-    assetDeploymentTracker: string
-  ];
+  export type OutputTuple = [assetId: string, _assetHandlerAddress: string];
   export interface OutputObject {
     assetId: string;
-    assetHandlerAddress: string;
-    additionalData: string;
-    assetDeploymentTracker: string;
+    _assetHandlerAddress: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -600,25 +495,13 @@ export namespace DepositFinalizedAssetRouterEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace InitializedEvent {
-  export type InputTuple = [version: BigNumberish];
-  export type OutputTuple = [version: bigint];
-  export interface OutputObject {
-    version: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
 export namespace LegacyDepositInitiatedEvent {
   export type InputTuple = [
     chainId: BigNumberish,
     l2DepositTxHash: BytesLike,
     from: AddressLike,
     to: AddressLike,
-    l1Asset: AddressLike,
+    l1Token: AddressLike,
     amount: BigNumberish
   ];
   export type OutputTuple = [
@@ -626,7 +509,7 @@ export namespace LegacyDepositInitiatedEvent {
     l2DepositTxHash: string,
     from: string,
     to: string,
-    l1Asset: string,
+    l1Token: string,
     amount: bigint
   ];
   export interface OutputObject {
@@ -634,58 +517,8 @@ export namespace LegacyDepositInitiatedEvent {
     l2DepositTxHash: string;
     from: string;
     to: string;
-    l1Asset: string;
+    l1Token: string;
     amount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace OwnershipTransferStartedEvent {
-  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
-  export type OutputTuple = [previousOwner: string, newOwner: string];
-  export interface OutputObject {
-    previousOwner: string;
-    newOwner: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace OwnershipTransferredEvent {
-  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
-  export type OutputTuple = [previousOwner: string, newOwner: string];
-  export interface OutputObject {
-    previousOwner: string;
-    newOwner: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace PausedEvent {
-  export type InputTuple = [account: AddressLike];
-  export type OutputTuple = [account: string];
-  export interface OutputObject {
-    account: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace UnpausedEvent {
-  export type InputTuple = [account: AddressLike];
-  export type OutputTuple = [account: string];
-  export interface OutputObject {
-    account: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -738,24 +571,12 @@ export interface IL1AssetRouter extends BaseContract {
 
   BRIDGE_HUB: TypedContractMethod<[], [string], "view">;
 
-  ERA_CHAIN_ID: TypedContractMethod<[], [bigint], "view">;
-
-  L1_CHAIN_ID: TypedContractMethod<[], [bigint], "view">;
-
   L1_NULLIFIER: TypedContractMethod<[], [string], "view">;
 
   L1_WETH_TOKEN: TypedContractMethod<[], [string], "view">;
 
-  acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
-
-  assetDeploymentTracker: TypedContractMethod<
-    [assetId: BytesLike],
-    [string],
-    "view"
-  >;
-
   assetHandlerAddress: TypedContractMethod<
-    [assetId: BytesLike],
+    [_assetId: BytesLike],
     [string],
     "view"
   >;
@@ -815,22 +636,6 @@ export interface IL1AssetRouter extends BaseContract {
     "payable"
   >;
 
-  claimFailedDeposit: TypedContractMethod<
-    [
-      _chainId: BigNumberish,
-      _depositSender: AddressLike,
-      _l1Token: AddressLike,
-      _amount: BigNumberish,
-      _l2TxHash: BytesLike,
-      _l2BatchNumber: BigNumberish,
-      _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBatch: BigNumberish,
-      _merkleProof: BytesLike[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-
   depositLegacyErc20Bridge: TypedContractMethod<
     [
       _originalCaller: AddressLike,
@@ -848,7 +653,7 @@ export interface IL1AssetRouter extends BaseContract {
   finalizeDeposit: TypedContractMethod<
     [_chainId: BigNumberish, _assetId: BytesLike, _transferData: BytesLike],
     [void],
-    "nonpayable"
+    "payable"
   >;
 
   finalizeWithdrawal: TypedContractMethod<
@@ -870,8 +675,6 @@ export interface IL1AssetRouter extends BaseContract {
     "view"
   >;
 
-  initialize: TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
-
   isWithdrawalFinalized: TypedContractMethod<
     [
       _chainId: BigNumberish,
@@ -882,19 +685,13 @@ export interface IL1AssetRouter extends BaseContract {
     "view"
   >;
 
-  legacyBridge: TypedContractMethod<[], [string], "view">;
+  l2BridgeAddress: TypedContractMethod<
+    [_chainId: BigNumberish],
+    [string],
+    "view"
+  >;
 
   nativeTokenVault: TypedContractMethod<[], [string], "view">;
-
-  owner: TypedContractMethod<[], [string], "view">;
-
-  pause: TypedContractMethod<[], [void], "nonpayable">;
-
-  paused: TypedContractMethod<[], [boolean], "view">;
-
-  pendingOwner: TypedContractMethod<[], [string], "view">;
-
-  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   setAssetDeploymentTracker: TypedContractMethod<
     [_assetRegistrationData: BytesLike, _assetDeploymentTracker: AddressLike],
@@ -926,14 +723,6 @@ export interface IL1AssetRouter extends BaseContract {
     "nonpayable"
   >;
 
-  transferOwnership: TypedContractMethod<
-    [newOwner: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-
-  unpause: TypedContractMethod<[], [void], "nonpayable">;
-
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -942,26 +731,14 @@ export interface IL1AssetRouter extends BaseContract {
     nameOrSignature: "BRIDGE_HUB"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "ERA_CHAIN_ID"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "L1_CHAIN_ID"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "L1_NULLIFIER"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "L1_WETH_TOKEN"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "acceptOwnership"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "assetDeploymentTracker"
-  ): TypedContractMethod<[assetId: BytesLike], [string], "view">;
-  getFunction(
     nameOrSignature: "assetHandlerAddress"
-  ): TypedContractMethod<[assetId: BytesLike], [string], "view">;
+  ): TypedContractMethod<[_assetId: BytesLike], [string], "view">;
   getFunction(
     nameOrSignature: "bridgeRecoverFailedTransfer(uint256,address,bytes32,bytes)"
   ): TypedContractMethod<
@@ -1023,23 +800,6 @@ export interface IL1AssetRouter extends BaseContract {
     "payable"
   >;
   getFunction(
-    nameOrSignature: "claimFailedDeposit"
-  ): TypedContractMethod<
-    [
-      _chainId: BigNumberish,
-      _depositSender: AddressLike,
-      _l1Token: AddressLike,
-      _amount: BigNumberish,
-      _l2TxHash: BytesLike,
-      _l2BatchNumber: BigNumberish,
-      _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBatch: BigNumberish,
-      _merkleProof: BytesLike[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
     nameOrSignature: "depositLegacyErc20Bridge"
   ): TypedContractMethod<
     [
@@ -1059,7 +819,7 @@ export interface IL1AssetRouter extends BaseContract {
   ): TypedContractMethod<
     [_chainId: BigNumberish, _assetId: BytesLike, _transferData: BytesLike],
     [void],
-    "nonpayable"
+    "payable"
   >;
   getFunction(
     nameOrSignature: "finalizeWithdrawal"
@@ -1083,9 +843,6 @@ export interface IL1AssetRouter extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "initialize"
-  ): TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
-  getFunction(
     nameOrSignature: "isWithdrawalFinalized"
   ): TypedContractMethod<
     [
@@ -1097,26 +854,11 @@ export interface IL1AssetRouter extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "legacyBridge"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: "l2BridgeAddress"
+  ): TypedContractMethod<[_chainId: BigNumberish], [string], "view">;
   getFunction(
     nameOrSignature: "nativeTokenVault"
   ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "owner"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "pause"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "paused"
-  ): TypedContractMethod<[], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "pendingOwner"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "renounceOwnership"
-  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "setAssetDeploymentTracker"
   ): TypedContractMethod<
@@ -1148,13 +890,14 @@ export interface IL1AssetRouter extends BaseContract {
     [boolean],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "transferOwnership"
-  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "unpause"
-  ): TypedContractMethod<[], [void], "nonpayable">;
 
+  getEvent(
+    key: "AssetDeploymentTrackerRegistered"
+  ): TypedContractEvent<
+    AssetDeploymentTrackerRegisteredEvent.InputTuple,
+    AssetDeploymentTrackerRegisteredEvent.OutputTuple,
+    AssetDeploymentTrackerRegisteredEvent.OutputObject
+  >;
   getEvent(
     key: "AssetDeploymentTrackerSet"
   ): TypedContractEvent<
@@ -1168,13 +911,6 @@ export interface IL1AssetRouter extends BaseContract {
     AssetHandlerRegisteredEvent.InputTuple,
     AssetHandlerRegisteredEvent.OutputTuple,
     AssetHandlerRegisteredEvent.OutputObject
-  >;
-  getEvent(
-    key: "AssetHandlerRegisteredInitial"
-  ): TypedContractEvent<
-    AssetHandlerRegisteredInitialEvent.InputTuple,
-    AssetHandlerRegisteredInitialEvent.OutputTuple,
-    AssetHandlerRegisteredInitialEvent.OutputObject
   >;
   getEvent(
     key: "BridgehubDepositBaseTokenInitiated"
@@ -1226,49 +962,25 @@ export interface IL1AssetRouter extends BaseContract {
     DepositFinalizedAssetRouterEvent.OutputObject
   >;
   getEvent(
-    key: "Initialized"
-  ): TypedContractEvent<
-    InitializedEvent.InputTuple,
-    InitializedEvent.OutputTuple,
-    InitializedEvent.OutputObject
-  >;
-  getEvent(
     key: "LegacyDepositInitiated"
   ): TypedContractEvent<
     LegacyDepositInitiatedEvent.InputTuple,
     LegacyDepositInitiatedEvent.OutputTuple,
     LegacyDepositInitiatedEvent.OutputObject
   >;
-  getEvent(
-    key: "OwnershipTransferStarted"
-  ): TypedContractEvent<
-    OwnershipTransferStartedEvent.InputTuple,
-    OwnershipTransferStartedEvent.OutputTuple,
-    OwnershipTransferStartedEvent.OutputObject
-  >;
-  getEvent(
-    key: "OwnershipTransferred"
-  ): TypedContractEvent<
-    OwnershipTransferredEvent.InputTuple,
-    OwnershipTransferredEvent.OutputTuple,
-    OwnershipTransferredEvent.OutputObject
-  >;
-  getEvent(
-    key: "Paused"
-  ): TypedContractEvent<
-    PausedEvent.InputTuple,
-    PausedEvent.OutputTuple,
-    PausedEvent.OutputObject
-  >;
-  getEvent(
-    key: "Unpaused"
-  ): TypedContractEvent<
-    UnpausedEvent.InputTuple,
-    UnpausedEvent.OutputTuple,
-    UnpausedEvent.OutputObject
-  >;
 
   filters: {
+    "AssetDeploymentTrackerRegistered(bytes32,bytes32,address)": TypedContractEvent<
+      AssetDeploymentTrackerRegisteredEvent.InputTuple,
+      AssetDeploymentTrackerRegisteredEvent.OutputTuple,
+      AssetDeploymentTrackerRegisteredEvent.OutputObject
+    >;
+    AssetDeploymentTrackerRegistered: TypedContractEvent<
+      AssetDeploymentTrackerRegisteredEvent.InputTuple,
+      AssetDeploymentTrackerRegisteredEvent.OutputTuple,
+      AssetDeploymentTrackerRegisteredEvent.OutputObject
+    >;
+
     "AssetDeploymentTrackerSet(bytes32,address,bytes32)": TypedContractEvent<
       AssetDeploymentTrackerSetEvent.InputTuple,
       AssetDeploymentTrackerSetEvent.OutputTuple,
@@ -1289,17 +1001,6 @@ export interface IL1AssetRouter extends BaseContract {
       AssetHandlerRegisteredEvent.InputTuple,
       AssetHandlerRegisteredEvent.OutputTuple,
       AssetHandlerRegisteredEvent.OutputObject
-    >;
-
-    "AssetHandlerRegisteredInitial(bytes32,address,bytes32,address)": TypedContractEvent<
-      AssetHandlerRegisteredInitialEvent.InputTuple,
-      AssetHandlerRegisteredInitialEvent.OutputTuple,
-      AssetHandlerRegisteredInitialEvent.OutputObject
-    >;
-    AssetHandlerRegisteredInitial: TypedContractEvent<
-      AssetHandlerRegisteredInitialEvent.InputTuple,
-      AssetHandlerRegisteredInitialEvent.OutputTuple,
-      AssetHandlerRegisteredInitialEvent.OutputObject
     >;
 
     "BridgehubDepositBaseTokenInitiated(uint256,address,bytes32,uint256)": TypedContractEvent<
@@ -1379,17 +1080,6 @@ export interface IL1AssetRouter extends BaseContract {
       DepositFinalizedAssetRouterEvent.OutputObject
     >;
 
-    "Initialized(uint8)": TypedContractEvent<
-      InitializedEvent.InputTuple,
-      InitializedEvent.OutputTuple,
-      InitializedEvent.OutputObject
-    >;
-    Initialized: TypedContractEvent<
-      InitializedEvent.InputTuple,
-      InitializedEvent.OutputTuple,
-      InitializedEvent.OutputObject
-    >;
-
     "LegacyDepositInitiated(uint256,bytes32,address,address,address,uint256)": TypedContractEvent<
       LegacyDepositInitiatedEvent.InputTuple,
       LegacyDepositInitiatedEvent.OutputTuple,
@@ -1399,50 +1089,6 @@ export interface IL1AssetRouter extends BaseContract {
       LegacyDepositInitiatedEvent.InputTuple,
       LegacyDepositInitiatedEvent.OutputTuple,
       LegacyDepositInitiatedEvent.OutputObject
-    >;
-
-    "OwnershipTransferStarted(address,address)": TypedContractEvent<
-      OwnershipTransferStartedEvent.InputTuple,
-      OwnershipTransferStartedEvent.OutputTuple,
-      OwnershipTransferStartedEvent.OutputObject
-    >;
-    OwnershipTransferStarted: TypedContractEvent<
-      OwnershipTransferStartedEvent.InputTuple,
-      OwnershipTransferStartedEvent.OutputTuple,
-      OwnershipTransferStartedEvent.OutputObject
-    >;
-
-    "OwnershipTransferred(address,address)": TypedContractEvent<
-      OwnershipTransferredEvent.InputTuple,
-      OwnershipTransferredEvent.OutputTuple,
-      OwnershipTransferredEvent.OutputObject
-    >;
-    OwnershipTransferred: TypedContractEvent<
-      OwnershipTransferredEvent.InputTuple,
-      OwnershipTransferredEvent.OutputTuple,
-      OwnershipTransferredEvent.OutputObject
-    >;
-
-    "Paused(address)": TypedContractEvent<
-      PausedEvent.InputTuple,
-      PausedEvent.OutputTuple,
-      PausedEvent.OutputObject
-    >;
-    Paused: TypedContractEvent<
-      PausedEvent.InputTuple,
-      PausedEvent.OutputTuple,
-      PausedEvent.OutputObject
-    >;
-
-    "Unpaused(address)": TypedContractEvent<
-      UnpausedEvent.InputTuple,
-      UnpausedEvent.OutputTuple,
-      UnpausedEvent.OutputObject
-    >;
-    Unpaused: TypedContractEvent<
-      UnpausedEvent.InputTuple,
-      UnpausedEvent.OutputTuple,
-      UnpausedEvent.OutputObject
     >;
   };
 }
