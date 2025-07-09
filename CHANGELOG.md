@@ -1,3 +1,15 @@
+# [6.19.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.18.0...v6.19.0) (2025-07-09)
+
+
+### Bug Fixes
+
+* use onchain data instead of RPC endpoints ([673bd25](https://github.com/zksync-sdk/zksync-ethers/commit/673bd250c7da110c719d2863b20933c80891a89e))
+
+
+### Features
+
+* avoid `zks_estimateFee` for populating fee data ([2425081](https://github.com/zksync-sdk/zksync-ethers/commit/24250819f6770cebe05311729e20da219e11c092))
+
 # [6.18.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.17.0...v6.18.0) (2025-06-17)
 
 
