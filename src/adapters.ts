@@ -13,7 +13,6 @@ import {
   checkBaseCost,
   DEFAULT_GAS_PER_PUBDATA_LIMIT,
   estimateCustomBridgeDepositL2Gas,
-  estimateDefaultBridgeDepositL2Gas,
   getERC20DefaultBridgeData,
   isETH,
   L1_MESSENGER_ADDRESS,
@@ -30,6 +29,8 @@ import {
   resolveAssetId,
   encodeNativeTokenVaultTransferData,
   encodeSecondBridgeDataV1,
+  getL2HashFromPriorityOp,
+  sleep,
 } from './utils';
 import {
   IBridgehub,
@@ -66,6 +67,7 @@ import {
   PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
+  TransactionStatus,
 } from './types';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -115,7 +117,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       l1NativeTokenVault: string;
     }> {
       await this._providerL2().getDefaultBridgeAddresses();
-      const addresses = await this._providerL2().contractAddresses();
+      const addresses = this._providerL2().contractAddresses();
       let l1Nullifier: Address;
       let l1NativeTokenVault: Address;
       if (!addresses.l1Nullifier) {
@@ -125,7 +127,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         );
         l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
         l1NativeTokenVault = await l1AssetRouter.nativeTokenVault();
-        await this._providerL2()._setL1NullifierAndNativeTokenVault(
+        this._providerL2()._setL1NullifierAndNativeTokenVault(
           l1Nullifier,
           l1NativeTokenVault
         );
@@ -146,10 +148,23 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     /**
+     * Returns the main ZKsync Era smart contract address.
+     */
+    async getMainContractAddress(): Promise<Address> {
+      if (!this._providerL2().contractAddresses().mainContract) {
+        const chainId = (await this._providerL2().getNetwork()).chainId;
+        const bridgehub = await this.getBridgehubContract();
+        this._providerL2().contractAddresses().mainContract =
+          await bridgehub.getZKChain(chainId);
+      }
+      return this._providerL2().contractAddresses().mainContract!;
+    }
+
+    /**
      * Returns `Contract` wrapper of the ZKsync Era smart contract.
      */
     async getMainContract(): Promise<IZkSyncHyperchain> {
-      const address = await this._providerL2().getMainContractAddress();
+      const address = await this.getMainContractAddress();
       return IZkSyncHyperchain__factory.connect(address, this._signerL1());
     }
 
@@ -171,7 +186,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       weth: IL1ERC20Bridge;
       shared: IL1SharedBridge;
     }> {
-      const addresses = await this._providerL2().getDefaultBridgeAddresses();
+      const addresses = await this.getDefaultBridgeAddresses();
       return {
         erc20: IL1ERC20Bridge__factory.connect(
           addresses.erc20L1,
@@ -230,9 +245,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * Returns the address of the base token on L1.
      */
     async getBaseToken(): Promise<string> {
-      const bridgehub = await this.getBridgehubContract();
-      const chainId = (await this._providerL2().getNetwork()).chainId;
-      return await bridgehub.baseToken(chainId);
+      if (!this._providerL2().contractAddresses().baseToken) {
+        const bridgehub = await this.getBridgehubContract();
+        const chainId = (await this._providerL2().getNetwork()).chainId;
+        this._providerL2().contractAddresses().baseToken =
+          await bridgehub.baseToken(chainId);
+      }
+      return this._providerL2().contractAddresses().baseToken!;
     }
 
     /**
@@ -455,8 +474,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     async getNativeTokenVaultL1(): Promise<IL1NativeTokenVault> {
       // FIXME: maybe makes sense to provide an API to do it in one call
-      const bridgeContracts =
-        await this._providerL2().getDefaultBridgeAddresses();
+      const bridgeContracts = await this.getDefaultBridgeAddresses();
 
       const sharedBridge = bridgeContracts.sharedL1;
       const l1AssetRouter = IL1AssetRouter__factory.connect(
@@ -621,7 +639,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       tx.gasLimit ??= gasLimit;
 
-      return await this._providerL2().getPriorityOpResponse(
+      return await this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(tx)
       );
     }
@@ -733,7 +751,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       tx.gasLimit ??= gasLimit;
 
-      return await this._providerL2().getPriorityOpResponse(
+      return await this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(tx)
       );
     }
@@ -786,7 +804,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       tx.gasLimit ??= gasLimit;
 
-      return await this._providerL2().getPriorityOpResponse(
+      return await this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(tx)
       );
     }
@@ -1314,9 +1332,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (transaction.bridgeAddress) {
         return await this._getL2GasLimitFromCustomBridge(transaction);
       } else {
-        return await estimateDefaultBridgeDepositL2Gas(
+        return await this._providerL2().estimateDefaultBridgeDepositL2Gas(
           this._providerL1(),
-          this._providerL2(),
           transaction.token,
           transaction.amount,
           transaction.to!,
@@ -1687,7 +1704,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @returns A promise that resolves to the address of the L1 Nullifier address
      */
     async getL1NullifierAddress(): Promise<Address> {
-      const addresses = await this._providerL2().getDefaultBridgeAddresses();
+      const addresses = await this.getDefaultBridgeAddresses();
       return await IL1AssetRouter__factory.connect(
         addresses.sharedL1,
         this._signerL1()
@@ -1814,10 +1831,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         throw new Error('L2 bridge address not found!');
       }
 
-      const l1Bridge = IL1SharedBridge__factory.connect(
-        l1BridgeAddress,
-        this._signerL1()
-      );
       const l2Bridge = IL2Bridge__factory.connect(
         l2BridgeAddress,
         this._providerL2()
@@ -1932,7 +1945,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.Overrides;
     }): Promise<PriorityOpResponse> {
       const requestExecuteTx = await this.getRequestExecuteTx(transaction);
-      return this._providerL2().getPriorityOpResponse(
+      return this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(requestExecuteTx)
       );
     }
@@ -2133,6 +2146,54 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         },
         overrides
       );
+    }
+
+    /**
+     * Returns a L2 transaction response from L1 transaction response.
+     *
+     * @param l1TxResponse The L1 transaction response.
+     */
+    async getL2TransactionFromPriorityOp(
+      l1TxResponse: ethers.TransactionResponse
+    ): Promise<TransactionResponse> {
+      const receipt = await l1TxResponse.wait();
+      const l2Hash = getL2HashFromPriorityOp(
+        receipt as ethers.TransactionReceipt,
+        await this.getMainContractAddress()
+      );
+
+      let status = null;
+      do {
+        status = await this._providerL2().getTransactionStatus(l2Hash);
+        await sleep(this._providerL2().pollingInterval);
+      } while (status === TransactionStatus.NotFound);
+
+      return await this._providerL2().getTransaction(l2Hash);
+    }
+
+    /**
+     * Returns a {@link PriorityOpResponse} from L1 transaction response.
+     *
+     * @param l1TxResponse The L1 transaction response.
+     */
+    async getPriorityOpResponse(
+      l1TxResponse: ethers.TransactionResponse
+    ): Promise<PriorityOpResponse> {
+      const l2Response = {...l1TxResponse} as PriorityOpResponse;
+
+      l2Response.waitL1Commit = l1TxResponse.wait.bind(
+        l1TxResponse
+      ) as PriorityOpResponse['waitL1Commit'];
+      l2Response.wait = async () => {
+        const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
+        return await l2Tx.wait();
+      };
+      l2Response.waitFinalize = async () => {
+        const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
+        return await l2Tx.waitFinalize();
+      };
+
+      return l2Response;
     }
   };
 }

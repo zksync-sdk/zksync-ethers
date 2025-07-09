@@ -55,14 +55,6 @@ describe('VoidSigner', () => {
     });
   });
 
-  describe('#getAllBalances()', () => {
-    it('should return all balances', async () => {
-      const result = await signer.getAllBalances();
-      const expected = IS_ETH_BASED ? 2 : 3;
-      expect(Object.keys(result)).to.have.lengthOf(expected);
-    });
-  });
-
   describe('#getL2BridgeContracts()', () => {
     it('should return a L2 bridge contracts', async () => {
       const result = await signer.getL2BridgeContracts();
@@ -364,14 +356,6 @@ describe('L2VoidSigner', () => {
     it('should return the `L2VoidSigner` balance', async () => {
       const result = await signer.getBalance();
       expect(result > 0n).to.be.true;
-    });
-  });
-
-  describe('#getAllBalances()', () => {
-    it('should return all balances', async () => {
-      const result = await signer.getAllBalances();
-      const expected = IS_ETH_BASED ? 2 : 3;
-      expect(Object.keys(result)).to.have.lengthOf(expected);
     });
   });
 
