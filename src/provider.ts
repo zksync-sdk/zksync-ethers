@@ -76,7 +76,7 @@ import {
   encodeNativeTokenVaultAssetId,
   DEFAULT_GAS_PER_PUBDATA_LIMIT,
 } from './utils';
-import {Signer} from './signer';
+import { Signer } from './signer';
 
 import {
   formatLog,
@@ -85,7 +85,8 @@ import {
   formatTransactionReceipt,
   formatFee,
 } from './format';
-import {makeError} from 'ethers';
+import { makeError } from 'ethers';
+import { IBridgeAdapter } from './bridges/usdcBridgeAdapter';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -232,7 +233,7 @@ export function JsonRpcApiProvider<
       } else {
         try {
           const token = IERC20__factory.connect(tokenAddress, this);
-          return await token.balanceOf(address, {blockTag});
+          return await token.balanceOf(address, { blockTag });
         } catch {
           return 0n;
         }
@@ -618,7 +619,7 @@ export function JsonRpcApiProvider<
         start,
         limit,
       ]);
-      return tokens.map(token => ({address: token.l2Address, ...token}));
+      return tokens.map(token => ({ address: token.l2Address, ...token }));
     }
 
     /**
@@ -773,11 +774,11 @@ export function JsonRpcApiProvider<
       from?: Address;
       to?: Address;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       paymasterParams?: PaymasterParams;
-      useLegacyBridge?: boolean;
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
-      const {...tx} = transaction;
+      const { ...tx } = transaction;
       tx.token ??= L2_BASE_TOKEN_ADDRESS;
       if (
         isAddressEq(tx.token, LEGACY_ETH_ADDRESS) ||
@@ -847,34 +848,39 @@ export function JsonRpcApiProvider<
           ? bridgeAddresses.sharedL2
           : L2_ASSET_ROUTER_ADDRESS;
       }
-      // For non L1 native tokens we need to use the AssetRouter.
-      // For L1 native tokens we can use the legacy withdraw method.
-      if (!isTokenL1Native && !tx.useLegacyBridge) {
-        const bridge = await this.connectL2AssetRouter();
-        const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = encodeNativeTokenVaultAssetId(
-          BigInt(chainId),
-          tx.token
-        );
-        const assetData = encodeNativeTokenVaultTransferData(
-          BigInt(tx.amount),
-          tx.to!,
-          tx.token
-        );
 
-        populatedTx = await bridge.withdraw.populateTransaction(
-          assetId,
-          assetData,
-          tx.overrides
-        );
+      if (tx.bridgeAdapter) {
+        populatedTx = await tx.bridgeAdapter.populateWithdrawTransaction(tx);
       } else {
-        const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-        populatedTx = await bridge.withdraw.populateTransaction(
-          tx.to!,
-          tx.token,
-          tx.amount,
-          tx.overrides
-        );
+        // For non L1 native tokens we need to use the AssetRouter.
+        // For L1 native tokens we can use the legacy withdraw method.
+        if (!isTokenL1Native) {
+          const bridge = await this.connectL2AssetRouter();
+          const chainId = Number((await this.getNetwork()).chainId);
+          const assetId = encodeNativeTokenVaultAssetId(
+            BigInt(chainId),
+            tx.token
+          );
+          const assetData = encodeNativeTokenVaultTransferData(
+            BigInt(tx.amount),
+            tx.to!,
+            tx.token
+          );
+
+          populatedTx = await bridge.withdraw.populateTransaction(
+            assetId,
+            assetData,
+            tx.overrides
+          );
+        } else {
+          const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
+          populatedTx = await bridge.withdraw.populateTransaction(
+            tx.to!,
+            tx.token,
+            tx.amount,
+            tx.overrides
+          );
+        }
       }
       if (tx.paymasterParams) {
         return {
@@ -930,7 +936,7 @@ export function JsonRpcApiProvider<
       paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
-      const {...tx} = transaction;
+      const { ...tx } = transaction;
       if (!tx.token) {
         tx.token = L2_BASE_TOKEN_ADDRESS;
       } else if (
@@ -1078,7 +1084,7 @@ export function JsonRpcApiProvider<
     override async broadcastTransaction(
       signedTx: string
     ): Promise<TransactionResponse> {
-      const {blockNumber, hash} = await resolveProperties({
+      const { blockNumber, hash } = await resolveProperties({
         blockNumber: this.getBlockNumber(),
         hash: this._perform({
           method: 'broadcastTransaction',
@@ -1130,7 +1136,7 @@ export function JsonRpcApiProvider<
     async getPriorityOpResponse(
       l1TxResponse: ethers.TransactionResponse
     ): Promise<PriorityOpResponse> {
-      const l2Response = {...l1TxResponse} as PriorityOpResponse;
+      const l2Response = { ...l1TxResponse } as PriorityOpResponse;
 
       l2Response.waitL1Commit = l1TxResponse.wait.bind(
         l1TxResponse
@@ -1174,7 +1180,7 @@ export function JsonRpcApiProvider<
      * @throws {Error} If log proof can not be found.
      */
     async getPriorityOpConfirmation(txHash: string, index = 0) {
-      const {l2ToL1LogIndex, l2ToL1Log, l1BatchTxId} =
+      const { l2ToL1LogIndex, l2ToL1Log, l1BatchTxId } =
         await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
       const proof = await this.getLogProof(txHash, l2ToL1LogIndex);
       return {
@@ -1334,7 +1340,7 @@ export function JsonRpcApiProvider<
         gasPerPubdata: transaction.gasPerPubdataByte,
       };
       if (transaction.factoryDeps) {
-        Object.assign(customData, {factoryDeps: transaction.factoryDeps});
+        Object.assign(customData, { factoryDeps: transaction.factoryDeps });
       }
 
       return await this.estimateGasL1({
@@ -1463,14 +1469,14 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     const isLocalNetwork =
       typeof url === 'string'
         ? url.includes('localhost') ||
-          url.includes('127.0.0.1') ||
-          url.includes('0.0.0.0')
+        url.includes('127.0.0.1') ||
+        url.includes('0.0.0.0')
         : url.url.includes('localhost') ||
-          url.url.includes('127.0.0.1') ||
-          url.url.includes('0.0.0.0');
+        url.url.includes('127.0.0.1') ||
+        url.url.includes('0.0.0.0');
 
     const optionsWithDisabledCache = isLocalNetwork
-      ? {...options, cacheTimeout: -1}
+      ? { ...options, cacheTimeout: -1 }
       : options;
 
     super(url, network, optionsWithDisabledCache);
@@ -2097,8 +2103,8 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
+    bridgeAdapter?: IBridgeAdapter;
     paymasterParams?: PaymasterParams;
-    useLegacyBridge?: boolean;
     overrides?: ethers.Overrides;
   }): Promise<TransactionRequest> {
     return super.getWithdrawTx(transaction);
@@ -2519,11 +2525,11 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   }
 
   override getRpcError(payload: JsonRpcPayload, _error: JsonRpcError): Error {
-    const {error} = _error;
+    const { error } = _error;
     const message = _error.error.message ?? 'Execution reverted';
     const code = _error.error.code ?? 0;
     // @ts-ignore
-    return makeError(message, code, {payload, error});
+    return makeError(message, code, { payload, error });
   }
 
   override async _send(
@@ -2636,18 +2642,18 @@ export class BrowserProvider extends JsonRpcApiProvider(
       method: string,
       params: Array<any> | Record<string, any>
     ) => {
-      const payload = {method, params};
-      this.emit('debug', {action: 'sendEip1193Request', payload});
+      const payload = { method, params };
+      this.emit('debug', { action: 'sendEip1193Request', payload });
       try {
         const result = await ethereum.request(payload);
-        this.emit('debug', {action: 'receiveEip1193Result', result});
+        this.emit('debug', { action: 'receiveEip1193Result', result });
         return result;
       } catch (e: any) {
         const error = new Error(e.message);
         (<any>error).code = e.code;
         (<any>error).data = e.data;
         (<any>error).payload = payload;
-        this.emit('debug', {action: 'receiveEip1193Error', error});
+        this.emit('debug', { action: 'receiveEip1193Error', error });
         throw error;
       }
     };
@@ -3681,12 +3687,12 @@ export class BrowserProvider extends JsonRpcApiProvider(
 
     try {
       const result = await this.#request(payload.method, payload.params || []);
-      return [{id: payload.id, result}];
+      return [{ id: payload.id, result }];
     } catch (e: any) {
       return [
         {
           id: payload.id,
-          error: {code: e.code, data: e.data, message: e.message},
+          error: { code: e.code, data: e.data, message: e.message },
         },
       ];
     }
@@ -3769,7 +3775,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
         await this.#request('eth_requestAccounts', []);
       } catch (error: any) {
         const payload = error.payload;
-        throw this.getRpcError(payload, {id: payload.id, error});
+        throw this.getRpcError(payload, { id: payload.id, error });
       }
     }
 

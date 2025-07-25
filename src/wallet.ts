@@ -1,6 +1,6 @@
-import {EIP712Signer} from './signer';
-import {Provider} from './provider';
-import {EIP712_TX_TYPE, resolveFeeData, serializeEip712} from './utils';
+import { EIP712Signer } from './signer';
+import { Provider } from './provider';
+import { EIP712_TX_TYPE, resolveFeeData, serializeEip712 } from './utils';
 import {
   BigNumberish,
   BlockTag,
@@ -23,7 +23,7 @@ import {
   TransactionRequest,
   TransactionResponse,
 } from './types';
-import {AdapterL1, AdapterL2} from './adapters';
+import { AdapterL1, AdapterL2 } from './adapters';
 import {
   IBridgehub,
   IL1ERC20Bridge,
@@ -741,9 +741,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override async finalizeWithdrawal(
     withdrawalHash: BytesLike,
     index = 0,
-    overrides?: Overrides
+    overrides?: Overrides,
+    bridgeConfig?: {
+      bridgeAddress: Address,
+      bridgeAdapter: IBridgeAdapter
+    }
   ): Promise<ContractTransactionResponse> {
-    return super.finalizeWithdrawal(withdrawalHash, index, overrides);
+    return super.finalizeWithdrawal(withdrawalHash, index, overrides, bridgeConfig);
   }
 
   /**
@@ -832,7 +836,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
     overrides?: Overrides;
-  }): Promise<{token: Address; allowance: BigNumberish}> {
+  }): Promise<{ token: Address; allowance: BigNumberish }> {
     return super.getRequestExecuteAllowanceParams(transaction);
   }
 
@@ -1131,7 +1135,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     to?: Address;
     bridgeAddress?: Address;
     paymasterParams?: PaymasterParams;
-    useLegacyBridge?: boolean;
     overrides?: Overrides;
   }): Promise<TransactionResponse> {
     return super.withdraw(transaction);
@@ -1479,7 +1482,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
       );
     }
-    const {gasLimit, gasPrice, gasPerPubdata} = await resolveFeeData(
+    const { gasLimit, gasPrice, gasPerPubdata } = await resolveFeeData(
       populated,
       this.provider
     );

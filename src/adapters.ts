@@ -1745,14 +1745,18 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async finalizeWithdrawal(
       withdrawalHash: BytesLike,
       index = 0,
-      overrides?: ethers.Overrides & { bridgeAddress?: Address },
+      overrides?: ethers.Overrides,
+      bridgeConfig?: {
+        bridgeAddress: Address,
+        bridgeAdapter: IBridgeAdapter
+      }
     ): Promise<ethers.ContractTransactionResponse> {
       const finalizeWithdrawalParams = await this.getFinalizeWithdrawalParams(
         withdrawalHash,
         index
       );
 
-      const l1Nullifier = await this.getL1Nullifier(overrides?.bridgeAddress);
+      const l1Nullifier = await this.getL1Nullifier();
 
       const finalizeL1DepositParams: FinalizeL1DepositParams = {
         chainId: (await this._providerL2().getNetwork())
@@ -1765,15 +1769,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         message: finalizeWithdrawalParams.message,
         merkleProof: finalizeWithdrawalParams.proof,
       };
-      if (overrides?.bridgeAddress) {
-        return await l1Nullifier.finalizeWithdrawal(
-          (await this._providerL2().getNetwork()).chainId as BigNumberish,
-          finalizeWithdrawalParams.l1BatchNumber as BigNumberish,
-          finalizeWithdrawalParams.l2MessageIndex as BigNumberish,
-          finalizeWithdrawalParams.l2TxNumberInBlock as BigNumberish,
-          finalizeWithdrawalParams.message,
-          finalizeWithdrawalParams.proof,
-          overrides ?? {}
+
+      if (bridgeConfig) {
+        return await bridgeConfig.bridgeAdapter.finalizeDeposit(
+          bridgeConfig.bridgeAddress, finalizeL1DepositParams, overrides
         );
       }
 
@@ -2315,34 +2314,62 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       return customData;
     }
 
-    async getAllowance(
-      address: Address,
+    /**
+     * Returns the amount of approved tokens for a specific L2 bridge.
+     *
+     * @param token The address of the token.
+     * @param [bridgeAddress] The address of the bridge contract to be used.
+     * Defaults to the default L2 shared bridge.
+     * @param [blockTag] The block in which an allowance should be checked.
+     * Defaults to 'committed', i.e., the latest processed block.
+     */
+    async getAllowanceL2(
       token: Address,
+      bridgeAddress?: Address,
+      blockTag?: ethers.BlockTag
     ): Promise<bigint> {
+      if (!bridgeAddress) {
+        const bridgeContracts = await this.getL2BridgeContracts();
+        bridgeAddress = await bridgeContracts.shared.getAddress();
+      }
 
       const erc20contract = IERC20__factory.connect(token, this._providerL2());
       return await erc20contract.allowance(
         await this.getAddress(),
-        address,
+        bridgeAddress,
+        {
+          blockTag,
+        }
       );
     }
 
-    // async approveERC20(
-    //   address: Address,
-    //   token: Address,
-    //   amount: BigNumberish,
-    //   overrides?: ethers.Overrides,
-    // ): Promise<ethers.TransactionResponse> {
-    //   if (isETH(token)) {
-    //     throw new Error(
-    //       "ETH token can't be approved! The address of the token does not exist on L1."
-    //     );
-    //   }
+    /**
+     * Approves token for the specified bridge.
+     *
+     * @param token The L2 address of the token.
+     * @param amount The amount of the token to be approved.
+     * @param [overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
+     * @returns A promise that resolves to the response of the approval transaction.
+     */
+    async approveERC20L2(
+      token: Address,
+      amount: BigNumberish,
+      overrides?: ethers.Overrides & { bridgeAddress?: Address }
+    ): Promise<ethers.TransactionResponse> {
+      overrides ??= {};
+      let bridgeAddress = overrides.bridgeAddress;
+      const erc20contract = IERC20__factory.connect(token, this._signerL2());
 
-    //   overrides ??= {};
-    //   const erc20contract = IERC20__factory.connect(token, this._signerL2());
-    //   return await erc20contract.approve(address, amount, overrides);
-    // }
+      if (!bridgeAddress) {
+        bridgeAddress = await (
+          await this.getL2BridgeContracts()
+        ).shared.getAddress();
+      } else {
+        delete overrides.bridgeAddress;
+      }
+
+      return await erc20contract.approve(bridgeAddress, amount, overrides);
+    }
 
     /**
      * Initiates the withdrawal process which withdraws ETH or any ERC20 token
@@ -2362,29 +2389,30 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       token: Address;
       to?: Address;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
+      approveERC20?: boolean;
       paymasterParams?: PaymasterParams;
-      useLegacyBridge?: boolean;
       overrides?: ethers.Overrides;
       approveOverrides?: ethers.Overrides;
     }): Promise<TransactionResponse> {
-      // if (transaction.bridgeAddress) {
-      //   // Only request the allowance if the current one is not enough.
-      //   const allowance = await this.getAllowance(
-      //     transaction.bridgeAddress,
-      //     transaction.token,
-      //   );
-      //   if (allowance < BigInt(transaction.amount)) {
-      //     const approveTx = await this.approveERC20(
-      //       transaction.bridgeAddress,
-      //       transaction.token,
-      //       transaction.amount,
-      //       {
-      //         ...transaction.approveOverrides,
-      //       }
-      //     );
-      //     await approveTx.wait();
-      //   }
-      // }
+      if (transaction.approveERC20) {
+        // Only request the allowance if the current one is not enough.
+        const allowance = await this.getAllowanceL2(
+          transaction.token,
+          transaction.bridgeAddress,
+        );
+        if (allowance < BigInt(transaction.amount)) {
+          const approveTx = await this.approveERC20L2(
+            transaction.token,
+            transaction.amount,
+            {
+              ...transaction.approveOverrides,
+              bridgeAddress: transaction.bridgeAddress,
+            }
+          );
+          await approveTx.wait();
+        }
+      }
 
       const withdrawTx = await this._providerL2().getWithdrawTx({
         from: await this.getAddress(),
