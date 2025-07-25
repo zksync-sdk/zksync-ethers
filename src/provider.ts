@@ -774,6 +774,7 @@ export function JsonRpcApiProvider<
       to?: Address;
       bridgeAddress?: Address;
       paymasterParams?: PaymasterParams;
+      useLegacyBridge?: boolean;
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
@@ -848,7 +849,7 @@ export function JsonRpcApiProvider<
       }
       // For non L1 native tokens we need to use the AssetRouter.
       // For L1 native tokens we can use the legacy withdraw method.
-      if (!isTokenL1Native) {
+      if (!isTokenL1Native && !tx.useLegacyBridge) {
         const bridge = await this.connectL2AssetRouter();
         const chainId = Number((await this.getNetwork()).chainId);
         const assetId = encodeNativeTokenVaultAssetId(
@@ -2097,6 +2098,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     to?: Address;
     bridgeAddress?: Address;
     paymasterParams?: PaymasterParams;
+    useLegacyBridge?: boolean;
     overrides?: ethers.Overrides;
   }): Promise<TransactionRequest> {
     return super.getWithdrawTx(transaction);

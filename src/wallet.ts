@@ -1128,6 +1128,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     to?: Address;
     bridgeAddress?: Address;
     paymasterParams?: PaymasterParams;
+    useLegacyBridge?: boolean;
     overrides?: Overrides;
   }): Promise<TransactionResponse> {
     return super.withdraw(transaction);
