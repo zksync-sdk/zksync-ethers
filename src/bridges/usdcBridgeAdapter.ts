@@ -7,8 +7,9 @@ import {
 import {
     Address,
 } from '../types';
+import { Wallet } from '../wallet';
 export interface IBridgeAdapter {
-    getSecondBridgeCalldata(transaction: {
+    getSecondBridgeDepositCalldata(transaction: {
         token: Address;
         amount: BigNumberish;
         to?: Address;
@@ -23,14 +24,9 @@ export interface IBridgeAdapter {
 }
 
 export class USDCBridgeAdapter implements IBridgeAdapter {
-    // async getL1Nullifier(bridgeAddress?: Address): Promise<IL1Nullifier> {
-    //     return IL1Nullifier__factory.connect(
-    //         bridgeAddress || (await this.getDefaultBridgeAddresses()).l1Nullifier!,
-    //         this._signerL1()
-    //     );
-    // }
+    constructor(protected readonly wallet: Wallet) { }
 
-    async getSecondBridgeCalldata(transaction: {
+    async getSecondBridgeDepositCalldata(transaction: {
         token: Address;
         amount: BigNumberish;
         to?: Address;
@@ -45,7 +41,7 @@ export class USDCBridgeAdapter implements IBridgeAdapter {
         return AbiCoder.defaultAbiCoder().encode(
             ["address", "uint256", "address"],
             [
-                transaction.token, transaction.amount, transaction.to
+                transaction.token, transaction.amount, transaction.to ?? (await this.wallet.getAddress())
             ]
         );
     }

@@ -7,11 +7,12 @@ export {
   L2VoidSigner,
   L1VoidSigner,
 } from './signer';
-export {Wallet} from './wallet';
+export { Wallet } from './wallet';
 export {
   SmartAccount,
   ECDSASmartAccount,
   MultisigECDSASmartAccount,
 } from './smart-account';
-export {BrowserProvider, Provider} from './provider';
-export {ContractFactory, Contract} from './contract';
+export { BrowserProvider, Provider } from './provider';
+export { ContractFactory, Contract } from './contract';
+export { IBridgeAdapter, USDCBridgeAdapter } from "./bridges/usdcBridgeAdapter";

@@ -32,6 +32,7 @@ import {
   IL2SharedBridge,
   IZkSyncHyperchain,
 } from './typechain';
+import { IBridgeAdapter } from './bridges/usdcBridgeAdapter';
 
 /**
  * A `Wallet` is an extension of {@link ethers.Wallet} with additional features for interacting with ZKsync Era.
@@ -542,6 +543,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     to?: Address;
     operatorTip?: BigNumberish;
     bridgeAddress?: Address;
+    bridgeAdapter?: IBridgeAdapter;
     approveERC20?: boolean;
     approveBaseERC20?: boolean;
     l2GasLimit?: BigNumberish;
@@ -551,6 +553,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     approveOverrides?: Overrides;
     approveBaseOverrides?: Overrides;
     customBridgeData?: BytesLike;
+
   }): Promise<PriorityOpResponse> {
     return super.deposit(transaction);
   }

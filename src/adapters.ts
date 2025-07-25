@@ -69,6 +69,7 @@ import {
   TransactionResponse,
   TransactionStatus,
 } from './types';
+import { IBridgeAdapter } from './bridges/usdcBridgeAdapter';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -530,6 +531,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       approveERC20?: boolean;
       approveBaseERC20?: boolean;
       l2GasLimit?: BigNumberish;
@@ -573,6 +575,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       approveERC20?: boolean;
       approveBaseERC20?: boolean;
       l2GasLimit?: BigNumberish;
@@ -650,6 +653,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       approveERC20?: boolean;
       approveBaseERC20?: boolean;
       l2GasLimit?: BigNumberish;
@@ -706,6 +710,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       approveERC20?: boolean;
       approveBaseERC20?: boolean;
       l2GasLimit?: BigNumberish;
@@ -762,6 +767,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       approveERC20?: boolean;
       approveBaseERC20?: boolean;
       l2GasLimit?: BigNumberish;
@@ -815,6 +821,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       approveERC20?: boolean;
       approveBaseERC20?: boolean;
       l2GasLimit?: BigNumberish;
@@ -955,6 +962,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       customBridgeData?: BytesLike;
@@ -1022,6 +1030,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       customBridgeData?: BytesLike;
@@ -1139,6 +1148,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       customBridgeData?: BytesLike;
@@ -1161,11 +1171,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         gasPerPubdataByte,
       } = tx;
 
-      const secondBridgeCalldata = transaction.customBridgeData ?? (await this._getSecondBridgeCalldata(
-        token,
-        amount,
-        to
-      ));
+      let secondBridgeCalldata: string;
+      if (transaction.bridgeAdapter) {
+        secondBridgeCalldata = await transaction.bridgeAdapter.getSecondBridgeDepositCalldata(transaction);
+      } else {
+        secondBridgeCalldata = await this._getSecondBridgeCalldata(
+          token,
+          amount,
+          to
+        );
+      }
 
       const gasPriceForEstimation =
         overrides.maxFeePerGas || overrides.gasPrice;
@@ -1276,6 +1291,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       customBridgeData?: BytesLike;
@@ -1323,6 +1339,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       customBridgeData?: BytesLike;
@@ -1350,18 +1367,22 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
+      bridgeAdapter?: IBridgeAdapter;
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       customBridgeData?: BytesLike;
       refundRecipient?: Address;
       overrides?: ethers.Overrides;
     }): Promise<BigNumberish> {
-      const customBridgeData =
-        transaction.customBridgeData ??
-        (await getERC20DefaultBridgeData(
-          transaction.token,
-          this._providerL1()
-        ));
+      let customBridgeData = transaction.customBridgeData;
+      if (!customBridgeData) {
+        customBridgeData = transaction.bridgeAdapter ?
+          await transaction.bridgeAdapter.getSecondBridgeDepositCalldata(transaction) :
+          await getERC20DefaultBridgeData(
+            transaction.token,
+            this._providerL1()
+          );
+      }
       const bridge = IL1Bridge__factory.connect(
         transaction.bridgeAddress!,
         this._signerL1()
@@ -2306,22 +2327,22 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
-    async approveERC20(
-      address: Address,
-      token: Address,
-      amount: BigNumberish,
-      overrides?: ethers.Overrides,
-    ): Promise<ethers.TransactionResponse> {
-      if (isETH(token)) {
-        throw new Error(
-          "ETH token can't be approved! The address of the token does not exist on L1."
-        );
-      }
+    // async approveERC20(
+    //   address: Address,
+    //   token: Address,
+    //   amount: BigNumberish,
+    //   overrides?: ethers.Overrides,
+    // ): Promise<ethers.TransactionResponse> {
+    //   if (isETH(token)) {
+    //     throw new Error(
+    //       "ETH token can't be approved! The address of the token does not exist on L1."
+    //     );
+    //   }
 
-      overrides ??= {};
-      const erc20contract = IERC20__factory.connect(token, this._signerL2());
-      return await erc20contract.approve(address, amount, overrides);
-    }
+    //   overrides ??= {};
+    //   const erc20contract = IERC20__factory.connect(token, this._signerL2());
+    //   return await erc20contract.approve(address, amount, overrides);
+    // }
 
     /**
      * Initiates the withdrawal process which withdraws ETH or any ERC20 token
@@ -2346,24 +2367,24 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.Overrides;
       approveOverrides?: ethers.Overrides;
     }): Promise<TransactionResponse> {
-      if (transaction.bridgeAddress) {
-        // Only request the allowance if the current one is not enough.
-        const allowance = await this.getAllowance(
-          transaction.bridgeAddress,
-          transaction.token,
-        );
-        if (allowance < BigInt(transaction.amount)) {
-          const approveTx = await this.approveERC20(
-            transaction.bridgeAddress,
-            transaction.token,
-            transaction.amount,
-            {
-              ...transaction.approveOverrides,
-            }
-          );
-          await approveTx.wait();
-        }
-      }
+      // if (transaction.bridgeAddress) {
+      //   // Only request the allowance if the current one is not enough.
+      //   const allowance = await this.getAllowance(
+      //     transaction.bridgeAddress,
+      //     transaction.token,
+      //   );
+      //   if (allowance < BigInt(transaction.amount)) {
+      //     const approveTx = await this.approveERC20(
+      //       transaction.bridgeAddress,
+      //       transaction.token,
+      //       transaction.amount,
+      //       {
+      //         ...transaction.approveOverrides,
+      //       }
+      //     );
+      //     await approveTx.wait();
+      //   }
+      // }
 
       const withdrawTx = await this._providerL2().getWithdrawTx({
         from: await this.getAddress(),
