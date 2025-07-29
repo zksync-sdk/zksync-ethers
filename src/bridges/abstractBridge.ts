@@ -57,7 +57,7 @@ export abstract class AbstractBridge {
    * Returns the amount of approved tokens for a specific L2 bridge.
    *
    * @param token The address of the token.
-   * @param [bridgeAddress] The address of the bridge contract to be used.
+   * @param bridgeAddress The address of the bridge contract to be used.
    * @param [blockTag] The block in which an allowance should be checked.
    * Defaults to 'committed', i.e., the latest processed block.
    */
@@ -83,7 +83,7 @@ export abstract class AbstractBridge {
    * Approves token for the specified bridge.
    *
    * @param token The L2 address of the token.
-   * @param [bridgeAddress] The address of the bridge contract to be used.
+   * @param bridgeAddress The address of the bridge contract to be used.
    * @param amount The amount of the token to be approved.
    * @param [overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
    * @returns A promise that resolves to the response of the approval transaction.
@@ -237,7 +237,7 @@ export abstract class AbstractBridge {
    * @param transaction Withdraw transaction.
    */
   protected abstract populateWithdrawTransaction(
-    tx: IWithdrawTransaction
+    transaction: IWithdrawTransaction
   ): Promise<TransactionLike>;
 
   /**
@@ -313,7 +313,9 @@ export abstract class AbstractBridge {
 
   /**
    * Finalizes the L1 deposit.
+   * @param bridgeAddress The address of the bridge contract to use.
    * @param finalizeParams Finalize L1 deposit params.
+   * @param [overrides] Transaction's overrides for the finalization.
    */
   protected abstract finalizeL1Deposit(
     bridgeAddress: Address,
@@ -353,6 +355,41 @@ export abstract class AbstractBridge {
       bridgeAddress,
       finalizeParams,
       overrides
+    );
+  }
+
+  /**
+   * Checks if the withdrawal is finalized.
+   * @param bridgeAddress The address of the bridge contract to use.
+   * @param finalizeParams Params of the L1 finalize.
+   */
+  protected abstract checkIfWithdrawalIsFinalized(
+    bridgeAddress: Address,
+    finalizeParams: FinalizeL1DepositParams
+  ): Promise<boolean>;
+
+  /**
+   * Checks if the withdrawal is finalized.
+   *
+   * @param bridgeAddress The address of the bridge contract to use.
+   * @param withdrawalHash The hash of the withdrawal transaction.
+   * @param [index] The index of the withdrawal.
+   *
+   * @returns A promise that resolves to a boolean indicating whether the withdrawal is finalized.
+   */
+  async isWithdrawalFinalized(
+    bridgeAddress: Address,
+    withdrawalHash: BytesLike,
+    index = 0
+  ): Promise<boolean> {
+    const finalizeParams = await this.wallet.getFinalizeDepositParams(
+      withdrawalHash,
+      index
+    );
+
+    return await this.checkIfWithdrawalIsFinalized(
+      bridgeAddress,
+      finalizeParams
     );
   }
 }

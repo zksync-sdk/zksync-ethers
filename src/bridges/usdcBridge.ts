@@ -108,4 +108,20 @@ export class USDCBridge extends AbstractBridge {
       overrides ?? {}
     );
   }
+
+  protected override async checkIfWithdrawalIsFinalized(
+    bridgeAddress: Address,
+    finalizeParams: FinalizeL1DepositParams
+  ): Promise<boolean> {
+    const bridgeContract = IL1Nullifier__factory.connect(
+      bridgeAddress,
+      this.wallet._signerL1()
+    );
+
+    return await bridgeContract.isWithdrawalFinalized(
+      finalizeParams.chainId,
+      finalizeParams.l2BatchNumber,
+      finalizeParams.l2MessageIndex
+    );
+  }
 }
