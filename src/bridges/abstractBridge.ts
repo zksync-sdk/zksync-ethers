@@ -48,9 +48,9 @@ export interface IWithdrawTransaction {
 }
 
 /**
- * A `Bridge` is an abstract class that provides a base implementation for bridging assets.
+ * `AbstractBridge` is an abstract class that provides a base implementation for bridging assets.
  */
-export abstract class Bridge {
+export abstract class AbstractBridge {
   constructor(protected readonly wallet: Wallet) {}
 
   /**
@@ -122,7 +122,9 @@ export abstract class Bridge {
   ): Promise<void> {}
 
   /**
-   * @example Deposit USDC.
+   * Deposit USDC.
+   *
+   * @example
    *
    * import { Wallet, Provider, types, USDCBridge } from "zksync-ethers";
    * import { ethers } from "ethers";
@@ -250,7 +252,9 @@ export abstract class Bridge {
   ): Promise<void> {}
 
   /**
-   * @example Withdraw USDC.
+   * Withdraw USDC.
+   *
+   * @example
    *
    * import { Wallet, Provider, types, USDCBridge } from "zksync-ethers";
    *
@@ -318,6 +322,8 @@ export abstract class Bridge {
   ): Promise<ContractTransactionResponse>;
 
   /**
+   * Finalizes the withdrawal on L1.
+   *
    * @example
    *
    * import { Wallet, Provider, types, utils } from "zksync-ethers";

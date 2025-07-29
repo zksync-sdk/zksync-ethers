@@ -7,18 +7,22 @@ import {
 import {Address, FinalizeL1DepositParams, TransactionLike} from '../types';
 import {IL1Nullifier__factory} from '../typechain';
 import {Wallet} from '../wallet';
-import {IDepositTransaction, IWithdrawTransaction, Bridge} from './bridge';
+import {
+  IDepositTransaction,
+  IWithdrawTransaction,
+  AbstractBridge,
+} from './abstractBridge';
 
 const L1_BRIDGE_ABI = ['function L1_USDC_TOKEN() view returns (address)'];
 
 const L2_BRIDGE_ABI = ['function L2_USDC_TOKEN() view returns (address)'];
 
 /**
- * `USDCBridge` is an implementation of the Bridge abstract class which provides methods
+ * `USDCBridge` is an implementation of the AbstractBridge class which provides methods
  * for depositing and withdrawing USDC tokens using Custom USDC Bridge that can be found here:
  * https://github.com/matter-labs/usdc-bridge
  */
-export class USDCBridge extends Bridge {
+export class USDCBridge extends AbstractBridge {
   constructor(wallet: Wallet) {
     super(wallet);
   }
