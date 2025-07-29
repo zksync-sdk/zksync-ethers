@@ -15,4 +15,5 @@ export {
 } from './smart-account';
 export {BrowserProvider, Provider} from './provider';
 export {ContractFactory, Contract} from './contract';
+export {Bridge} from './bridges/bridge';
 export {USDCBridge} from './bridges/usdcBridge';

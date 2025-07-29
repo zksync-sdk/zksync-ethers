@@ -2284,63 +2284,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     /**
-     * Returns the amount of approved tokens for a specific L2 bridge.
-     *
-     * @param token The address of the token.
-     * @param [bridgeAddress] The address of the bridge contract to be used.
-     * Defaults to the default L2 shared bridge.
-     * @param [blockTag] The block in which an allowance should be checked.
-     * Defaults to 'committed', i.e., the latest processed block.
-     */
-    async getAllowanceL2(
-      token: Address,
-      bridgeAddress?: Address,
-      blockTag?: ethers.BlockTag
-    ): Promise<bigint> {
-      if (!bridgeAddress) {
-        const bridgeContracts = await this.getL2BridgeContracts();
-        bridgeAddress = await bridgeContracts.shared.getAddress();
-      }
-
-      const erc20contract = IERC20__factory.connect(token, this._providerL2());
-      return await erc20contract.allowance(
-        await this.getAddress(),
-        bridgeAddress,
-        {
-          blockTag,
-        }
-      );
-    }
-
-    /**
-     * Approves token for the specified bridge.
-     *
-     * @param token The L2 address of the token.
-     * @param amount The amount of the token to be approved.
-     * @param [overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
-     * @returns A promise that resolves to the response of the approval transaction.
-     */
-    async approveERC20L2(
-      token: Address,
-      amount: BigNumberish,
-      overrides?: ethers.Overrides & {bridgeAddress?: Address}
-    ): Promise<ethers.TransactionResponse> {
-      overrides ??= {};
-      let bridgeAddress = overrides.bridgeAddress;
-      const erc20contract = IERC20__factory.connect(token, this._signerL2());
-
-      if (!bridgeAddress) {
-        bridgeAddress = await (
-          await this.getL2BridgeContracts()
-        ).shared.getAddress();
-      } else {
-        delete overrides.bridgeAddress;
-      }
-
-      return await erc20contract.approve(bridgeAddress, amount, overrides);
-    }
-
-    /**
      * Initiates the withdrawal process which withdraws ETH or any ERC20 token
      * from the associated account on L2 network to the target account on L1 network.
      *
