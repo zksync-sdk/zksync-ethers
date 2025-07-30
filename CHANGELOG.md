@@ -1,3 +1,17 @@
+# [6.20.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.19.0...v6.20.0) (2025-07-30)
+
+
+### Bug Fixes
+
+* rename Bridge to AbstractBridge ([bd4f8bd](https://github.com/zksync-sdk/zksync-ethers/commit/bd4f8bdca0d58c5dee472f41b9e9a06c397f1e6e))
+
+
+### Features
+
+* add abstract bridge class ([b528ba6](https://github.com/zksync-sdk/zksync-ethers/commit/b528ba6b401d158994798695acbd9ceec8ead859))
+* add isWithdrawalFinalized function ([053bd34](https://github.com/zksync-sdk/zksync-ethers/commit/053bd343a2a3cb0b7c68a2bc44ec7d0b79de34ea))
+* add usdc bridge adapter ([d72208a](https://github.com/zksync-sdk/zksync-ethers/commit/d72208a69bc13cfade7e9722583942a8f8a4b2f1))
+
 # [6.19.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.18.0...v6.19.0) (2025-07-09)
 
 
