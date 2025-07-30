@@ -2340,7 +2340,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
 
 // This method checks if the overrides contain a gasPrice (or maxFeePerGas),
 // if not it will insert the maxFeePerGas
-async function insertGasPrice(
+export async function insertGasPrice(
   l1Provider: ethers.Provider,
   overrides: ethers.Overrides
 ): Promise<void> {
