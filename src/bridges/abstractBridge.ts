@@ -328,17 +328,19 @@ export abstract class AbstractBridge {
    *
    * @example
    *
-   * import { Wallet, Provider, types, utils } from "zksync-ethers";
+   * import { Wallet, Provider, types, USDCBridge } from "zksync-ethers";
    * import { ethers } from "ethers";
    *
    * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   * const USDC_BRIDGE_L1_ADDRESS = "<USDC_BRIDGE_L1_ADDRESS>";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * const ethProvider = ethers.getDefaultProvider("sepolia");
    * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   * const usdcBridge = new USDCBridge(wallet);
    *
-   * const WITHDRAWAL_HASH = "<WITHDRAWAL_TX_HASH>";
-   * const finalizeWithdrawTx = await wallet.finalizeWithdrawal(WITHDRAWAL_HASH);
+   * const WITHDRAWAL_TX_HASH = "<WITHDRAWAL_TX_HASH>";
+   * const finalizeWithdrawalTx = await usdcBridge.finalizeWithdrawal(USDC_BRIDGE_L1_ADDRESS, WITHDRAWAL_TX_HASH);
    */
   async finalizeWithdrawal(
     bridgeAddress: Address,
@@ -376,6 +378,22 @@ export abstract class AbstractBridge {
    * @param [index] The index of the withdrawal.
    *
    * @returns A promise that resolves to a boolean indicating whether the withdrawal is finalized.
+   *
+   * @example
+   *
+   * import { Wallet, Provider, types, USDCBridge } from "zksync-ethers";
+   * import { ethers } from "ethers";
+   *
+   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
+   * const USDC_BRIDGE_L1_ADDRESS = "<USDC_BRIDGE_L1_ADDRESS>";
+   *
+   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+   * const ethProvider = ethers.getDefaultProvider("sepolia");
+   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
+   * const usdcBridge = new USDCBridge(wallet);
+   *
+   * const WITHDRAWAL_TX_HASH = "<WITHDRAWAL_TX_HASH>";
+   * const isFinalized = await usdcBridge.isWithdrawalFinalized(USDC_BRIDGE_L1_ADDRESS, WITHDRAWAL_TX_HASH);
    */
   async isWithdrawalFinalized(
     bridgeAddress: Address,
