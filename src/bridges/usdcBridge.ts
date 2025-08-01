@@ -27,7 +27,7 @@ export class USDCBridge extends AbstractBridge {
     super(wallet);
   }
 
-  override async validateDepositParams(
+  protected override async validateDepositParams(
     transaction: IDepositTransaction
   ): Promise<void> {
     const l1Token = new Contract(
@@ -42,7 +42,7 @@ export class USDCBridge extends AbstractBridge {
     }
   }
 
-  override async getSecondBridgeDepositCalldata(
+  protected override async getSecondBridgeDepositCalldata(
     transaction: IDepositTransaction
   ): Promise<string> {
     return AbiCoder.defaultAbiCoder().encode(
@@ -51,7 +51,7 @@ export class USDCBridge extends AbstractBridge {
     );
   }
 
-  override async validateWithdrawParams(
+  protected override async validateWithdrawParams(
     transaction: IWithdrawTransaction
   ): Promise<void> {
     const l2Token = new Contract(
@@ -66,7 +66,7 @@ export class USDCBridge extends AbstractBridge {
     }
   }
 
-  override async populateWithdrawTransaction(
+  protected override async populateWithdrawTransaction(
     tx: IWithdrawTransaction
   ): Promise<TransactionLike> {
     const bridge = await this.wallet
