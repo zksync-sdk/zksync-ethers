@@ -1,3 +1,10 @@
+## [6.20.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.20.0...v6.20.1) (2025-08-11)
+
+
+### Bug Fixes
+
+* improve usdc bridge methods visibility and docs ([#258](https://github.com/zksync-sdk/zksync-ethers/issues/258)) ([100ba13](https://github.com/zksync-sdk/zksync-ethers/commit/100ba135ba902b6195e234ca085a7dee2778c9d1))
+
 # [6.20.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.19.0...v6.20.0) (2025-07-30)
 
 
