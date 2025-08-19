@@ -154,7 +154,7 @@ export class InteropClient {
    *
    * @param params.sent         - Returned payload from `sendMessage`.
    * @param params.srcProvider  - Provider for the source chain (to fetch proof nodes + batch details).
-   * @param params.targetRunner   - Provider for the target chain (to read interop roots + call verifier).
+   * @param params.targetChain   - Provider for the target chain (to read interop roots + call verifier).
    * @param params.includeProofInputs - If true, include raw proof positioning info in the result (for debugging).
    *
    * @returns InteropResult — compact verification outcome (plus optional proof inputs).
@@ -162,15 +162,10 @@ export class InteropClient {
   async verifyMessage(params: {
     sent: types.Sent;
     srcProvider: Provider;
-    targetRunner: Provider;
+    targetChain: Provider;
     includeProofInputs?: boolean;
   }): Promise<types.InteropResult> {
-    const {
-      sent,
-      srcProvider,
-      targetRunner,
-      includeProofInputs = false,
-    } = params;
+    const {sent, srcProvider, targetChain, includeProofInputs = false} = params;
 
     // fetch proof nodes from the source chain
     const nodes = await getGatewayProof(
@@ -188,7 +183,7 @@ export class InteropClient {
     // wait for interop root import on target
     const interopRoot = await waitForGatewayInteropRoot(
       this.gwChainId,
-      targetRunner,
+      targetChain,
       gwBlock
     );
 
@@ -196,7 +191,7 @@ export class InteropClient {
     const verifier = new ethers.Contract(
       L2_MESSAGE_VERIFICATION_ADDRESS,
       L2_MESSAGE_VERIFICATION_ABI,
-      targetRunner as any
+      targetChain as any
     );
     const srcChainId = Number((await srcProvider.getNetwork()).chainId);
 
@@ -245,7 +240,7 @@ export class InteropClient {
    */
   async sendMessageAndVerify(params: {
     srcWallet: Wallet;
-    targetRunner: Provider;
+    targetChain: Provider;
     message: ethers.BytesLike | string;
     includeProofInputs?: boolean;
   }): Promise<types.InteropResult> {
@@ -253,7 +248,7 @@ export class InteropClient {
     return this.verifyMessage({
       sent,
       srcProvider: params.srcWallet.provider as Provider,
-      targetRunner: params.targetRunner,
+      targetChain: params.targetChain,
       includeProofInputs: params.includeProofInputs,
     });
   }
