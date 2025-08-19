@@ -156,7 +156,7 @@ export class InteropClient {
    * @param params.srcProvider  - Provider for the source chain (to fetch proof nodes + batch details).
    * @param params.targetChain   - Provider for the target chain (to read interop roots + call verifier).
    * @param params.includeProofInputs - If true, include raw proof positioning info in the result (for debugging).
-   *
+   * @param params.timeoutMs         - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
    * @returns InteropResult — compact verification outcome (plus optional proof inputs).
    */
   async verifyMessage(params: {
@@ -164,8 +164,15 @@ export class InteropClient {
     srcProvider: Provider;
     targetChain: Provider;
     includeProofInputs?: boolean;
+    timeoutMs?: number;
   }): Promise<types.InteropResult> {
-    const {sent, srcProvider, targetChain, includeProofInputs = false} = params;
+    const {
+      sent,
+      srcProvider,
+      targetChain,
+      includeProofInputs,
+      timeoutMs = 120_000,
+    } = params;
 
     // fetch proof nodes from the source chain
     const nodes = await getGatewayProof(
@@ -184,7 +191,8 @@ export class InteropClient {
     const interopRoot = await waitForGatewayInteropRoot(
       this.gwChainId,
       targetChain,
-      gwBlock
+      gwBlock,
+      timeoutMs ? {timeoutMs} : undefined
     );
 
     // on-chain verifier
@@ -237,12 +245,14 @@ export class InteropClient {
    * @param params.targetRunner    - Provider on the target chain.
    * @param params.message       - Message bytes/string to send.
    * @param params.includeProofInputs - Include raw proof positioning in result (optional, debugging).
+   * @param params.timeoutMs          - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
    */
   async sendMessageAndVerify(params: {
     srcWallet: Wallet;
     targetChain: Provider;
     message: ethers.BytesLike | string;
     includeProofInputs?: boolean;
+    timeoutMs?: number;
   }): Promise<types.InteropResult> {
     const sent = await this.sendMessage(params.srcWallet, params.message);
     return this.verifyMessage({
@@ -250,6 +260,7 @@ export class InteropClient {
       srcProvider: params.srcWallet.provider as Provider,
       targetChain: params.targetChain,
       includeProofInputs: params.includeProofInputs,
+      timeoutMs: params.timeoutMs,
     });
   }
 }
