@@ -99,11 +99,18 @@ export const L2_BRIDGE_ABI = new ethers.Interface(IL2BridgeABI);
  */
 export const NONCE_HOLDER_ABI = new ethers.Interface(INonceHolderABI);
 
-// todo: document
+/**
+ * The ABI for the `L2MessageVerification` interface.
+ * @readonly
+ */
 export const L2_MESSAGE_VERIFICATION_ABI = new ethers.Interface(
   (L2MessageVerificationABI as any).abi as any
 );
 
+/**
+ * The ABI for the `L2InteropRootStorage` interface.
+ * @readonly
+ */
 export const L2_INTEROP_ROOT_STORAGE_ABI = new ethers.Interface(
   (L2InteropRootStorageABI as any).abi as any
 );
@@ -192,9 +199,17 @@ export const L2_ASSET_ROUTER_ADDRESS: Address =
 export const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address =
   '0x0000000000000000000000000000000000010004';
 
+/**
+ * The address of the L2 Message Verification.
+ * @readonly
+ */
 export const L2_MESSAGE_VERIFICATION_ADDRESS: Address =
   '0x0000000000000000000000000000000000010009';
 
+/**
+ * The address of the L2 Interop Root Storage.
+ * @readonly
+ */
 export const L2_INTEROP_ROOT_STORAGE_ADDRESS: Address =
   '0x0000000000000000000000000000000000010008';
 
