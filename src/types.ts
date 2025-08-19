@@ -1061,3 +1061,92 @@ export type FinalizeL1DepositParams = {
   message: BytesLike;
   merkleProof: BytesLike[];
 };
+
+/**
+ * Gateway environment presets.
+ *
+ * @public
+ * @category Interop
+ */
+export type GatewayEnv = 'testnet' | 'mainnet' | 'local';
+
+/**
+ * Flexible Gateway configuration. Most users can omit this (defaults to the **testnet** preset).
+ *
+ * @public
+ * @category Interop
+ * @remarks
+ * Resolution precedence matches {@link resolveGateway}:
+ * 1) explicit `gwProvider` + `gwChainId`
+ * 2) `env` ('testnet' | 'mainnet') with optional overrides (`gwRpcUrl`, `gwChainId`)
+ * 3) `env: 'local'` requires **both** `gwRpcUrl` and `gwChainId` (or an explicit provider + chainId)
+ *
+ * @example
+ * ```ts
+ * // Testnet by default:
+ * const { gwProvider, gwChainId } = resolveGateway();
+ *
+ * // Mainnet preset:
+ * resolveGateway({ env: 'mainnet' });
+ *
+ * // Local dev:
+ * resolveGateway({ env: 'local', gwRpcUrl: 'http://localhost:3250', gwChainId: 506n });
+ * ```
+ */
+export interface GatewayConfig {
+  /** 'testnet' | 'mainnet' | 'local' (default: 'testnet') */
+  env?: GatewayEnv;
+  /** Explicit provider (wins over env/rpcUrl if provided) */
+  gwProvider?: ethers.JsonRpcProvider;
+  /** Explicit chain id (wins over env default if provided) */
+  gwChainId?: bigint;
+  /** RPC URL override for env presets or local */
+  gwRpcUrl?: string;
+}
+
+/**
+ * Result of sendMessage ({@link sendMessage}) on the source chain.
+ *
+ * @public
+ * @category Interop
+ * @remarks
+ * This bundle contains everything needed by {@link verifyMessage} to prove inclusion on a target chain.
+ */
+export interface Sent {
+  txHash: string;
+  l1BatchNumber: number;
+  l1BatchTxIndex: number;
+  l2ToL1LogIndex: number;
+  sender: Address;
+  messageHex: string;
+}
+
+/**
+ * Final result of {@link verifyMessage} / {@link sendMessageAndVerify}.
+ *
+ * @public
+ * @category Interop
+ * @remarks
+ * - `source` is a minimal description of the message origin (including a convenience `messageHash`).
+ * - `interopRoot` is the imported Gateway interop root observed on the target chain for the relevant Gateway block.
+ * - `verified` is the on-chain check result from `L2MessageVerification.proveL2MessageInclusionShared`.
+ * - `proof` is optional debug telemetry; enable via `includeProofInputs: true`.
+ */
+export interface InteropResult {
+  source: {
+    chainId: number;
+    txHash: string;
+    sender: Address;
+    messageHash: string;
+  };
+  interopRoot: string;
+  verified: boolean;
+
+  // Optional, only when includeProofInputs = true
+  proof?: {
+    l1BatchNumber: number;
+    l1BatchTxIndex: number;
+    l2ToL1LogIndex: number;
+    gwBlockNumber: bigint;
+  };
+}

@@ -21,3 +21,10 @@ export {
   IWithdrawTransaction,
 } from './bridges/abstractBridge';
 export {USDCBridge} from './bridges/usdcBridge';
+export {InteropClient, resolveGateway, GATEWAY_PRESETS} from './interop-client';
+export {
+  findInteropLogIndex,
+  getGatewayProof,
+  getGwBlockForBatch,
+  waitForGatewayInteropRoot,
+} from './interop-utils';
