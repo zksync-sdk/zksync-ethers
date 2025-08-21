@@ -13,22 +13,22 @@ import {Provider} from './provider';
  *
  * @internal
  * @param receipt - Source L2 tx receipt with `l2ToL1Logs`.
- * @param eoa - Externally owned account (sender) to match.
+ * @param sender - Externally owned account (sender) to match.
  * @param message - Optional raw message bytes to match by value hash.
  * @returns The log index within `receipt.l2ToL1Logs`, or `-1` if not found.
  */
 export function findInteropLogIndex(
   receipt: types.TransactionReceipt,
-  eoa: types.Address,
+  sender: types.Address,
   message?: ethers.BytesLike
 ): number {
-  const paddedEOA = ethers.zeroPadValue(eoa, 32);
+  const paddedSender = ethers.zeroPadValue(sender, 32);
   const valueHash = message ? ethers.keccak256(message) : undefined;
 
   return receipt.l2ToL1Logs.findIndex(
     (log: any) =>
       log.sender.toLowerCase() === utils.L1_MESSENGER_ADDRESS.toLowerCase() &&
-      log.key.toLowerCase() === paddedEOA.toLowerCase() &&
+      log.key.toLowerCase() === paddedSender.toLowerCase() &&
       (valueHash ? log.value.toLowerCase() === valueHash.toLowerCase() : true)
   );
 }
