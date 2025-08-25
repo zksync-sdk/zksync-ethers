@@ -789,11 +789,34 @@ export interface BatchDetails {
   l1GasPrice: number;
   /** Fair gas price on L2 at the time of the block's execution. */
   l2FairGasPrice: number;
+  /** Fair pubdata price on L2 at the time of the block's execution. */
+  fairPubdataPrice: number;
   /** Hashes of the base system contracts involved in the batch. */
   baseSystemContractsHashes: {
     bootloader: string;
     default_aa: string;
+    evm_emulator?: string;
   };
+  /** Chain ID where the commit transaction was submitted. */
+  commitChainId?: number;
+  /** Finality status of the commit transaction. */
+  commitTxFinality?: string;
+  /** Chain ID where the precommit transaction was submitted. */
+  precommitChainId?: number;
+  /** Finality status of the precommit transaction. */
+  precommitTxFinality?: string;
+  /** Transaction hash of the precommit operation on L1. */
+  precommitTxHash?: string;
+  /** Timestamp when the block was precommitted on L1. */
+  precommittedAt?: Date;
+  /** Chain ID where the prove transaction was submitted. */
+  proveChainId?: number;
+  /** Finality status of the prove transaction. */
+  proveTxFinality?: string;
+  /** Chain ID where the execute transaction was submitted. */
+  executeChainId?: number;
+  /** Finality status of the execute transaction. */
+  executeTxFinality?: string;
 }
 
 /** Contains block information. */
