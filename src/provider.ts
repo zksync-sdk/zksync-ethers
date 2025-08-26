@@ -162,6 +162,7 @@ export function JsonRpcApiProvider<
     override async getTransactionReceipt(
       txHash: string
     ): Promise<TransactionReceipt | null> {
+      console.log("hit getTransactionReceipt");
       return (await super.getTransactionReceipt(
         txHash
       )) as TransactionReceipt | null;
@@ -310,9 +311,10 @@ export function JsonRpcApiProvider<
      * @param transaction The transaction request.
      */
     async estimateGasL1(transaction: TransactionRequest): Promise<bigint> {
-      return await this.send('zks_estimateGasL1ToL2', [
+      const res = await this.send('zks_estimateGasL1ToL2', [
         this.getRpcTransaction(transaction),
       ]);
+      return BigInt(res);
     }
 
     /**
@@ -321,6 +323,7 @@ export function JsonRpcApiProvider<
      * @param transaction The transaction request.
      */
     async estimateFee(transaction: TransactionRequest): Promise<Fee> {
+      console.log("estimateFee hit");
       const fee = await this.send('zks_estimateFee', [
         await this.getRpcTransaction(transaction),
       ]);
@@ -333,6 +336,7 @@ export function JsonRpcApiProvider<
      * Calls the {@link https://docs.zksync.io/build/api.html#zks_getFeeParams zks_getFeeParams} JSON-RPC method.
      */
     async getFeeParams(): Promise<FeeParams> {
+       console.log("zks_getFeeParams hit");
       return await this.send('zks_getFeeParams', []);
     }
 
@@ -348,6 +352,7 @@ export function JsonRpcApiProvider<
      * Returns an estimate (best guess) of the gas per pubdata to use in a transaction.
      */
     async getGasPerPubdata(): Promise<bigint> {
+      console.log("zks_gasPerPubdata hit");
       return await this.send('zks_gasPerPubdata', []).catch(_ => {
         // Presuming `zks_gasPerPubdata` is not available on this environment yet.
         // Using default value.
@@ -419,6 +424,7 @@ export function JsonRpcApiProvider<
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getmaincontract zks_getMainContract} JSON-RPC method.
      */
     async getMainContractAddress(): Promise<Address> {
+      console.log("zks_getMainContract hit");
       if (!this.contractAddresses().mainContract) {
         this.contractAddresses().mainContract = await this.send(
           'zks_getMainContract',
@@ -433,6 +439,7 @@ export function JsonRpcApiProvider<
      * Returns the L1 base token address.
      */
     async getBaseTokenContractAddress(): Promise<Address> {
+      console.log("zks_getBaseTokenL1Address hit");
       if (!this.contractAddresses().baseToken) {
         this.contractAddresses().baseToken = await this.send(
           'zks_getBaseTokenL1Address',
@@ -1147,7 +1154,9 @@ export function JsonRpcApiProvider<
     }
 
     async _getPriorityOpConfirmationL2ToL1Log(txHash: string, index = 0) {
+      console.log("getpro");
       const hash = ethers.hexlify(txHash);
+      console.log("HASH:", hash);
       const receipt = await this.getTransactionReceipt(hash);
       if (!receipt) {
         throw new Error('Transaction is not mined!');
@@ -1160,7 +1169,7 @@ export function JsonRpcApiProvider<
       return {
         l2ToL1LogIndex,
         l2ToL1Log,
-        l1BatchTxId: receipt.l1BatchTxIndex,
+        // l1BatchTxId: receipt.l1BatchTxIndex,
       };
     }
 
@@ -1173,13 +1182,13 @@ export function JsonRpcApiProvider<
      * @throws {Error} If log proof can not be found.
      */
     async getPriorityOpConfirmation(txHash: string, index = 0) {
-      const {l2ToL1LogIndex, l2ToL1Log, l1BatchTxId} =
+      const {l2ToL1LogIndex, l2ToL1Log} =
         await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
       const proof = await this.getLogProof(txHash, l2ToL1LogIndex);
       return {
         l1BatchNumber: l2ToL1Log.l1BatchNumber,
         l2MessageIndex: proof!.id,
-        l2TxNumberInBlock: l1BatchTxId,
+        // l2TxNumberInBlock: null, // TODO: dustin fix correctly
         proof: proof!.proof,
       };
     }
@@ -1247,6 +1256,7 @@ export function JsonRpcApiProvider<
         const l2BridgeAddress = bridgeAddresses.sharedL2;
         const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
 
+        console.log("at the return here");
         return await this.estimateCustomBridgeDepositL2Gas(
           l1BridgeAddress,
           l2BridgeAddress,
@@ -1292,6 +1302,7 @@ export function JsonRpcApiProvider<
         amount,
         bridgeData
       );
+      console.log("nested bullshit");
       return await this.estimateL1ToL2Execute({
         caller: applyL1ToL2Alias(l1BridgeAddress),
         contractAddress: l2BridgeAddress,
@@ -1335,8 +1346,8 @@ export function JsonRpcApiProvider<
       if (transaction.factoryDeps) {
         Object.assign(customData, {factoryDeps: transaction.factoryDeps});
       }
-
-      return await this.estimateGasL1({
+      console.log("Changed from estimateGasL1 to estimateGas");
+      return await this.estimateGas({
         from: transaction.caller,
         data: transaction.calldata,
         to: transaction.contractAddress,
@@ -1494,6 +1505,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   override async getTransactionReceipt(
     txHash: string
   ): Promise<TransactionReceipt | null> {
+    console.log("hit getTransactionReceipt2");
     return super.getTransactionReceipt(txHash);
   }
 
@@ -2357,13 +2369,13 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
-    l2TxNumberInBlock: number | null;
+    // l2TxNumberInBlock: number | null;
     proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);
   }
 
-  /**
+  /** 
    * @inheritDoc
    *
    * @example
@@ -2415,6 +2427,7 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     from?: Address,
     gasPerPubdataByte?: BigNumberish
   ): Promise<bigint> {
+    console.log("estimateDefaultBridgeDepositL2Gas hit");
     return super.estimateDefaultBridgeDepositL2Gas(
       providerL1,
       token,
@@ -3508,7 +3521,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
   ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
-    l2TxNumberInBlock: number | null;
+    // l2TxNumberInBlock: number | null;
     proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);

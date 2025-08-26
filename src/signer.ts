@@ -1622,7 +1622,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
   ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
-    l2TxNumberInBlock: number | null;
+    // l2TxNumberInBlock: number | null;
     proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);

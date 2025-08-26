@@ -1266,7 +1266,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
-    l2TxNumberInBlock: number | null;
+    // l2TxNumberInBlock: number | null; // TODO:(@ZKSYNCOS)
     proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);

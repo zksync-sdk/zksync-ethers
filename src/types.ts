@@ -283,10 +283,6 @@ export class TransactionResponse extends ethers.TransactionResponse {
  * interacting with ZKsync Era.
  */
 export class TransactionReceipt extends ethers.TransactionReceipt {
-  /** The batch number on the L1 network. */
-  readonly l1BatchNumber!: null | number;
-  /** The transaction index within the batch on the L1 network. */
-  readonly l1BatchTxIndex!: null | number;
   /** The logs of L2 to L1 messages. */
   readonly l2ToL1Logs!: L2ToL1Log[];
   /** All logs included in the transaction receipt. */
@@ -295,8 +291,6 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
     defineProperties<TransactionReceipt>(this, {
-      l1BatchNumber: params.l1BatchNumber,
-      l1BatchTxIndex: params.l1BatchTxIndex,
       l2ToL1Logs: params.l2ToL1Logs,
     });
 
@@ -320,11 +314,9 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
   }
 
   override toJSON(): any {
-    const {l1BatchNumber, l1BatchTxIndex, l2ToL1Logs} = this;
+    const {l2ToL1Logs} = this;
     return {
       ...super.toJSON(),
-      l1BatchNumber,
-      l1BatchTxIndex,
       l2ToL1Logs,
     };
   }
