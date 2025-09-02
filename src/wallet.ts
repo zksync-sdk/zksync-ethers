@@ -1,6 +1,5 @@
-import {EIP712Signer} from './signer';
 import {Provider} from './provider';
-import {EIP712_TX_TYPE, resolveFeeData, serializeEip712} from './utils';
+import {resolveFeeData} from './utils';
 import {
   BigNumberish,
   BlockTag,
@@ -17,10 +16,7 @@ import {
   FinalizeWithdrawalParams,
   FullDepositFee,
   InteropMode,
-  PaymasterParams,
   PriorityOpResponse,
-  TransactionLike,
-  TransactionRequest,
   TransactionResponse,
 } from './types';
 import {AdapterL1, AdapterL2} from './adapters';
@@ -41,7 +37,6 @@ import {
 export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   override readonly provider!: Provider;
   providerL1?: ethers.Provider;
-  public eip712!: EIP712Signer;
 
   override _providerL1(): ethers.Provider {
     if (!this.providerL1) {
@@ -939,7 +934,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
     overrides?: Overrides;
-  }): Promise<TransactionRequest> {
+  }): Promise<ethers.TransactionRequest> {
     return super.getRequestExecuteTx(transaction);
   }
 
@@ -979,26 +974,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     blockTag: BlockTag = 'committed'
   ): Promise<bigint> {
     return super.getBalance(token, blockTag);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Wallet, Provider, types, utils } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const ethProvider = ethers.getDefaultProvider("sepolia");
-   * const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-   *
-   * const allBalances = await wallet.getAllBalances();
-   */
-  override async getAllBalances(): Promise<BalancesMap> {
-    return super.getAllBalances();
   }
 
   /**
@@ -1127,7 +1102,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     amount: BigNumberish;
     to?: Address;
     bridgeAddress?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: Overrides;
   }): Promise<TransactionResponse> {
     return super.withdraw(transaction);
@@ -1236,7 +1210,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     to: Address;
     amount: BigNumberish;
     token?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: Overrides;
   }): Promise<TransactionResponse> {
     return super.transfer(transaction);
@@ -1429,13 +1402,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     providerL1?: ethers.Provider
   ) {
     super(privateKey, providerL2);
-    if (this.provider) {
-      const network = this.provider.getNetwork();
-      this.eip712 = new EIP712Signer(
-        this,
-        network.then(n => Number(n.chainId))
-      );
-    }
     this.providerL1 = providerL1;
   }
 
@@ -1464,9 +1430,9 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * });
    */
   override async populateTransaction(
-    tx: TransactionRequest
-  ): Promise<TransactionLike> {
-    const populated = (await this.populateCall(tx)) as TransactionLike;
+    tx: ethers.TransactionRequest
+  ): Promise<ethers.TransactionLike> {
+    const populated = (await this.populateCall(tx)) as ethers.TransactionLike;
     if (
       populated.gasPrice &&
       (populated.maxFeePerGas || populated.maxPriorityFeePerGas)
@@ -1475,34 +1441,13 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
         'Provide combination of maxFeePerGas and maxPriorityFeePerGas or provide gasPrice. Not both!'
       );
     }
-    const {gasLimit, gasPrice, gasPerPubdata} = await resolveFeeData(
-      populated,
-      this.provider
-    );
+    const {gasLimit, gasPrice} = await resolveFeeData(populated, this.provider);
     populated.gasLimit = gasLimit;
     if (!populated.gasPrice && populated.type === 0) {
       populated.gasPrice = gasPrice;
     } else if (!populated.gasPrice && populated.type !== 0) {
       populated.maxFeePerGas = gasPrice;
       populated.maxPriorityFeePerGas ??= BigInt(0);
-    }
-    if (
-      tx.type === null ||
-      tx.type === undefined ||
-      tx.type === EIP712_TX_TYPE ||
-      tx.customData
-    ) {
-      tx.customData ??= {};
-      tx.customData.gasPerPubdata = gasPerPubdata;
-      populated.type = EIP712_TX_TYPE;
-      populated.value ??= 0;
-      populated.data ??= '0x';
-      populated.customData = this._fillCustomData(tx.customData ?? {});
-      populated.nonce = populated.nonce ?? (await this.getNonce('pending'));
-      populated.chainId =
-        populated.chainId ?? (await this.provider.getNetwork()).chainId;
-
-      return populated;
     }
 
     return super.populateTransaction(populated);
@@ -1532,14 +1477,11 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *   value: ethers.parseEther('1'),
    * });
    */
-  override async signTransaction(tx: TransactionRequest): Promise<string> {
+  override async signTransaction(
+    tx: ethers.TransactionRequest
+  ): Promise<string> {
     const populated = await this.populateTransaction(tx);
-    if (populated.type !== EIP712_TX_TYPE) {
-      return await super.signTransaction(populated);
-    }
-
-    populated.customData!.customSignature = await this.eip712.sign(populated);
-    return serializeEip712(populated);
+    return await super.signTransaction(populated);
   }
 
   /**
@@ -1572,7 +1514,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    * await tx.wait();
    */
   override async sendTransaction(
-    tx: TransactionRequest
+    tx: ethers.TransactionRequest
   ): Promise<TransactionResponse> {
     return await this.provider.broadcastTransaction(
       await this.signTransaction(tx)

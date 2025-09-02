@@ -59,12 +59,9 @@ import {
 import {
   Address,
   FinalizeL1DepositParams,
-  BalancesMap,
-  Eip712Meta,
   FinalizeWithdrawalParams,
   FullDepositFee,
   InteropMode,
-  PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
   TransactionStatus,
@@ -826,14 +823,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       customBridgeData?: BytesLike;
     }): Promise<PriorityOpResponse> {
       const tx = await this._getDepositETHOnETHBasedChainTx(transaction);
-      console.log("ETH Deposit Transaction:", tx);
       const baseGasLimit = await this.estimateGasRequestExecute(tx);
-      console.log("baseGasLimit:", baseGasLimit);
       const gasLimit = scaleGasLimit(baseGasLimit);
 
       tx.overrides ??= {};
       tx.overrides.gasLimit ??= gasLimit;
-      console.log("request:", tx);
       return this.requestExecute(tx);
     }
 
@@ -1301,7 +1295,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       tx.overrides.from = await this.getAddress();
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
       tx.l2GasLimit ??= BigInt(await this._getL2GasLimit(tx));
-      console.log("tx l2 gas limit::: ", tx.l2GasLimit);
       tx.l2GasLimit = BigInt(tx.l2GasLimit as any) + 550_000n;
       // tx.l2GasLimit = BigInt(tx.l2GasLimit as any) + 20000n;
       //console.log("tx l2 gas limit", tx.l2GasLimit);
@@ -1335,10 +1328,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.Overrides;
     }): Promise<BigNumberish> {
       if (transaction.bridgeAddress) {
-        console.log("using custom bridge path");
         return await this._getL2GasLimitFromCustomBridge(transaction);
       } else {
-        console.log("using default bridge path");
         return await this._providerL2().estimateDefaultBridgeDepositL2Gas(
           this._providerL1(),
           transaction.token,
@@ -1376,7 +1367,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const chainId = (await this._providerL2().getNetwork())
         .chainId as BigNumberish;
       const l2Address = await bridge.l2BridgeAddress(chainId);
-      console.log("because of this used here?");
       return await estimateCustomBridgeDepositL2Gas(
         this._providerL2(),
         transaction.bridgeAddress!,
@@ -1413,8 +1403,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       gasPerPubdataByte?: BigNumberish;
       overrides?: ethers.Overrides;
     }): Promise<FullDepositFee> {
-
-      console.log("/n/n/n GETFULLDEPOSIT \n\n\n\n");
       if (isAddressEq(transaction.token, LEGACY_ETH_ADDRESS)) {
         transaction.token = ETH_ADDRESS_IN_CONTRACTS;
       }
@@ -1432,7 +1420,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ...transaction,
         amount: dummyAmount,
       });
-      console.log("getFullRequiredDepositFee");
       const gasPriceForEstimation =
         tx.overrides.maxFeePerGas || tx.overrides.gasPrice;
       const baseCost = await bridgehub.l2TransactionBaseCost(
@@ -1443,7 +1430,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
 
       if (isETHBasedChain) {
-        console.log("ETH Based transaction");
         // To ensure that L1 gas estimation succeeds when using estimateGasDeposit,
         // the account needs to have a sufficient ETH balance.
         const selfBalanceETH = await this.getBalanceL1();
@@ -1498,7 +1484,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       delete estimationOverrides.gasPrice;
       delete estimationOverrides.maxFeePerGas;
       delete estimationOverrides.maxPriorityFeePerGas;
-      console.log("estimating L1 gas limit");
       const l1GasLimit = await this.estimateGasDeposit({
         ...tx,
         amount: dummyAmount,
@@ -1538,13 +1523,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     async _getWithdrawalLog(withdrawalHash: BytesLike, index = 0) {
       const hash = ethers.hexlify(withdrawalHash);
-      console.log("hit _getWithdrawalLog");
-      console.log("TX HASH:", hash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       if (!receipt) {
         throw new Error('Transaction is not mined!');
       }
-      console.log("receipt:", receipt);
       const log = receipt.logs.filter(
         log =>
           isAddressEq(log.address, L1_MESSENGER_ADDRESS) &&
@@ -1557,7 +1539,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     async _getWithdrawalL2ToL1Log(withdrawalHash: BytesLike, index = 0) {
-      console.log("hit _getWithdrawalL2ToL1Log");
       const hash = ethers.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       if (!receipt) {
@@ -1588,10 +1569,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       withdrawalHash: BytesLike,
       index = 0
     ): Promise<FinalizeWithdrawalParams> {
-      const {log} = await this._getWithdrawalLog(
-        withdrawalHash,
-        index
-      );
+      const {log} = await this._getWithdrawalLog(withdrawalHash, index);
       const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
         withdrawalHash,
         index
@@ -1604,6 +1582,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (!proof) {
         throw new Error('Log proof not found!');
       }
+      const receipt = await this._providerL2().getTransactionReceipt(
+        ethers.hexlify(withdrawalHash)
+      );
+      const txIndex = Number(receipt?.index ?? 0);
       const message = ethers.AbiCoder.defaultAbiCoder().decode(
         ['bytes'],
         log.data
@@ -1611,8 +1593,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return {
         l1BatchNumber: log.l1BatchNumber,
         l2MessageIndex: proof.id,
-        l2TxNumberInBlock: null,
-        // l2TxNumberInBlock: l1BatchTxId, // todo: how do we return properly
+        l2TxNumberInBlock: txIndex,
         message,
         sender,
         proof: proof.proof,
@@ -1634,10 +1615,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       index = 0,
       interopMode?: InteropMode
     ): Promise<FinalizeWithdrawalParams> {
-      const {log} = await this._getWithdrawalLog(
-        withdrawalHash,
-        index
-      );
+      const {log} = await this._getWithdrawalLog(withdrawalHash, index);
       const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
         withdrawalHash,
         index
@@ -1651,6 +1629,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (!proof) {
         throw new Error('Log proof not found!');
       }
+      const receipt = await this._providerL2().getTransactionReceipt(
+        ethers.hexlify(withdrawalHash)
+      );
+      const txIndex = Number(receipt?.index ?? 0);
       const message = ethers.AbiCoder.defaultAbiCoder().decode(
         ['bytes'],
         log.data
@@ -1658,8 +1640,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return {
         l1BatchNumber: log.l1BatchNumber,
         l2MessageIndex: proof.id,
-        l2TxNumberInBlock: null,
-        // l2TxNumberInBlock: l1BatchTxId, todo: fix correctly
+        l2TxNumberInBlock: txIndex,
         message,
         sender,
         proof: proof.proof,
@@ -1682,10 +1663,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       withdrawalHash: BytesLike,
       index = 0
     ): Promise<FinalizeL1DepositParams> {
-      const {log} = await this._getWithdrawalLog(
-        withdrawalHash,
-        index
-      );
+      const {log} = await this._getWithdrawalLog(withdrawalHash, index);
       const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
         withdrawalHash,
         index
@@ -1698,6 +1676,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (!proof) {
         throw new Error('Log proof not found!');
       }
+      const receipt = await this._providerL2().getTransactionReceipt(
+        ethers.hexlify(withdrawalHash)
+      );
+      const txIndex = Number(receipt?.index ?? 0);
       const message = ethers.AbiCoder.defaultAbiCoder().decode(
         ['bytes'],
         log.data
@@ -1708,8 +1690,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         l2BatchNumber: log.l1BatchNumber as BigNumberish,
         l2MessageIndex: proof.id,
         l2Sender: sender,
-        l2TxNumberInBatch: 0,
-        //l2TxNumberInBatch: l1BatchTxId as BigNumberish, // todo: fix correctly
+        l2TxNumberInBatch: txIndex,
         message,
         merkleProof: proof.proof,
       };
@@ -1780,14 +1761,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       withdrawalHash: BytesLike,
       index = 0
     ): Promise<boolean> {
-      console.log("hit isWithdrawalFinalized");
       const {log} = await this._getWithdrawalLog(withdrawalHash, index);
-      console.log("log:", log);
       const {l2ToL1LogIndex} = await this._getWithdrawalL2ToL1Log(
         withdrawalHash,
         index
       );
-      console.log("l2ToL1LogIndex:", l2ToL1LogIndex);
       // `getLogProof` is called not to get proof but
       // to get the index of the corresponding L2->L1 log,
       // which is returned as `proof.id`.
@@ -1795,7 +1773,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         withdrawalHash,
         l2ToL1LogIndex
       );
-      console.log("proof:", proof);
       if (!proof) {
         throw new Error('Log proof not found!');
       }
@@ -1825,12 +1802,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       depositHash: BytesLike,
       overrides?: ethers.Overrides
     ): Promise<ContractTransactionResponse> {
-      console.log("hit claimFailedDeposit");
-      console.log("deposithash", depositHash);
       const receipt = await this._providerL2().getTransactionReceipt(
         ethers.hexlify(depositHash)
       );
-      console.log("hit claimFailedDeposit2");
       if (!receipt) {
         throw new Error('Transaction is not mined!');
       }
@@ -1971,7 +1945,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.Overrides;
     }): Promise<PriorityOpResponse> {
       const requestExecuteTx = await this.getRequestExecuteTx(transaction);
-      console.log("getRequestExecuteTx:", requestExecuteTx);
       return this.getPriorityOpResponse(
         await this._signerL1().sendTransaction(requestExecuteTx)
       );
@@ -2049,12 +2022,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const {...tx} = transaction;
       tx.l2Value ??= 0n;
       tx.operatorTip ??= 0n;
-      tx.factoryDeps ??= [];
       tx.overrides ??= {};
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
       tx.refundRecipient ??= await this.getAddress();
       tx.l2GasLimit ??=
-        await this._providerL2().estimateL1ToL2Execute(transaction);
+        await this._providerL2().estimateGas(transaction); // TODO: resolve this dustin
 
       const {l2Value, l2GasLimit, operatorTip, overrides, gasPerPubdataByte} =
         tx;
@@ -2116,13 +2088,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       tx.l2Value ??= 0;
       tx.mintValue ??= 0;
       tx.operatorTip ??= 0;
-      tx.factoryDeps ??= [];
       tx.overrides ??= {};
       tx.overrides.from ??= await this.getAddress();
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
       tx.refundRecipient ??= await this.getAddress();
       tx.l2GasLimit ??=
-        await this._providerL2().estimateL1ToL2Execute(transaction);
+        await this._providerL2().estimateGas(transaction); // TODO resolve dustin
 
       const {
         contractAddress,
@@ -2168,7 +2139,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           l2Calldata: calldata,
           l2GasLimit: l2GasLimit,
           l2GasPerPubdataByteLimit: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: factoryDeps,
+          factoryDeps: factoryDeps ?? [],
           refundRecipient: refundRecipient,
         },
         overrides
@@ -2259,19 +2230,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     /**
-     * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
-     *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
-     *  or other token APIs from providers like Alchemy or QuickNode.
-     *
-     * Returns all token balances of the account.
-     */
-    async getAllBalances(): Promise<BalancesMap> {
-      return await this._providerL2().getAllAccountBalances(
-        await this.getAddress()
-      );
-    }
-
-    /**
      * Returns the deployment nonce of the account.
      */
     async getDeploymentNonce(): Promise<bigint> {
@@ -2303,13 +2261,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
-    _fillCustomData(data: Eip712Meta): Eip712Meta {
-      const customData = {...data};
-      customData.gasPerPubdata ??= DEFAULT_GAS_PER_PUBDATA_LIMIT;
-      customData.factoryDeps ??= [];
-      return customData;
-    }
-
     /**
      * Initiates the withdrawal process which withdraws ETH or any ERC20 token
      * from the associated account on L2 network to the target account on L1 network.
@@ -2319,7 +2270,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @param transaction.token The address of the token. Defaults to ETH.
      * @param [transaction.to] The address of the recipient on L1.
      * @param [transaction.bridgeAddress] The address of the bridge contract to be used.
-     * @param [transaction.paymasterParams] Paymaster parameters.
      * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
      * @returns A Promise resolving to a withdrawal transaction response.
      */
@@ -2328,7 +2278,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       token: Address;
       to?: Address;
       bridgeAddress?: Address;
-      paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<TransactionResponse> {
       const withdrawTx = await this._providerL2().getWithdrawTx({
@@ -2345,7 +2294,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @param transaction.to The address of the recipient.
      * @param transaction.amount The amount of the token to transfer.
      * @param [transaction.token] The address of the token. Defaults to ETH.
-     * @param [transaction.paymasterParams] Paymaster parameters.
      * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
      * @returns A Promise resolving to a transfer transaction response.
      */
@@ -2353,7 +2301,6 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
       to: Address;
       amount: BigNumberish;
       token?: Address;
-      paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<TransactionResponse> {
       const transferTx = await this._providerL2().getTransferTx({

@@ -10,22 +10,17 @@ import {
 import {Provider} from './provider';
 import {
   DEFAULT_GAS_PER_PUBDATA_LIMIT,
-  EIP712_TX_TYPE,
   hashBytecode,
   isAddressEq,
   resolveFeeData,
-  serializeEip712,
 } from './utils';
 import {
   Address,
   BalancesMap,
   FinalizeWithdrawalParams,
   FullDepositFee,
-  PaymasterParams,
   PriorityOpResponse,
   Signature,
-  TransactionLike,
-  TransactionRequest,
   TransactionResponse,
 } from './types';
 import {AdapterL1, AdapterL2} from './adapters';
@@ -38,197 +33,6 @@ import {
   IZkSyncHyperchain,
 } from './typechain';
 
-/**
- * All typed data conforming to the EIP712 standard within ZKsync Era.
- */
-export const EIP712_TYPES = {
-  Transaction: [
-    {name: 'txType', type: 'uint256'},
-    {name: 'from', type: 'uint256'},
-    {name: 'to', type: 'uint256'},
-    {name: 'gasLimit', type: 'uint256'},
-    {name: 'gasPerPubdataByteLimit', type: 'uint256'},
-    {name: 'maxFeePerGas', type: 'uint256'},
-    {name: 'maxPriorityFeePerGas', type: 'uint256'},
-    {name: 'paymaster', type: 'uint256'},
-    {name: 'nonce', type: 'uint256'},
-    {name: 'value', type: 'uint256'},
-    {name: 'data', type: 'bytes'},
-    {name: 'factoryDeps', type: 'bytes32[]'},
-    {name: 'paymasterInput', type: 'bytes'},
-  ],
-};
-
-/**
- * A `EIP712Signer` provides support for signing EIP712-typed ZKsync Era transactions.
- */
-export class EIP712Signer {
-  private eip712Domain: Promise<ethers.TypedDataDomain>;
-
-  /**
-   * @example
-   *
-   * import { Provider, types, EIP712Signer } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const PRIVATE_KEY = "<PRIVATE_KEY>";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY), Number((await provider.getNetwork()).chainId));
-   */
-  constructor(
-    private ethSigner: ethers.Signer,
-    chainId: number | Promise<number>
-  ) {
-    this.eip712Domain = Promise.resolve(chainId).then(chainId => ({
-      name: 'zkSync',
-      version: '2',
-      chainId,
-    }));
-  }
-
-  /**
-   * Generates the EIP712 typed data from provided transaction. Optional fields are populated by zero values.
-   *
-   * @param transaction The transaction request that needs to be populated.
-   *
-   * @example
-   *
-   * import { EIP712Signer } from "zksync-ethers";
-   *
-   * const tx = EIP712Signer.getSignInput({
-   *   type: utils.EIP712_TX_TYPE,
-   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
-   *   value: 7_000_000n,
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   nonce: 0n,
-   *   chainId: 270n,
-   *   gasPrice: 250_000_000n,
-   *   gasLimit: 21_000n,
-   *   customData: {},
-   * });
-   */
-  static getSignInput(transaction: TransactionRequest) {
-    const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0n;
-    const maxPriorityFeePerGas =
-      transaction.maxPriorityFeePerGas || maxFeePerGas;
-    const gasPerPubdataByteLimit =
-      transaction.customData?.gasPerPubdata ?? DEFAULT_GAS_PER_PUBDATA_LIMIT;
-    return {
-      txType: transaction.type || EIP712_TX_TYPE,
-      from: transaction.from,
-      to: transaction.to,
-      gasLimit: transaction.gasLimit || 0n,
-      gasPerPubdataByteLimit: gasPerPubdataByteLimit,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymaster:
-        transaction.customData?.paymasterParams?.paymaster ||
-        ethers.ZeroAddress,
-      nonce: transaction.nonce || 0,
-      value: transaction.value || 0n,
-      data: transaction.data || '0x',
-      factoryDeps:
-        transaction.customData?.factoryDeps?.map((dep: any) =>
-          hashBytecode(dep)
-        ) || [],
-      paymasterInput:
-        transaction.customData?.paymasterParams?.paymasterInput || '0x',
-    };
-  }
-
-  /**
-   * Signs a transaction request using EIP712.
-   *
-   * @param transaction The transaction request that needs to be signed.
-   * @returns A promise that resolves to the signature of the transaction.
-   *
-   * @example
-   *
-   * import { Provider, types, EIP712Signer } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const PRIVATE_KEY = "<PRIVATE_KEY>";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
-   * const signature = signer.sign({
-   *   type: utils.EIP712_TX_TYPE,
-   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
-   *   value: 7_000_000n,
-   *   nonce: 0n,
-   *   chainId: 270n,
-   *   gasPrice: 250_000_000n,
-   *   gasLimit: 21_000n,
-   * })
-   */
-  async sign(transaction: TransactionRequest): Promise<Signature> {
-    return await this.ethSigner.signTypedData(
-      await this.eip712Domain,
-      EIP712_TYPES,
-      EIP712Signer.getSignInput(transaction)
-    );
-  }
-
-  /**
-   * Hashes the transaction request using EIP712.
-   *
-   * @param transaction The transaction request that needs to be hashed.
-   * @returns A hash (digest) of the transaction request.
-   *
-   * @throws {Error} If `transaction.chainId` is not set.
-   *
-   * @example
-   *
-   * import { EIP712Signer } from "zksync-ethers";
-   *
-   * const hash = EIP712Signer.getSignedDigest({
-   *   type: utils.EIP712_TX_TYPE,
-   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
-   *   value: 7_000_000n,
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   nonce: 0n,
-   *   chainId: 270n,
-   *   gasPrice: 250_000_000n,
-   *   gasLimit: 21_000n,
-   *   customData: {},
-   * });
-   */
-  static getSignedDigest(transaction: TransactionRequest): ethers.BytesLike {
-    if (!transaction.chainId) {
-      throw Error("Transaction chainId isn't set!");
-    }
-    const domain = {
-      name: 'zkSync',
-      version: '2',
-      chainId: transaction.chainId,
-    };
-    return ethers.TypedDataEncoder.hash(
-      domain,
-      EIP712_TYPES,
-      EIP712Signer.getSignInput(transaction)
-    );
-  }
-
-  /**
-   * Returns ZKsync Era EIP712 domain.
-   *
-   * @example
-   *
-   * import { Provider, types, EIP712Signer } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const PRIVATE_KEY = "<PRIVATE_KEY>";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const signer = new EIP712Signer(new ethers.Wallet(PRIVATE_KEY, Number(await provider.getNetwork()));
-   * const domain = await signer.getDomain();
-   */
-  async getDomain(): Promise<ethers.TypedDataDomain> {
-    return await this.eip712Domain;
-  }
-}
-
 /* c8 ignore start */
 /**
  * A `Signer` is designed for frontend use with browser wallet injection (e.g., MetaMask),
@@ -238,7 +42,6 @@ export class EIP712Signer {
  */
 export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
   public override provider!: Provider;
-  public eip712!: EIP712Signer;
   protected providerL2?: Provider;
 
   override _signerL2() {
@@ -286,26 +89,6 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     blockTag: BlockTag = 'committed'
   ): Promise<bigint> {
     return super.getBalance(token, blockTag);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, Provider, types } from "zksync-ethers";
-   *
-   * const browserProvider = new BrowserProvider(window.ethereum);
-   * const signer = Signer.from(
-   *     await browserProvider.getSigner(),
-   *     Number((await browserProvider.getNetwork()).chainId),
-   *     Provider.getDefaultProvider(types.Network.Sepolia)
-   * );
-   *
-   * const allBalances = await signer.getAllBalances();
-   */
-  override async getAllBalances(): Promise<BalancesMap> {
-    return super.getAllBalances();
   }
 
   /**
@@ -447,7 +230,6 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     amount: BigNumberish;
     to?: Address;
     bridgeAddress?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: Overrides;
   }): Promise<TransactionResponse> {
     return super.withdraw(transaction);
@@ -566,7 +348,6 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     to: Address;
     amount: BigNumberish;
     token?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: Overrides;
   }): Promise<TransactionResponse> {
     return super.transfer(transaction);
@@ -593,11 +374,9 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    */
   static from(
     signer: ethers.JsonRpcSigner & {provider: Provider},
-    chainId: number,
     zksyncProvider?: Provider
   ): Signer {
     const newSigner: Signer = Object.setPrototypeOf(signer, Signer.prototype);
-    newSigner.eip712 = new EIP712Signer(newSigner, chainId);
     newSigner.providerL2 = zksyncProvider;
     return newSigner;
   }
@@ -646,11 +425,8 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
    * });
    */
   override async sendTransaction(
-    transaction: TransactionRequest
+    transaction: ethers.TransactionRequest
   ): Promise<TransactionResponse> {
-    if (!transaction.type) {
-      transaction.type = EIP712_TX_TYPE;
-    }
     const address = await this.getAddress();
     transaction.from ??= address;
     const tx = await this.populateFeeData(transaction);
@@ -658,36 +434,11 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
       throw new Error('Transaction `from` address mismatch!');
     }
 
-    if (
-      tx.type === null ||
-      tx.type === undefined ||
-      tx.type === EIP712_TX_TYPE ||
-      tx.customData
-    ) {
-      const zkTx: TransactionLike = {
-        type: tx.type ?? EIP712_TX_TYPE,
-        value: tx.value ?? 0,
-        data: tx.data ?? '0x',
-        nonce: tx.nonce ?? (await this.getNonce('pending')),
-        maxFeePerGas: tx.gasPrice ?? tx.maxFeePerGas,
-        maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
-        gasLimit: tx.gasLimit,
-        chainId: tx.chainId ?? (await this.provider.getNetwork()).chainId,
-        to: await ethers.resolveAddress(tx.to!),
-        customData: this._fillCustomData(tx.customData ?? {}),
-        from: address,
-      };
-      zkTx.customData ??= {};
-      zkTx.customData.customSignature = await this.eip712.sign(zkTx);
-
-      const txBytes = serializeEip712(zkTx);
-      return await this.provider.broadcastTransaction(txBytes);
-    }
     return (await super.sendTransaction(tx)) as TransactionResponse;
   }
 
   protected async populateFeeData(
-    transaction: TransactionRequest
+    transaction: ethers.TransactionRequest
   ): Promise<ethers.PreparedTransactionRequest> {
     const tx = copyRequest(transaction);
 
@@ -699,10 +450,9 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     if (!this.providerL2) {
       throw new Error('Initialize provider L2');
     }
-    const {gasLimit, gasPrice, gasPerPubdata} = await resolveFeeData(
-      tx as TransactionLike,
-      this.provider,
-      this.providerL2
+    const {gasLimit, gasPrice} = await resolveFeeData(
+      tx as ethers.TransactionLike,
+      this.provider
     );
 
     tx.gasLimit = ethers.getBigInt(gasLimit);
@@ -711,15 +461,6 @@ export class Signer extends AdapterL2(ethers.JsonRpcSigner) {
     } else if (!tx.gasPrice && tx.type !== 0) {
       tx.maxFeePerGas = ethers.getBigInt(gasPrice);
       tx.maxPriorityFeePerGas ??= BigInt(0);
-    }
-    if (
-      tx.type === null ||
-      tx.type === undefined ||
-      tx.type === EIP712_TX_TYPE ||
-      tx.customData
-    ) {
-      tx.customData ??= {};
-      tx.customData.gasPerPubdata = gasPerPubdata;
     }
     return tx;
   }
@@ -1593,7 +1334,7 @@ export class L1Signer extends AdapterL1(ethers.JsonRpcSigner) {
     gasPerPubdataByte?: BigNumberish;
     refundRecipient?: Address;
     overrides?: Overrides;
-  }): Promise<TransactionRequest> {
+  }): Promise<ethers.TransactionRequest> {
     return super.getRequestExecuteTx(transaction);
   }
 
@@ -1744,19 +1485,15 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
    * });
    */
   override async populateTransaction(
-    tx: TransactionRequest
-  ): Promise<TransactionLike> {
-    if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
-      return (await super.populateTransaction(tx)) as TransactionLike;
-    }
-
+    tx: ethers.TransactionRequest
+  ): Promise<ethers.TransactionLike> {
     tx.type = 2;
-    const populated = (await super.populateTransaction(tx)) as TransactionLike;
+    const populated = (await super.populateTransaction(
+      tx
+    )) as ethers.TransactionLike;
 
-    populated.type = EIP712_TX_TYPE;
     populated.value ??= 0;
     populated.data ??= '0x';
-    populated.customData = this._fillCustomData(tx.customData ?? {});
     if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
       populated.gasPrice = await this.provider.getGasPrice();
     }
@@ -1764,7 +1501,7 @@ export class L2VoidSigner extends AdapterL2(ethers.VoidSigner) {
   }
 
   override async sendTransaction(
-    tx: TransactionRequest
+    tx: ethers.TransactionRequest
   ): Promise<TransactionResponse> {
     const populated = await this.populateTransaction(tx);
 
@@ -1834,19 +1571,13 @@ export class VoidSigner extends AdapterL2(ethers.VoidSigner) {
    * });
    */
   override async populateTransaction(
-    tx: TransactionRequest
-  ): Promise<TransactionLike> {
-    if ((!tx.type || tx.type !== EIP712_TX_TYPE) && !tx.customData) {
-      return (await super.populateTransaction(tx)) as TransactionLike;
-    }
-
+    tx: ethers.TransactionRequest
+  ): Promise<ethers.TransactionLike> {
     tx.type = 2;
-    const populated = (await super.populateTransaction(tx)) as TransactionLike;
+    const populated = (await super.populateTransaction(tx)) as ethers.TransactionLike;
 
-    populated.type = EIP712_TX_TYPE;
     populated.value ??= 0;
     populated.data ??= '0x';
-    populated.customData = this._fillCustomData(tx.customData ?? {});
     if (!populated.maxFeePerGas && !populated.maxPriorityFeePerGas) {
       populated.gasPrice = await this.provider.getGasPrice();
     }
@@ -1854,7 +1585,7 @@ export class VoidSigner extends AdapterL2(ethers.VoidSigner) {
   }
 
   override async sendTransaction(
-    tx: TransactionRequest
+    tx: ethers.TransactionRequest
   ): Promise<TransactionResponse> {
     const populated = await this.populateTransaction(tx);
 

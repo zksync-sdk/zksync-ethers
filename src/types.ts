@@ -9,14 +9,7 @@ import {
   Signature as EthersSignature,
   TransactionRequest as EthersTransactionRequest,
 } from 'ethers';
-import {
-  EIP712_TX_TYPE,
-  parseEip712,
-  serializeEip712,
-  sleep,
-  eip712TxHash,
-  isAddressEq,
-} from './utils';
+import {sleep, isAddressEq} from './utils';
 import {Provider} from './provider';
 
 /** 0x-prefixed, hex encoded, ethereum account address. */
@@ -60,26 +53,6 @@ export enum TransactionStatus {
   /** Transaction has been finalized. */
   Finalized = 'finalized',
 }
-
-/** Type defining a paymaster by its address and the bytestream input. */
-export type PaymasterParams = {
-  /** The address of the paymaster. */
-  paymaster: Address;
-  /** The bytestream input for the paymaster. */
-  paymasterInput: BytesLike;
-};
-
-/** Contains EIP712 transaction metadata. */
-export type Eip712Meta = {
-  /** The maximum amount of gas the user is willing to pay for a single byte of pubdata. */
-  gasPerPubdata?: BigNumberish;
-  /** An array of bytes containing the bytecode of the contract being deployed and any related contracts it can deploy. */
-  factoryDeps?: BytesLike[];
-  /** Custom signature used for cases where the signer's account is not an EOA. */
-  customSignature?: BytesLike;
-  /** Parameters for configuring the custom paymaster for the transaction. */
-  paymasterParams?: PaymasterParams;
-};
 
 /**
  * Specifies a specific block. This can be represented by:
@@ -198,16 +171,16 @@ export interface LogProof {
  */
 export class TransactionResponse extends ethers.TransactionResponse {
   /** The batch number on the L1 network. */
-  readonly l1BatchNumber!: null | number;
-  /** The transaction index within the batch on the L1 network. */
-  readonly l1BatchTxIndex!: null | number;
+  // readonly l1BatchNumber!: null | number;
+  // /** The transaction index within the batch on the L1 network. */
+  // readonly l1BatchTxIndex!: null | number;
 
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
-    defineProperties<TransactionResponse>(this, {
-      l1BatchNumber: params.l1BatchNumber,
-      l1BatchTxIndex: params.l1BatchTxIndex,
-    });
+    // defineProperties<TransactionResponse>(this, {
+    //   l1BatchNumber: params.l1BatchNumber,
+    //   l1BatchTxIndex: params.l1BatchTxIndex,
+    // });
   }
 
   /**
@@ -268,12 +241,12 @@ export class TransactionResponse extends ethers.TransactionResponse {
   }
 
   override toJSON(): any {
-    const {l1BatchNumber, l1BatchTxIndex} = this;
+    // const {l1BatchNumber, l1BatchTxIndex} = this;
 
     return {
       ...super.toJSON(),
-      l1BatchNumber,
-      l1BatchTxIndex,
+      // l1BatchNumber,
+      // l1BatchTxIndex,
     };
   }
 }
@@ -325,9 +298,9 @@ export class TransactionReceipt extends ethers.TransactionReceipt {
 /** A `Block` is an extension of {@link ethers.Block} with additional features for interacting with ZKsync Era. */
 export class Block extends ethers.Block {
   /** The batch number on L1. */
-  readonly l1BatchNumber!: null | number;
-  /** The timestamp of the batch on L1. */
-  readonly l1BatchTimestamp!: null | number;
+  // readonly l1BatchNumber!: null | number;
+  // /** The timestamp of the batch on L1. */
+  // readonly l1BatchTimestamp!: null | number;
 
   readonly #transactions: Array<string | TransactionResponse>;
 
@@ -342,17 +315,17 @@ export class Block extends ethers.Block {
       }
     );
     defineProperties<Block>(this, {
-      l1BatchNumber: params.l1BatchNumber,
-      l1BatchTimestamp: params.l1BatchTimestamp,
+      // l1BatchNumber: params.l1BatchNumber,
+      // l1BatchTimestamp: params.l1BatchTimestamp,
     });
   }
 
   override toJSON(): any {
-    const {l1BatchNumber, l1BatchTimestamp} = this;
+    // const {l1BatchNumber, l1BatchTimestamp} = this;
     return {
       ...super.toJSON(),
-      l1BatchNumber,
-      l1BatchTimestamp,
+      // l1BatchNumber,
+      // l1BatchTimestamp,
     };
   }
 
@@ -451,155 +424,155 @@ export class Log extends ethers.Log {
   }
 }
 
-/**
- * A `TransactionLike` is an extension of {@link ethers.TransactionLike} with additional features for interacting
- * with ZKsync Era.
- */
-export interface TransactionLike extends ethers.TransactionLike {
-  /** The custom data for EIP712 transaction metadata. */
-  customData?: null | Eip712Meta;
-}
+// /**
+//  * A `TransactionLike` is an extension of {@link ethers.TransactionLike} with additional features for interacting
+//  * with ZKsync Era.
+//  */
+// export interface TransactionLike extends ethers.TransactionLike {
+//   /** The custom data for EIP712 transaction metadata. */
+//   customData?: null | Eip712Meta;
+// }
 
 /**
  * A `Transaction` is an extension of {@link ethers.Transaction} with additional features for interacting
  * with ZKsync Era.
  */
-export class Transaction extends ethers.Transaction {
-  /** The custom data for EIP712 transaction metadata. */
-  customData?: null | Eip712Meta;
-  // super.#type is private and there is no way to override which enforced to
-  // introduce following variable
-  #type?: null | number;
-  #from?: null | string;
+// export class Transaction extends ethers.Transaction {
+//   /** The custom data for EIP712 transaction metadata. */
+//   // customData?: null | Eip712Meta;
+//   // super.#type is private and there is no way to override which enforced to
+//   // introduce following variable
+//   #type?: null | number;
+//   #from?: null | string;
 
-  override get type(): number | null {
-    return this.#type === EIP712_TX_TYPE ? this.#type : super.type;
-  }
+//   // override get type(): number | null {
+//   //   return this.#type === EIP712_TX_TYPE ? this.#type : super.type;
+//   // }
 
-  override set type(value: number | string | null) {
-    switch (value) {
-      case EIP712_TX_TYPE:
-      case 'eip-712':
-        this.#type = EIP712_TX_TYPE;
-        break;
-      default:
-        super.type = value;
-    }
-  }
+//   // override set type(value: number | string | null) {
+//   //   switch (value) {
+//   //     case EIP712_TX_TYPE:
+//   //     case 'eip-712':
+//   //       this.#type = EIP712_TX_TYPE;
+//   //       break;
+//   //     default:
+//   //       super.type = value;
+//   //   }
+//   // }
 
-  static override from(tx: string | TransactionLike): Transaction {
-    if (typeof tx === 'string') {
-      const payload = ethers.getBytes(tx);
-      if (payload[0] !== EIP712_TX_TYPE) {
-        return Transaction.from(ethers.Transaction.from(tx));
-      } else {
-        return Transaction.from(parseEip712(payload));
-      }
-    } else {
-      const result = new Transaction();
-      if (tx.type === EIP712_TX_TYPE) {
-        result.type = EIP712_TX_TYPE;
-        result.customData = tx.customData;
-        result.from = tx.from!;
-      }
-      if (tx.type !== null && tx.type !== undefined) result.type = tx.type;
-      if (tx.to) result.to = tx.to;
-      if (tx.nonce) result.nonce = tx.nonce;
-      if (tx.gasLimit) result.gasLimit = tx.gasLimit;
-      if (tx.gasPrice) result.gasPrice = tx.gasPrice;
-      if (tx.maxPriorityFeePerGas)
-        result.maxPriorityFeePerGas = tx.maxPriorityFeePerGas;
-      if (tx.maxFeePerGas) result.maxFeePerGas = tx.maxFeePerGas;
-      if (tx.data) result.data = tx.data;
-      if (tx.value) result.value = tx.value;
-      if (tx.chainId) result.chainId = tx.chainId;
-      if (tx.signature) result.signature = EthersSignature.from(tx.signature);
-      result.accessList = null;
+//   static override from(tx: string | TransactionLike): Transaction {
+//     if (typeof tx === 'string') {
+//       const payload = ethers.getBytes(tx);
+//       if (payload[0] !== EIP712_TX_TYPE) {
+//         return Transaction.from(ethers.Transaction.from(tx));
+//       } else {
+//         return Transaction.from(parseEip712(payload));
+//       }
+//     } else {
+//       const result = new Transaction();
+//       if (tx.type === EIP712_TX_TYPE) {
+//         result.type = EIP712_TX_TYPE;
+//         result.customData = tx.customData;
+//         result.from = tx.from!;
+//       }
+//       if (tx.type !== null && tx.type !== undefined) result.type = tx.type;
+//       if (tx.to) result.to = tx.to;
+//       if (tx.nonce) result.nonce = tx.nonce;
+//       if (tx.gasLimit) result.gasLimit = tx.gasLimit;
+//       if (tx.gasPrice) result.gasPrice = tx.gasPrice;
+//       if (tx.maxPriorityFeePerGas)
+//         result.maxPriorityFeePerGas = tx.maxPriorityFeePerGas;
+//       if (tx.maxFeePerGas) result.maxFeePerGas = tx.maxFeePerGas;
+//       if (tx.data) result.data = tx.data;
+//       if (tx.value) result.value = tx.value;
+//       if (tx.chainId) result.chainId = tx.chainId;
+//       if (tx.signature) result.signature = EthersSignature.from(tx.signature);
+//       result.accessList = null;
 
-      if (tx.from) {
-        assertArgument(
-          result.isSigned(),
-          'unsigned transaction cannot define from',
-          'tx',
-          tx
-        );
-        assertArgument(
-          isAddressEq(result.from, tx.from),
-          'from mismatch',
-          'tx',
-          tx
-        );
-      }
+//       if (tx.from) {
+//         assertArgument(
+//           result.isSigned(),
+//           'unsigned transaction cannot define from',
+//           'tx',
+//           tx
+//         );
+//         assertArgument(
+//           isAddressEq(result.from, tx.from),
+//           'from mismatch',
+//           'tx',
+//           tx
+//         );
+//       }
 
-      if (tx.hash) {
-        assertArgument(
-          result.isSigned(),
-          'unsigned transaction cannot define hash',
-          'tx',
-          tx
-        );
-        assertArgument(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
-      }
+//       if (tx.hash) {
+//         assertArgument(
+//           result.isSigned(),
+//           'unsigned transaction cannot define hash',
+//           'tx',
+//           tx
+//         );
+//         assertArgument(result.hash === tx.hash, 'hash mismatch', 'tx', tx);
+//       }
 
-      return result;
-    }
-  }
+//       return result;
+//     }
+//   }
 
-  override get serialized(): string {
-    if (!this.customData && this.#type !== EIP712_TX_TYPE) {
-      return super.serialized;
-    }
-    return serializeEip712(this, this.signature!);
-  }
+//   override get serialized(): string {
+//     if (!this.customData && this.#type !== EIP712_TX_TYPE) {
+//       return super.serialized;
+//     }
+//     return serializeEip712(this, this.signature!);
+//   }
 
-  override get unsignedSerialized(): string {
-    if (!this.customData && this.type !== EIP712_TX_TYPE) {
-      return super.unsignedSerialized;
-    }
-    return serializeEip712(this);
-  }
+//   override get unsignedSerialized(): string {
+//     if (!this.customData && this.type !== EIP712_TX_TYPE) {
+//       return super.unsignedSerialized;
+//     }
+//     return serializeEip712(this);
+//   }
 
-  override toJSON(): any {
-    const {customData} = this;
-    return {
-      ...super.toJSON(),
-      type: !this.#type ? this.type : this.#type,
-      customData,
-    };
-  }
+//   override toJSON(): any {
+//     const {customData} = this;
+//     return {
+//       ...super.toJSON(),
+//       type: !this.#type ? this.type : this.#type,
+//       customData,
+//     };
+//   }
 
-  override get typeName(): string | null {
-    return this.#type === EIP712_TX_TYPE ? 'zksync' : super.typeName;
-  }
+//   override get typeName(): string | null {
+//     return this.#type === EIP712_TX_TYPE ? 'zksync' : super.typeName;
+//   }
 
-  override isSigned(): this is Transaction & {
-    type: number;
-    typeName: string;
-    from: string;
-    signature: Signature;
-  } {
-    return this.#type === EIP712_TX_TYPE
-      ? this.customData?.customSignature !== null
-      : super.isSigned();
-  }
+//   override isSigned(): this is Transaction & {
+//     type: number;
+//     typeName: string;
+//     from: string;
+//     signature: Signature;
+//   } {
+//     return this.#type === EIP712_TX_TYPE
+//       ? this.customData?.customSignature !== null
+//       : super.isSigned();
+//   }
 
-  override get hash(): string | null {
-    if (this.#type === EIP712_TX_TYPE) {
-      return this.customData?.customSignature !== null
-        ? eip712TxHash(this)
-        : null;
-    } else {
-      return super.hash;
-    }
-  }
+//   override get hash(): string | null {
+//     if (this.#type === EIP712_TX_TYPE) {
+//       return this.customData?.customSignature !== null
+//         ? eip712TxHash(this)
+//         : null;
+//     } else {
+//       return super.hash;
+//     }
+//   }
 
-  override get from(): string | null {
-    return this.#type === EIP712_TX_TYPE ? this.#from! : super.from;
-  }
-  override set from(value: string | null) {
-    this.#from = value;
-  }
-}
+//   override get from(): string | null {
+//     return this.#type === EIP712_TX_TYPE ? this.#from! : super.from;
+//   }
+//   override set from(value: string | null) {
+//     this.#from = value;
+//   }
+// }
 
 /**
  * Represents a L2 to L1 transaction log.
@@ -640,10 +613,10 @@ export interface L2ToL1Log {
  * A `TransactionRequest` is an extension of {@link ethers.TransactionRequest} with additional features for interacting
  * with ZKsync Era.
  */
-export interface TransactionRequest extends EthersTransactionRequest {
-  /** The custom data for EIP712 transaction metadata. */
-  customData?: null | Eip712Meta;
-}
+// export interface TransactionRequest extends EthersTransactionRequest {
+//   /** The custom data for EIP712 transaction metadata. */
+//   customData?: null | Eip712Meta;
+// }
 
 /**
  * Interface representation of priority op response that extends {@link ethers.TransactionResponse} and adds a function
@@ -714,17 +687,17 @@ export interface EthereumSignature {
  * Represents the input data structure for a paymaster.
  * It can be either approval-based or general.
  */
-export type PaymasterInput =
-  | ApprovalBasedPaymasterInput
-  | GeneralPaymasterInput;
+// export type PaymasterInput =
+//   | ApprovalBasedPaymasterInput
+//   | GeneralPaymasterInput;
 
 /** Enumerated list of account abstraction versions. */
-export enum AccountAbstractionVersion {
-  /** Used for contracts that are not accounts. */
-  None = 0,
-  /** Used for contracts that are accounts. */
-  Version1 = 1,
-}
+// export enum AccountAbstractionVersion {
+//   /** Used for contracts that are not accounts. */
+//   None = 0,
+//   /** Used for contracts that are accounts. */
+//   Version1 = 1,
+// }
 
 /**
  * Enumerated list of account nonce ordering formats.
@@ -744,114 +717,114 @@ export enum AccountNonceOrdering {
  * Interface representing contract account information containing details on the supported account abstraction version
  * and nonce ordering format.
  */
-export interface ContractAccountInfo {
-  /** The supported account abstraction version. */
-  supportedAAVersion: AccountAbstractionVersion;
-  /** The nonce ordering format. */
-  nonceOrdering: AccountNonceOrdering;
-}
+// export interface ContractAccountInfo {
+//   /** The supported account abstraction version. */
+//   supportedAAVersion: AccountAbstractionVersion;
+//   /** The nonce ordering format. */
+//   nonceOrdering: AccountNonceOrdering;
+// }
 
-/** Contains L1 batch details. */
-export interface BatchDetails {
-  /** L1 batch number. */
-  number: number;
-  /** Unix timestamp when the batch was processed. */
-  timestamp: number;
-  /** Number of L1 transactions included in the batch. */
-  l1TxCount: number;
-  /** Number of L2 transactions associated with this batch. */
-  l2TxCount: number;
-  /** Root hash of the state after processing the batch. */
-  rootHash?: string;
-  /** Current status of the batch (e.g., verified). */
-  status: string;
-  /** Transaction hash of the commit operation on L1. */
-  commitTxHash?: string;
-  /** Timestamp when the block was committed on L1. */
-  committedAt?: Date;
-  /** Transaction hash of the proof submission on L1. */
-  proveTxHash?: string;
-  /** Timestamp when the proof was submitted on L1. */
-  provenAt?: Date;
-  /** Transaction hash of the execution on L1. */
-  executeTxHash?: string;
-  /** Timestamp when the block execution was completed on L1. */
-  executedAt?: Date;
-  /** L1 gas price at the time of the block's execution. */
-  l1GasPrice: number;
-  /** Fair gas price on L2 at the time of the block's execution. */
-  l2FairGasPrice: number;
-  /** Hashes of the base system contracts involved in the batch. */
-  baseSystemContractsHashes: {
-    bootloader: string;
-    default_aa: string;
-  };
-}
+// /** Contains L1 batch details. */
+// export interface BatchDetails {
+//   /** L1 batch number. */
+//   number: number;
+//   /** Unix timestamp when the batch was processed. */
+//   timestamp: number;
+//   /** Number of L1 transactions included in the batch. */
+//   l1TxCount: number;
+//   /** Number of L2 transactions associated with this batch. */
+//   l2TxCount: number;
+//   /** Root hash of the state after processing the batch. */
+//   rootHash?: string;
+//   /** Current status of the batch (e.g., verified). */
+//   status: string;
+//   /** Transaction hash of the commit operation on L1. */
+//   commitTxHash?: string;
+//   /** Timestamp when the block was committed on L1. */
+//   committedAt?: Date;
+//   /** Transaction hash of the proof submission on L1. */
+//   proveTxHash?: string;
+//   /** Timestamp when the proof was submitted on L1. */
+//   provenAt?: Date;
+//   /** Transaction hash of the execution on L1. */
+//   executeTxHash?: string;
+//   /** Timestamp when the block execution was completed on L1. */
+//   executedAt?: Date;
+//   /** L1 gas price at the time of the block's execution. */
+//   l1GasPrice: number;
+//   /** Fair gas price on L2 at the time of the block's execution. */
+//   l2FairGasPrice: number;
+//   /** Hashes of the base system contracts involved in the batch. */
+//   baseSystemContractsHashes: {
+//     bootloader: string;
+//     default_aa: string;
+//   };
+// }
 
 /** Contains block information. */
-export interface BlockDetails {
-  /** Number of the block. */
-  number: number;
-  /** Unix timestamp when the block was committed. */
-  timestamp: number;
-  /** Corresponding L1 batch number. */
-  l1BatchNumber: number;
-  /** Number of L1 transactions included in the block. */
-  l1TxCount: number;
-  /** Number of L2 transactions included in the block. */
-  l2TxCount: number;
-  /** Root hash of the block's state after execution. */
-  rootHash?: string;
-  /** Current status of the block (e.g., verified, executed). */
-  status: string;
-  /** Transaction hash of the commit operation on L1. */
-  commitTxHash?: string;
-  /** Timestamp when the block was committed on L1. */
-  committedAt?: Date;
-  /** Transaction hash of the proof submission on L1. */
-  proveTxHash?: string;
-  /** Timestamp when the proof was submitted on L1. */
-  provenAt?: Date;
-  /** Transaction hash of the execution on L1. */
-  executeTxHash?: string;
-  /** Timestamp when the block execution was completed on L1. */
-  executedAt?: Date;
-  /** L1 gas price at the time of the block's execution. */
-  l1GasPrice: number;
-  /** Fair gas price on L2 at the time of the block's execution. */
-  l2FairGasPrice: number;
-  /** A collection of hashes for the base system contracts involved in the block. */
-  baseSystemContractsHashes: {
-    bootloader: string;
-    default_aa: string;
-  };
-  /** Address of the operator who committed the block. */
-  operatorAddress: string;
-  /** Version of the ZKsync protocol the block was committed under. */
-  protocolVersion: string;
-}
+// export interface BlockDetails {
+//   /** Number of the block. */
+//   number: number;
+//   /** Unix timestamp when the block was committed. */
+//   timestamp: number;
+//   /** Corresponding L1 batch number. */
+//   l1BatchNumber: number;
+//   /** Number of L1 transactions included in the block. */
+//   l1TxCount: number;
+//   /** Number of L2 transactions included in the block. */
+//   l2TxCount: number;
+//   /** Root hash of the block's state after execution. */
+//   rootHash?: string;
+//   /** Current status of the block (e.g., verified, executed). */
+//   status: string;
+//   /** Transaction hash of the commit operation on L1. */
+//   commitTxHash?: string;
+//   /** Timestamp when the block was committed on L1. */
+//   committedAt?: Date;
+//   /** Transaction hash of the proof submission on L1. */
+//   proveTxHash?: string;
+//   /** Timestamp when the proof was submitted on L1. */
+//   provenAt?: Date;
+//   /** Transaction hash of the execution on L1. */
+//   executeTxHash?: string;
+//   /** Timestamp when the block execution was completed on L1. */
+//   executedAt?: Date;
+//   /** L1 gas price at the time of the block's execution. */
+//   l1GasPrice: number;
+//   /** Fair gas price on L2 at the time of the block's execution. */
+//   l2FairGasPrice: number;
+//   /** A collection of hashes for the base system contracts involved in the block. */
+//   baseSystemContractsHashes: {
+//     bootloader: string;
+//     default_aa: string;
+//   };
+//   /** Address of the operator who committed the block. */
+//   operatorAddress: string;
+//   /** Version of the ZKsync protocol the block was committed under. */
+//   protocolVersion: string;
+// }
 
 /** Contains transaction details information. */
-export interface TransactionDetails {
-  /** Indicates whether the transaction originated on Layer 1. */
-  isL1Originated: boolean;
-  /** Current status of the transaction (e.g., verified). */
-  status: string;
-  /** Transaction fee. */
-  fee: BigNumberish;
-  /** Gas amount per unit of public data for this transaction. */
-  gasPerPubdata: BigNumberish;
-  /** Address of the transaction initiator. */
-  initiatorAddress: Address;
-  /** Timestamp when the transaction was received. */
-  receivedAt: Date;
-  /** Transaction hash of the commit operation. */
-  ethCommitTxHash?: string;
-  /** Transaction hash of the proof submission. */
-  ethProveTxHash?: string;
-  /** Transaction hash of the execution. */
-  ethExecuteTxHash?: string;
-}
+// export interface TransactionDetails {
+//   /** Indicates whether the transaction originated on Layer 1. */
+//   isL1Originated: boolean;
+//   /** Current status of the transaction (e.g., verified). */
+//   status: string;
+//   /** Transaction fee. */
+//   fee: BigNumberish;
+//   /** Gas amount per unit of public data for this transaction. */
+//   gasPerPubdata: BigNumberish;
+//   /** Address of the transaction initiator. */
+//   initiatorAddress: Address;
+//   /** Timestamp when the transaction was received. */
+//   receivedAt: Date;
+//   /** Transaction hash of the commit operation. */
+//   ethCommitTxHash?: string;
+//   /** Transaction hash of the proof submission. */
+//   ethProveTxHash?: string;
+//   /** Transaction hash of the execution. */
+//   ethExecuteTxHash?: string;
+// }
 
 /** Represents the full deposit fee containing fees for both L1 and L2 transactions. */
 export interface FullDepositFee {
@@ -887,10 +860,6 @@ export interface RawBlockTransaction {
       input: {
         hash: string;
         data: BytesLike[];
-      };
-      paymasterParams: {
-        paymaster: Address;
-        paymasterInput: BytesLike[];
       };
     };
   };
@@ -1019,25 +988,11 @@ export type PayloadSigner = (
  * @param [provider] The provider is used to fetch data from the network if it is required for signing.
  * @returns A promise that resolves to the populated transaction.
  */
-export type TransactionBuilder = (
-  transaction: TransactionRequest,
-  secret?: any,
-  provider?: null | Provider
-) => Promise<TransactionLike>;
-
-/**
- * Encapsulates the required input parameters for creating a signer for `SmartAccount`.
- */
-export interface SmartAccountSigner {
-  /** Address to which the `SmartAccount` is bound. */
-  address: string;
-  /** Secret in any form that can be used for signing different payloads. */
-  secret: any;
-  /** Custom method for signing different payloads. */
-  payloadSigner?: PayloadSigner;
-  /** Custom method for populating transaction requests. */
-  transactionBuilder?: TransactionBuilder;
-}
+// export type TransactionBuilder = (
+//   transaction: TransactionRequest,
+//   secret?: any,
+//   provider?: null | Provider
+// ) => Promise<TransactionLike>;
 
 /**
  * Contains parameters for finalizing the L2->L1 deposit transaction.

@@ -31,22 +31,15 @@ import {
 import {
   Address,
   TransactionResponse,
-  TransactionRequest,
   TransactionStatus,
   PriorityOpResponse,
   BalancesMap,
   TransactionReceipt,
   Block,
   Log,
-  TransactionDetails,
-  BlockDetails,
-  ContractAccountInfo,
   Network as ZkSyncNetwork,
-  BatchDetails,
   Fee,
-  Transaction,
   RawBlockTransaction,
-  PaymasterParams,
   StorageProof,
   LogProof,
   Token,
@@ -60,7 +53,6 @@ import {
   CONTRACT_DEPLOYER_ADDRESS,
   CONTRACT_DEPLOYER,
   sleep,
-  EIP712_TX_TYPE,
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   BOOTLOADER_FORMAL_ADDRESS,
   ETH_ADDRESS_IN_CONTRACTS,
@@ -162,7 +154,6 @@ export function JsonRpcApiProvider<
     override async getTransactionReceipt(
       txHash: string
     ): Promise<TransactionReceipt | null> {
-      console.log("hit getTransactionReceipt");
       return (await super.getTransactionReceipt(
         txHash
       )) as TransactionReceipt | null;
@@ -291,74 +282,11 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * @deprecated JSON-RPC endpoint has been removed. Use `eth_protocolVersion` to fetch current protocol semantic version.
-     *
-     * Return the protocol version.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getprotocolversion zks_getProtocolVersion} JSON-RPC method.
-     *
-     * @param [id] Specific version ID.
-     */
-    async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
-      return await this.send('zks_getProtocolVersion', [id]);
-    }
-
-    /**
-     * Returns an estimate of the amount of gas required to submit a transaction from L1 to L2 as a bigint object.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-estimategasl1tol2 zks_estimateL1ToL2} JSON-RPC method.
-     *
-     * @param transaction The transaction request.
-     */
-    async estimateGasL1(transaction: TransactionRequest): Promise<bigint> {
-      const res = await this.send('zks_estimateGasL1ToL2', [
-        this.getRpcTransaction(transaction),
-      ]);
-      return BigInt(res);
-    }
-
-    /**
-     * Returns an estimated {@link Fee} for requested transaction.
-     *
-     * @param transaction The transaction request.
-     */
-    async estimateFee(transaction: TransactionRequest): Promise<Fee> {
-      console.log("estimateFee hit");
-      const fee = await this.send('zks_estimateFee', [
-        await this.getRpcTransaction(transaction),
-      ]);
-      return formatFee(fee);
-    }
-
-    /**
-     * Returns the current fee parameters.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getFeeParams zks_getFeeParams} JSON-RPC method.
-     */
-    async getFeeParams(): Promise<FeeParams> {
-       console.log("zks_getFeeParams hit");
-      return await this.send('zks_getFeeParams', []);
-    }
-
-    /**
      * Returns an estimate (best guess) of the gas price to use in a transaction.
      */
     async getGasPrice(): Promise<bigint> {
       const feeData = await this.getFeeData();
       return feeData.gasPrice!;
-    }
-
-    /**
-     * Returns an estimate (best guess) of the gas per pubdata to use in a transaction.
-     */
-    async getGasPerPubdata(): Promise<bigint> {
-      console.log("zks_gasPerPubdata hit");
-      return await this.send('zks_gasPerPubdata', []).catch(_ => {
-        // Presuming `zks_gasPerPubdata` is not available on this environment yet.
-        // Using default value.
-        // TODO: Remove this workaround when all chains have been upgraded
-        return BigInt(DEFAULT_GAS_PER_PUBDATA_LIMIT);
-      });
     }
 
     /**
@@ -383,25 +311,6 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * Returns the range of blocks contained within a batch given by batch number.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchblockrange zks_getL1BatchBlockRange} JSON-RPC method.
-     *
-     * @param l1BatchNumber The L1 batch number.
-     */
-    async getL1BatchBlockRange(
-      l1BatchNumber: number
-    ): Promise<[number, number] | null> {
-      const range = await this.send('zks_getL1BatchBlockRange', [
-        l1BatchNumber,
-      ]);
-      if (!range) {
-        return null;
-      }
-      return [parseInt(range[0], 16), parseInt(range[1], 16)];
-    }
-
-    /**
      * Returns the Bridgehub smart contract address.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-getbridgehubcontract zks_getBridgehubContract} JSON-RPC method.
@@ -414,39 +323,6 @@ export function JsonRpcApiProvider<
         );
       }
       return this.contractAddresses().bridgehubContract!;
-    }
-
-    /**
-     * @deprecated JSON-RPC endpoint has been removed. Use `Wallet.getMainContractAddress`.
-     *
-     * Returns the main ZKsync Era smart contract address.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getmaincontract zks_getMainContract} JSON-RPC method.
-     */
-    async getMainContractAddress(): Promise<Address> {
-      console.log("zks_getMainContract hit");
-      if (!this.contractAddresses().mainContract) {
-        this.contractAddresses().mainContract = await this.send(
-          'zks_getMainContract',
-          []
-        );
-      }
-      return this.contractAddresses().mainContract!;
-    }
-
-    /**
-     * @deprecated JSON-RPC endpoint has been removed. Use `Wallet.getBaseToken`.
-     * Returns the L1 base token address.
-     */
-    async getBaseTokenContractAddress(): Promise<Address> {
-      console.log("zks_getBaseTokenL1Address hit");
-      if (!this.contractAddresses().baseToken) {
-        this.contractAddresses().baseToken = await this.send(
-          'zks_getBaseTokenL1Address',
-          []
-        );
-      }
-      return ethers.getAddress(this.contractAddresses().baseToken!);
     }
 
     /**
@@ -474,18 +350,6 @@ export function JsonRpcApiProvider<
       const assetId = encodeNativeTokenVaultAssetId(l1ChainId, token);
 
       return isAddressEq(baseAssetId, assetId);
-    }
-
-    /**
-     * Returns the testnet {@link https://docs.zksync.io/build/developer-reference/account-abstraction.html#paymasters paymaster address}
-     * if available, or `null`.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettestnetpaymaster zks_getTestnetPaymaster} JSON-RPC method.
-     */
-    async getTestnetPaymasterAddress(): Promise<Address | null> {
-      // Unlike contract's addresses, the testnet paymaster is not cached, since it can be trivially changed
-      // on the fly by the server and should not be relied on to be constant
-      return await this.send('zks_getTestnetPaymaster', []);
     }
 
     /**
@@ -592,55 +456,6 @@ export function JsonRpcApiProvider<
     }
 
     /**
-     * @deprecated JSON-RPC endpoint has been removed. Use `addresstokenbalance` method from the block explorer API
-     *  ({@link https://block-explorer-api.mainnet.zksync.io/docs#/Account%20API/ApiController_getAccountTokenHoldings})
-     *  or other token APIs from providers like Alchemy or QuickNode.
-     *
-     * Returns all balances for confirmed tokens given by an account address.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getallaccountbalances zks_getAllAccountBalances} JSON-RPC method.
-     *
-     * @param address The account address.
-     */
-    async getAllAccountBalances(address: Address): Promise<BalancesMap> {
-      const balances = await this.send('zks_getAllAccountBalances', [address]);
-      for (const token in balances) {
-        balances[token] = BigInt(balances[token]);
-      }
-      return balances;
-    }
-
-    /**
-     * @deprecated JSON-RPC endpoint has been removed. Use third-party APIs such as Coingecko or {@link https://tokenlists.org}.
-     *
-     * Returns confirmed tokens. Confirmed token is any token bridged to ZKsync Era via the official bridge.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks_getconfirmedtokens zks_getConfirmedTokens} JSON-RPC method.
-     *
-     * @param start The token id from which to start.
-     * @param limit The maximum number of tokens to list.
-     */
-    async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
-      const tokens: Token[] = await this.send('zks_getConfirmedTokens', [
-        start,
-        limit,
-      ]);
-      return tokens.map(token => ({address: token.l2Address, ...token}));
-    }
-
-    /**
-     * @deprecated In favor of {@link getL1ChainId}
-     *
-     * Returns the L1 chain ID.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-l1chainid zks_L1ChainId} JSON-RPC method.
-     */
-    async l1ChainId(): Promise<number> {
-      const res = await this.send('zks_L1ChainId', []);
-      return Number(res);
-    }
-
-    /**
      * Returns the L1 chain ID.
      *
      * Calls the {@link https://docs.zksync.io/build/api.html#zks-l1chainid zks_L1ChainId} JSON-RPC method.
@@ -648,118 +463,6 @@ export function JsonRpcApiProvider<
     async getL1ChainId(): Promise<number> {
       const ntv = await this.connectL2NativeTokenVault();
       return Number(await ntv.L1_CHAIN_ID());
-    }
-
-    /**
-     * Returns the latest L1 batch number.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-l1batchnumber zks_L1BatchNumber}  JSON-RPC method.
-     */
-    async getL1BatchNumber(): Promise<number> {
-      const number = await this.send('zks_L1BatchNumber', []);
-      return Number(number);
-    }
-
-    /**
-     * Returns data pertaining to a given batch.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getl1batchdetails zks_getL1BatchDetails} JSON-RPC method.
-     *
-     * @param number The L1 batch number.
-     */
-    async getL1BatchDetails(number: number): Promise<BatchDetails> {
-      return await this.send('zks_getL1BatchDetails', [number]);
-    }
-
-    /**
-     * Returns additional zkSync-specific information about the L2 block.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getblockdetails zks_getBlockDetails}  JSON-RPC method.
-     *
-     * @param number The block number.
-     */
-    async getBlockDetails(number: number): Promise<BlockDetails> {
-      return await this.send('zks_getBlockDetails', [number]);
-    }
-
-    /**
-     * Returns data from a specific transaction given by the transaction hash.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-gettransactiondetails zks_getTransactionDetails} JSON-RPC method.
-     *
-     * @param txHash The transaction hash.
-     */
-    async getTransactionDetails(
-      txHash: BytesLike
-    ): Promise<TransactionDetails> {
-      return await this.send('zks_getTransactionDetails', [txHash]);
-    }
-
-    /**
-     * Returns bytecode of a contract given by its hash.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getbytecodebyhash zks_getBytecodeByHash} JSON-RPC method.
-     *
-     * @param bytecodeHash The bytecode hash.
-     */
-    async getBytecodeByHash(bytecodeHash: BytesLike): Promise<Uint8Array> {
-      return await this.send('zks_getBytecodeByHash', [bytecodeHash]);
-    }
-
-    /**
-     * Returns data of transactions in a block.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getrawblocktransactions zks_getRawBlockTransactions}  JSON-RPC method.
-     *
-     * @param number The block number.
-     */
-    async getRawBlockTransactions(
-      number: number
-    ): Promise<RawBlockTransaction[]> {
-      return await this.send('zks_getRawBlockTransactions', [number]);
-    }
-
-    /**
-     * Returns Merkle proofs for one or more storage values at the specified account along with a Merkle proof
-     * of their authenticity.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks-getproof zks_getProof} JSON-RPC method.
-     *
-     * @param address The account to fetch storage values and proofs for.
-     * @param keys The vector of storage keys in the account.
-     * @param l1BatchNumber The number of the L1 batch specifying the point in time at which the requested values are returned.
-     */
-    async getProof(
-      address: Address,
-      keys: string[],
-      l1BatchNumber: number
-    ): Promise<StorageProof> {
-      return await this.send('zks_getProof', [address, keys, l1BatchNumber]);
-    }
-
-    /**
-     * @deprecated JSON-RPC endpoint has been destabilized and is now available as `unstable_sendRawTransactionWithDetailedOutput`.
-     *
-     * Executes a transaction and returns its hash, storage logs, and events that would have been generated if the
-     * transaction had already been included in the block. The API has a similar behaviour to `eth_sendRawTransaction`
-     * but with some extra data returned from it.
-     *
-     * With this API Consumer apps can apply "optimistic" events in their applications instantly without having to
-     * wait for ZKsync block confirmation time.
-     *
-     * It’s expected that the optimistic logs of two uncommitted transactions that modify the same state will not
-     * have causal relationships between each other.
-     *
-     * Calls the {@link https://docs.zksync.io/build/api.html#zks_sendRawTransactionWithDetailedOutput zks_sendRawTransactionWithDetailedOutput} JSON-RPC method.
-     *
-     * @param signedTx The signed transaction that needs to be broadcasted.
-     */
-    async sendRawTransactionWithDetailedOutput(
-      signedTx: string
-    ): Promise<TransactionWithDetailedOutput> {
-      return await this.send('zks_sendRawTransactionWithDetailedOutput', [
-        signedTx,
-      ]);
     }
 
     /**
@@ -780,7 +483,6 @@ export function JsonRpcApiProvider<
       from?: Address;
       to?: Address;
       bridgeAddress?: Address;
-      paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
@@ -802,7 +504,6 @@ export function JsonRpcApiProvider<
       tx.to ??= tx.from;
       tx.overrides ??= {};
       tx.overrides.from ??= tx.from;
-      tx.overrides.type ??= EIP712_TX_TYPE;
 
       if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
         if (!tx.overrides.value) {
@@ -825,14 +526,6 @@ export function JsonRpcApiProvider<
           tx.to!,
           tx.overrides
         );
-        if (tx.paymasterParams) {
-          return {
-            ...populatedTx,
-            customData: {
-              paymasterParams: tx.paymasterParams,
-            },
-          };
-        }
         return populatedTx;
       }
 
@@ -882,14 +575,6 @@ export function JsonRpcApiProvider<
           tx.overrides
         );
       }
-      if (tx.paymasterParams) {
-        return {
-          ...populatedTx,
-          customData: {
-            paymasterParams: tx.paymasterParams,
-          },
-        };
-      }
       return populatedTx;
     }
 
@@ -902,7 +587,6 @@ export function JsonRpcApiProvider<
      * @param [transaction.from] The sender's address.
      * @param [transaction.to] The recipient's address.
      * @param [transaction.bridgeAddress] The bridge address.
-     * @param [transaction.paymasterParams] Paymaster parameters.
      * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
      */
     async estimateGasWithdraw(transaction: {
@@ -911,7 +595,6 @@ export function JsonRpcApiProvider<
       from?: Address;
       to?: Address;
       bridgeAddress?: Address;
-      paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<bigint> {
       const withdrawTx = await this.getWithdrawTx(transaction);
@@ -925,7 +608,6 @@ export function JsonRpcApiProvider<
      * @param transaction.to The address of the recipient.
      * @param transaction.amount The amount of the token to transfer.
      * @param [transaction.token] The address of the token. Defaults to ETH.
-     * @param [transaction.paymasterParams] Paymaster parameters.
      * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
      */
     async getTransferTx(transaction: {
@@ -933,7 +615,6 @@ export function JsonRpcApiProvider<
       amount: BigNumberish;
       from?: Address;
       token?: Address;
-      paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<EthersTransactionRequest> {
       const {...tx} = transaction;
@@ -948,21 +629,8 @@ export function JsonRpcApiProvider<
 
       tx.overrides ??= {};
       tx.overrides.from ??= tx.from;
-      tx.overrides.type ??= EIP712_TX_TYPE;
 
       if (isAddressEq(tx.token, L2_BASE_TOKEN_ADDRESS)) {
-        if (tx.paymasterParams) {
-          return {
-            ...tx.overrides,
-            type: EIP712_TX_TYPE,
-            to: tx.to,
-            value: tx.amount,
-            customData: {
-              paymasterParams: tx.paymasterParams,
-            },
-          };
-        }
-
         return {
           ...tx.overrides,
           to: tx.to,
@@ -975,14 +643,6 @@ export function JsonRpcApiProvider<
           tx.amount,
           tx.overrides
         );
-        if (tx.paymasterParams) {
-          return {
-            ...populatedTx,
-            customData: {
-              paymasterParams: tx.paymasterParams,
-            },
-          };
-        }
         return populatedTx;
       }
     }
@@ -994,7 +654,6 @@ export function JsonRpcApiProvider<
      * @param transaction.to The address of the recipient.
      * @param transaction.amount The amount of the token to transfer.
      * @param [transaction.token] The address of the token. Defaults to ETH.
-     * @param [transaction.paymasterParams] Paymaster parameters.
      * @param [transaction.overrides] Transaction's overrides which may be used to pass L2 `gasLimit`, `gasPrice`, `value`, etc.
      */
     async estimateGasTransfer(transaction: {
@@ -1002,7 +661,6 @@ export function JsonRpcApiProvider<
       amount: BigNumberish;
       from?: Address;
       token?: Address;
-      paymasterParams?: PaymasterParams;
       overrides?: ethers.Overrides;
     }): Promise<bigint> {
       const transferTx = await this.getTransferTx(transaction);
@@ -1093,7 +751,7 @@ export function JsonRpcApiProvider<
         network: this.getNetwork(),
       });
 
-      const tx = Transaction.from(signedTx);
+      const tx = ethers.Transaction.from(signedTx);
       if (tx.hash !== hash) {
         throw new Error('@TODO: the returned hash did not match!');
       }
@@ -1103,60 +761,8 @@ export function JsonRpcApiProvider<
       );
     }
 
-    /**
-     * @deprecated Use `Wallet.getL2TransactionFromPriorityOp`.
-     * Returns a L2 transaction response from L1 transaction response.
-     *
-     * @param l1TxResponse The L1 transaction response.
-     */
-    async getL2TransactionFromPriorityOp(
-      l1TxResponse: ethers.TransactionResponse
-    ): Promise<TransactionResponse> {
-      const receipt = await l1TxResponse.wait();
-      const l2Hash = getL2HashFromPriorityOp(
-        receipt as ethers.TransactionReceipt,
-        await this.getMainContractAddress()
-      );
-
-      let status = null;
-      do {
-        status = await this.getTransactionStatus(l2Hash);
-        await sleep(this.pollingInterval);
-      } while (status === TransactionStatus.NotFound);
-
-      return await this.getTransaction(l2Hash);
-    }
-
-    /**
-     * @deprecated Use `Wallet.getPriorityOpResponse`.
-     * Returns a {@link PriorityOpResponse} from L1 transaction response.
-     *
-     * @param l1TxResponse The L1 transaction response.
-     */
-    async getPriorityOpResponse(
-      l1TxResponse: ethers.TransactionResponse
-    ): Promise<PriorityOpResponse> {
-      const l2Response = {...l1TxResponse} as PriorityOpResponse;
-
-      l2Response.waitL1Commit = l1TxResponse.wait.bind(
-        l1TxResponse
-      ) as PriorityOpResponse['waitL1Commit'];
-      l2Response.wait = async () => {
-        const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
-        return await l2Tx.wait();
-      };
-      l2Response.waitFinalize = async () => {
-        const l2Tx = await this.getL2TransactionFromPriorityOp(l1TxResponse);
-        return await l2Tx.waitFinalize();
-      };
-
-      return l2Response;
-    }
-
     async _getPriorityOpConfirmationL2ToL1Log(txHash: string, index = 0) {
-      console.log("getpro");
       const hash = ethers.hexlify(txHash);
-      console.log("HASH:", hash);
       const receipt = await this.getTransactionReceipt(hash);
       if (!receipt) {
         throw new Error('Transaction is not mined!');
@@ -1188,31 +794,31 @@ export function JsonRpcApiProvider<
       return {
         l1BatchNumber: l2ToL1Log.l1BatchNumber,
         l2MessageIndex: proof!.id,
-        // l2TxNumberInBlock: null, // TODO: dustin fix correctly
+        //l2TxNumberInBlock: null, // TODO: dustin fix correctly
         proof: proof!.proof,
       };
     }
 
-    /**
-     * Returns the version of the supported account abstraction and nonce ordering from a given contract address.
-     *
-     * @param address The contract address.
-     */
-    async getContractAccountInfo(
-      address: Address
-    ): Promise<ContractAccountInfo> {
-      const deployerContract = new Contract(
-        CONTRACT_DEPLOYER_ADDRESS,
-        CONTRACT_DEPLOYER.fragments,
-        this
-      );
-      const data = await deployerContract.getAccountInfo(address);
+    // /**
+    //  * Returns the version of the supported account abstraction and nonce ordering from a given contract address.
+    //  *
+    //  * @param address The contract address.
+    //  */
+    // async getContractAccountInfo(
+    //   address: Address
+    // ): Promise<ContractAccountInfo> {
+    //   const deployerContract = new Contract(
+    //     CONTRACT_DEPLOYER_ADDRESS,
+    //     CONTRACT_DEPLOYER.fragments,
+    //     this
+    //   );
+    //   const data = await deployerContract.getAccountInfo(address);
 
-      return {
-        supportedAAVersion: Number(data.supportedAAVersion),
-        nonceOrdering: Number(data.nonceOrdering),
-      };
-    }
+    //   return {
+    //     supportedAAVersion: Number(data.supportedAAVersion),
+    //     nonceOrdering: Number(data.nonceOrdering),
+    //   };
+    // }
 
     /**
      * @deprecated Use `Wallet.estimateDefaultBridgeDepositL2Gas`.
@@ -1241,12 +847,12 @@ export function JsonRpcApiProvider<
         ? ETH_ADDRESS_IN_CONTRACTS
         : token;
       if (await this.isBaseToken(token)) {
-        return await this.estimateL1ToL2Execute({
-          contractAddress: to,
-          gasPerPubdataByte: gasPerPubdataByte,
-          caller: from,
-          calldata: '0x',
-          l2Value: amount,
+        return await this.estimateGas({
+          to: to,
+          // gasPerPubdataByte: gasPerPubdataByte, // TODO: dustin apply gas here
+          from: from,
+          data: '0x',
+          value: amount,
         });
       } else {
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
@@ -1256,7 +862,6 @@ export function JsonRpcApiProvider<
         const l2BridgeAddress = bridgeAddresses.sharedL2;
         const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
 
-        console.log("at the return here");
         return await this.estimateCustomBridgeDepositL2Gas(
           l1BridgeAddress,
           l2BridgeAddress,
@@ -1302,57 +907,12 @@ export function JsonRpcApiProvider<
         amount,
         bridgeData
       );
-      console.log("nested bullshit");
-      return await this.estimateL1ToL2Execute({
-        caller: applyL1ToL2Alias(l1BridgeAddress),
-        contractAddress: l2BridgeAddress,
-        gasPerPubdataByte: gasPerPubdataByte,
-        calldata: calldata,
-        l2Value: l2Value,
-      });
-    }
-
-    /**
-     * Returns gas estimation for an L1 to L2 execute operation.
-     *
-     * @param transaction The transaction details.
-     * @param transaction.contractAddress The address of the contract.
-     * @param transaction.calldata The transaction call data.
-     * @param [transaction.caller] The caller's address.
-     * @param [transaction.l2Value] The deposit amount.
-     * @param [transaction.factoryDeps] An array of bytes containing contract bytecode.
-     * @param [transaction.gasPerPubdataByte] The current gas per byte value.
-     * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
-     */
-    async estimateL1ToL2Execute(transaction: {
-      contractAddress: Address;
-      calldata: string;
-      caller?: Address;
-      l2Value?: BigNumberish;
-      factoryDeps?: ethers.BytesLike[];
-      gasPerPubdataByte?: BigNumberish;
-      overrides?: ethers.Overrides;
-    }): Promise<bigint> {
-      transaction.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-
-      // If the `from` address is not provided, we use a random address, because
-      // due to storage slot aggregation, the gas estimation will depend on the address
-      // and so estimation for the zero address may be smaller than for the sender.
-      transaction.caller ??= ethers.Wallet.createRandom().address;
-
-      const customData = {
-        gasPerPubdata: transaction.gasPerPubdataByte,
-      };
-      if (transaction.factoryDeps) {
-        Object.assign(customData, {factoryDeps: transaction.factoryDeps});
-      }
-      console.log("Changed from estimateGasL1 to estimateGas");
       return await this.estimateGas({
-        from: transaction.caller,
-        data: transaction.calldata,
-        to: transaction.contractAddress,
-        value: transaction.l2Value,
-        customData,
+        // caller: applyL1ToL2Alias(l1BridgeAddress),
+        to: l2BridgeAddress,
+        // gasPerPubdataByte: gasPerPubdataByte, // TODO: @dustin should be applied
+        data: calldata,
+        value: l2Value,
       });
     }
 
@@ -1362,37 +922,9 @@ export function JsonRpcApiProvider<
      * @param tx The transaction request that should be normalized.
      */
     override getRpcTransaction(
-      tx: TransactionRequest
+      tx: EthersTransactionRequest
     ): JsonRpcTransactionRequest {
       const result: any = super.getRpcTransaction(tx);
-      if (!tx.customData) {
-        return result;
-      }
-      result.type = ethers.toBeHex(EIP712_TX_TYPE);
-      result.eip712Meta = {
-        gasPerPubdata: ethers.toBeHex(tx.customData.gasPerPubdata ?? 0),
-      } as any;
-      if (tx.customData.factoryDeps) {
-        result.eip712Meta.factoryDeps = tx.customData.factoryDeps.map(
-          (dep: ethers.BytesLike) =>
-            // TODO (SMA-1605): we arraify instead of hexlifying because server expects Vec<u8>.
-            //  We should change deserialization there.
-            Array.from(ethers.getBytes(dep))
-        );
-      }
-      if (tx.customData.customSignature) {
-        result.eip712Meta.customSignature = Array.from(
-          ethers.getBytes(tx.customData.customSignature)
-        );
-      }
-      if (tx.customData.paymasterParams) {
-        result.eip712Meta.paymasterParams = {
-          paymaster: ethers.hexlify(tx.customData.paymasterParams.paymaster),
-          paymasterInput: Array.from(
-            ethers.getBytes(tx.customData.paymasterParams.paymasterInput)
-          ),
-        };
-      }
       return result;
     }
   };
@@ -1505,7 +1037,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   override async getTransactionReceipt(
     txHash: string
   ): Promise<TransactionReceipt | null> {
-    console.log("hit getTransactionReceipt2");
     return super.getTransactionReceipt(txHash);
   }
 
@@ -1618,78 +1149,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
-   */
-  override async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
-    return super.getProtocolVersion(id);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const gasL1 = await provider.estimateGasL1({
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   to: await provider.getMainContractAddress(),
-   *   value: 7_000_000_000,
-   *   customData: {
-   *     gasPerPubdata: 800,
-   *   },
-   * });
-   * console.log(`L1 gas: ${BigInt(gasL1)}`);
-   */
-  override async estimateGasL1(
-    transaction: TransactionRequest
-  ): Promise<bigint> {
-    return super.estimateGasL1(transaction);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const fee = await provider.estimateFee({
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
-   *   value: `0x${BigInt(7_000_000_000).toString(16)}`,
-   * });
-   * console.log(`Fee: ${utils.toJSON(fee)}`);
-   */
-  override async estimateFee(transaction: TransactionRequest): Promise<Fee> {
-    return super.estimateFee(transaction);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const feeParams = await provider.getFeeParams();
-   * console.log(`Fee: ${utils.toJSON(feeParams)}`);
-   */
-  override async getFeeParams(): Promise<FeeParams> {
-    return super.getFeeParams();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * console.log(`Gas price: ${await provider.getGasPrice()}`);
    */
   override async getGasPrice(): Promise<bigint> {
@@ -1722,37 +1181,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * @example
    *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const l1BatchNumber = await provider.getL1BatchNumber();
-   * console.log(`L1 batch block range: ${utils.toJSON(await provider.getL1BatchBlockRange(l1BatchNumber))}`);
-   */
-  override async getL1BatchBlockRange(
-    l1BatchNumber: number
-  ): Promise<[number, number] | null> {
-    return super.getL1BatchBlockRange(l1BatchNumber);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`Main contract: ${await provider.getMainContractAddress()}`);
-   */
-  override async getMainContractAddress(): Promise<Address> {
-    return super.getMainContractAddress();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
    * import { Provider, types } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -1760,20 +1188,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getBridgehubContractAddress(): Promise<Address> {
     return super.getBridgehubContractAddress();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`Base token: ${await provider.getBaseTokenContractAddress()}`);
-   */
-  override async getBaseTokenContractAddress(): Promise<Address> {
-    return super.getBaseTokenContractAddress();
   }
 
   /**
@@ -1809,20 +1223,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * @example
    *
-   * import { Provider, types } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`Testnet paymaster: ${await provider.getTestnetPaymasterAddress()}`);
-   */
-  override async getTestnetPaymasterAddress(): Promise<Address | null> {
-    return super.getTestnetPaymasterAddress();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
    * import { Provider, types, utils } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -1844,51 +1244,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *
    * @example
    *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const balances = await provider.getAllAccountBalances("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049");
-   * console.log(`All balances: ${utils.toJSON(balances)}`);
-   */
-  override async getAllAccountBalances(address: Address): Promise<BalancesMap> {
-    return super.getAllAccountBalances(address);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const tokens = await provider.getConfirmedTokens();
-   * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
-   */
-  override async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
-    return super.getConfirmedTokens(start, limit);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types} from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const l1ChainId = await provider.l1ChainId();
-   * console.log(`All balances: ${l1ChainId}`);
-   */
-  override async l1ChainId(): Promise<number> {
-    return super.l1ChainId();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
    * import { Provider, types} from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -1897,170 +1252,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    */
   override async getL1ChainId(): Promise<number> {
     return super.getL1ChainId();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`L1 batch number: ${await provider.getL1BatchNumber()}`);
-   */
-  override async getL1BatchNumber(): Promise<number> {
-    return super.getL1BatchNumber();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const l1BatchNumber = await provider.getL1BatchNumber();
-   * console.log(`L1 batch details: ${utils.toJSON(await provider.getL1BatchDetails(l1BatchNumber))}`);
-   */
-  override async getL1BatchDetails(number: number): Promise<BatchDetails> {
-    return super.getL1BatchDetails(number);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`Block details: ${utils.toJSON(await provider.getBlockDetails(90_000))}`);
-   */
-  override async getBlockDetails(number: number): Promise<BlockDetails> {
-    return super.getBlockDetails(number);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   *
-   * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * console.log(`Transaction details: ${utils.toJSON(await provider.getTransactionDetails(TX_HASH))}`);
-   */
-  override async getTransactionDetails(
-    txHash: BytesLike
-  ): Promise<TransactionDetails> {
-    return super.getTransactionDetails(txHash);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * // Bytecode hash can be computed by following these steps:
-   * // const testnetPaymasterBytecode = await provider.getCode(await provider.getTestnetPaymasterAddress());
-   * // const testnetPaymasterBytecodeHash = ethers.hexlify(utils.hashBytecode(testnetPaymasterBytecode));
-   *
-   * const testnetPaymasterBytecodeHash = "0x010000f16d2b10ddeb1c32f2c9d222eb1aea0f638ec94a81d4e916c627720e30";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`Bytecode: ${await provider.getBytecodeByHash(testnetPaymasterBytecodeHash)}`);
-   */
-  override async getBytecodeByHash(
-    bytecodeHash: BytesLike
-  ): Promise<Uint8Array> {
-    return super.getBytecodeByHash(bytecodeHash);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * console.log(`Raw block transactions: ${utils.toJSON(await provider.getRawBlockTransactions(90_000))}`);
-   */
-  override async getRawBlockTransactions(
-    number: number
-  ): Promise<RawBlockTransaction[]> {
-    return super.getRawBlockTransactions(number);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const address = "0x082b1BB53fE43810f646dDd71AA2AB201b4C6b04";
-   *
-   * // Fetching the storage proof for rawNonces storage slot in NonceHolder system contract.
-   * // mapping(uint256 => uint256) internal rawNonces;
-   *
-   * // Ensure the address is a 256-bit number by padding it
-   * // because rawNonces slot uses uint256 for mapping addresses and their nonces.
-   * const addressPadded = ethers.zeroPadValue(address, 32);
-   *
-   * // Convert the slot number to a hex string and pad it to 32 bytes.
-   * const slotPadded = ethers.zeroPadValue(ethers.toBeHex(0), 32);
-   *
-   * // Concatenate the padded address and slot number.
-   * const concatenated = addressPadded + slotPadded.slice(2); // slice to remove '0x' from the slotPadded
-   *
-   * // Hash the concatenated string using Keccak-256.
-   * const storageKey = ethers.keccak256(concatenated);
-   *
-   * const l1BatchNumber = await provider.getL1BatchNumber();
-   * const storageProof = await provider.getProof(utils.NONCE_HOLDER_ADDRESS, [storageKey], l1BatchNumber);
-   * console.log(`Storage proof: ${utils.toJSON(storageProof)}`);
-   */
-  override async getProof(
-    address: Address,
-    keys: string[],
-    l1BatchNumber: number
-  ): Promise<StorageProof> {
-    return super.getProof(address, keys, l1BatchNumber);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, Wallet, types, utils } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const PRIVATE_KEY = "<PRIVATE_KEY>";
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const wallet = new Wallet(PRIVATE_KEY, provider);
-   *
-   * const txWithOutputs = await provider.sendRawTransactionWithDetailedOutput(
-   *  await wallet.signTransaction({
-   *    to: Wallet.createRandom().address,
-   *    value: ethers.parseEther("0.01"),
-   *  })
-   * );
-   *
-   * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
-   */
-  override async sendRawTransactionWithDetailedOutput(
-    signedTx: string
-  ): Promise<TransactionWithDetailedOutput> {
-    return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 
   /**
@@ -2108,9 +1299,8 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
-  }): Promise<TransactionRequest> {
+  }): Promise<EthersTransactionRequest> {
     return super.getWithdrawTx(transaction);
   }
 
@@ -2136,7 +1326,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
   }): Promise<bigint> {
     return super.estimateGasWithdraw(transaction);
@@ -2186,9 +1375,8 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     amount: BigNumberish;
     from?: Address;
     token?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
-  }): Promise<TransactionRequest> {
+  }): Promise<EthersTransactionRequest> {
     return super.getTransferTx(transaction);
   }
 
@@ -2213,7 +1401,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     amount: BigNumberish;
     from?: Address;
     token?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
   }): Promise<bigint> {
     return super.estimateGasTransfer(transaction);
@@ -2312,50 +1499,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * @example
    *
    * import { Provider, types, utils } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const ethProvider = ethers.getDefaultProvider("sepolia");
-   * const l1Tx = "0xcca5411f3e514052f4a4ae1c2020badec6e0998adb52c09959c5f5ff15fba3a8";
-   * const l1TxResponse = await ethProvider.getTransaction(l1Tx);
-   * if (l1TxResponse) {
-   *   console.log(`Tx: ${utils.toJSON(await provider.getL2TransactionFromPriorityOp(l1TxResponse))}`);
-   * }
-   */
-  override async getL2TransactionFromPriorityOp(
-    l1TxResponse: ethers.TransactionResponse
-  ): Promise<TransactionResponse> {
-    return super.getL2TransactionFromPriorityOp(l1TxResponse);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const ethProvider = ethers.getDefaultProvider("sepolia");
-   * const l1Tx = "0xcca5411f3e514052f4a4ae1c2020badec6e0998adb52c09959c5f5ff15fba3a8";
-   * const l1TxResponse = await ethProvider.getTransaction(l1Tx);
-   * if (l1TxResponse) {
-   *   console.log(`Tx: ${utils.toJSON(await provider.getPriorityOpResponse(l1TxResponse))}`);
-   * }
-   */
-  override async getPriorityOpResponse(
-    l1TxResponse: ethers.TransactionResponse
-  ): Promise<PriorityOpResponse> {
-    return super.getPriorityOpResponse(l1TxResponse);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
    *
    * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
    * // Any L2 -> L1 transaction can be used.
@@ -2375,68 +1518,22 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
     return super.getPriorityOpConfirmation(txHash, index);
   }
 
-  /** 
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const tokenAddress = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-   * console.log(`Contract account info: ${utils.toJSON(await provider.getContractAccountInfo(tokenAddress))}`);
-   */
-  override async getContractAccountInfo(
-    address: Address
-  ): Promise<ContractAccountInfo> {
-    return super.getContractAccountInfo(address);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, utils, types } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const ethProvider = ethers.getDefaultProvider("sepolia");
-   *
-   * const token = "0x0000000000000000000000000000000000000001";
-   * const amount = 5;
-   * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-   * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-   * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-   *
-   * const gas = await provider.estimateCustomBridgeDepositL2Gas(
-   *   ethProvider,
-   *   token,
-   *   amount,
-   *   to,
-   *   from,
-   *   gasPerPubdataByte
-   * );
-   * // gas = 355_704
-   */
-  override async estimateDefaultBridgeDepositL2Gas(
-    providerL1: ethers.Provider,
-    token: Address,
-    amount: BigNumberish,
-    to: Address,
-    from?: Address,
-    gasPerPubdataByte?: BigNumberish
-  ): Promise<bigint> {
-    console.log("estimateDefaultBridgeDepositL2Gas hit");
-    return super.estimateDefaultBridgeDepositL2Gas(
-      providerL1,
-      token,
-      amount,
-      to,
-      from,
-      gasPerPubdataByte
-    );
-  }
+  // /**
+  //  * @inheritDoc
+  //  *
+  //  * @example
+  //  *
+  //  * import { Provider, types, utils } from "zksync-ethers";
+  //  *
+  //  * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
+  //  * const tokenAddress = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
+  //  * console.log(`Contract account info: ${utils.toJSON(await provider.getContractAccountInfo(tokenAddress))}`);
+  //  */
+  // override async getContractAccountInfo(
+  //   address: Address
+  // ): Promise<ContractAccountInfo> {
+  //   return super.getContractAccountInfo(address);
+  // }
 
   /**
    * @inheritDoc
@@ -2499,34 +1596,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
       gasPerPubdataByte,
       l2Value
     );
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, types } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const gasL1ToL2 = await provider.estimateL1ToL2Execute({
-   *   contractAddress: await provider.getMainContractAddress(),
-   *   calldata: "0x",
-   *   caller: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   l2Value: 7_000_000_000,
-   * });
-   * console.log(`Gas L1 to L2: ${BigInt(gasL1ToL2)}`);
-   */
-  override async estimateL1ToL2Execute(transaction: {
-    contractAddress: Address;
-    calldata: string;
-    caller?: Address;
-    l2Value?: BigNumberish;
-    factoryDeps?: BytesLike[];
-    gasPerPubdataByte?: BigNumberish;
-    overrides?: ethers.Overrides;
-  }): Promise<bigint> {
-    return super.estimateL1ToL2Execute(transaction);
   }
 
   override getRpcError(payload: JsonRpcPayload, _error: JsonRpcError): Error {
@@ -2790,78 +1859,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`Protocol version: ${await provider.getProtocolVersion()}`);
-   */
-  override async getProtocolVersion(id?: number): Promise<ProtocolVersion> {
-    return super.getProtocolVersion(id);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const gasL1 = await provider.estimateGasL1({
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   to: await provider.getMainContractAddress(),
-   *   value: 7_000_000_000,
-   *   customData: {
-   *     gasPerPubdata: 800,
-   *   },
-   * });
-   * console.log(`L1 gas: ${BigInt(gasL1)}`);
-   */
-  override async estimateGasL1(
-    transaction: TransactionRequest
-  ): Promise<bigint> {
-    return super.estimateGasL1(transaction);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const fee = await provider.estimateFee({
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
-   *   value: `0x${BigInt(7_000_000_000).toString(16)}`,
-   * });
-   * console.log(`Fee: ${utils.toJSON(fee)}`);
-   */
-  override async estimateFee(transaction: TransactionRequest): Promise<Fee> {
-    return super.estimateFee(transaction);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const feeParams = await provider.getFeeParams();
-   * console.log(`Fee: ${utils.toJSON(feeParams)}`);
-   */
-  override async getFeeParams(): Promise<FeeParams> {
-    return super.getFeeParams();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
    * console.log(`Gas price: ${await provider.getGasPrice()}`);
    */
   override async getGasPrice(): Promise<bigint> {
@@ -2893,37 +1890,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
    *
    * @example
    *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const l1BatchNumber = await provider.getL1BatchNumber();
-   * console.log(`L1 batch block range: ${utils.toJSON(await provider.getL1BatchBlockRange(l1BatchNumber))}`);
-   */
-  override async getL1BatchBlockRange(
-    l1BatchNumber: number
-  ): Promise<[number, number] | null> {
-    return super.getL1BatchBlockRange(l1BatchNumber);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`Main contract: ${await provider.getMainContractAddress()}`);
-   */
-  override async getMainContractAddress(): Promise<Address> {
-    return super.getMainContractAddress();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
    * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
@@ -2931,20 +1897,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
    */
   override async getBridgehubContractAddress(): Promise<Address> {
     return super.getBridgehubContractAddress();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`Base token: ${await provider.getBaseTokenContractAddress()}`);
-   */
-  override async getBaseTokenContractAddress(): Promise<Address> {
-    return super.getBaseTokenContractAddress();
   }
 
   /**
@@ -2981,20 +1933,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * import { BrowserProvider } from "zksync-ethers";
    *
    * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`Testnet paymaster: ${await provider.getTestnetPaymasterAddress()}`);
-   */
-  override async getTestnetPaymasterAddress(): Promise<Address | null> {
-    return super.getTestnetPaymasterAddress();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
    * console.log(`Default bridges: ${utils.toJSON(await provider.getDefaultBridgeAddresses())}`);
    */
   override async getDefaultBridgeAddresses(): Promise<{
@@ -3006,216 +1944,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
     sharedL2: string;
   }> {
     return super.getDefaultBridgeAddresses();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const balances = await provider.getAllAccountBalances("0x36615Cf349d7F6344891B1e7CA7C72883F5dc049");
-   * console.log(`All balances: ${utils.toJSON(balances)}`);
-   */
-  override async getAllAccountBalances(address: Address): Promise<BalancesMap> {
-    return super.getAllAccountBalances(address);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const tokens = await provider.getConfirmedTokens();
-   * console.log(`Confirmed tokens: ${utils.toJSON(tokens)}`);
-   */
-  override async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
-    return super.getConfirmedTokens(start, limit);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const l1ChainId = await provider.l1ChainId();
-   * console.log(`All balances: ${l1ChainId}`);
-   */
-  override async l1ChainId(): Promise<number> {
-    return super.l1ChainId();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`L1 batch number: ${await provider.getL1BatchNumber()}`);
-   */
-  override async getL1BatchNumber(): Promise<number> {
-    return super.getL1BatchNumber();
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const l1BatchNumber = await provider.getL1BatchNumber();
-   * console.log(`L1 batch details: ${utils.toJSON(await provider.getL1BatchDetails(l1BatchNumber))}`);
-   */
-  override async getL1BatchDetails(number: number): Promise<BatchDetails> {
-    return super.getL1BatchDetails(number);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`Block details: ${utils.toJSON(await provider.getBlockDetails(90_000))}`);
-   */
-  override async getBlockDetails(number: number): Promise<BlockDetails> {
-    return super.getBlockDetails(number);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   *
-   * const TX_HASH = "<YOUR_TX_HASH_ADDRESS>";
-   * console.log(`Transaction details: ${utils.toJSON(await provider.getTransactionDetails(TX_HASH))}`);
-   */
-  override async getTransactionDetails(
-    txHash: BytesLike
-  ): Promise<TransactionDetails> {
-    return super.getTransactionDetails(txHash);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * // Bytecode hash can be computed by following these steps:
-   * // const testnetPaymasterBytecode = await provider.getCode(await provider.getTestnetPaymasterAddress());
-   * // const testnetPaymasterBytecodeHash = ethers.hexlify(utils.hashBytecode(testnetPaymasterBytecode));
-   *
-   * const testnetPaymasterBytecodeHash = "0x010000f16d2b10ddeb1c32f2c9d222eb1aea0f638ec94a81d4e916c627720e30";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`Bytecode: ${await provider.getBytecodeByHash(testnetPaymasterBytecodeHash)}`);
-   */
-  override async getBytecodeByHash(
-    bytecodeHash: BytesLike
-  ): Promise<Uint8Array> {
-    return super.getBytecodeByHash(bytecodeHash);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * console.log(`Raw block transactions: ${utils.toJSON(await provider.getRawBlockTransactions(90_000))}`);
-   */
-  override async getRawBlockTransactions(
-    number: number
-  ): Promise<RawBlockTransaction[]> {
-    return super.getRawBlockTransactions(number);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const address = "0x082b1BB53fE43810f646dDd71AA2AB201b4C6b04";
-   *
-   * // Fetching the storage proof for rawNonces storage slot in NonceHolder system contract.
-   * // mapping(uint256 => uint256) internal rawNonces;
-   *
-   * // Ensure the address is a 256-bit number by padding it
-   * // because rawNonces slot uses uint256 for mapping addresses and their nonces.
-   * const addressPadded = ethers.zeroPadValue(address, 32);
-   *
-   * // Convert the slot number to a hex string and pad it to 32 bytes.
-   * const slotPadded = ethers.zeroPadValue(ethers.toBeHex(0), 32);
-   *
-   * // Concatenate the padded address and slot number.
-   * const concatenated = addressPadded + slotPadded.slice(2); // slice to remove '0x' from the slotPadded
-   *
-   * // Hash the concatenated string using Keccak-256.
-   * const storageKey = ethers.keccak256(concatenated);
-   *
-   * const l1BatchNumber = await provider.getL1BatchNumber();
-   * const storageProof = await provider.getProof(utils.NONCE_HOLDER_ADDRESS, [storageKey], l1BatchNumber);
-   * console.log(`Storage proof: ${utils.toJSON(storageProof)}`);
-   */
-  override async getProof(
-    address: Address,
-    keys: string[],
-    l1BatchNumber: number
-  ): Promise<StorageProof> {
-    return super.getProof(address, keys, l1BatchNumber);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, Wallet, Provider, utils, types } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const signer = Signer.from(
-   *     await provider.getSigner(),
-   *     Number((await provider.getNetwork()).chainId),
-   *     Provider.getDefaultProvider(types.Network.Sepolia)
-   * );
-   *
-   * const txWithOutputs = await provider.sendRawTransactionWithDetailedOutput(
-   *   await signer.signTransaction({
-   *     Wallet.createRandom().address,
-   *     amount: ethers.parseEther("0.01"),
-   *   })
-   * );
-   * console.log(`Transaction with detailed output: ${utils.toJSON(txWithOutputs)}`);
-   */
-  override async sendRawTransactionWithDetailedOutput(
-    signedTx: string
-  ): Promise<TransactionWithDetailedOutput> {
-    return super.sendRawTransactionWithDetailedOutput(signedTx);
   }
 
   /**
@@ -3263,9 +1991,8 @@ export class BrowserProvider extends JsonRpcApiProvider(
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
-  }): Promise<TransactionRequest> {
+  }): Promise<EthersTransactionRequest> {
     return super.getWithdrawTx(transaction);
   }
 
@@ -3291,7 +2018,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
   }): Promise<bigint> {
     return super.estimateGasWithdraw(transaction);
@@ -3341,9 +2067,8 @@ export class BrowserProvider extends JsonRpcApiProvider(
     amount: BigNumberish;
     from?: Address;
     token?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
-  }): Promise<TransactionRequest> {
+  }): Promise<EthersTransactionRequest> {
     return super.getTransferTx(transaction);
   }
 
@@ -3368,7 +2093,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
     amount: BigNumberish;
     from?: Address;
     token?: Address;
-    paymasterParams?: PaymasterParams;
     overrides?: ethers.Overrides;
   }): Promise<bigint> {
     return super.estimateGasTransfer(transaction);
@@ -3462,48 +2186,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
   }
 
   /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const ethProvider = ethers.getDefaultProvider("sepolia");
-   * const l1Tx = "0xcca5411f3e514052f4a4ae1c2020badec6e0998adb52c09959c5f5ff15fba3a8";
-   * const l1TxResponse = await ethProvider.getTransaction(l1Tx);
-   * if (l1TxResponse) {
-   *   console.log(`Tx: ${utils.toJSON(await provider.getL2TransactionFromPriorityOp(l1TxResponse))}`);
-   * }
-   */
-  override async getL2TransactionFromPriorityOp(
-    l1TxResponse: ethers.TransactionResponse
-  ): Promise<TransactionResponse> {
-    return super.getL2TransactionFromPriorityOp(l1TxResponse);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const ethProvider = ethers.getDefaultProvider("sepolia");
-   * const l1Tx = "0xcca5411f3e514052f4a4ae1c2020badec6e0998adb52c09959c5f5ff15fba3a8";
-   * const l1TxResponse = await ethProvider.getTransaction(l1Tx);
-   * if (l1TxResponse) {
-   *   console.log(`Tx: ${utils.toJSON(await provider.getPriorityOpResponse(l1TxResponse))}`);
-   * }
-   */
-  override async getPriorityOpResponse(
-    l1TxResponse: ethers.TransactionResponse
-  ): Promise<PriorityOpResponse> {
-    return super.getPriorityOpResponse(l1TxResponse);
-  }
-
-  /**
    *
    * @example
    *
@@ -3527,67 +2209,22 @@ export class BrowserProvider extends JsonRpcApiProvider(
     return super.getPriorityOpConfirmation(txHash, index);
   }
 
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const tokenAddress = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-   * console.log(`Contract account info: ${utils.toJSON(await provider.getContractAccountInfo(tokenAddress))}`);
-   */
-  override async getContractAccountInfo(
-    address: Address
-  ): Promise<ContractAccountInfo> {
-    return super.getContractAccountInfo(address);
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { Provider, utils, types } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const ethProvider = ethers.getDefaultProvider("sepolia");
-   *
-   * const token = "0x0000000000000000000000000000000000000001";
-   * const amount = 5;
-   * const to = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-   * const from = "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049";
-   * const gasPerPubdataByte = utils.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-   *
-   * const gas = await provider.estimateCustomBridgeDepositL2Gas(
-   *   ethProvider,
-   *   token,
-   *   amount,
-   *   to,
-   *   from,
-   *   gasPerPubdataByte
-   * );
-   * // gas = 355_704
-   */
-  override async estimateDefaultBridgeDepositL2Gas(
-    providerL1: ethers.Provider,
-    token: Address,
-    amount: BigNumberish,
-    to: Address,
-    from?: Address,
-    gasPerPubdataByte?: BigNumberish
-  ): Promise<bigint> {
-    return super.estimateDefaultBridgeDepositL2Gas(
-      providerL1,
-      token,
-      amount,
-      to,
-      from,
-      gasPerPubdataByte
-    );
-  }
+  // /**
+  //  * @inheritDoc
+  //  *
+  //  * @example
+  //  *
+  //  * import { BrowserProvider, utils } from "zksync-ethers";
+  //  *
+  //  * const provider = new BrowserProvider(window.ethereum);
+  //  * const tokenAddress = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
+  //  * console.log(`Contract account info: ${utils.toJSON(await provider.getContractAccountInfo(tokenAddress))}`);
+  //  */
+  // override async getContractAccountInfo(
+  //   address: Address
+  // ): Promise<ContractAccountInfo> {
+  //   return super.getContractAccountInfo(address);
+  // }
 
   /**
    * @inheritDoc
@@ -3650,34 +2287,6 @@ export class BrowserProvider extends JsonRpcApiProvider(
       gasPerPubdataByte,
       l2Value
     );
-  }
-
-  /**
-   * @inheritDoc
-   *
-   * @example
-   *
-   * import { BrowserProvider, utils } from "zksync-ethers";
-   *
-   * const provider = new BrowserProvider(window.ethereum);
-   * const gasL1ToL2 = await provider.estimateL1ToL2Execute({
-   *   contractAddress: await provider.getMainContractAddress(),
-   *   calldata: "0x",
-   *   caller: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   l2Value: 7_000_000_000,
-   * });
-   * console.log(`Gas L1 to L2: ${BigInt(gasL1ToL2)}`);
-   */
-  override async estimateL1ToL2Execute(transaction: {
-    contractAddress: Address;
-    calldata: string;
-    caller?: Address;
-    l2Value?: BigNumberish;
-    factoryDeps?: BytesLike[];
-    gasPerPubdataByte?: BigNumberish;
-    overrides?: ethers.Overrides;
-  }): Promise<bigint> {
-    return super.estimateL1ToL2Execute(transaction);
   }
 
   override async _send(
@@ -3784,10 +2393,7 @@ export class BrowserProvider extends JsonRpcApiProvider(
       }
     }
 
-    return Signer.from(
-      (await super.getSigner(address)) as any,
-      Number((await this.getNetwork()).chainId)
-    );
+    return Signer.from((await super.getSigner(address)) as any);
   }
 
   /**
@@ -3805,12 +2411,12 @@ export class BrowserProvider extends JsonRpcApiProvider(
    * });
    * console.log(`Gas: ${gas}`);
    */
-  override async estimateGas(transaction: TransactionRequest): Promise<bigint> {
+  override async estimateGas(
+    transaction: EthersTransactionRequest
+  ): Promise<bigint> {
     const gas = await super.estimateGas(transaction);
     const metamaskMinimum = 21_000n;
-    const isEIP712 =
-      transaction.customData || transaction.type === EIP712_TX_TYPE;
-    return gas > metamaskMinimum || isEIP712 ? gas : metamaskMinimum;
+    return gas > metamaskMinimum ? gas : metamaskMinimum;
   }
 }
 /* c8 ignore stop */

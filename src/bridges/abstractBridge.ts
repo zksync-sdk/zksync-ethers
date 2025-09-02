@@ -7,10 +7,8 @@ import {
 } from 'ethers';
 import {
   Address,
-  PaymasterParams,
   PriorityOpResponse,
   TransactionResponse,
-  TransactionLike,
   FinalizeL1DepositParams,
 } from '../types';
 import {IERC20__factory} from '../typechain';
@@ -41,7 +39,6 @@ export interface IWithdrawTransaction {
   amount: BigNumberish;
   to?: Address;
   bridgeAddress: Address;
-  paymasterParams?: PaymasterParams;
   overrides?: Overrides;
   approveERC20?: boolean;
   approveOverrides?: Overrides;
@@ -238,7 +235,7 @@ export abstract class AbstractBridge {
    */
   protected abstract populateWithdrawTransaction(
     transaction: IWithdrawTransaction
-  ): Promise<TransactionLike>;
+  ): Promise<ethers.TransactionLike>;
 
   /**
    * Validates the withdraw parameters.

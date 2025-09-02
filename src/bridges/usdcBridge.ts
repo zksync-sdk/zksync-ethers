@@ -3,8 +3,9 @@ import {
   ContractTransactionResponse,
   Overrides,
   Contract,
+  ethers,
 } from 'ethers';
-import {Address, FinalizeL1DepositParams, TransactionLike} from '../types';
+import {Address, FinalizeL1DepositParams} from '../types';
 import {IL1Nullifier__factory} from '../typechain';
 import {Wallet} from '../wallet';
 import {
@@ -68,7 +69,7 @@ export class USDCBridge extends AbstractBridge {
 
   protected override async populateWithdrawTransaction(
     tx: IWithdrawTransaction
-  ): Promise<TransactionLike> {
+  ): Promise<ethers.TransactionLike> {
     const bridge = await this.wallet
       ._providerL2()
       .connectL2Bridge(tx.bridgeAddress!);
@@ -78,12 +79,6 @@ export class USDCBridge extends AbstractBridge {
       tx.amount,
       tx.overrides!
     );
-
-    if (tx.paymasterParams) {
-      populatedWithdrawTx.customData = {
-        paymasterParams: tx.paymasterParams,
-      };
-    }
 
     return populatedWithdrawTx;
   }

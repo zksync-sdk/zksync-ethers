@@ -9,18 +9,12 @@ import {
 import {
   Address,
   DeploymentInfo,
-  Eip712Meta,
   EthereumSignature,
-  PaymasterParams,
   PriorityOpTree,
   PriorityQueueType,
-  Transaction,
-  TransactionLike,
   TransactionReceipt,
-  TransactionRequest,
 } from './types';
 import {Provider} from './provider';
-import {EIP712Signer} from './signer';
 import {IERC20__factory, IL1NativeTokenVault} from './typechain';
 import IZkSyncABI from '../abi/IZkSyncHyperchain.json';
 import IBridgehubABI from '../abi/IBridgehub.json';
@@ -32,10 +26,6 @@ import IERC1271ABI from '../abi/IERC1271.json';
 import IL1BridgeABI from '../abi/IL1ERC20Bridge.json';
 import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
-
-export * from './paymaster-utils';
-export * from './smart-account-utils';
-export {EIP712_TYPES} from './signer';
 
 /**
  * The ABI for the `ZKsync` interface.
@@ -189,13 +179,6 @@ export const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address =
  * @readonly
  */
 export const EIP1271_MAGIC_VALUE = '0x1626ba7e';
-
-/**
- * Represents an EIP712 transaction type.
- *
- * @readonly
- */
-export const EIP712_TX_TYPE = 0x71;
 
 /**
  * Represents a priority transaction operation on L2.
@@ -492,112 +475,6 @@ export async function checkBaseCost(
 }
 
 /**
- * Serializes an EIP712 transaction and includes a signature if provided.
- *
- * @param transaction The transaction that needs to be serialized.
- * @param [signature] Ethers signature to be included in the transaction.
- * @throws {Error} Throws an error if:
- * - `transaction.customData.customSignature` is an empty string. The transaction should be signed, and the `transaction.customData.customSignature` field should be populated with the signature. It should not be specified if the transaction is not signed.
- * - `transaction.chainId` is not provided.
- * - `transaction.from` is not provided.
- *
- * @example Serialize EIP712 transaction without signature.
- *
- * import { utils } from "zksync-ethers";
- *
- * const serializedTx = utils.serializeEip712({ chainId: 270, from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049" }, null);
- *
- * // serializedTx = "0x71ea8080808080808082010e808082010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0"
- *
- * @example Serialize EIP712 transaction with signature.
- *
- * import { utils } from "zksync-ethers";
- * import { ethers } from "ethers";
- *
- * const signature = ethers.Signature.from("0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a");
- *
- * const serializedTx = utils.serializeEip712(
- *   {
- *     chainId: 270,
- *     from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
- *     to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
- *     value: 1_000_000,
- *   },
- *   signature
- * );
- * // serializedTx = "0x71f87f8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0"
- */
-export function serializeEip712(
-  transaction: TransactionLike,
-  signature?: ethers.SignatureLike
-): string {
-  if (!transaction.chainId) {
-    throw Error("Transaction chainId isn't set!");
-  }
-
-  if (!transaction.from) {
-    throw new Error(
-      'Explicitly providing `from` field is required for EIP712 transactions!'
-    );
-  }
-  const from = transaction.from;
-  const meta: Eip712Meta = transaction.customData ?? {};
-  const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0;
-  const maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
-
-  const fields: any[] = [
-    ethers.toBeArray(transaction.nonce || 0),
-    ethers.toBeArray(maxPriorityFeePerGas),
-    ethers.toBeArray(maxFeePerGas),
-    ethers.toBeArray(transaction.gasLimit || 0),
-    transaction.to ? ethers.getAddress(transaction.to) : '0x',
-    ethers.toBeArray(transaction.value || 0),
-    transaction.data || '0x',
-  ];
-
-  if (signature) {
-    const sig = ethers.Signature.from(signature);
-    fields.push(ethers.toBeArray(sig.yParity));
-    fields.push(ethers.toBeArray(sig.r));
-    fields.push(ethers.toBeArray(sig.s));
-  } else {
-    fields.push(ethers.toBeArray(transaction.chainId));
-    fields.push('0x');
-    fields.push('0x');
-  }
-  fields.push(ethers.toBeArray(transaction.chainId));
-  fields.push(ethers.getAddress(from));
-
-  // Add meta
-  fields.push(
-    ethers.toBeArray(meta.gasPerPubdata ?? DEFAULT_GAS_PER_PUBDATA_LIMIT)
-  );
-  fields.push((meta.factoryDeps ?? []).map(dep => ethers.hexlify(dep)));
-
-  if (
-    meta.customSignature &&
-    ethers.getBytes(meta.customSignature).length === 0
-  ) {
-    throw new Error('Empty signatures are not supported!');
-  }
-  fields.push(meta.customSignature || '0x');
-
-  if (meta.paymasterParams) {
-    fields.push([
-      meta.paymasterParams.paymaster,
-      ethers.hexlify(meta.paymasterParams.paymasterInput),
-    ]);
-  } else {
-    fields.push([]);
-  }
-
-  return ethers.concat([
-    new Uint8Array([EIP712_TX_TYPE]),
-    ethers.encodeRlp(fields),
-  ]);
-}
-
-/**
  * Returns the hash of the given bytecode.
  *
  * @param bytecode The bytecode to hash.
@@ -654,123 +531,6 @@ export function hashBytecode(bytecode: ethers.BytesLike): Uint8Array {
   hash.set(bytecodeLengthPadded, 2);
 
   return hash;
-}
-
-/**
- * Parses an EIP712 transaction from a payload.
- *
- * @param payload The payload to parse.
- *
- * @example
- *
- * import { utils, types } from "zksync-ethers";
- *
- * const serializedTx =
- *   "0x71f87f8080808094a61464658afeaf65cccaafd3a512b69a83b77618830f42408001a073a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aa02f87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a82010e9436615cf349d7f6344891b1e7ca7c72883f5dc04982c350c080c0";
- * const tx: types.TransactionLike = utils.parseEip712(serializedTx);
- * /*
- * tx: types.TransactionLike = {
- *   type: 113,
- *   nonce: 0,
- *   maxPriorityFeePerGas: 0n,
- *   maxFeePerGas: 0n,
- *   gasLimit: 0n,
- *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
- *   value: 1000000n,
- *   data: "0x",
- *   chainId: 270n,
- *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
- *   customData: {
- *     gasPerPubdata: 50000n,
- *     factoryDeps: [],
- *     customSignature: "0x",
- *     paymasterParams: null,
- *   },
- *   hash: "0x9ed410ce33179ac1ff6b721060605afc72d64febfe0c08cacab5a246602131ee",
- * };
- * *\/
- */
-export function parseEip712(payload: ethers.BytesLike): TransactionLike {
-  function handleAddress(value: string): string | null {
-    if (value === '0x') {
-      return null;
-    }
-    return ethers.getAddress(value);
-  }
-
-  function handleNumber(value: string): bigint {
-    if (!value || value === '0x') {
-      return 0n;
-    }
-    return BigInt(value);
-  }
-
-  function arrayToPaymasterParams(arr: string[]): PaymasterParams | undefined {
-    if (arr.length === 0) {
-      return undefined;
-    }
-    if (arr.length !== 2) {
-      throw new Error(
-        `Invalid paymaster parameters, expected to have length of 2, found ${arr.length}!`
-      );
-    }
-
-    return {
-      paymaster: ethers.getAddress(arr[0]),
-      paymasterInput: ethers.getBytes(arr[1]),
-    };
-  }
-
-  const bytes = ethers.getBytes(payload);
-  const raw = ethers.decodeRlp(bytes.slice(1)) as string[];
-  const transaction: TransactionLike = {
-    type: EIP712_TX_TYPE,
-    nonce: Number(handleNumber(raw[0])),
-    maxPriorityFeePerGas: handleNumber(raw[1]),
-    maxFeePerGas: handleNumber(raw[2]),
-    gasLimit: handleNumber(raw[3]),
-    to: handleAddress(raw[4]),
-    value: handleNumber(raw[5]),
-    data: raw[6],
-    chainId: handleNumber(raw[10]),
-    from: handleAddress(raw[11]),
-    customData: {
-      gasPerPubdata: handleNumber(raw[12]),
-      factoryDeps: raw[13] as unknown as string[],
-      customSignature: raw[14],
-      paymasterParams: arrayToPaymasterParams(raw[15] as unknown as string[]),
-    },
-  };
-
-  const ethSignature = {
-    v: Number(handleNumber(raw[7])),
-    r: raw[8],
-    s: raw[9],
-  };
-
-  if (
-    (ethers.hexlify(ethSignature.r) === '0x' ||
-      ethers.hexlify(ethSignature.s) === '0x') &&
-    !transaction.customData?.customSignature
-  ) {
-    return transaction;
-  }
-
-  if (
-    ethSignature.v !== 0 &&
-    ethSignature.v !== 1 &&
-    !transaction.customData?.customSignature
-  ) {
-    throw new Error('Failed to parse signature!');
-  }
-
-  if (!transaction.customData?.customSignature) {
-    transaction.signature = ethers.Signature.from(ethSignature);
-  }
-
-  transaction.hash = eip712TxHash(transaction, ethSignature);
-
-  return transaction;
 }
 
 /**
@@ -846,77 +606,6 @@ function getSignature(
   const v = ethSignature.v;
 
   return new Uint8Array([...r, ...s, v]);
-}
-
-/**
- * Returns the hash of an EIP712 transaction. If a custom signature is provided in the transaction,
- * it will be used to form the transaction hash. Otherwise, the Ethereum signature specified in the
- * `ethSignature` parameter will be used.
- *
- * @param transaction The EIP712 transaction that may contain a custom signature.
- * If a custom signature is not present in the transaction, the `ethSignature` parameter will be used.
- * @param [ethSignature] The Ethereum transaction signature. This parameter is ignored if the transaction
- * object contains a custom signature.
- *
- * @example Get transaction hash using custom signature from the transaction.
- *
- * import { utils } from "zksync-ethers";
- *
- * const tx: types.TransactionRequest = {
- *   type: 113,
- *   nonce: 0,
- *   maxPriorityFeePerGas: 0n,
- *   maxFeePerGas: 0n,
- *   gasLimit: 0n,
- *   to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
- *   value: 1_000_000n,
- *   data: '0x',
- *   chainId: 270n,
- *   from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
- *   customData: {
- *     gasPerPubdata: 50_000n,
- *     factoryDeps: [],
- *     customSignature:
- *       '0x307837373262396162343735386435636630386637643732303161646332653534383933616532376263666562323162396337643666643430393766346464653063303166376630353332323866346636643838653662663334333436343931343135363761633930363632306661653832633239333339393062353563613336363162',
- *     paymasterParams: {
- *       paymaster: '0xa222f0c183AFA73a8Bc1AFb48D34C88c9Bf7A174',
- *       paymasterInput: ethers.getBytes(
- *         '0x949431dc000000000000000000000000841c43fa5d8fffdb9efe3358906f7578d8700dd4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000'
- *       ),
- *     },
- *   },
- * };
- *
- * const hash = utils.eip712TxHash(tx);
- * // hash = '0xc0ba55587423e1ef281b06a9d684b481365897f37a6ad611d7619b1b7e0bc908'
- *
- * @example Get transaction hash using Ethereum signature.
- *
- * import { utils } from "zksync-ethers";
- * import { ethers } from "ethers";
- *
- * const tx: types.TransactionRequest = {
- *   chainId: 270n,
- *   from: '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049',
- *   to: '0xa61464658AfeAf65CccaaFD3a512b69A83B77618',
- *   value: 1_000_000n,
- * };
- * const signature = ethers.Signature.from(
- *   '0x73a20167b8d23b610b058c05368174495adf7da3a4ed4a57eb6dbdeb1fafc24aaf87530d663a0d061f69bb564d2c6fb46ae5ae776bbd4bd2a2a4478b9cd1b42a'
- * );
- * const hash = utils.eip712TxHash(tx, signature);
- * // hash = '0x8efdc7ce5f5a75ab945976c3e2b0c2a45e9f8e15ff940d05625ac5545cd9f870'
- */
-export function eip712TxHash(
-  transaction: Transaction | TransactionRequest,
-  ethSignature?: EthereumSignature
-): string {
-  const signedDigest = EIP712Signer.getSignedDigest(transaction);
-  const hashedSignature = ethers.keccak256(
-    getSignature(transaction, ethSignature)
-  );
-
-  return ethers.keccak256(ethers.concat([signedDigest, hashedSignature]));
 }
 
 /**
@@ -1416,12 +1105,12 @@ export async function estimateDefaultBridgeDepositL2Gas(
     ? ETH_ADDRESS_IN_CONTRACTS
     : token;
   if (await providerL2.isBaseToken(token)) {
-    return await providerL2.estimateL1ToL2Execute({
-      contractAddress: to,
-      gasPerPubdataByte: gasPerPubdataByte,
-      caller: from,
-      calldata: '0x',
-      l2Value: amount,
+    return await providerL2.estimateGas({
+      to: to,
+      // gasPerPubdataByte: gasPerPubdataByte, // TODO: @dustin need to update gas field
+      from: from,
+      data: '0x',
+      value: amount,
     });
   } else {
     const bridgeAddresses = await providerL2.getDefaultBridgeAddresses();
@@ -1540,12 +1229,12 @@ export async function estimateCustomBridgeDepositL2Gas(
     amount,
     bridgeData
   );
-  return await providerL2.estimateL1ToL2Execute({
-    caller: applyL1ToL2Alias(l1BridgeAddress),
-    contractAddress: l2BridgeAddress,
-    gasPerPubdataByte: gasPerPubdataByte,
-    calldata: calldata,
-    l2Value: l2Value,
+  return await providerL2.estimateGas({
+    from: applyL1ToL2Alias(l1BridgeAddress),
+    to: l2BridgeAddress,
+    // gasPerPubdataByte: gasPerPubdataByte, // TODO: @dustin apply gas field
+    data: calldata,
+    value: l2Value,
   });
 }
 
@@ -1718,34 +1407,17 @@ export function encodeNTVTransferData(
 }
 
 export async function resolveFeeData(
-  tx: TransactionLike,
-  provider: Provider,
-  providerL2?: Provider
+  tx: ethers.TransactionLike,
+  provider: Provider
+  // providerL2?: Provider
 ): Promise<{
   gasLimit: BigNumberish;
   gasPrice: BigNumberish;
-  gasPerPubdata: BigNumberish | undefined;
 }> {
   // Race all requests against each other so that ethers batches them if it can
   return await resolveProperties({
     gasLimit: (async () => tx.gasLimit ?? (await provider.estimateGas(tx)))(),
     gasPrice: (async () =>
       tx.gasPrice ?? tx.maxFeePerGas ?? (await provider.getGasPrice()))(),
-    gasPerPubdata: (async () => {
-      if (
-        tx.type === null ||
-        tx.type === undefined ||
-        tx.type === EIP712_TX_TYPE ||
-        tx.customData
-      ) {
-        return (
-          tx.customData?.gasPerPubdata ??
-          // `zks_gasPerPubdata` should not go through proxied provider if
-          // there is one (e.g. MetaMask does not forward `zks` requests).
-          (await (providerL2 ?? provider).getGasPerPubdata())
-        );
-      }
-      return undefined;
-    })(),
   });
 }
