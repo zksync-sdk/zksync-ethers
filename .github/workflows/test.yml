@@ -30,93 +30,58 @@ jobs:
           yarn types
           yarn build
           yarn test:build
-      - name: Run local-setup
-        run: |
-          git clone https://github.com/matter-labs/local-setup.git
-          pushd local-setup
-          ./start-zk-chains.sh
-          popd
-      - name: Extract custom token address
-        run: |
-          echo "Waiting for token deployment..."
-          until docker exec local-setup-zksync-1 test -f /configs/erc20.yaml; do
-            echo "Token config file not found yet, checking again in 5 seconds..."
-            sleep 5
-          done
 
-          echo "Extracting deployed token address from inside zksync container..."
-          CUSTOM_TOKEN_ADDRESS=$(docker exec local-setup-zksync-1 awk -F": " '/tokens:/ {found_tokens=1} found_tokens && /DAI:/ {found_dai=1} found_dai && /address:/ {print $2; exit}' /configs/erc20.yaml)
-
-          if [ -z "$CUSTOM_TOKEN_ADDRESS" ]; then
-            echo "❌ Error: Could not retrieve token address. Exiting."
-            exit 1
-          fi
-
-          echo "Custom token address: $CUSTOM_TOKEN_ADDRESS"
-          # Export the variable so subsequent steps have access to it
-          echo "CUSTOM_TOKEN_ADDRESS=$CUSTOM_TOKEN_ADDRESS" >> $GITHUB_ENV
-      - name: Prepare environment
-        env:
-          IS_ETH_CHAIN: true
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
-        run: yarn test:prepare
-      - name: Run tests
-        env:
-          IS_ETH_CHAIN: true
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
-        run: yarn test
-
-  non-eth-based-chain-test:
-    name: Non-ETH-based Chain Test
+  setup-l2-server-and-run-tests:
+    name: Setup L2 server and run tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout your repo
         uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Foundry (anvil)
+        uses: foundry-rs/foundry-toolchain@v1
         with:
-          fetch-depth: 0
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "lts/*"
-      - name: Install dependencies
-        run: yarn install
-      - name: Build
+          version: nightly
+          cache: true
+
+      - name: Clone zksync-os-server
         run: |
-          yarn types
-          yarn build
-          yarn test:build
-      - name: Run local-setup
+          # use HTTPS to avoid SSH key setup on the runner
+          git clone https://github.com/matter-labs/zksync-os-server.git
+
+      - name: Start Anvil (L1) with saved state
+        working-directory: zksync-os-server
         run: |
-          git clone https://github.com/matter-labs/local-setup.git
-          pushd local-setup
-          ./start-zk-chains.sh
-          popd
-      - name: Extract custom token address
-        run: |
-          echo "Waiting for token deployment..."
-          until docker exec local-setup-zksync-1 test -f /configs/erc20.yaml; do
-            echo "Token config file not found yet, checking again in 5 seconds..."
-            sleep 5
+          nohup anvil --load-state zkos-l1-state.json --host 0.0.0.0 --port 8545 > anvil.log 2>&1 &
+          # wait until RPC responds
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:8545 > /dev/null; then
+              echo "Anvil is up"
+              break
+            fi
+            sleep 1
           done
 
-          echo "Extracting deployed token address from inside zksync container..."
-          CUSTOM_TOKEN_ADDRESS=$(docker exec local-setup-zksync-1 awk -F": " '/tokens:/ {found_tokens=1} found_tokens && /DAI:/ {found_dai=1} found_dai && /address:/ {print $2; exit}' /configs/erc20.yaml)
+      - name: Run L2 server
+        working-directory: zksync-os-server
+        run: |
+          cargo run
+          # wait until RPC responds
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:3050 > /dev/null; then
+              echo "L2 server is up"
+              break
+            fi
+            sleep 1
+          done
 
-          if [ -z "$CUSTOM_TOKEN_ADDRESS" ]; then
-            echo "❌ Error: Could not retrieve token address. Exiting."
-            exit 1
-          fi
-
-          echo "Custom token address: $CUSTOM_TOKEN_ADDRESS"
-          # Export the variable so subsequent steps have access to it
-          echo "CUSTOM_TOKEN_ADDRESS=$CUSTOM_TOKEN_ADDRESS" >> $GITHUB_ENV
-      - name: Prepare environment
-        env:
-          IS_ETH_CHAIN: false
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
-        run: yarn test:prepare
       - name: Run tests
-        env:
-          IS_ETH_CHAIN: false
-          CUSTOM_TOKEN_ADDRESS: ${{ env.CUSTOM_TOKEN_ADDRESS }}
-        run: yarn test
+        run: |
+          yarn test:prepare
+          yarn test

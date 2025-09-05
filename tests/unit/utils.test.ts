@@ -1,7 +1,6 @@
 import {expect} from 'chai';
-import {types, utils} from '../../src';
-import {ethers} from 'ethers';
-import {ADDRESS1, ADDRESS2, APPROVAL_TOKEN} from '../utils';
+import {utils} from '../../src';
+import {ADDRESS1} from '../utils';
 
 describe('utils', () => {
   describe('#getHashedL2ToL1Msg()', () => {

@@ -5,9 +5,7 @@ import {
   IL2NativeTokenVault__factory,
   IERC20__factory,
 } from '../src/typechain';
-import {DAI_L1} from './utils';
 import MintableERC20Artifact from './files/MintableERC20.json';
-import Token from './files/Token.json';
 import {L1_CHAIN_URL, L2_CHAIN_URL, NTV_ADDRESS} from './utils';
 
 const PRIVATE_KEY =
@@ -15,12 +13,10 @@ const PRIVATE_KEY =
 
 const provider = new Provider(L2_CHAIN_URL);
 const ethProvider = new ethers.JsonRpcProvider(L1_CHAIN_URL);
+export let APPROVAL_TOKEN = ethers.ZeroAddress;
+export let DAI_L1 = ethers.ZeroAddress;
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
-
-const SALT =
-  '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
-const TOKEN = '0x2dc3685cA34163952CF4A5395b0039c00DFa851D'; // deployed by using create2 and SALT
 
 // Deploys token
 // Mints tokens to wallet
@@ -44,6 +40,7 @@ async function deployToken(): Promise<{
     Typed.uint256(50)
   )) as ethers.ContractTransactionResponse;
   await mintTx.wait();
+  APPROVAL_TOKEN = tokenAddress;
 
   return {token: tokenAddress};
 }
@@ -75,6 +72,7 @@ export async function deployDaiTokenL1(): Promise<`0x${string}`> {
   const factory = new ContractFactory(abi, bytecode, wallet._signerL1());
   const dai = await factory.deploy('Dai Stablecoin', 'DAI', 18);
   await dai.waitForDeployment();
+  DAI_L1 = await dai.getAddress();
   return (await dai.getAddress()) as `0x${string}`;
 }
 

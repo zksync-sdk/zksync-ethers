@@ -1,18 +1,17 @@
 import {expect} from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
-import {ContractFactory, ethers} from 'ethers';
+import {ethers} from 'ethers';
 import {
   IS_ETH_BASED,
   ADDRESS1,
   PRIVATE_KEY1,
   ADDRESS2,
-  APPROVAL_TOKEN,
   L2_CHAIN_URL,
   L1_CHAIN_URL,
+  APPROVAL_TOKEN,
   DAI_L1,
 } from '../utils';
-import Token from '../files/Token.json';
 
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);

@@ -1,4 +1,7 @@
 import {expect} from 'chai';
+import {Contract, ContractFactory, ethers, Typed} from 'ethers';
+import {Wallet} from '../src';
+import MintableERC20Artifact from './files/MintableERC20.json';
 
 export const ADDRESS1 = '0x36615Cf349d7F6344891B1e7CA7C72883F5dc049';
 export const PRIVATE_KEY1 =
@@ -10,11 +13,11 @@ export const PRIVATE_KEY2 =
   '0xac1e735be8536c6534bb4f17f06f6afc73b2b5ba84ac2cfb12f7461b20c0bbe3';
 export const DAI_L1 =
   process.env.CUSTOM_TOKEN_ADDRESS ||
-  '0x78dBF8F3E776b2e98E75B69249450F4987C0387c';
+  '0xD75Bf167785EAe2197ef92637337259bfD16bDE9';
 export const DAI_L2 = '0xDb6ca4Dd98d4F7248f7dEaE35204706e10492Ef7';
 export const NON_ETH_BASED_ETH_L2_ADDRESS =
   '0xa283C9f5302429D70d62346a5a9d236FF0886dA5';
-export const APPROVAL_TOKEN = '0x05DcF3DFc8533ffcf0E0a705924E731C49B247Dc'; // Crown token
+export const APPROVAL_TOKEN = '0xe441CF0795aF14DdB9f7984Da85CD36DB1B8790d'; // Crown token
 export const NTV_ADDRESS = '0x0000000000000000000000000000000000010004'; // Native Token Vault is deployed at this address on ZK chains
 export const IS_ETH_BASED = ['true', '1', 'yes'].includes(
   process.env.IS_ETH_CHAIN ?? 'true'

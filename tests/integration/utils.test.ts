@@ -2,15 +2,7 @@ import * as chai from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils} from '../../src';
 import {ethers} from 'ethers';
-import {
-  PRIVATE_KEY1,
-  ADDRESS1,
-  IS_ETH_BASED,
-  ADDRESS2,
-  DAI_L1,
-  L1_CHAIN_URL,
-  L2_CHAIN_URL,
-} from '../utils';
+import {PRIVATE_KEY1, ADDRESS1, L1_CHAIN_URL, L2_CHAIN_URL} from '../utils';
 
 const {expect} = chai;
 
