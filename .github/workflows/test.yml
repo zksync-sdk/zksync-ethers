@@ -32,62 +32,107 @@ jobs:
           yarn test:build
 
   setup-l2-server-and-run-tests:
-    name: Setup L2 server and run tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout your repo
-        uses: actions/checkout@v4
+      name: Setup L2 server and run tests
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout your repo
+          uses: actions/checkout@v4
 
-      - name: Install build deps
-        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
+        # Node + deps so ts-node is available in THIS job
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: "lts/*"
+            cache: yarn
+        - name: Install dependencies
+          run: yarn install --frozen-lockfile
 
-      - name: Install Rust (stable)
-        uses: dtolnay/rust-toolchain@stable
+        - name: Install build deps
+          run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
 
-      - name: Install Foundry (anvil)
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
-          cache: true
+        - name: Install Rust (stable)
+          uses: dtolnay/rust-toolchain@stable
 
-      - name: Clone zksync-os-server
-        run: |
-          # use HTTPS to avoid SSH key setup on the runner
-          git clone https://github.com/matter-labs/zksync-os-server.git
+        - name: Install Foundry (anvil)
+          uses: foundry-rs/foundry-toolchain@v1
+          with:
+            version: nightly
+            cache: true
 
-      - name: Start Anvil (L1) with saved state
-        working-directory: zksync-os-server
-        run: |
-          nohup anvil --load-state zkos-l1-state.json --host 0.0.0.0 --port 8545 > anvil.log 2>&1 &
-          # wait until RPC responds
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:8545 > /dev/null; then
-              echo "Anvil is up"
-              break
+        - name: Clone zksync-os-server
+          run: git clone https://github.com/matter-labs/zksync-os-server.git
+
+        # Cache Cargo to avoid recompiling everything every run
+        - name: Cache cargo
+          uses: actions/cache@v4
+          with:
+            path: |
+              ~/.cargo/registry
+              ~/.cargo/git
+              zksync-os-server/target
+            key: ${{ runner.os }}-cargo-${{ hashFiles('zksync-os-server/Cargo.lock') }}
+            restore-keys: |
+              ${{ runner.os }}-cargo-
+
+        - name: Start Anvil (L1) with saved state
+          working-directory: zksync-os-server
+          run: |
+            nohup anvil --load-state zkos-l1-state.json --host 0.0.0.0 --port 8545 > anvil.log 2>&1 &
+            for i in {1..60}; do
+              if curl -s http://127.0.0.1:8545 > /dev/null; then
+                echo "Anvil is up"
+                break
+              fi
+              sleep 1
+            done
+
+        # Build first so cargo run doesn't spend minutes compiling while we poll
+        - name: Build L2 server (release)
+          working-directory: zksync-os-server
+          env:
+            CARGO_TERM_COLOR: always
+            CARGO_INCREMENTAL: 0
+          run: cargo build --release
+
+        - name: Run L2 server (background) and wait for JSON-RPC
+          working-directory: zksync-os-server
+          run: |
+            # If there's a binary, use it directly; otherwise fall back to cargo run.
+            if [ -x ./target/release/zksync-os-server ]; then
+              nohup ./target/release/zksync-os-server > l2.log 2>&1 &
+            else
+              nohup cargo run --release > l2.log 2>&1 &
             fi
-            sleep 1
-          done
 
-      - name: Run L2 server (background) and wait for RPC
-        working-directory: zksync-os-server
-        run: |
-          nohup cargo run > l2.log 2>&1 &
-          # wait for JSON-RPC (port 3050) to respond
-          for i in {1..90}; do
-            if curl -sS -X POST http://127.0.0.1:3050 \
-                 -H 'content-type: application/json' \
-                 --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' \
-                 | grep -q '"result"'; then
-              echo "L2 JSON-RPC is up"
-              break
+            # Wait up to 10 minutes for RPC (port 3050) to respond
+            for i in {1..600}; do
+              if curl -sS -X POST http://127.0.0.1:3050 \
+                  -H 'content-type: application/json' \
+                  --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' \
+                  | grep -q '"result"'; then
+                echo "L2 JSON-RPC is up"
+                break
+              fi
+              # show progress logs every 30s
+              if [ $((i % 30)) -eq 0 ]; then
+                echo "--- l2.log (last 50 lines) ---"
+                tail -n 50 l2.log || true
+              fi
+              sleep 1
+            done
+
+            # Final check: fail fast if still not up
+            if ! curl -sS -X POST http://127.0.0.1:3050 \
+                -H 'content-type: application/json' \
+                --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' \
+                | grep -q '"result"'; then
+              echo "L2 JSON-RPC failed to start."
+              echo "--- l2.log (last 200 lines) ---"
+              tail -n 200 l2.log || true
+              exit 1
             fi
-            sleep 1
-          done
-          # show last lines for debugging
-          tail -n 50 l2.log
 
-
-      - name: Run tests
-        run: |
-          yarn test:prepare
-          yarn test
+        - name: Run tests
+          run: |
+            yarn test:prepare
+            yarn test
