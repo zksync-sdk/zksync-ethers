@@ -1,6 +1,9 @@
 {
   "repositoryUrl": "https://github.com/zksync-sdk/zksync-ethers.git",
-  "branches": "main",
+  "branches": [
+    "main",
+    { "name": "zksyncos", "prerelease": "zksyncos-alpha" }
+  ],
   "debug": true,
   "addReleases": "top",
   "preset": "angular",
