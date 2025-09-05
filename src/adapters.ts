@@ -11,7 +11,6 @@ import {Provider} from './provider';
 import {
   BOOTLOADER_FORMAL_ADDRESS,
   checkBaseCost,
-  DEFAULT_GAS_PER_PUBDATA_LIMIT,
   estimateCustomBridgeDepositL2Gas,
   getERC20DefaultBridgeData,
   isETH,
@@ -552,7 +551,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         isETHBasedChain &&
         isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)
       ) {
-        return await this._depositETHToETHBasedChain(transaction);
+        const response = await this._depositETHToETHBasedChain(transaction);
+        return response;
       } else if (isAddressEq(baseTokenAddress, ETH_ADDRESS_IN_CONTRACTS)) {
         return await this._depositTokenToETHBasedChain(transaction);
       } else if (isAddressEq(transaction.token, ETH_ADDRESS_IN_CONTRACTS)) {
@@ -828,6 +828,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       tx.overrides ??= {};
       tx.overrides.gasLimit ??= gasLimit;
+
       return this.requestExecute(tx);
     }
 
@@ -1210,7 +1211,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       // Call the BridgeHub directly, like it's done with the DiamondProxy.
       const bridgehub = await this.getBridgehubContract();
       const chainId = (await this._providerL2().getNetwork()).chainId;
-
       const tx = await this._getDepositTxWithDefaults(transaction);
       const {
         operatorTip,
@@ -1296,10 +1296,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
       tx.l2GasLimit ??= BigInt(await this._getL2GasLimit(tx));
       tx.l2GasLimit = BigInt(tx.l2GasLimit as any) + 550_000n;
-      // tx.l2GasLimit = BigInt(tx.l2GasLimit as any) + 20000n;
-      //console.log("tx l2 gas limit", tx.l2GasLimit);
       await insertGasPrice(this._providerL1(), tx.overrides);
-
       return tx as {
         token: Address;
         amount: BigNumberish;
@@ -1534,7 +1531,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       )[index];
 
       return {
-        log
+        log,
       };
     }
 
@@ -1687,7 +1684,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return {
         chainId: (await this._providerL2().getNetwork())
           .chainId as BigNumberish,
-        l2BatchNumber: log.l1BatchNumber as BigNumberish,
+        l2BatchNumber: proof.batch_number as BigNumberish,
         l2MessageIndex: proof.id,
         l2Sender: sender,
         l2TxNumberInBatch: txIndex,
@@ -1724,29 +1721,28 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       index = 0,
       overrides?: ethers.Overrides
     ): Promise<ethers.ContractTransactionResponse> {
-      const finalizeWithdrawalParams = await this.getFinalizeWithdrawalParams(
+      const finalizeWithdrawalParams = await this.getFinalizeDepositParams(
         withdrawalHash,
         index
       );
-
       const l1Nullifier = await this.getL1Nullifier();
 
       const finalizeL1DepositParams: FinalizeL1DepositParams = {
-        chainId: (await this._providerL2().getNetwork())
-          .chainId as BigNumberish,
-        l2BatchNumber: finalizeWithdrawalParams.l1BatchNumber as BigNumberish,
+        chainId: finalizeWithdrawalParams.chainId as BigNumberish,
+        l2BatchNumber: finalizeWithdrawalParams.l2BatchNumber as BigNumberish,
         l2MessageIndex: finalizeWithdrawalParams.l2MessageIndex as BigNumberish,
-        l2Sender: finalizeWithdrawalParams.sender,
+        l2Sender: finalizeWithdrawalParams.l2Sender,
         l2TxNumberInBatch:
-          finalizeWithdrawalParams.l2TxNumberInBlock as BigNumberish,
+          finalizeWithdrawalParams.l2TxNumberInBatch as BigNumberish,
         message: finalizeWithdrawalParams.message,
-        merkleProof: finalizeWithdrawalParams.proof,
+        merkleProof: finalizeWithdrawalParams.merkleProof,
       };
-
-      return await l1Nullifier.finalizeDeposit(
+      const res = await l1Nullifier.finalizeDeposit(
         finalizeL1DepositParams,
         overrides ?? {}
       );
+
+      return res;
     }
 
     /**
@@ -1778,14 +1774,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
 
       const chainId = (await this._providerL2().getNetwork()).chainId;
-
       const l1Bridge = (await this.getL1BridgeContracts()).shared;
-
-      return await l1Bridge.isWithdrawalFinalized(
+      const response = await l1Bridge.isWithdrawalFinalized(
         chainId,
-        log.l1BatchNumber!,
+        proof.batch_number,
         proof.id
       );
+      return response;
     }
 
     /**
@@ -1808,6 +1803,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       if (!receipt) {
         throw new Error('Transaction is not mined!');
       }
+      const txIndex = Number(receipt?.index ?? 0);
       const successL2ToL1LogIndex = receipt.l2ToL1Logs.findIndex(
         l2ToL1log =>
           isAddressEq(l2ToL1log.sender, BOOTLOADER_FORMAL_ADDRESS) &&
@@ -1903,11 +1899,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         assetId,
         assetData,
         depositHash,
-        0, // todo: fix correctly dustin
-        // receipt.l1BatchNumber!,
+        proof.batch_number,
         proof.id,
-        0, // todo: fix correctly dustin
-        // receipt.l1BatchTxIndex!,
+        txIndex,
         proof.proof,
         overrides ?? {}
       );
@@ -1985,7 +1979,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       delete requestExecuteTx.gasPrice;
       delete requestExecuteTx.maxFeePerGas;
       delete requestExecuteTx.maxPriorityFeePerGas;
-
       return this._providerL1().estimateGas(requestExecuteTx);
     }
 
@@ -2020,13 +2013,27 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
 
       const {...tx} = transaction;
+
       tx.l2Value ??= 0n;
       tx.operatorTip ??= 0n;
       tx.overrides ??= {};
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
       tx.refundRecipient ??= await this.getAddress();
-      tx.l2GasLimit ??=
-        await this._providerL2().estimateGas(transaction); // TODO: resolve this dustin
+
+      if (tx.l2GasLimit === null) {
+        const estReq: ethers.TransactionRequest = {
+          to: tx.contractAddress,
+          data: tx.calldata,
+          value: ((): bigint => {
+            if (typeof tx.l2Value === 'bigint') return tx.l2Value;
+            if (tx.l2Value === undefined || tx.l2Value === null) return 0n;
+            return BigInt(tx.l2Value as any);
+          })(),
+          from: tx.overrides.from,
+        };
+
+        tx.l2GasLimit = await this._providerL2().estimateGas(estReq);
+      }
 
       const {l2Value, l2GasLimit, operatorTip, overrides, gasPerPubdataByte} =
         tx;
@@ -2038,7 +2045,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const baseCost = await this.getBaseCost({
         gasPrice: gasPriceForEstimation!,
         gasPerPubdataByte,
-        gasLimit: l2GasLimit,
+        gasLimit: l2GasLimit!,
       });
 
       return {
@@ -2085,15 +2092,28 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
 
       const {...tx} = transaction;
-      tx.l2Value ??= 0;
-      tx.mintValue ??= 0;
-      tx.operatorTip ??= 0;
+
+      tx.l2Value ??= 0n;
+      tx.mintValue ??= 0n;
+      tx.operatorTip ??= 0n;
       tx.overrides ??= {};
       tx.overrides.from ??= await this.getAddress();
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
       tx.refundRecipient ??= await this.getAddress();
-      tx.l2GasLimit ??=
-        await this._providerL2().estimateGas(transaction); // TODO resolve dustin
+
+      if (tx.l2GasLimit === null || tx.l2GasLimit === undefined) {
+        const estReq: ethers.TransactionRequest = {
+          to: tx.contractAddress,
+          data: tx.calldata,
+          value: ((): bigint => {
+            if (typeof tx.l2Value === 'bigint') return tx.l2Value;
+            if (tx.l2Value === undefined || tx.l2Value === null) return 0n;
+            return BigInt(tx.l2Value as any);
+          })(),
+          from: tx.overrides.from,
+        };
+        tx.l2GasLimit = await this._providerL2().estimateGas(estReq);
+      }
 
       const {
         contractAddress,
@@ -2111,25 +2131,31 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       await insertGasPrice(this._providerL1(), overrides);
       const gasPriceForEstimation =
         overrides.maxFeePerGas || overrides.gasPrice;
-
+      // TODO: hacky estimation, improve for zksyncos sdk.
+      const scaled = scaleGasLimit(BigInt(l2GasLimit as any));
+      const MULTIPLIER = 12n;
+      const MIN_EFFECTIVE_L2_GAS = 300_000n;
+      const effective =
+        scaled * MULTIPLIER < MIN_EFFECTIVE_L2_GAS
+          ? MIN_EFFECTIVE_L2_GAS
+          : scaled * MULTIPLIER;
       const baseCost = await this.getBaseCost({
         gasPrice: gasPriceForEstimation!,
         gasPerPubdataByte,
-        gasLimit: l2GasLimit,
+        gasLimit: effective,
       });
-
       const l2Costs = baseCost + BigInt(operatorTip) + BigInt(l2Value);
       let providedValue = isETHBaseToken ? overrides.value : mintValue;
       if (
         providedValue === undefined ||
         providedValue === null ||
-        BigInt(providedValue) === 0n
+        BigInt(providedValue) === 0n ||
+        BigInt(providedValue) < l2Costs
       ) {
         providedValue = l2Costs;
         if (isETHBaseToken) overrides.value = providedValue;
       }
       await checkBaseCost(baseCost, providedValue);
-
       return await bridgehub.requestL2TransactionDirect.populateTransaction(
         {
           chainId,
@@ -2137,7 +2163,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           l2Contract: contractAddress,
           l2Value: l2Value,
           l2Calldata: calldata,
-          l2GasLimit: l2GasLimit,
+          l2GasLimit: effective,
           l2GasPerPubdataByteLimit: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
           factoryDeps: factoryDeps ?? [],
           refundRecipient: refundRecipient,
@@ -2218,10 +2244,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
      * @param [token] The token address to query balance for. Defaults to the native token.
      * @param [blockTag='committed'] The block tag to get the balance at.
      */
-    async getBalance(
-      token?: Address,
-      blockTag: BlockTag = 'committed'
-    ): Promise<bigint> {
+    async getBalance(token?: Address, blockTag?: BlockTag): Promise<bigint> {
       return await this._providerL2().getBalance(
         await this.getAddress(),
         blockTag,
@@ -2320,7 +2343,6 @@ export async function insertGasPrice(
 ): Promise<void> {
   if (!overrides.gasPrice && !overrides.maxFeePerGas) {
     const l1FeeData = await l1Provider.getFeeData();
-
     // check if plugin is used to fetch fee data
     const network = await l1Provider.getNetwork();
     const plugin = <FetchUrlFeeDataNetworkPlugin>(
@@ -2332,7 +2354,6 @@ export async function insertGasPrice(
       overrides.maxPriorityFeePerGas = l1FeeData.maxPriorityFeePerGas;
       return;
     }
-
     // Sometimes baseFeePerGas is not available, so we use gasPrice instead.
     const baseFee = l1FeeData.maxFeePerGas
       ? getBaseCostFromFeeData(l1FeeData)
@@ -2340,7 +2361,6 @@ export async function insertGasPrice(
     if (!baseFee) {
       throw new Error('Failed to calculate base fee!');
     }
-
     // ethers.js by default uses multiplication by 2, but since the price for the L2 part
     // will depend on the L1 part, doubling base fee is typically too much.
     overrides.maxFeePerGas =

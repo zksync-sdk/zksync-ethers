@@ -140,8 +140,10 @@ export function JsonRpcApiProvider<
     }
 
     override _wrapTransactionReceipt(value: any): TransactionReceipt {
-      const receipt: any = formatTransactionReceipt(value);
-      return new TransactionReceipt(receipt, this);
+      const {l2ToL1Logs, ...rest} = value ?? {};
+      const formatted: any = formatTransactionReceipt(rest);
+      formatted.l2ToL1Logs = l2ToL1Logs ?? [];
+      return new TransactionReceipt(formatted, this);
     }
 
     /**
@@ -775,7 +777,6 @@ export function JsonRpcApiProvider<
       return {
         l2ToL1LogIndex,
         l2ToL1Log,
-        // l1BatchTxId: receipt.l1BatchTxIndex,
       };
     }
 
@@ -791,34 +792,15 @@ export function JsonRpcApiProvider<
       const {l2ToL1LogIndex, l2ToL1Log} =
         await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
       const proof = await this.getLogProof(txHash, l2ToL1LogIndex);
+      const receipt = await this.getTransactionReceipt(txHash);
+      const txIndex = Number(receipt?.index ?? 0);
       return {
         l1BatchNumber: l2ToL1Log.l1BatchNumber,
         l2MessageIndex: proof!.id,
-        //l2TxNumberInBlock: null, // TODO: dustin fix correctly
+        l2TxNumberInBlock: txIndex,
         proof: proof!.proof,
       };
     }
-
-    // /**
-    //  * Returns the version of the supported account abstraction and nonce ordering from a given contract address.
-    //  *
-    //  * @param address The contract address.
-    //  */
-    // async getContractAccountInfo(
-    //   address: Address
-    // ): Promise<ContractAccountInfo> {
-    //   const deployerContract = new Contract(
-    //     CONTRACT_DEPLOYER_ADDRESS,
-    //     CONTRACT_DEPLOYER.fragments,
-    //     this
-    //   );
-    //   const data = await deployerContract.getAccountInfo(address);
-
-    //   return {
-    //     supportedAAVersion: Number(data.supportedAAVersion),
-    //     nonceOrdering: Number(data.nonceOrdering),
-    //   };
-    // }
 
     /**
      * @deprecated Use `Wallet.estimateDefaultBridgeDepositL2Gas`.
@@ -847,9 +829,8 @@ export function JsonRpcApiProvider<
         ? ETH_ADDRESS_IN_CONTRACTS
         : token;
       if (await this.isBaseToken(token)) {
-        return await this.estimateGas({
+        return await providerL1.estimateGas({
           to: to,
-          // gasPerPubdataByte: gasPerPubdataByte, // TODO: dustin apply gas here
           from: from,
           data: '0x',
           value: amount,
@@ -861,7 +842,6 @@ export function JsonRpcApiProvider<
         const l1BridgeAddress = bridgeAddresses.sharedL1;
         const l2BridgeAddress = bridgeAddresses.sharedL2;
         const bridgeData = await getERC20DefaultBridgeData(token, providerL1);
-
         return await this.estimateCustomBridgeDepositL2Gas(
           l1BridgeAddress,
           l2BridgeAddress,
@@ -907,10 +887,10 @@ export function JsonRpcApiProvider<
         amount,
         bridgeData
       );
+      const caller = applyL1ToL2Alias(l1BridgeAddress);
       return await this.estimateGas({
-        // caller: applyL1ToL2Alias(l1BridgeAddress),
+        from: caller,
         to: l2BridgeAddress,
-        // gasPerPubdataByte: gasPerPubdataByte, // TODO: @dustin should be applied
         data: calldata,
         value: l2Value,
       });
@@ -1270,28 +1250,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
    * });
    * console.log(`Withdrawal tx: ${tx}`);
-   *
-   * @example Retrieve populated ETH withdrawal transaction using paymaster to facilitate fee payment with an ERC20 token.
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
-   *
-   * const tx = await provider.getWithdrawTx({
-   *   token: utils.ETH_ADDRESS,
-   *   amount: 7_000_000_000,
-   *   to: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   paymasterParams: utils.getPaymasterParams(paymaster, {
-   *     type: "ApprovalBased",
-   *     token: token,
-   *     minimalAllowance: 1,
-   *     innerInput: new Uint8Array(),
-   *   }),
-   * });
-   * console.log(`Withdrawal tx: ${tx}`);
    */
   override async getWithdrawTx(transaction: {
     token: Address;
@@ -1348,27 +1306,6 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
    * });
    * console.log(`Transfer tx: ${tx}`);
    *
-   * @example Retrieve populated ETH transfer transaction using paymaster to facilitate fee payment with an ERC20 token.
-   *
-   * import { Provider, types, utils } from "zksync-ethers";
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
-   *
-   * const tx = await provider.getTransferTx({
-   *   token: utils.ETH_ADDRESS,
-   *   amount: 7_000_000_000,
-   *   to: "0xa61464658AfeAf65CccaaFD3a512b69A83B77618",
-   *   from: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
-   *   paymasterParams: utils.getPaymasterParams(paymaster, {
-   *     type: "ApprovalBased",
-   *     token: token,
-   *     minimalAllowance: 1,
-   *     innerInput: new Uint8Array(),
-   *   }),
-   * });
-   * console.log(`Transfer tx: ${tx}`);
    */
   override async getTransferTx(transaction: {
     to: Address;
@@ -1512,28 +1449,11 @@ export class Provider extends JsonRpcApiProvider(ethers.JsonRpcProvider) {
   ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
-    // l2TxNumberInBlock: number | null;
+    l2TxNumberInBlock: number;
     proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);
   }
-
-  // /**
-  //  * @inheritDoc
-  //  *
-  //  * @example
-  //  *
-  //  * import { Provider, types, utils } from "zksync-ethers";
-  //  *
-  //  * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-  //  * const tokenAddress = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-  //  * console.log(`Contract account info: ${utils.toJSON(await provider.getContractAccountInfo(tokenAddress))}`);
-  //  */
-  // override async getContractAccountInfo(
-  //   address: Address
-  // ): Promise<ContractAccountInfo> {
-  //   return super.getContractAccountInfo(address);
-  // }
 
   /**
    * @inheritDoc
@@ -2203,28 +2123,11 @@ export class BrowserProvider extends JsonRpcApiProvider(
   ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
-    // l2TxNumberInBlock: number | null;
+    l2TxNumberInBlock: number;
     proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);
   }
-
-  // /**
-  //  * @inheritDoc
-  //  *
-  //  * @example
-  //  *
-  //  * import { BrowserProvider, utils } from "zksync-ethers";
-  //  *
-  //  * const provider = new BrowserProvider(window.ethereum);
-  //  * const tokenAddress = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-  //  * console.log(`Contract account info: ${utils.toJSON(await provider.getContractAccountInfo(tokenAddress))}`);
-  //  */
-  // override async getContractAccountInfo(
-  //   address: Address
-  // ): Promise<ContractAccountInfo> {
-  //   return super.getContractAccountInfo(address);
-  // }
 
   /**
    * @inheritDoc

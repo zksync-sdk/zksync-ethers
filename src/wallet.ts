@@ -11,7 +11,6 @@ import {
 } from 'ethers';
 import {
   Address,
-  BalancesMap,
   FinalizeL1DepositParams,
   FinalizeWithdrawalParams,
   FullDepositFee,
@@ -971,7 +970,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    */
   override async getBalance(
     token?: Address,
-    blockTag: BlockTag = 'committed'
+    blockTag?: BlockTag
   ): Promise<bigint> {
     return super.getBalance(token, blockTag);
   }
@@ -1129,33 +1128,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
    *
-   * @example Transfer ETH using paymaster to facilitate fee payment with an ERC20 token.
-   *
-   * import { Wallet, Provider, types } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const wallet = new Wallet(PRIVATE_KEY, provider);
-   *
-   * const transferTx = await wallet.transfer({
-   *   to: Wallet.createRandom().address,
-   *   amount: ethers.parseEther("0.01"),
-   *   paymasterParams: utils.getPaymasterParams(paymaster, {
-   *     type: "ApprovalBased",
-   *     token: token,
-   *     minimalAllowance: 1,
-   *     innerInput: new Uint8Array(),
-   *   }),
-   * });
-   *
-   * const receipt = await transferTx.wait();
-   *
-   * console.log(`The sum of ${receipt.value} ETH was transferred to ${receipt.to}`);
-   *
    * @example Transfer token.
    *
    * import { Wallet, Provider, types } from "zksync-ethers";
@@ -1177,34 +1149,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *
    * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    *
-   * @example Transfer token using paymaster to facilitate fee payment with an ERC20 token.
-   *
-   * import { Wallet, Provider, types } from "zksync-ethers";
-   * import { ethers } from "ethers";
-   *
-   * const PRIVATE_KEY = "<WALLET_PRIVATE_KEY>";
-   * const token = "0x927488F48ffbc32112F1fF721759649A89721F8F"; // Crown token which can be minted for free
-   * const paymaster = "0x13D0D8550769f59aa241a41897D4859c87f7Dd46"; // Paymaster for Crown token
-   *
-   * const provider = Provider.getDefaultProvider(types.Network.Sepolia);
-   * const wallet = new Wallet(PRIVATE_KEY, provider);
-   *
-   * const tokenL2 = "0x6a4Fb925583F7D4dF82de62d98107468aE846FD1";
-   * const transferTx = await wallet.transfer({
-   *   token: tokenL2,
-   *   to: Wallet.createRandom().address,
-   *   amount: ethers.parseEther("0.01"),
-   *   paymasterParams: utils.getPaymasterParams(paymaster, {
-   *     type: "ApprovalBased",
-   *     token: token,
-   *     minimalAllowance: 1,
-   *     innerInput: new Uint8Array(),
-   *   }),
-   * });
-   *
-   * const receipt = await transferTx.wait();
-   *
-   * console.log(`The sum of ${receipt.value} token was transferred to ${receipt.to}`);
    */
   override async transfer(transaction: {
     to: Address;
@@ -1239,7 +1183,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
   ): Promise<{
     l1BatchNumber: number;
     l2MessageIndex: number;
-    // l2TxNumberInBlock: number | null; // TODO:(@ZKSYNCOS)
+    l2TxNumberInBlock: number;
     proof: string[];
   }> {
     return super.getPriorityOpConfirmation(txHash, index);
@@ -1507,9 +1451,6 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
    *   value: 7_000_000n,
    *   maxFeePerGas: 3_500_000_000n,
    *   maxPriorityFeePerGas: 2_000_000_000n,
-   *   customData: {
-   *     gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-   *   },
    * });
    * await tx.wait();
    */

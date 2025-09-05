@@ -1,19 +1,19 @@
 import {expect} from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
-import {ethers} from 'ethers';
+import {ContractFactory, ethers} from 'ethers';
 import {
   IS_ETH_BASED,
   ADDRESS1,
   PRIVATE_KEY1,
   ADDRESS2,
-  DAI_L1,
   APPROVAL_TOKEN,
-  PAYMASTER,
   L2_CHAIN_URL,
   L1_CHAIN_URL,
+  DAI_L1,
 } from '../utils';
-import {EIP712_TX_TYPE} from '../../src/utils';
+import Token from '../files/Token.json';
+
 describe('Provider', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
@@ -45,27 +45,6 @@ describe('Provider', () => {
     });
   });
 
-  describe('#getProtocolVersion()', () => {
-    it('should return the latest protocol version', async () => {
-      const result = await provider.getProtocolVersion();
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getFeeParams()', () => {
-    it('should return the current fee parameters', async () => {
-      const result = await provider.getFeeParams();
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getMainContractAddress()', () => {
-    it('should return the address of main contract', async () => {
-      const result = await provider.getMainContractAddress();
-      expect(result).not.to.be.null;
-    });
-  });
-
   describe('#getBridgehubContractAddress()', () => {
     it('should return the address of main contract', async () => {
       const result = await provider.getBridgehubContractAddress();
@@ -73,24 +52,9 @@ describe('Provider', () => {
     });
   });
 
-  describe('#getTestnetPaymasterAddress()', () => {
-    it('should return the address of testnet paymaster', async () => {
-      const result = await provider.getTestnetPaymasterAddress();
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#l1ChainId()', () => {
-    it('should return the L1 chain ID', async () => {
-      const L1_CHAIN_ID = 9;
-      const result = await provider.l1ChainId();
-      expect(result).to.be.equal(L1_CHAIN_ID);
-    });
-  });
-
   describe('#getL1ChainId()', () => {
     it('should return the L1 chain ID', async () => {
-      const L1_CHAIN_ID = 9;
+      const L1_CHAIN_ID = 31337;
       const result = await provider.getL1ChainId();
       expect(result).to.be.equal(L1_CHAIN_ID);
     });
@@ -110,104 +74,10 @@ describe('Provider', () => {
     });
   });
 
-  describe('#getL1BatchNumber()', () => {
-    it('should return a L1 batch number', async () => {
-      const result = await provider.getL1BatchNumber();
-      expect(result).to.be.greaterThan(0);
-    });
-  });
-
   describe('#getBalance()', () => {
     it('should return an ETH balance of the account at `address`', async () => {
       const result = await provider.getBalance(ADDRESS1);
       expect(result > 0n).to.be.true;
-    });
-
-    it('should return a DAI balance of the account at `address`', async () => {
-      const result = await provider.getBalance(
-        ADDRESS1,
-        'latest',
-        await provider.l2TokenAddress(DAI_L1)
-      );
-      expect(result > 0n).to.be.true;
-    });
-  });
-
-  describe('#getConfirmedTokens()', () => {
-    it('should return confirmed tokens', async () => {
-      const result = await provider.getConfirmedTokens();
-      expect(result).to.have.lengthOf(1);
-    });
-  });
-
-  describe('#getBlockDetails()', () => {
-    it('should return a block details', async () => {
-      const result = await provider.getBlockDetails(1);
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getTransactionDetails()', () => {
-    it('should return a transaction details', async () => {
-      const result = await provider.getTransactionDetails(receipt.hash);
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getBytecodeByHash()', () => {
-    it('should return the bytecode of a contract', async () => {
-      const testnetPaymasterBytecode = await provider.getCode(
-        (await provider.getTestnetPaymasterAddress()) as string
-      );
-      const testnetPaymasterBytecodeHash = ethers.hexlify(
-        utils.hashBytecode(testnetPaymasterBytecode)
-      );
-      const result = await provider.getBytecodeByHash(
-        testnetPaymasterBytecodeHash
-      );
-      expect(result).to.be.deep.equal(
-        Array.from(ethers.getBytes(testnetPaymasterBytecode))
-      );
-    });
-  });
-
-  describe('#getRawBlockTransactions()', () => {
-    it('should return a raw transactions', async () => {
-      const blockNumber = await provider.getBlockNumber();
-      const result = await provider.getRawBlockTransactions(blockNumber);
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getProof()', () => {
-    it('should return a storage proof', async () => {
-      // fetching the storage proof for rawNonce storage slot in NonceHolder system contract
-      // mapping(uint256 => uint256) internal rawNonces;
-
-      // Ensure the address is a 256-bit number by padding it
-      // because rawNonces uses uint256 for mapping addresses and their nonces
-      const addressPadded = ethers.zeroPadValue(wallet.address, 32);
-
-      // Convert the slot number to a hex string and pad it to 32 bytes
-      const slotPadded = ethers.zeroPadValue(ethers.toBeHex(0), 32);
-
-      // Concatenate the padded address and slot number
-      const concatenated = addressPadded + slotPadded.slice(2); // slice to remove '0x' from the slotPadded
-
-      // Hash the concatenated string using Keccak-256
-      const storageKey = ethers.keccak256(concatenated);
-
-      const l1BatchNumber = await provider.getL1BatchNumber();
-      try {
-        const result = await provider.getProof(
-          utils.NONCE_HOLDER_ADDRESS,
-          [storageKey],
-          l1BatchNumber
-        );
-        expect(result).not.to.be.null;
-      } catch (error) {
-        //
-      }
     });
   });
 
@@ -271,18 +141,11 @@ describe('Provider', () => {
     });
   });
 
-  describe('#getContractAccountInfo()', () => {
-    it('should return the contract account info', async () => {
-      const TESTNET_PAYMASTER = '0x0f9acdb01827403765458b4685de6d9007580d15';
-      const result = await provider.getContractAccountInfo(TESTNET_PAYMASTER);
-      expect(result).not.to.be.null;
-    });
-  });
-
   describe('#l2TokenAddress()', () => {
     it('should return the L2 ETH address', async () => {
       if (!IS_ETH_BASED) {
         const result = await provider.l2TokenAddress(utils.LEGACY_ETH_ADDRESS);
+        console.log(IS_ETH_BASED);
         expect(result).not.to.be.null;
       }
     });
@@ -303,6 +166,7 @@ describe('Provider', () => {
       const result = await provider.l1TokenAddress(
         await provider.l2TokenAddress(DAI_L1)
       );
+      const r = await provider.l2TokenAddress(DAI_L1);
       expect(result.toLowerCase()).to.equal(DAI_L1.toLowerCase());
     });
   });
@@ -331,38 +195,8 @@ describe('Provider', () => {
       expect(result).not.to.be.null;
     });
 
-    it('should return a committed block', async () => {
-      const result = await provider.getBlock('committed');
-      expect(result).not.to.be.null;
-    });
-
     it('should return a finalized block', async () => {
       const result = await provider.getBlock('finalized');
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getBlockDetails()', () => {
-    it('should return the block details', async () => {
-      const result = await provider.getBlockDetails(
-        await provider.getBlockNumber()
-      );
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getL1BatchBlockRange()', () => {
-    it('should return the L1 batch block range', async () => {
-      const l1BatchNumber = await provider.getL1BatchNumber();
-      const result = await provider.getL1BatchBlockRange(l1BatchNumber);
-      expect(result).not.to.be.null;
-    });
-  });
-
-  describe('#getL1BatchDetails()', () => {
-    it('should return the L1 batch details', async () => {
-      const l1BatchNumber = await provider.getL1BatchNumber();
-      const result = await provider.getL1BatchDetails(l1BatchNumber);
       expect(result).not.to.be.null;
     });
   });
@@ -382,7 +216,6 @@ describe('Provider', () => {
     if (IS_ETH_BASED) {
       it('should return an ETH withdraw transaction', async () => {
         const tx = {
-          type: 113,
           from: ADDRESS1,
           value: 7_000_000_000n,
           to: utils.L2_BASE_TOKEN_ADDRESS,
@@ -393,43 +226,12 @@ describe('Provider', () => {
           amount: 7_000_000_000,
           to: ADDRESS1,
           from: ADDRESS1,
-        });
-        expect(result).to.be.deep.equal(tx);
-      });
-
-      it('should return an ETH withdraw transaction with paymaster parameters', async () => {
-        const tx = {
-          from: ADDRESS1,
-          value: 7_000_000_000n,
-          type: 113,
-          to: utils.L2_BASE_TOKEN_ADDRESS,
-          data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
-          customData: {
-            paymasterParams: {
-              paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-              paymasterInput:
-                '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-            },
-          },
-        };
-        const result = await provider.getWithdrawTx({
-          token: utils.LEGACY_ETH_ADDRESS,
-          amount: 7_000_000_000,
-          to: ADDRESS1,
-          from: ADDRESS1,
-          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-            type: 'ApprovalBased',
-            token: APPROVAL_TOKEN,
-            minimalAllowance: 1,
-            innerInput: new Uint8Array(),
-          }),
         });
         expect(result).to.be.deep.equal(tx);
       });
     } else {
       it('should return an ETH withdraw transaction', async () => {
         const tx = {
-          type: 113,
           from: ADDRESS1,
           to: (await provider.getDefaultBridgeAddresses()).sharedL2,
           data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049000000000000000000000000540dff1797971fe12ba19e45c8e0568fe886b32000000000000000000000000000000000000000000000000000000001a13b8600',
@@ -439,35 +241,6 @@ describe('Provider', () => {
           amount: 7_000_000_000,
           to: ADDRESS1,
           from: ADDRESS1,
-        });
-        expect(result).to.be.deepEqualExcluding(tx, ['data']);
-      });
-
-      it('should return an ETH withdraw transaction with paymaster parameters', async () => {
-        const tx = {
-          from: ADDRESS1,
-          to: (await provider.getDefaultBridgeAddresses()).sharedL2,
-          type: EIP712_TX_TYPE,
-          data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049000000000000000000000000540dff1797971fe12ba19e45c8e0568fe886b32000000000000000000000000000000000000000000000000000000001a13b8600',
-          customData: {
-            paymasterParams: {
-              paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-              paymasterInput:
-                '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-            },
-          },
-        };
-        const result = await provider.getWithdrawTx({
-          token: utils.LEGACY_ETH_ADDRESS,
-          amount: 7_000_000_000,
-          to: ADDRESS1,
-          from: ADDRESS1,
-          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-            type: 'ApprovalBased',
-            token: APPROVAL_TOKEN,
-            minimalAllowance: 1,
-            innerInput: new Uint8Array(),
-          }),
         });
         expect(result).to.be.deepEqualExcluding(tx, ['data']);
       });
@@ -477,7 +250,6 @@ describe('Provider', () => {
           from: ADDRESS1,
           value: 7_000_000_000n,
           to: utils.L2_BASE_TOKEN_ADDRESS,
-          type: EIP712_TX_TYPE,
           data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
         };
         const result = await provider.getWithdrawTx({
@@ -485,36 +257,6 @@ describe('Provider', () => {
           amount: 7_000_000_000,
           to: ADDRESS1,
           from: ADDRESS1,
-        });
-        expect(result).to.be.deep.equal(tx);
-      });
-
-      it('should return a base token withdraw transaction with paymaster parameters', async () => {
-        const tx = {
-          from: ADDRESS1,
-          value: 7_000_000_000n,
-          to: utils.L2_BASE_TOKEN_ADDRESS,
-          type: EIP712_TX_TYPE,
-          data: '0x51cff8d900000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc049',
-          customData: {
-            paymasterParams: {
-              paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-              paymasterInput:
-                '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-            },
-          },
-        };
-        const result = await provider.getWithdrawTx({
-          token: utils.L2_BASE_TOKEN_ADDRESS,
-          amount: 7_000_000_000,
-          to: ADDRESS1,
-          from: ADDRESS1,
-          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-            type: 'ApprovalBased',
-            token: APPROVAL_TOKEN,
-            minimalAllowance: 1,
-            innerInput: new Uint8Array(),
-          }),
         });
         expect(result).to.be.deep.equal(tx);
       });
@@ -522,7 +264,6 @@ describe('Provider', () => {
 
     it('should return a DAI withdraw transaction', async () => {
       const tx = {
-        type: 113,
         value: 5n,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
@@ -533,43 +274,12 @@ describe('Provider', () => {
         amount: 5,
         to: ADDRESS1,
         from: ADDRESS1,
-      });
-      expect(result).to.be.deepEqualExcluding(tx, ['data']);
-    });
-
-    it('should return a DAI withdraw transaction with paymaster parameters', async () => {
-      const tx = {
-        type: 113,
-        value: 5n,
-        from: ADDRESS1,
-        to: (await provider.getDefaultBridgeAddresses()).sharedL2,
-        data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
-        customData: {
-          paymasterParams: {
-            paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-            paymasterInput:
-              '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-          },
-        },
-      };
-      const result = await provider.getWithdrawTx({
-        token: await provider.l2TokenAddress(DAI_L1),
-        amount: 5,
-        to: ADDRESS1,
-        from: ADDRESS1,
-        paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-          type: 'ApprovalBased',
-          token: APPROVAL_TOKEN,
-          minimalAllowance: 1,
-          innerInput: new Uint8Array(),
-        }),
       });
       expect(result).to.be.deepEqualExcluding(tx, ['data']);
     });
 
     it('should return a Crown withdraw transaction', async () => {
       const tx = {
-        type: 113,
         from: ADDRESS1,
         to: (await provider.getDefaultBridgeAddresses()).sharedL2,
         data: '0xd9caed1200000000000000000000000036615cf349d7f6344891b1e7ca7c72883f5dc04900000000000000000000000082b5ea13260346f4251c0940067a9117a6cf13840000000000000000000000000000000000000000000000000000000000000005',
@@ -585,7 +295,6 @@ describe('Provider', () => {
 
     it('should return a withdraw transaction with `tx.from==tx.to` when `tx.to` is not provided', async () => {
       const tx = {
-        type: 113,
         from: ADDRESS1,
         value: 7_000_000_000n,
         to: IS_ETH_BASED
@@ -633,7 +342,6 @@ describe('Provider', () => {
     if (IS_ETH_BASED) {
       it('should return an ETH transfer transaction', async () => {
         const tx = {
-          type: 113,
           from: ADDRESS1,
           to: ADDRESS2,
           value: 7_000_000_000,
@@ -643,35 +351,6 @@ describe('Provider', () => {
           amount: 7_000_000_000,
           to: ADDRESS2,
           from: ADDRESS1,
-        });
-        expect(result).to.be.deep.equal(tx);
-      });
-
-      it('should return an ETH transfer transaction with paymaster parameters', async () => {
-        const tx = {
-          type: utils.EIP712_TX_TYPE,
-          from: ADDRESS1,
-          to: ADDRESS2,
-          value: 7_000_000_000,
-          customData: {
-            paymasterParams: {
-              paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-              paymasterInput:
-                '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-            },
-          },
-        };
-        const result = await provider.getTransferTx({
-          token: utils.LEGACY_ETH_ADDRESS,
-          amount: 7_000_000_000,
-          to: ADDRESS2,
-          from: ADDRESS1,
-          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-            type: 'ApprovalBased',
-            token: APPROVAL_TOKEN,
-            minimalAllowance: 1,
-            innerInput: new Uint8Array(),
-          }),
         });
         expect(result).to.be.deep.equal(tx);
       });
@@ -680,7 +359,6 @@ describe('Provider', () => {
         const tx = {
           from: ADDRESS1,
           to: await provider.l2TokenAddress(utils.ETH_ADDRESS_IN_CONTRACTS),
-          type: EIP712_TX_TYPE,
           data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b7761800000000000000000000000000000000000000000000000000000001a13b8600',
         };
         const result = await provider.getTransferTx({
@@ -694,36 +372,21 @@ describe('Provider', () => {
 
       it('should return an ETH transfer transaction with paymaster parameters', async () => {
         const tx = {
-          type: 113,
           from: ADDRESS1,
           to: await provider.l2TokenAddress(utils.ETH_ADDRESS_IN_CONTRACTS),
           data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b7761800000000000000000000000000000000000000000000000000000001a13b8600',
-          customData: {
-            paymasterParams: {
-              paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-              paymasterInput:
-                '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-            },
-          },
         };
         const result = await provider.getTransferTx({
           token: utils.LEGACY_ETH_ADDRESS,
           amount: 7_000_000_000,
           to: ADDRESS2,
           from: ADDRESS1,
-          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-            type: 'ApprovalBased',
-            token: APPROVAL_TOKEN,
-            minimalAllowance: 1,
-            innerInput: new Uint8Array(),
-          }),
         });
         expect(result).to.be.deep.equal(tx);
       });
 
       it('should return a base token transfer transaction', async () => {
         const tx = {
-          type: 113,
           from: ADDRESS1,
           to: ADDRESS2,
           value: 7_000_000_000,
@@ -738,28 +401,14 @@ describe('Provider', () => {
 
       it('should return a base token transfer transaction with paymaster parameters', async () => {
         const tx = {
-          type: utils.EIP712_TX_TYPE,
           from: ADDRESS1,
           to: ADDRESS2,
           value: 7_000_000_000,
-          customData: {
-            paymasterParams: {
-              paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-              paymasterInput:
-                '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-            },
-          },
         };
         const result = await provider.getTransferTx({
           amount: 7_000_000_000,
           to: ADDRESS2,
           from: ADDRESS1,
-          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-            type: 'ApprovalBased',
-            token: APPROVAL_TOKEN,
-            minimalAllowance: 1,
-            innerInput: new Uint8Array(),
-          }),
         });
         expect(result).to.be.deep.equal(tx);
       });
@@ -767,7 +416,6 @@ describe('Provider', () => {
 
     it('should return a DAI transfer transaction', async () => {
       const tx = {
-        type: 113,
         from: ADDRESS1,
         to: await provider.l2TokenAddress(DAI_L1),
         data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005',
@@ -783,29 +431,15 @@ describe('Provider', () => {
 
     it('should return a DAI transfer transaction with paymaster parameters', async () => {
       const tx = {
-        type: 113,
         from: ADDRESS1,
         to: await provider.l2TokenAddress(DAI_L1),
         data: '0xa9059cbb000000000000000000000000a61464658afeaf65cccaafd3a512b69a83b776180000000000000000000000000000000000000000000000000000000000000005',
-        customData: {
-          paymasterParams: {
-            paymaster: '0x0EEc6f45108B4b806e27B81d9002e162BD910670',
-            paymasterInput:
-              '0x949431dc0000000000000000000000002dc3685ca34163952cf4a5395b0039c00dfa851d000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-          },
-        },
       };
       const result = await provider.getTransferTx({
         token: await provider.l2TokenAddress(DAI_L1),
         amount: 5,
         to: ADDRESS2,
         from: ADDRESS1,
-        paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-          type: 'ApprovalBased',
-          token: APPROVAL_TOKEN,
-          minimalAllowance: 1,
-          innerInput: new Uint8Array(),
-        }),
       });
       expect(result).to.be.deep.equal(tx);
     });
@@ -831,12 +465,6 @@ describe('Provider', () => {
         amount: 7_000_000_000,
         to: ADDRESS1,
         from: ADDRESS1,
-        paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-          type: 'ApprovalBased',
-          token: APPROVAL_TOKEN,
-          minimalAllowance: 1,
-          innerInput: new Uint8Array(),
-        }),
       });
       expect(result > 0n).to.be.true;
     });
@@ -852,59 +480,6 @@ describe('Provider', () => {
       });
       expect(result > 0n).to.be.be.true;
     });
-
-    it('should return a gas estimation of the transfer transaction with paymaster', async () => {
-      const result = await provider.estimateGasTransfer({
-        token: utils.LEGACY_ETH_ADDRESS,
-        amount: 7_000_000_000,
-        to: ADDRESS2,
-        from: ADDRESS1,
-        paymasterParams: utils.getPaymasterParams(PAYMASTER, {
-          type: 'ApprovalBased',
-          token: APPROVAL_TOKEN,
-          minimalAllowance: 1,
-          innerInput: new Uint8Array(),
-        }),
-      });
-      expect(result > 0n).to.be.be.true;
-    });
-  });
-
-  describe('#estimateGasL1()', () => {
-    it('should return a gas estimation of the L1 transaction', async () => {
-      const result = await provider.estimateGasL1({
-        from: ADDRESS1,
-        to: await provider.getBridgehubContractAddress(),
-        value: 7_000_000_000,
-        customData: {
-          gasPerPubdata: 800,
-        },
-      });
-      expect(result > 0n).to.be.true;
-    });
-  });
-
-  describe('#estimateL1ToL2Execute()', () => {
-    it('should return a gas estimation of the L1 to L2 transaction', async () => {
-      const result = await provider.estimateL1ToL2Execute({
-        contractAddress: await provider.getBridgehubContractAddress(),
-        calldata: '0x',
-        caller: ADDRESS1,
-        l2Value: 7_000_000_000,
-      });
-      expect(result > 0n).to.be.true;
-    });
-  });
-
-  describe('#estimateFee()', () => {
-    it('should return a gas estimation of the transaction', async () => {
-      const result = await provider.estimateFee({
-        from: ADDRESS1,
-        to: ADDRESS2,
-        value: `0x${7_000_000_000n.toString(16)}`,
-      });
-      expect(result).not.to.be.null;
-    });
   });
 
   describe('#estimateGas()', () => {
@@ -916,66 +491,6 @@ describe('Provider', () => {
       });
       expect(result > 0n).to.be.true;
     });
-
-    it('should return a gas estimation of the EIP712 transaction', async () => {
-      const result = await provider.estimateGas({
-        from: ADDRESS1,
-        to: await provider.l2TokenAddress(DAI_L1),
-        data: utils.IERC20.encodeFunctionData('approve', [ADDRESS2, 1]),
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-        },
-      });
-      expect(result > 0n).to.be.true;
-    });
-  });
-
-  describe('#estimateDefaultBridgeDepositL2Gas()', () => {
-    if (IS_ETH_BASED) {
-      it('should return estimation for ETH token', async () => {
-        const result = await provider.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          utils.LEGACY_ETH_ADDRESS,
-          ethers.parseEther('1'),
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-
-      it('should return estimation for DAI token', async () => {
-        const result = await provider.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          DAI_L1,
-          5,
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-    } else {
-      it('should return estimation for ETH token', async () => {
-        const result = await provider.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          utils.LEGACY_ETH_ADDRESS,
-          ethers.parseEther('1'),
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-
-      it('should return estimation for DAI token', async () => {
-        const result = await provider.estimateDefaultBridgeDepositL2Gas(
-          ethProvider,
-          DAI_L1,
-          5,
-          ADDRESS2,
-          ADDRESS1
-        );
-        expect(result > 0n).to.be.true;
-      });
-    }
   });
 
   describe('#getFilterChanges()', () => {
@@ -989,17 +504,6 @@ describe('Provider', () => {
     });
   });
 
-  describe('#sendRawTransactionWithDetailedOutput()', () => {
-    it('should return the transaction with detailed output', async () => {
-      const result = await provider.sendRawTransactionWithDetailedOutput(
-        await wallet.signTransaction({
-          to: ADDRESS2,
-          value: 7_000_000_000n,
-        })
-      );
-      expect(result).not.to.be.null;
-    });
-  });
   describe('#error()', () => {
     it('Should not allow invalid contract bytecode', async () => {
       const address = wallet.getAddress();
@@ -1008,11 +512,6 @@ describe('Provider', () => {
         await provider.estimateGas({
           to: address,
           from: address,
-          customData: {
-            gasPerPubdata: 50_000,
-            factoryDeps: new Array(17).fill('0x1234567890abcdef'),
-            customSignature: new Uint8Array(17),
-          },
         });
       } catch (e) {
         expect(
@@ -1027,12 +526,12 @@ describe('Provider', () => {
       try {
         await provider.estimateGasTransfer({
           token: utils.L2_BASE_TOKEN_ADDRESS,
-          amount: 7_000_000_000_000_000_000_000_000n,
+          amount: 100_700_000_000_000_000_000_000_000_000n,
           to: ADDRESS2,
           from: ADDRESS1,
         });
       } catch (e) {
-        const revertString = 'insufficient funds for gas + value.';
+        const revertString = 'invalid transaction: LackOfFundForMaxFee';
         expect((e as Error).message.toString().includes(revertString)).to.be
           .true;
       }

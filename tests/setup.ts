@@ -1,41 +1,41 @@
-import {Provider, Wallet, ContractFactory, Contract, utils} from '../src';
-import {ethers, Typed} from 'ethers';
+import {Provider, Wallet, utils} from '../src';
+import {ethers, Typed, ContractFactory, Contract} from 'ethers';
 import {
   ITestnetERC20Token__factory,
   IL2NativeTokenVault__factory,
   IERC20__factory,
 } from '../src/typechain';
 import {DAI_L1} from './utils';
-
+import MintableERC20Artifact from './files/MintableERC20.json';
 import Token from './files/Token.json';
-import Paymaster from './files/Paymaster.json';
 import {L1_CHAIN_URL, L2_CHAIN_URL, NTV_ADDRESS} from './utils';
 
 const PRIVATE_KEY =
   '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110';
 
 const provider = new Provider(L2_CHAIN_URL);
-const ethProvider = ethers.getDefaultProvider(L1_CHAIN_URL);
+const ethProvider = new ethers.JsonRpcProvider(L1_CHAIN_URL);
 
 const wallet = new Wallet(PRIVATE_KEY, provider, ethProvider);
 
 const SALT =
   '0x293328ad84b118194c65a0dc0defdb6483740d3163fd99b260907e15f2e2f642';
 const TOKEN = '0x2dc3685cA34163952CF4A5395b0039c00DFa851D'; // deployed by using create2 and SALT
-const PAYMASTER = '0x0EEc6f45108B4b806e27B81d9002e162BD910670'; // approval based paymaster for TOKEN deployed by using create2 and SALT
 
-// Deploys token and approval based paymaster for that token using create2 method.
-// Mints tokens to wallet and sends ETH to paymaster.
-async function deployPaymasterAndToken(): Promise<{
+// Deploys token
+// Mints tokens to wallet
+// TODO: may need to deploy token via create2?
+async function deployToken(): Promise<{
   token: string;
-  paymaster: string;
 }> {
-  const abi = Token.abi;
-  const bytecode: string = Token.bytecode;
-  const factory = new ContractFactory(abi, bytecode, wallet, 'create2');
+  const abi = MintableERC20Artifact.abi;
+  const bytecode = MintableERC20Artifact.bytecode;
+  const factory = new ContractFactory(abi, bytecode, wallet);
+
   const tokenContract = (await factory.deploy('Crown', 'Crown', 18, {
-    customData: {salt: SALT},
+    gasLimit: 6000000,
   })) as Contract;
+  await tokenContract.waitForDeployment();
   const tokenAddress = await tokenContract.getAddress();
 
   // mint tokens to wallet
@@ -45,36 +45,7 @@ async function deployPaymasterAndToken(): Promise<{
   )) as ethers.ContractTransactionResponse;
   await mintTx.wait();
 
-  const paymasterAbi = Paymaster.abi;
-  const paymasterBytecode = Paymaster.bytecode;
-
-  const accountFactory = new ContractFactory(
-    paymasterAbi,
-    paymasterBytecode,
-    wallet,
-    'create2Account'
-  );
-
-  const paymasterContract = await accountFactory.deploy(tokenAddress, {
-    customData: {salt: SALT},
-  });
-  const paymasterAddress = await paymasterContract.getAddress();
-  // transfer base token to paymaster so it could pay fee
-  const faucetTx = await wallet.transfer({
-    to: paymasterAddress,
-    amount: ethers.parseEther('100'),
-  });
-  await faucetTx.wait();
-
-  if (ethers.getAddress(TOKEN) !== ethers.getAddress(tokenAddress)) {
-    throw new Error('token addresses mismatch');
-  }
-
-  if (ethers.getAddress(PAYMASTER) !== ethers.getAddress(paymasterAddress)) {
-    throw new Error('paymaster addresses mismatch');
-  }
-
-  return {token: tokenAddress, paymaster: paymasterAddress};
+  return {token: tokenAddress};
 }
 
 /*
@@ -91,8 +62,20 @@ async function mintTokensOnL1(l1Token: string) {
       await wallet.getAddress(),
       ethers.parseEther('20000')
     );
-    await mintTx.wait();
+    const rec = await mintTx.wait();
+    console.log(rec);
   }
+}
+
+export async function deployDaiTokenL1(): Promise<`0x${string}`> {
+  const {abi, bytecode} = MintableERC20Artifact as unknown as {
+    abi: any;
+    bytecode: `0x${string}`;
+  };
+  const factory = new ContractFactory(abi, bytecode, wallet._signerL1());
+  const dai = await factory.deploy('Dai Stablecoin', 'DAI', 18);
+  await dai.waitForDeployment();
+  return (await dai.getAddress()) as `0x${string}`;
 }
 
 /*
@@ -102,7 +85,7 @@ async function sendTokenToL2(l1TokenAddress: string) {
   const priorityOpResponse = await wallet.deposit({
     token: l1TokenAddress,
     to: await wallet.getAddress(),
-    amount: ethers.parseEther('10000'),
+    amount: ethers.parseEther('1'),
     approveERC20: true,
     approveBaseERC20: true,
     refundRecipient: await wallet.getAddress(),
@@ -136,10 +119,9 @@ async function main() {
   const baseToken = await wallet.getBaseToken();
   console.log(`Wallet address: ${await wallet.getAddress()}`);
   console.log(`Base token L1: ${baseToken}`);
-
-  console.log(
-    `L1 base token balance before: ${await wallet.getBalanceL1(baseToken)}`
-  );
+  const daiAddress = await deployDaiTokenL1();
+  console.log(`DAI token deployed at: ${daiAddress}`);
+  console.log(`L1 base token balance before: ${await wallet.getBalanceL1()}`);
   console.log(`L2 base token balance before: ${await wallet.getBalance()}`);
 
   await mintTokensOnL1(baseToken);
@@ -172,26 +154,26 @@ async function main() {
     );
   }
 
-  const l2DAIAddress = await wallet.l2TokenAddress(DAI_L1);
-  console.log(`DAI L1: ${DAI_L1}`);
+  const l2DAIAddress = await wallet.l2TokenAddress(daiAddress);
+  console.log(`DAI L1: ${daiAddress}`);
   console.log(`DAI L2: ${l2DAIAddress}`);
 
-  console.log(`L1 DAI balance before: ${await wallet.getBalanceL1(DAI_L1)}`);
+  console.log(
+    `L1 DAI balance before: ${await wallet.getBalanceL1(daiAddress)}`
+  );
   console.log(
     `L2 DAI balance before: ${await wallet.getBalance(l2DAIAddress)}`
   );
 
-  await mintTokensOnL1(DAI_L1);
-  await sendTokenToL2(DAI_L1);
+  await mintTokensOnL1(daiAddress);
+  await sendTokenToL2(daiAddress);
 
-  console.log(`L1 DAI balance after: ${await wallet.getBalanceL1(DAI_L1)}`);
+  console.log(`L1 DAI balance after: ${await wallet.getBalanceL1(daiAddress)}`);
   console.log(`L2 DAI balance after: ${await wallet.getBalance(l2DAIAddress)}`);
 
-  console.log('===== Deploying token and paymaster =====');
-  const {token, paymaster} = await deployPaymasterAndToken();
+  console.log('===== Deploying token =====');
+  const {token} = await deployToken();
   console.log(`Token: ${token}`);
-  console.log(`Paymaster: ${paymaster}`);
-  console.log(`Paymaster ETH balance: ${await provider.getBalance(paymaster)}`);
   console.log(`Wallet Crown balance: ${await wallet.getBalance(token)}`);
   console.log(`Crown token address: ${token}.`);
 

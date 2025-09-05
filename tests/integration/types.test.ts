@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import '../custom-matchers';
 import {Provider, types, utils, Wallet} from '../../src';
 import {ADDRESS2, L2_CHAIN_URL, PRIVATE_KEY1} from '../utils';
+import {Transaction} from 'ethers';
 describe('types', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
@@ -177,17 +178,10 @@ describe('types', () => {
   });
 
   describe('Transaction', () => {
-    let eip712Tx: types.Transaction;
-    let eip1559Tx: types.Transaction;
+    let eip1559Tx: Transaction;
 
     before('setup', async function () {
       this.timeout(25_000);
-      const signedEip712Tx = await wallet.signTransaction({
-        to: ADDRESS2,
-        value: 1_000_000,
-        nonce: 1,
-      });
-      eip712Tx = types.Transaction.from(signedEip712Tx);
 
       const signedLegacyTx = await wallet.signTransaction({
         type: 2,
@@ -195,29 +189,12 @@ describe('types', () => {
         value: 1_000_000,
         nonce: 1,
       });
-      eip1559Tx = types.Transaction.from(signedLegacyTx);
-    });
-
-    describe('#serialized()', () => {
-      it('should return the serialized EIP1559 transaction', async () => {
-        const result = eip1559Tx.serialized;
-        expect(result).not.to.be.null;
-      });
-
-      it('should return the serialized EIP712 transaction', async () => {
-        const result = eip712Tx.serialized;
-        expect(result).not.to.be.null;
-      });
+      eip1559Tx = Transaction.from(signedLegacyTx);
     });
 
     describe('#unsignedSerialized()', () => {
       it('should return the unsigned serialized EIP1559 transaction', async () => {
         const result = eip1559Tx.unsignedSerialized;
-        expect(result).not.to.be.null;
-      });
-
-      it('should return the unsigned serialized EIP712 transaction', async () => {
-        const result = eip712Tx.unsignedSerialized;
         expect(result).not.to.be.null;
       });
     });
@@ -227,21 +204,11 @@ describe('types', () => {
         const result = eip1559Tx.typeName;
         expect(result).to.be.equal('eip-1559');
       });
-
-      it('should return the type name of the EIP712 transaction', async () => {
-        const result = eip712Tx.typeName;
-        expect(result).to.be.equal('zksync');
-      });
     });
 
     describe('#toJSON()', () => {
       it('should return the JSON representation of the EIP1559 transaction', async () => {
         const result = eip1559Tx.toJSON();
-        expect(result).not.to.be.null;
-      });
-
-      it('should return the JSON representation of the EIP712 transaction', async () => {
-        const result = eip712Tx.toJSON();
         expect(result).not.to.be.null;
       });
     });

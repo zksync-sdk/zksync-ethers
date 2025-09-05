@@ -163,6 +163,8 @@ export interface LogProof {
   proof: string[];
   /** Root hash of the proof, anchoring it to a specific state in the blockchain. */
   root: string;
+  /** The batch number on L1. */
+  batch_number: number;
 }
 
 /**
@@ -170,17 +172,8 @@ export interface LogProof {
  * interacting with ZKsync Era.
  */
 export class TransactionResponse extends ethers.TransactionResponse {
-  /** The batch number on the L1 network. */
-  // readonly l1BatchNumber!: null | number;
-  // /** The transaction index within the batch on the L1 network. */
-  // readonly l1BatchTxIndex!: null | number;
-
   constructor(params: any, provider: ethers.Provider) {
     super(params, provider);
-    // defineProperties<TransactionResponse>(this, {
-    //   l1BatchNumber: params.l1BatchNumber,
-    //   l1BatchTxIndex: params.l1BatchTxIndex,
-    // });
   }
 
   /**
@@ -241,12 +234,8 @@ export class TransactionResponse extends ethers.TransactionResponse {
   }
 
   override toJSON(): any {
-    // const {l1BatchNumber, l1BatchTxIndex} = this;
-
     return {
       ...super.toJSON(),
-      // l1BatchNumber,
-      // l1BatchTxIndex,
     };
   }
 }
@@ -396,6 +385,8 @@ export interface LogParams extends ethers.LogParams {
 /** A `Log` is an extension of {@link ethers.Log} with additional features for interacting with ZKsync Era. */
 export class Log extends ethers.Log {
   /** The batch number on L1. */
+
+  // TODO: @dustin remove l1BatchNumber
   readonly l1BatchNumber: null | number;
 
   constructor(params: LogParams, provider: ethers.Provider) {

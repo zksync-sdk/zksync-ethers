@@ -29,7 +29,7 @@ describe('VoidSigner', () => {
 
   before('setup', async function () {
     this.timeout(25_000);
-    baseToken = await provider.getBaseTokenContractAddress();
+    baseToken = utils.L2_BASE_TOKEN_ADDRESS; // @zksyncos todo: update?
   });
 
   describe('#constructor()', () => {
@@ -79,13 +79,6 @@ describe('VoidSigner', () => {
     });
   });
 
-  describe('#getDeploymentNonce()', () => {
-    it('should return a deployment nonce', async () => {
-      const result = await signer.getDeploymentNonce();
-      expect(result).not.to.be.null;
-    });
-  });
-
   describe('#populateTransaction()', () => {
     it('should return populated transaction with default values if are omitted', async () => {
       const tx = {
@@ -95,6 +88,7 @@ describe('VoidSigner', () => {
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         chainId: 270n,
+        data: '0x',
         maxFeePerGas: defaultMaxFeePerGas,
         maxPriorityFeePerGas: defaultMaxPriorityFeePerGas,
       };
@@ -114,29 +108,21 @@ describe('VoidSigner', () => {
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
       const tx = {
+        type: 2,
         to: ADDRESS2,
         value: 7_000_000n,
-        type: 113,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -145,26 +131,20 @@ describe('VoidSigner', () => {
     it('should return populated transaction when `maxPriorityFeePerGas` and `customData` are provided', async () => {
       const tx = {
         to: ADDRESS2,
+        type: 2,
         value: 7_000_000n,
-        type: 113,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         data: '0x',
         chainId: 270n,
-        maxPriorityFeePerGas: 2_000_000_000n,
+        maxPriorityFeePerGas: 200_000_000n,
         maxFeePerGas: defaultMaxFeePerGas,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
-        maxPriorityFeePerGas: 2_000_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-        },
+        maxPriorityFeePerGas: 200_000_000n,
+        maxFeePerGas: defaultMaxFeePerGas,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -173,26 +153,19 @@ describe('VoidSigner', () => {
     it('should return populated transaction when `maxFeePerGas` and `customData` are provided', async () => {
       const tx = {
         to: ADDRESS2,
+        type: 2,
         value: 7_000_000n,
-        type: 113,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
-        data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: defaultMaxPriorityFeePerGas,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
         maxFeePerGas: 3_500_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-        },
+        maxPriorityFeePerGas: defaultMaxPriorityFeePerGas,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -229,11 +202,13 @@ describe('VoidSigner', () => {
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 3_500_000_000n,
+        data: '0x',
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
-        gasPrice: 3_500_000_000n,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 3_500_000_000n,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -241,9 +216,9 @@ describe('VoidSigner', () => {
 
     it('should return populated legacy transaction when `type = 0`', async () => {
       const tx = {
+        type: 0,
         to: ADDRESS2,
         value: 7_000_000n,
-        type: 0,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         chainId: 270n,
@@ -253,7 +228,9 @@ describe('VoidSigner', () => {
         type: 0,
         to: ADDRESS2,
         value: 7_000_000,
+        gasPrice: 100_000_000n,
       });
+
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
     });
@@ -333,7 +310,7 @@ describe('L2VoidSigner', () => {
 
   before('setup', async function () {
     this.timeout(25_000);
-    baseToken = await provider.getBaseTokenContractAddress();
+    baseToken = utils.L2_BASE_TOKEN_ADDRESS; //@zksyncos todo: update?
   });
 
   describe('#constructor()', () => {
@@ -383,13 +360,6 @@ describe('L2VoidSigner', () => {
     });
   });
 
-  describe('#getDeploymentNonce()', () => {
-    it('should return a deployment nonce', async () => {
-      const result = await signer.getDeploymentNonce();
-      expect(result).not.to.be.null;
-    });
-  });
-
   describe('#populateTransaction()', () => {
     it('should return populated transaction with default values if are omitted', async () => {
       const tx = {
@@ -399,6 +369,7 @@ describe('L2VoidSigner', () => {
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         chainId: 270n,
+        data: '0x',
         maxFeePerGas: defaultMaxFeePerGas,
         maxPriorityFeePerGas: defaultMaxPriorityFeePerGas,
       };
@@ -418,29 +389,21 @@ describe('L2VoidSigner', () => {
 
     it('should return populated transaction when `maxFeePerGas` and `maxPriorityFeePerGas` and `customData` are provided', async () => {
       const tx = {
+        type: 2,
         to: ADDRESS2,
         value: 7_000_000n,
-        type: 113,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 2_000_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -450,25 +413,19 @@ describe('L2VoidSigner', () => {
       const tx = {
         to: ADDRESS2,
         value: 7_000_000n,
-        type: 113,
+        type: 2,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
         data: '0x',
         chainId: 270n,
-        maxPriorityFeePerGas: 2_000_000_000n,
+        maxPriorityFeePerGas: 200_000_000n,
         maxFeePerGas: defaultMaxFeePerGas,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
-        maxPriorityFeePerGas: 2_000_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-        },
+        maxPriorityFeePerGas: 200_000_000n,
+        maxFeePerGas: defaultMaxFeePerGas,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -476,27 +433,20 @@ describe('L2VoidSigner', () => {
 
     it('should return populated transaction when `maxFeePerGas` and `customData` are provided', async () => {
       const tx = {
+        type: 2,
         to: ADDRESS2,
         value: 7_000_000n,
-        type: 113,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
-        data: '0x',
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: defaultMaxPriorityFeePerGas,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          factoryDeps: [],
-        },
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
         maxFeePerGas: 3_500_000_000n,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-        },
+        maxPriorityFeePerGas: 0n,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -533,11 +483,13 @@ describe('L2VoidSigner', () => {
         chainId: 270n,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 3_500_000_000n,
+        data: '0x',
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
-        gasPrice: 3_500_000_000n,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 3_500_000_000n,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -557,6 +509,7 @@ describe('L2VoidSigner', () => {
         type: 0,
         to: ADDRESS2,
         value: 7_000_000,
+        gasPrice: 100_000_000n,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -637,7 +590,7 @@ describe('L1VoidSigner', async () => {
   let baseToken: string;
 
   before('setup', async function () {
-    baseToken = await provider.getBaseTokenContractAddress();
+    baseToken = utils.L2_BASE_TOKEN_ADDRESS; //@zksyncos todo: update?
     this.timeout(25_000);
   });
 
@@ -696,11 +649,6 @@ describe('L1VoidSigner', async () => {
   });
 
   describe('#l2TokenAddress()', () => {
-    it('should return the L2 ETH address', async () => {
-      const result = await signer.l2TokenAddress(baseToken);
-      expect(result).to.be.equal(utils.L2_BASE_TOKEN_ADDRESS);
-    });
-
     it('should return the L2 DAI address', async () => {
       const result = await signer.l2TokenAddress(DAI_L1);
       expect(result).not.to.be.null;
@@ -799,7 +747,8 @@ describe('L1VoidSigner', async () => {
         type: 2,
         from: ADDRESS1,
         nonce: await signer.getNonce('pending'),
-        chainId: 9n,
+        chainId: 31337n,
+        data: '0x',
         maxFeePerGas: 1_000_000_002n,
         maxPriorityFeePerGas: 1_000_000_000n,
       };
@@ -849,11 +798,13 @@ describe('L1VoidSigner', async () => {
         chainId: 9n,
         maxFeePerGas: 3_500_000_000n,
         maxPriorityFeePerGas: 3_500_000_000n,
+        data: '0x',
       };
       const result = await signer.populateTransaction({
         to: ADDRESS2,
         value: 7_000_000,
-        gasPrice: 3_500_000_000n,
+        maxFeePerGas: 3_500_000_000n,
+        maxPriorityFeePerGas: 3_500_000_000n,
       });
       expect(result).to.be.deepEqualExcluding(tx, ['gasLimit', 'chainId']);
       expect(BigInt(result.gasLimit!) > 0n).to.be.true;
@@ -873,6 +824,7 @@ describe('L1VoidSigner', async () => {
         type: 0,
         to: ADDRESS2,
         value: 7_000_000,
+        gasPrice: 1_000_000_001n,
       });
       expect(result).to.be.deepEqualExcluding(tx, [
         'gasLimit',
