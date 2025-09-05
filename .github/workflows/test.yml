@@ -68,18 +68,24 @@ jobs:
             sleep 1
           done
 
-      - name: Run L2 server
+      - name: Run L2 server (background) and wait for RPC
         working-directory: zksync-os-server
         run: |
-          cargo run
-          # wait until RPC responds
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:3050 > /dev/null; then
-              echo "L2 server is up"
+          nohup cargo run > l2.log 2>&1 &
+          # wait for JSON-RPC (port 3050) to respond
+          for i in {1..90}; do
+            if curl -sS -X POST http://127.0.0.1:3050 \
+                 -H 'content-type: application/json' \
+                 --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' \
+                 | grep -q '"result"'; then
+              echo "L2 JSON-RPC is up"
               break
             fi
             sleep 1
           done
+          # show last lines for debugging
+          tail -n 50 l2.log
+
 
       - name: Run tests
         run: |
