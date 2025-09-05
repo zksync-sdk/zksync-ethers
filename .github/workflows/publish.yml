@@ -16,6 +16,7 @@ on:
           - beta
           - ethers-v5-latest
           - ethers-v5-beta
+          - zksyncos-alpha
 jobs:
   zksync:
     name: Publish package
@@ -35,7 +36,26 @@ jobs:
           npm install
           npm run types
           npm run build
-          npm publish --tag ${{ inputs.tag }} 
+          node -p "require('./package.json').version"
+          
+      # Safety guard (optional but recommended)
+      - name: Enforce safe dist-tag for zksyncos-alpha prereleases
+        shell: bash
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [[ "$VERSION" == *"-zksyncos-alpha."* && "${{ inputs.tag }}" != "zksyncos-alpha" ]]; then
+            echo "Refusing to publish $VERSION with dist-tag '${{ inputs.tag }}'. Use tag=zksyncos-alpha."
+            exit 1
+          fi
+          if [[ "$VERSION" != *"-zksyncos-alpha."* && "${{ inputs.tag }}" == "zksyncos-alpha" ]]; then
+            echo "Refusing to publish non-zksyncos version $VERSION under dist-tag zksyncos-alpha."
+            exit 1
+          fi
+      
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --tag ${{ inputs.tag }}
 
   docs-build:
     permissions:
