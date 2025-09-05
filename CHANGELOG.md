@@ -1,3 +1,19 @@
+# [6.21.0-zksyncos-alpha.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.20.1...v6.21.0-zksyncos-alpha.1) (2025-09-05)
+
+
+### Bug Fixes
+
+* address ci branch ([b4188c4](https://github.com/zksync-sdk/zksync-ethers/commit/b4188c46b54bfd7bbce666aa89aaa1d94fd883ca))
+* update workflow ([a1723f4](https://github.com/zksync-sdk/zksync-ethers/commit/a1723f4c1e68f34d4d3b0bf72d5c7d36d420d907))
+* update workflow ([b9cc678](https://github.com/zksync-sdk/zksync-ethers/commit/b9cc67831ca4f118aabbbd37a355c8eb3b4051e1))
+* **zksyncos:** initialize zksyncos-alpha release channel (no functional change) ([dd230c6](https://github.com/zksync-sdk/zksync-ethers/commit/dd230c604bd148dc3c08240758d876fd9dd2ec3f))
+
+
+### Features
+
+* add zksyncos workflow to run test suite against ([c76f36c](https://github.com/zksync-sdk/zksync-ethers/commit/c76f36cc5f60d1e2f37b39017dc6c00f53038103))
+* tests all pass against zksyncos env ([ed52092](https://github.com/zksync-sdk/zksync-ethers/commit/ed52092d74673f7ce1d4875958bcc513eb569bee))
+
 ## [6.20.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.20.0...v6.20.1) (2025-08-11)
 
 
