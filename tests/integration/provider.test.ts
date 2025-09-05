@@ -144,7 +144,6 @@ describe('Provider', () => {
     it('should return the L2 ETH address', async () => {
       if (!IS_ETH_BASED) {
         const result = await provider.l2TokenAddress(utils.LEGACY_ETH_ADDRESS);
-        console.log(IS_ETH_BASED);
         expect(result).not.to.be.null;
       }
     });

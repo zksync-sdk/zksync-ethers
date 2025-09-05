@@ -59,8 +59,7 @@ async function mintTokensOnL1(l1Token: string) {
       await wallet.getAddress(),
       ethers.parseEther('20000')
     );
-    const rec = await mintTx.wait();
-    console.log(rec);
+    await mintTx.wait();
   }
 }
 
