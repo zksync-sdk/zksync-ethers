@@ -111,12 +111,12 @@ export class InteropClient {
    * @param srcWallet - Wallet connected to the source L2.
    * @param message   - Bytes or string; strings are UTF-8 encoded.
    *
-   * @returns Sent — the minimal info needed to later prove inclusion.
+   * @returns txHash — The transaction hash.
    */
   async sendMessage(
     srcWallet: Wallet,
     message: ethers.BytesLike | string
-  ): Promise<types.Sent> {
+  ): Promise<{txHash: `0x${string}`}> {
     const messenger = new ethers.Contract(
       utils.L1_MESSENGER_ADDRESS,
       utils.L1_MESSENGER,
@@ -127,75 +127,79 @@ export class InteropClient {
       typeof message === 'string' ? ethers.toUtf8Bytes(message) : message;
 
     const tx = await messenger.sendToL1(bytes);
-    const rcpt = await (
-      await srcWallet.provider.getTransaction(tx.hash)
-    ).waitFinalize();
+    await (await srcWallet.provider.getTransaction(tx.hash)).wait();
 
-    if (rcpt.l1BatchNumber === null || rcpt.l1BatchTxIndex === null) {
-      throw new Error('Missing l1BatchNumber or l1BatchTxIndex on receipt');
-    }
-
-    const idx = findInteropLogIndex(rcpt, await srcWallet.getAddress(), bytes);
-    if (idx < 0) throw new Error('Interop log not found');
-
-    return {
-      txHash: tx.hash,
-      l1BatchNumber: rcpt.l1BatchNumber,
-      l1BatchTxIndex: rcpt.l1BatchTxIndex,
-      l2ToL1LogIndex: idx,
-      sender: await srcWallet.getAddress(),
-      messageHex: ethers.hexlify(bytes),
-    };
+    return {txHash: tx.hash as `0x${string}`};
   }
 
   /**
    * Verify inclusion of a previously sent message on a target chain.
    * This is a read-only check against the target's L2MessageVerification contract.
    *
-   * @param params.sent         - Returned payload from `sendMessage`.
+   * @param params.txHash         - Returned txHash from `sendMessage`.
    * @param params.srcProvider  - Provider for the source chain (to fetch proof nodes + batch details).
-   * @param params.targetChain   - Provider for the target chain (to read interop roots + call verifier).
+   * @param params.targetChain   - Provider for the target chain (to read interop roots + call verifier). This can be any chain that imports the Gateway roots.
    * @param params.includeProofInputs - If true, include raw proof positioning info in the result (for debugging).
    * @param params.timeoutMs         - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
    * @returns InteropResult — compact verification outcome (plus optional proof inputs).
    */
   async verifyMessage(params: {
-    sent: types.Sent;
+    txHash: `0x${string}`;
     srcProvider: Provider;
     targetChain: Provider;
     includeProofInputs?: boolean;
     timeoutMs?: number;
   }): Promise<types.InteropResult> {
     const {
-      sent,
+      txHash,
       srcProvider,
       targetChain,
       includeProofInputs,
       timeoutMs = 120_000,
     } = params;
 
-    // fetch proof nodes from the source chain
-    const nodes = await getGatewayProof(
-      srcProvider,
-      sent.txHash,
-      sent.l2ToL1LogIndex
-    );
+    const tx = await srcProvider.getTransaction(txHash);
+    const finalizedRcpt = await tx.wait();
+    if (
+      finalizedRcpt.l1BatchNumber === null ||
+      finalizedRcpt.l1BatchNumber === undefined
+    ) {
+      throw new Error(
+        'Source tx is not yet finalized in an L1 batch. Cannot verify yet.'
+      );
+    }
 
-    // map L1 batch -> Gateway block
+    const sender = tx.from as `0x${string}`;
+    const l2ToL1LogIndex = findInteropLogIndex(finalizedRcpt as any, sender);
+    if (l2ToL1LogIndex < 0) {
+      throw new Error(
+        'Interop log not found in source receipt for L1Messenger'
+      );
+    }
+
+    const rawLog = (finalizedRcpt as any).l2ToL1Logs?.[l2ToL1LogIndex];
+    const messageHex = rawLog?.value as `0x${string}`;
+    if (!messageHex) {
+      throw new Error('Missing message value on matched L1Messenger log');
+    }
+
+    const l1BatchNumber = (finalizedRcpt as any).l1BatchNumber as number;
+    const l1BatchTxIndex = (finalizedRcpt as any).l1BatchTxIndex as number;
+
+    const nodes = await getGatewayProof(srcProvider, txHash, l2ToL1LogIndex);
+
     const gwBlock = await getGwBlockForBatch(
-      BigInt(sent.l1BatchNumber),
+      BigInt(l1BatchNumber),
       srcProvider,
       this.gwProvider
     );
-    // wait for interop root import on target
     const interopRoot = await waitForGatewayInteropRoot(
       this.gwChainId,
       targetChain,
       gwBlock,
-      timeoutMs ? {timeoutMs} : undefined
+      {timeoutMs}
     );
 
-    // on-chain verifier
     const verifier = new ethers.Contract(
       L2_MESSAGE_VERIFICATION_ADDRESS,
       L2_MESSAGE_VERIFICATION_ABI,
@@ -205,12 +209,12 @@ export class InteropClient {
 
     const included: boolean = await verifier.proveL2MessageInclusionShared(
       srcChainId,
-      sent.l1BatchNumber,
-      sent.l1BatchTxIndex,
+      l1BatchNumber,
+      l1BatchTxIndex,
       {
-        txNumberInBatch: sent.l1BatchTxIndex,
-        sender: sent.sender,
-        data: sent.messageHex,
+        txNumberInBatch: l1BatchTxIndex,
+        sender,
+        data: messageHex,
       },
       nodes
     );
@@ -218,19 +222,19 @@ export class InteropClient {
     const result: types.InteropResult = {
       source: {
         chainId: srcChainId,
-        txHash: sent.txHash,
-        sender: sent.sender,
-        messageHash: ethers.keccak256(sent.messageHex),
+        txHash,
+        sender,
+        messageHash: ethers.keccak256(messageHex) as `0x${string}`,
       },
-      interopRoot,
+      interopRoot: interopRoot as `0x${string}`,
       verified: included,
     };
 
     if (includeProofInputs) {
       result.proof = {
-        l1BatchNumber: sent.l1BatchNumber,
-        l1BatchTxIndex: sent.l1BatchTxIndex,
-        l2ToL1LogIndex: sent.l2ToL1LogIndex,
+        l1BatchNumber,
+        l1BatchTxIndex,
+        l2ToL1LogIndex,
         gwBlockNumber: gwBlock,
       };
     }
@@ -242,7 +246,7 @@ export class InteropClient {
    * One-shot convenience: sends on the source chain and verifies on the target chain.
    *
    * @param params.srcWallet     - Wallet on the source chain (used to send the message).
-   * @param params.targetRunner    - Provider on the target chain.
+   * @param params.targetChain   - Provider on the target chain. This can be any chain that imports the Gateway roots.
    * @param params.message       - Message bytes/string to send.
    * @param params.includeProofInputs - Include raw proof positioning in result (optional, debugging).
    * @param params.timeoutMs          - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
@@ -254,9 +258,9 @@ export class InteropClient {
     includeProofInputs?: boolean;
     timeoutMs?: number;
   }): Promise<types.InteropResult> {
-    const sent = await this.sendMessage(params.srcWallet, params.message);
+    const {txHash} = await this.sendMessage(params.srcWallet, params.message);
     return this.verifyMessage({
-      sent,
+      txHash,
       srcProvider: params.srcWallet.provider as Provider,
       targetChain: params.targetChain,
       includeProofInputs: params.includeProofInputs,

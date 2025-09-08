@@ -53,7 +53,9 @@ export async function getGatewayProof(
 ): Promise<string[]> {
   const proofResp = await l2.getLogProof(txHash, logIndex, 'proof_based_gw');
   if (!proofResp?.proof || proofResp.proof.length === 0) {
-    throw new Error('Gateway proof not ready yet');
+    throw new Error(
+      'Gateway proof not ready yet. Ensure the transaction is settled on Gateway.'
+    );
   }
   return proofResp.proof as string[];
 }

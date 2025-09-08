@@ -1109,13 +1109,9 @@ export interface GatewayConfig {
  *
  * @public
  * @category Interop
- * @remarks
- * This bundle contains everything needed by {@link verifyMessage} to prove inclusion on a target chain.
  */
 export interface Sent {
   txHash: string;
-  l1BatchNumber: number;
-  l1BatchTxIndex: number;
   l2ToL1LogIndex: number;
   sender: Address;
   messageHex: string;
