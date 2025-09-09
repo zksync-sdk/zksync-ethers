@@ -1172,3 +1172,21 @@ export type TxDetailsLite = {
   ethProveTxHash: string | null;
   ethExecuteTxHash: string | null;
 };
+
+/**
+ * Input arguments for proveL2MessageInclusionShared method on L2MessageVerification contract
+ *
+ * @public
+ * @category Interop v29
+ */
+export type ProveL2MessageInclusionSharedArgs = {
+  srcChainId: number;
+  l1BatchNumber: number;
+  l1BatchTxIndex: number;
+  msgData: {
+    txNumberInBatch: number;
+    sender: `0x${string}`;
+    data: `0x${string}`;
+  };
+  gatewayProof: string[];
+};

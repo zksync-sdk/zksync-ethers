@@ -151,6 +151,78 @@ export class InteropClient {
     includeProofInputs?: boolean;
     timeoutMs?: number;
   }): Promise<types.InteropResult> {
+    const {txHash, targetChain, includeProofInputs} = params;
+
+    const {
+      srcChainId,
+      l1BatchNumber,
+      l1BatchTxIndex,
+      msgData,
+      gatewayProof,
+      gwBlock,
+      l2ToL1LogIndex,
+      interopRoot,
+    } = await this.getVerificationArgs(params);
+
+    const verifier = new ethers.Contract(
+      L2_MESSAGE_VERIFICATION_ADDRESS,
+      L2_MESSAGE_VERIFICATION_ABI,
+      targetChain as any
+    );
+    const included: boolean = await verifier.proveL2MessageInclusionShared(
+      srcChainId,
+      l1BatchNumber,
+      l1BatchTxIndex,
+      msgData,
+      gatewayProof
+    );
+
+    const result: types.InteropResult = {
+      source: {
+        chainId: srcChainId,
+        txHash,
+        sender: msgData.sender,
+        messageHash: ethers.keccak256(msgData.data) as `0x${string}`,
+      },
+      interopRoot: interopRoot as `0x${string}`,
+      verified: included,
+    };
+
+    if (includeProofInputs) {
+      result.proof = {
+        l1BatchNumber,
+        l1BatchTxIndex,
+        l2ToL1LogIndex: l2ToL1LogIndex!,
+        gwBlockNumber: gwBlock!,
+      };
+    }
+
+    return result;
+  }
+
+  /**
+   * Get the input arguments for proveL2MessageInclusionShared to verify a previously sent message on a target chain.
+   *
+   * @param params.txHash         - Returned txHash from `sendMessage`.
+   * @param params.srcProvider  - Provider for the source chain (to fetch proof nodes + batch details).
+   * @param params.targetChain   - Provider for the target chain (to read interop roots + call verifier). This can be any chain that imports the Gateway roots.
+   * @param params.includeProofInputs - If true, include raw proof positioning info in the result (for debugging).
+   * @param params.timeoutMs         - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
+   * @returns ProveL2MessageInclusionSharedArgs & { interopRoot: string; gwBlock?: bigint; l2ToL1LogIndex?: number; } - An object with all the required input arguments to verify a previously sent message using the proveL2MessageInclusionShared method on the target's L2MessageVerification contract.
+   */
+  async getVerificationArgs(params: {
+    txHash: `0x${string}`;
+    srcProvider: Provider;
+    targetChain: Provider;
+    includeProofInputs?: boolean;
+    timeoutMs?: number;
+  }): Promise<
+    types.ProveL2MessageInclusionSharedArgs & {
+      interopRoot: string;
+      gwBlock?: bigint;
+      l2ToL1LogIndex?: number;
+    }
+  > {
     const {
       txHash,
       srcProvider,
@@ -217,6 +289,7 @@ export class InteropClient {
       srcProvider,
       this.gwProvider
     );
+
     const interopRoot = await waitForGatewayInteropRoot(
       this.gwChainId,
       targetChain,
@@ -224,45 +297,24 @@ export class InteropClient {
       {timeoutMs}
     );
 
-    const verifier = new ethers.Contract(
-      L2_MESSAGE_VERIFICATION_ADDRESS,
-      L2_MESSAGE_VERIFICATION_ABI,
-      targetChain as any
-    );
     const srcChainId = Number((await srcProvider.getNetwork()).chainId);
-    const included: boolean = await verifier.proveL2MessageInclusionShared(
+    const result: types.ProveL2MessageInclusionSharedArgs = {
       srcChainId,
       l1BatchNumber,
       l1BatchTxIndex,
-      {
+      msgData: {
         txNumberInBatch: l1BatchTxIndex,
         sender,
         data: messageHex,
       },
-      nodes
-    );
-
-    const result: types.InteropResult = {
-      source: {
-        chainId: srcChainId,
-        txHash,
-        sender,
-        messageHash: ethers.keccak256(messageHex) as `0x${string}`,
-      },
-      interopRoot: interopRoot as `0x${string}`,
-      verified: included,
+      gatewayProof: nodes,
     };
 
     if (includeProofInputs) {
-      result.proof = {
-        l1BatchNumber,
-        l1BatchTxIndex,
-        l2ToL1LogIndex,
-        gwBlockNumber: gwBlock,
-      };
+      return {...result, gwBlock, l2ToL1LogIndex, interopRoot};
     }
 
-    return result;
+    return {...result, interopRoot};
   }
 
   /**
