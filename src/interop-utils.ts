@@ -148,7 +148,11 @@ export function classifyPhase(d: TxDetailsLite): BatchPhase {
   if (d.status === 'failed') return 'FAILED';
   if (d.status === 'rejected') return 'REJECTED';
 
-  if (d.status === 'included') {
+  if (
+    d.status === 'included' ||
+    d.status === 'fastFinalized' ||
+    d.status === 'verified'
+  ) {
     if (d.ethExecuteTxHash) return 'EXECUTED';
     if (d.ethProveTxHash) return 'PROVING';
     if (d.ethCommitTxHash) return 'SENDING';
