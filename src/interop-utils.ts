@@ -2,6 +2,7 @@
 import {ethers, JsonRpcProvider} from 'ethers';
 import {utils, types} from './index';
 import {Provider} from './provider';
+import {BatchPhase, TxDetailsLite} from './types';
 
 /**
  * Locate the L1Messenger service log inside a receipt.
@@ -141,4 +142,17 @@ export async function waitForGatewayInteropRoot(
   throw new Error(
     `Target chain did not import interop root for (${gwChainId}, ${gwBlock}) or block has not been sealed yet`
   );
+}
+
+export function classifyPhase(d: TxDetailsLite): BatchPhase {
+  if (d.status === 'failed') return 'FAILED';
+  if (d.status === 'rejected') return 'REJECTED';
+
+  if (d.status === 'included') {
+    if (d.ethExecuteTxHash) return 'EXECUTED';
+    if (d.ethProveTxHash) return 'PROVING';
+    if (d.ethCommitTxHash) return 'SENDING';
+    return 'QUEUED';
+  }
+  return 'UNKNOWN';
 }

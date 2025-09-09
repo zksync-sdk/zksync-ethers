@@ -1146,3 +1146,29 @@ export interface InteropResult {
     gwBlockNumber: bigint;
   };
 }
+
+/**
+ * Possible phases of a batch lifecycle.
+ *
+ * @public
+ * @category Interop v29
+ */
+export type BatchPhase =
+  | 'QUEUED'
+  | 'SENDING'
+  | 'PROVING'
+  | 'EXECUTED'
+  | 'FAILED'
+  | 'REJECTED'
+  | 'UNKNOWN';
+
+/** Lite version of {@link TransactionDetails} with only fields relevant to tx status.
+ * @public
+ * @category Interop v29
+ */
+export type TxDetailsLite = {
+  status: 'included' | 'failed' | 'rejected' | string;
+  ethCommitTxHash: string | null;
+  ethProveTxHash: string | null;
+  ethExecuteTxHash: string | null;
+};

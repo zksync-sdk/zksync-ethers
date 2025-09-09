@@ -3,6 +3,7 @@ import {ethers, JsonRpcProvider} from 'ethers';
 import {Wallet, types} from './index';
 import {Provider} from './provider';
 import {
+  classifyPhase,
   findInteropLogIndex,
   getGatewayProof,
   getGwBlockForBatch,
@@ -158,16 +159,39 @@ export class InteropClient {
       timeoutMs = 120_000,
     } = params;
 
+    const phase = await this.getMessageStatus(srcProvider, txHash);
+
+    if (phase !== 'EXECUTED') {
+      switch (phase) {
+        case 'QUEUED':
+          throw new Error(
+            'Status: Pending → Transaction is included on L2 but the batch has not yet been committed. Not ready for verification.'
+          );
+        case 'SENDING':
+          throw new Error(
+            'Status: Included → Batch has been committed and is being sent to Gateway. Not ready for verification.'
+          );
+        case 'PROVING':
+          throw new Error(
+            'Status: Verified → Batch proof is being generated and submitted. Not ready for verification.'
+          );
+        case 'FAILED':
+          throw new Error(
+            'Status: Failed → Transaction did not verify successfully.'
+          );
+        case 'REJECTED':
+          throw new Error(
+            'Status: Failed → Transaction was rejected by the sequencer.'
+          );
+        default:
+          throw new Error(
+            'Status: Unknown → Transaction status could not be determined.'
+          );
+      }
+    }
+
     const tx = await srcProvider.getTransaction(txHash);
     const finalizedRcpt = await tx.wait();
-    if (
-      finalizedRcpt.l1BatchNumber === null ||
-      finalizedRcpt.l1BatchNumber === undefined
-    ) {
-      throw new Error(
-        'Source tx is not yet finalized in an L1 batch. Cannot verify yet.'
-      );
-    }
 
     const sender = tx.from as `0x${string}`;
     const l2ToL1LogIndex = findInteropLogIndex(finalizedRcpt as any, sender);
@@ -206,7 +230,6 @@ export class InteropClient {
       targetChain as any
     );
     const srcChainId = Number((await srcProvider.getNetwork()).chainId);
-
     const included: boolean = await verifier.proveL2MessageInclusionShared(
       srcChainId,
       l1BatchNumber,
@@ -243,28 +266,21 @@ export class InteropClient {
   }
 
   /**
-   * One-shot convenience: sends on the source chain and verifies on the target chain.
+   * Check the current lifecycle phase of a sent message on the source chain.
    *
-   * @param params.srcWallet     - Wallet on the source chain (used to send the message).
-   * @param params.targetChain   - Provider on the target chain. This can be any chain that imports the Gateway roots.
-   * @param params.message       - Message bytes/string to send.
-   * @param params.includeProofInputs - Include raw proof positioning in result (optional, debugging).
-   * @param params.timeoutMs          - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
+   * @param srcProvider - Source chain provider (supports `getTransactionDetails`).
+   * @param txHash      - Transaction hash returned by {@link sendMessage}.
+   * @returns Phase classification:
+   *   'QUEUED' | 'SENDING' | 'PROVING' | 'EXECUTED' | 'FAILED' | 'REJECTED' | 'UNKNOWN'
    */
-  async sendMessageAndVerify(params: {
-    srcWallet: Wallet;
-    targetChain: Provider;
-    message: ethers.BytesLike | string;
-    includeProofInputs?: boolean;
-    timeoutMs?: number;
-  }): Promise<types.InteropResult> {
-    const {txHash} = await this.sendMessage(params.srcWallet, params.message);
-    return this.verifyMessage({
-      txHash,
-      srcProvider: params.srcWallet.provider as Provider,
-      targetChain: params.targetChain,
-      includeProofInputs: params.includeProofInputs,
-      timeoutMs: params.timeoutMs,
+  async getMessageStatus(srcProvider: Provider, txHash: `0x${string}`) {
+    const d = await srcProvider.getTransactionDetails(txHash);
+    if (!d) return {phase: 'UNKNOWN', message: 'No details available' as const};
+    return classifyPhase({
+      status: d.status as any,
+      ethCommitTxHash: (d as any).ethCommitTxHash ?? null,
+      ethProveTxHash: (d as any).ethProveTxHash ?? null,
+      ethExecuteTxHash: (d as any).ethExecuteTxHash ?? null,
     });
   }
 }
