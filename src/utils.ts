@@ -104,7 +104,7 @@ export const NONCE_HOLDER_ABI = new ethers.Interface(INonceHolderABI);
  * @readonly
  */
 export const L2_MESSAGE_VERIFICATION_ABI = new ethers.Interface(
-  (L2MessageVerificationABI as any).abi as any
+  L2MessageVerificationABI
 );
 
 /**
@@ -112,7 +112,7 @@ export const L2_MESSAGE_VERIFICATION_ABI = new ethers.Interface(
  * @readonly
  */
 export const L2_INTEROP_ROOT_STORAGE_ABI = new ethers.Interface(
-  (L2InteropRootStorageABI as any).abi as any
+  L2InteropRootStorageABI
 );
 
 /**
