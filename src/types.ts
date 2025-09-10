@@ -1141,6 +1141,7 @@ export interface InteropResult {
   // Optional, only when includeProofInputs = true
   proof?: {
     l1BatchNumber: number;
+    l2MessageIndex: number;
     l1BatchTxIndex: number;
     l2ToL1LogIndex: number;
     gwBlockNumber: bigint;
@@ -1182,7 +1183,7 @@ export type TxDetailsLite = {
 export type ProveL2MessageInclusionSharedArgs = {
   srcChainId: number;
   l1BatchNumber: number;
-  l1BatchTxIndex: number;
+  l2MessageIndex: number;
   msgData: {
     txNumberInBatch: number;
     sender: `0x${string}`;

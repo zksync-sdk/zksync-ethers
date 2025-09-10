@@ -10,6 +10,7 @@ import {
   waitForGatewayInteropRoot,
 } from './interop-utils';
 import {
+  isAddressEq,
   L2_MESSAGE_VERIFICATION_ABI,
   L2_MESSAGE_VERIFICATION_ADDRESS,
 } from './utils';
@@ -151,18 +152,26 @@ export class InteropClient {
     includeProofInputs?: boolean;
     timeoutMs?: number;
   }): Promise<types.InteropResult> {
-    const {txHash, targetChain, includeProofInputs} = params;
+    const {txHash, srcProvider, targetChain, includeProofInputs, timeoutMs} =
+      params;
 
     const {
       srcChainId,
       l1BatchNumber,
-      l1BatchTxIndex,
+      l2MessageIndex,
       msgData,
       gatewayProof,
       gwBlock,
       l2ToL1LogIndex,
+      l1BatchTxIndex,
       interopRoot,
-    } = await this.getVerificationArgs(params);
+    } = await this.getVerificationArgs({
+      txHash,
+      srcProvider,
+      targetChain,
+      includeProofInputs: true,
+      timeoutMs,
+    });
 
     const verifier = new ethers.Contract(
       L2_MESSAGE_VERIFICATION_ADDRESS,
@@ -172,10 +181,12 @@ export class InteropClient {
     const included: boolean = await verifier.proveL2MessageInclusionShared(
       srcChainId,
       l1BatchNumber,
-      l1BatchTxIndex,
+      l2MessageIndex,
       msgData,
       gatewayProof
     );
+
+    if (!included) throw new Error('Verification failed.');
 
     const result: types.InteropResult = {
       source: {
@@ -191,7 +202,8 @@ export class InteropClient {
     if (includeProofInputs) {
       result.proof = {
         l1BatchNumber,
-        l1BatchTxIndex,
+        l2MessageIndex,
+        l1BatchTxIndex: l1BatchTxIndex!,
         l2ToL1LogIndex: l2ToL1LogIndex!,
         gwBlockNumber: gwBlock!,
       };
@@ -218,8 +230,9 @@ export class InteropClient {
     timeoutMs?: number;
   }): Promise<
     types.ProveL2MessageInclusionSharedArgs & {
-      interopRoot: string;
+      interopRoot?: string;
       gwBlock?: bigint;
+      l1BatchTxIndex?: number;
       l2ToL1LogIndex?: number;
     }
   > {
@@ -273,8 +286,15 @@ export class InteropClient {
       );
     }
 
-    const rawLog = (finalizedRcpt as any).l2ToL1Logs?.[l2ToL1LogIndex];
-    const messageHex = rawLog?.value as `0x${string}`;
+    const log = finalizedRcpt.logs.filter(
+      log =>
+        isAddressEq(log.address, utils.L1_MESSENGER_ADDRESS) &&
+        log.topics[0] === ethers.id('L1MessageSent(address,bytes32,bytes)')
+    )[l2ToL1LogIndex];
+    const messageHex = ethers.AbiCoder.defaultAbiCoder().decode(
+      ['bytes'],
+      log.data
+    )[0] as `0x${string}`;
     if (!messageHex) {
       throw new Error('Missing message value on matched L1Messenger log');
     }
@@ -282,7 +302,11 @@ export class InteropClient {
     const l1BatchNumber = (finalizedRcpt as any).l1BatchNumber as number;
     const l1BatchTxIndex = (finalizedRcpt as any).l1BatchTxIndex as number;
 
-    const nodes = await getGatewayProof(srcProvider, txHash, l2ToL1LogIndex);
+    const {nodes, proofId} = await getGatewayProof(
+      srcProvider,
+      txHash,
+      l2ToL1LogIndex
+    );
 
     const gwBlock = await getGwBlockForBatch(
       BigInt(l1BatchNumber),
@@ -301,7 +325,7 @@ export class InteropClient {
     const result: types.ProveL2MessageInclusionSharedArgs = {
       srcChainId,
       l1BatchNumber,
-      l1BatchTxIndex,
+      l2MessageIndex: proofId,
       msgData: {
         txNumberInBatch: l1BatchTxIndex,
         sender,
@@ -311,10 +335,10 @@ export class InteropClient {
     };
 
     if (includeProofInputs) {
-      return {...result, gwBlock, l2ToL1LogIndex, interopRoot};
+      return {...result, gwBlock, l2ToL1LogIndex, l1BatchTxIndex, interopRoot};
     }
 
-    return {...result, interopRoot};
+    return result;
   }
 
   /**

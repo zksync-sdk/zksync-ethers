@@ -51,14 +51,14 @@ export async function getGatewayProof(
   l2: Provider,
   txHash: ethers.BytesLike,
   logIndex: number
-): Promise<string[]> {
+): Promise<{nodes: string[]; proofId: number}> {
   const proofResp = await l2.getLogProof(txHash, logIndex, 'proof_based_gw');
   if (!proofResp?.proof || proofResp.proof.length === 0) {
     throw new Error(
       'Gateway proof not ready yet. Ensure the transaction is settled on Gateway.'
     );
   }
-  return proofResp.proof as string[];
+  return {nodes: proofResp.proof as string[], proofId: proofResp.id};
 }
 
 /**
