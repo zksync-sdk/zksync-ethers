@@ -141,6 +141,7 @@ export class InteropClient {
    * @param params.txHash         - Returned txHash from `sendMessage`.
    * @param params.srcProvider  - Provider for the source chain (to fetch proof nodes + batch details).
    * @param params.targetChain   - Provider for the target chain (to read interop roots + call verifier). This can be any chain that imports the Gateway roots.
+   * @param params.messageSentInContract - If the message was sent inside a contract call.
    * @param params.includeProofInputs - If true, include raw proof positioning info in the result (for debugging).
    * @param params.timeoutMs         - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
    * @returns InteropResult — compact verification outcome (plus optional proof inputs).
@@ -149,11 +150,18 @@ export class InteropClient {
     txHash: `0x${string}`;
     srcProvider: Provider;
     targetChain: Provider;
+    messageSentInContract?: boolean;
     includeProofInputs?: boolean;
     timeoutMs?: number;
   }): Promise<types.InteropResult> {
-    const {txHash, srcProvider, targetChain, includeProofInputs, timeoutMs} =
-      params;
+    const {
+      txHash,
+      srcProvider,
+      targetChain,
+      messageSentInContract,
+      includeProofInputs,
+      timeoutMs,
+    } = params;
 
     const {
       srcChainId,
@@ -169,6 +177,7 @@ export class InteropClient {
       txHash,
       srcProvider,
       targetChain,
+      messageSentInContract,
       includeProofInputs: true,
       timeoutMs,
     });
@@ -218,6 +227,7 @@ export class InteropClient {
    * @param params.txHash         - Returned txHash from `sendMessage`.
    * @param params.srcProvider  - Provider for the source chain (to fetch proof nodes + batch details).
    * @param params.targetChain   - Provider for the target chain (to read interop roots + call verifier). This can be any chain that imports the Gateway roots.
+   * @param params.messageSentInContract - If the message was sent inside a contract call.
    * @param params.includeProofInputs - If true, include raw proof positioning info in the result (for debugging).
    * @param params.timeoutMs         - Max time to wait for the interop root on the target chain (ms). Default: 120_000.
    * @returns ProveL2MessageInclusionSharedArgs & { interopRoot: string; gwBlock?: bigint; l2ToL1LogIndex?: number; } - An object with all the required input arguments to verify a previously sent message using the proveL2MessageInclusionShared method on the target's L2MessageVerification contract.
@@ -226,6 +236,7 @@ export class InteropClient {
     txHash: `0x${string}`;
     srcProvider: Provider;
     targetChain: Provider;
+    messageSentInContract?: boolean;
     includeProofInputs?: boolean;
     timeoutMs?: number;
   }): Promise<
@@ -241,6 +252,7 @@ export class InteropClient {
       srcProvider,
       targetChain,
       includeProofInputs,
+      messageSentInContract,
       timeoutMs = 120_000,
     } = params;
 
@@ -279,7 +291,11 @@ export class InteropClient {
     const finalizedRcpt = await tx.wait();
 
     const sender = tx.from as `0x${string}`;
-    const l2ToL1LogIndex = findInteropLogIndex(finalizedRcpt as any, sender);
+    const l2ToL1LogIndex = findInteropLogIndex(
+      finalizedRcpt as any,
+      sender,
+      messageSentInContract
+    );
     if (l2ToL1LogIndex < 0) {
       throw new Error(
         'Interop log not found in source receipt for L1Messenger'
@@ -328,7 +344,7 @@ export class InteropClient {
       l2MessageIndex: proofId,
       msgData: {
         txNumberInBatch: l1BatchTxIndex,
-        sender,
+        sender: messageSentInContract ? (tx.to as `0x${string}`) : sender,
         data: messageHex,
       },
       gatewayProof: nodes,
