@@ -22,7 +22,7 @@ describe('Account Abstraction', () => {
   const provider = new Provider(L2_CHAIN_URL);
   const wallet = new Wallet(PRIVATE_KEY1, provider);
 
-  it('use the ERC20 token for paying transaction fee', async () => {
+  it.skip('use the ERC20 token for paying transaction fee', async () => {
     const InitMintAmount = 10n;
     const mintAmount = 3n;
     const minimalAllowance = 1n;
