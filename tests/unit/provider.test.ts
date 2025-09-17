@@ -27,6 +27,7 @@ describe('Provider', () => {
         maxPriorityFeePerGas: null,
         maxFeePerGas: null,
         accessList: null,
+        authorizationList: null,
       },
       provider
     );
