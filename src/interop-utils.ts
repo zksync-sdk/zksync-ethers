@@ -15,23 +15,38 @@ import {BatchPhase, TxDetailsLite} from './types';
  * @internal
  * @param receipt - Source L2 tx receipt with `l2ToL1Logs`.
  * @param sender - Externally owned account (sender) to match.
- * @param message - Optional raw message bytes to match by value hash.
- * @returns The log index within `receipt.l2ToL1Logs`, or `-1` if not found.
+ * @returns The log index within `receipt.l2ToL1Logs`, or `-1` if not found and whether or not the message was sent inside a contract.
  */
 export function findInteropLogIndex(
   receipt: types.TransactionReceipt,
-  sender: types.Address,
-  message?: ethers.BytesLike
-): number {
+  sender: types.Address
+): {l2ToL1LogIndex: number; messageSentInContract: boolean} {
   const paddedSender = ethers.zeroPadValue(sender, 32);
-  const valueHash = message ? ethers.keccak256(message) : undefined;
+  const paddedContract = receipt.to
+    ? ethers.zeroPadValue(receipt.to, 32)
+    : null;
 
-  return receipt.l2ToL1Logs.findIndex(
-    (log: any) =>
-      log.sender.toLowerCase() === utils.L1_MESSENGER_ADDRESS.toLowerCase() &&
-      log.key.toLowerCase() === paddedSender.toLowerCase() &&
-      (valueHash ? log.value.toLowerCase() === valueHash.toLowerCase() : true)
-  );
+  let messageSentInContract = false;
+
+  const l2ToL1LogIndex = receipt.l2ToL1Logs.findIndex((log: any) => {
+    const senderMatches =
+      log.sender.toLowerCase() === utils.L1_MESSENGER_ADDRESS.toLowerCase();
+    const keyMatchesEOASender =
+      log.key.toLowerCase() === paddedSender.toLowerCase();
+    const keyMatchesContractSender =
+      paddedContract && log.key.toLowerCase() === paddedContract.toLowerCase();
+
+    if (senderMatches && (keyMatchesEOASender || keyMatchesContractSender)) {
+      if (keyMatchesContractSender) {
+        messageSentInContract = true;
+      }
+      return true;
+    }
+
+    return false;
+  });
+
+  return {l2ToL1LogIndex, messageSentInContract};
 }
 
 /**
@@ -148,11 +163,7 @@ export function classifyPhase(d: TxDetailsLite): BatchPhase {
   if (d.status === 'failed') return 'FAILED';
   if (d.status === 'rejected') return 'REJECTED';
 
-  if (
-    d.status === 'included' ||
-    d.status === 'fastFinalized' ||
-    d.status === 'verified'
-  ) {
+  if (['included', 'fastFinalized', 'verified'].includes(d.status)) {
     if (d.ethExecuteTxHash) return 'EXECUTED';
     if (d.ethProveTxHash) return 'PROVING';
     if (d.ethCommitTxHash) return 'SENDING';

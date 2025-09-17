@@ -279,7 +279,10 @@ export class InteropClient {
     const finalizedRcpt = await tx.wait();
 
     const sender = tx.from as `0x${string}`;
-    const l2ToL1LogIndex = findInteropLogIndex(finalizedRcpt as any, sender);
+    const {l2ToL1LogIndex, messageSentInContract} = findInteropLogIndex(
+      finalizedRcpt as any,
+      sender
+    );
     if (l2ToL1LogIndex < 0) {
       throw new Error(
         'Interop log not found in source receipt for L1Messenger'
@@ -328,7 +331,7 @@ export class InteropClient {
       l2MessageIndex: proofId,
       msgData: {
         txNumberInBatch: l1BatchTxIndex,
-        sender,
+        sender: messageSentInContract ? (tx.to as `0x${string}`) : sender,
         data: messageHex,
       },
       gatewayProof: nodes,
