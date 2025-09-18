@@ -1,3 +1,22 @@
+# [6.21.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.20.1...v6.21.0) (2025-09-18)
+
+
+### Bug Fixes
+
+* increase timeout on failing abs test ([d2cbf5f](https://github.com/zksync-sdk/zksync-ethers/commit/d2cbf5fe2d0a0364724853b8145637a0ee51a0ca))
+* minor param rename ([b372f7c](https://github.com/zksync-sdk/zksync-ethers/commit/b372f7c5924133c13dd63051d59003a0d2c817b7))
+* status options ([b67e4f1](https://github.com/zksync-sdk/zksync-ethers/commit/b67e4f1da8d8ec23a66553dd50309cbd7474e7f5))
+* support for messages sent in contracts ([344dbc5](https://github.com/zksync-sdk/zksync-ethers/commit/344dbc5f318d14ebce9af9a787362c90bebc13bd))
+* update for practical finalization ([4c1f6cb](https://github.com/zksync-sdk/zksync-ethers/commit/4c1f6cb161ad156ed51c72320fbafe990b04cd0d))
+* update to include message status checks for verification readiness, removes one shot method as its not practical. ([c1008ba](https://github.com/zksync-sdk/zksync-ethers/commit/c1008bae2e09940306edef34f62fcdc260d7b7e2))
+* verification ([a81f2cd](https://github.com/zksync-sdk/zksync-ethers/commit/a81f2cdbf6e5aaed8f48833187fabdb6b5039937))
+
+
+### Features
+
+* add getVerificationArgs method ([fca8ee3](https://github.com/zksync-sdk/zksync-ethers/commit/fca8ee3ebad14d5c627f27f4133fdb3c5f578c46))
+* adds interop class and helpers for easy usage of v29 interop ([0b927e3](https://github.com/zksync-sdk/zksync-ethers/commit/0b927e37fec502ad45788da11b055cf655d13cf4))
+
 ## [6.20.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.20.0...v6.20.1) (2025-08-11)
 
 
