@@ -28,6 +28,8 @@ import IERC1271ABI from '../abi/IERC1271.json';
 import IL1BridgeABI from '../abi/IL1ERC20Bridge.json';
 import IL2BridgeABI from '../abi/IL2Bridge.json';
 import INonceHolderABI from '../abi/INonceHolder.json';
+import L2MessageVerificationABI from '../abi/L2MessageVerification.json';
+import L2InteropRootStorageABI from '../abi/L2InteropRootStorage.json';
 
 /**
  * The ABI for the `ZKsync` interface.
@@ -82,6 +84,22 @@ export const L2_BRIDGE_ABI = new utils.Interface(IL2BridgeABI);
  * @constant
  */
 export const NONCE_HOLDER_ABI = new utils.Interface(INonceHolderABI);
+
+/**
+ * The ABI for the `L2MessageVerification` interface.
+ * @readonly
+ */
+export const L2_MESSAGE_VERIFICATION_ABI = new utils.Interface(
+  L2MessageVerificationABI
+);
+
+/**
+ * The ABI for the `L2InteropRootStorage` interface.
+ * @readonly
+ */
+export const L2_INTEROP_ROOT_STORAGE_ABI = new utils.Interface(
+  L2InteropRootStorageABI
+);
 
 /**
  * The address of the L1 `ETH` token.
@@ -158,6 +176,20 @@ export const ZERO_HASH =
  */
 export const L1_TO_L2_ALIAS_OFFSET =
   '0x1111000000000000000000000000000000001111';
+
+/**
+ * The address of the L2 Message Verification.
+ * @readonly
+ */
+export const L2_MESSAGE_VERIFICATION_ADDRESS: Address =
+  '0x0000000000000000000000000000000000010009';
+
+/**
+ * The address of the L2 Interop Root Storage.
+ * @readonly
+ */
+export const L2_INTEROP_ROOT_STORAGE_ADDRESS: Address =
+  '0x0000000000000000000000000000000000010008';
 
 /**
  * The EIP1271 magic value used for signature validation in smart contracts.
