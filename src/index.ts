@@ -15,3 +15,10 @@ export {
 } from './smart-account';
 export {Web3Provider, Provider} from './provider';
 export {ContractFactory, Contract} from './contract';
+export {InteropClient, resolveGateway, GATEWAY_PRESETS} from './interop-client';
+export {
+  findInteropLogIndex,
+  getGatewayProof,
+  getGwBlockForBatch,
+  waitForGatewayInteropRoot,
+} from './interop-utils';

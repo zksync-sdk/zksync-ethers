@@ -41,6 +41,7 @@ import {
   ProtocolVersion,
   FeeParams,
   TransactionWithDetailedOutput,
+  InteropMode,
 } from './types';
 import {
   BOOTLOADER_FORMAL_ADDRESS,
@@ -835,6 +836,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    *
    * @param txHash The hash of the L2 transaction the L2 to L1 log was produced within.
    * @param [index] The index of the L2 to L1 log in the transaction.
+   * @param [interopMode] Interop mode for interop, target Merkle root for the proof.
    *
    * @example
    *
@@ -848,11 +850,13 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    */
   async getLogProof(
     txHash: BytesLike,
-    index?: number
+    index?: number,
+    interopMode?: InteropMode
   ): Promise<MessageProof | null> {
     return await this.send('zks_getL2ToL1LogProof', [
       ethers.utils.hexlify(txHash),
       index,
+      interopMode,
     ]);
   }
 
