@@ -1,3 +1,10 @@
+# [5.11.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.10.0...v5.11.0) (2025-09-23)
+
+
+### Features
+
+* add interop client to v5 ([#265](https://github.com/zksync-sdk/zksync-ethers/issues/265)) ([d9c6bb6](https://github.com/zksync-sdk/zksync-ethers/commit/d9c6bb64eb55018631cf4c4f8432605e777671d8))
+
 # [5.10.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.9.2...v5.10.0) (2024-10-27)
 
 
