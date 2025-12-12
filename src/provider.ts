@@ -12,6 +12,8 @@ import {ConnectionInfo, poll} from '@ethersproject/web';
 import {Ierc20Factory as IERC20Factory} from './typechain/Ierc20Factory';
 import {IEthTokenFactory} from './typechain/IEthTokenFactory';
 import {Il2BridgeFactory as IL2BridgeFactory} from './typechain/Il2BridgeFactory';
+import {Il2AssetRouter} from './typechain/Il2AssetRouter';
+import {Il2AssetRouterFactory as IL2AssetRouterFactory} from './typechain/Il2AssetRouterFactory';
 import {
   Address,
   BalancesMap,
@@ -56,6 +58,7 @@ import {
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
   sleep,
   isAddressEq,
+  L2_ASSET_ROUTER_ADDRESS,
 } from './utils';
 import {Signer} from './signer';
 import Formatter = providers.Formatter;
@@ -1069,6 +1072,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       return IL2BridgeFactory.connect(address, this);
     }
     return Il2SharedBridgeFactory.connect(address, this);
+  }
+
+  connectL2AssetRouter(): Il2AssetRouter {
+    return IL2AssetRouterFactory.connect(L2_ASSET_ROUTER_ADDRESS, this);
   }
 
   /**

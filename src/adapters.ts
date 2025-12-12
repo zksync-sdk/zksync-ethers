@@ -7,10 +7,7 @@ import {Il2Bridge as IL2Bridge} from './typechain/Il2Bridge';
 import {IBridgehubFactory} from './typechain/IBridgehubFactory';
 import {IBridgehub} from './typechain/IBridgehub';
 import {Il1SharedBridge as IL1SharedBridge} from './typechain/Il1SharedBridge';
-import {
-  Il1SharedBridgeFactory,
-  Il1SharedBridgeFactory as IL1SharedBridgeFactory,
-} from './typechain/Il1SharedBridgeFactory';
+import {Il1SharedBridgeFactory as IL1SharedBridgeFactory} from './typechain/Il1SharedBridgeFactory';
 import {INonceHolderFactory} from './typechain/INonceHolderFactory';
 import {IZkSyncHyperchainFactory} from './typechain/IZkSyncHyperchainFactory';
 import {IZkSyncHyperchain} from './typechain/IZkSyncHyperchain';
@@ -25,6 +22,7 @@ import {
   PriorityOpResponse,
   TransactionResponse,
   PaymasterParams,
+  FinalizeL1DepositParams,
 } from './types';
 import {
   BOOTLOADER_FORMAL_ADDRESS,
@@ -45,13 +43,14 @@ import {
   scaleGasLimit,
   undoL1ToL2Alias,
   isAddressEq,
-  L2_BASE_TOKEN_ADDRESS,
+  L2_ASSET_ROUTER_ADDRESS,
 } from './utils';
 import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
 import {Il2SharedBridge} from './typechain/Il2SharedBridge';
-import {Il1SharedBridge} from './typechain/Il1SharedBridge';
-import {Il1Bridge} from './typechain/Il1Bridge';
-import {Il1BridgeFactory} from './typechain/Il1BridgeFactory';
+import {Il1Nullifier} from './typechain/Il1Nullifier';
+import {Il1NullifierFactory} from './typechain/Il1NullifierFactory';
+import {Il1AssetRouter} from './typechain/Il1AssetRouter';
+import {Il1AssetRouterFactory} from './typechain/Il1AssetRouterFactory';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -126,6 +125,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           this._signerL1()
         ),
       };
+    }
+
+    /**
+     * Returns the L1 asset router contract, used for handling cross chain calls.
+     */
+    getL1AssetRouter(address: string): Il1AssetRouter {
+      return Il1AssetRouterFactory.connect(address, this._signerL1());
+    }
+
+    /**
+     * Returns the L1 Nullifier contract, used for replay protection for failed deposits and withdrawals.
+     */
+    async getL1Nullifier(): Promise<Il1Nullifier> {
+      const assetRouter = this._providerL2().connectL2AssetRouter();
+      const l1AssetRouter = this.getL1AssetRouter(
+        await assetRouter.L1_ASSET_ROUTER()
+      );
+      const l1Nullifier = await l1AssetRouter.L1_NULLIFIER();
+
+      return Il1NullifierFactory.connect(l1Nullifier, this._signerL1());
     }
 
     /**
@@ -1421,41 +1440,27 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       index = 0,
       overrides?: ethers.Overrides
     ): Promise<ethers.ContractTransaction> {
-      const {
-        l1BatchNumber,
-        l2MessageIndex,
-        l2TxNumberInBlock,
-        message,
-        sender,
-        proof,
-      } = await this.finalizeWithdrawalParams(withdrawalHash, index);
+      const finalizeWithdrawalParams = await this.finalizeWithdrawalParams(
+        withdrawalHash,
+        index
+      );
 
-      let l1Bridge: Il1SharedBridge | Il1Bridge;
-      if (isAddressEq(sender, L2_BASE_TOKEN_ADDRESS)) {
-        l1Bridge = (await this.getL1BridgeContracts()).shared;
-      } else if (!(await this._providerL2().isL2BridgeLegacy(sender))) {
-        const l2Bridge = Il2SharedBridgeFactory.connect(
-          sender,
-          this._providerL2()
-        );
-        const bridgeAddress = await l2Bridge.l1SharedBridge();
-        l1Bridge = Il1SharedBridgeFactory.connect(
-          bridgeAddress,
-          this._signerL1()
-        );
-      } else {
-        const l2Bridge = IL2BridgeFactory.connect(sender, this._providerL2());
-        const bridgeAddress = await l2Bridge.l1Bridge();
-        l1Bridge = Il1BridgeFactory.connect(bridgeAddress, this._signerL1());
-      }
+      const l1Nullifier = await this.getL1Nullifier();
 
-      return await l1Bridge.finalizeWithdrawal(
-        (await this._providerL2().getNetwork()).chainId,
-        l1BatchNumber!,
-        l2MessageIndex,
-        l2TxNumberInBlock!,
-        message,
-        proof,
+      const finalizeL1DepositParams: FinalizeL1DepositParams = {
+        chainId: (await this._providerL2().getNetwork())
+          .chainId as BigNumberish,
+        l2BatchNumber: finalizeWithdrawalParams.l1BatchNumber as BigNumberish,
+        l2MessageIndex: finalizeWithdrawalParams.l2MessageIndex as BigNumberish,
+        l2Sender: finalizeWithdrawalParams.sender,
+        l2TxNumberInBatch:
+          finalizeWithdrawalParams.l2TxNumberInBlock as BigNumberish,
+        message: finalizeWithdrawalParams.message,
+        merkleProof: finalizeWithdrawalParams.proof,
+      };
+
+      return await l1Nullifier.finalizeDeposit(
+        finalizeL1DepositParams,
         overrides ?? {}
       );
     }
@@ -1501,7 +1506,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           this._providerL2()
         );
         l1Bridge = IL1SharedBridgeFactory.connect(
-          await l2Bridge.l1SharedBridge(),
+          sender === L2_ASSET_ROUTER_ADDRESS
+            ? await l2Bridge.l1Bridge()
+            : await l2Bridge.l1SharedBridge(),
           this._providerL1()
         );
       }
