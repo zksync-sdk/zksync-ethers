@@ -145,3 +145,4 @@ We welcome contributions from the community! If you're interested in contributin
 please take a look at our [CONTRIBUTING.md](./.github/CONTRIBUTING.md) for guidelines and details on the process.
 
 Thank you for making `zksync-ethers` JavaScript SDK better! 🙌
+
