@@ -1,3 +1,10 @@
+## [5.11.1](https://github.com/zksync-sdk/zksync-ethers/compare/v5.11.0...v5.11.1) (2025-12-16)
+
+
+### Bug Fixes
+
+* always use l1Nullifier to finalize withdrawal ([#268](https://github.com/zksync-sdk/zksync-ethers/issues/268)) ([2572b4f](https://github.com/zksync-sdk/zksync-ethers/commit/2572b4fee74e92d55b397d512419b4703ad8ddf5))
+
 # [5.11.0](https://github.com/zksync-sdk/zksync-ethers/compare/v5.10.0...v5.11.0) (2025-09-23)
 
 
