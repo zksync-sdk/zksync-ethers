@@ -177,6 +177,9 @@ export const ZERO_HASH =
 export const L1_TO_L2_ALIAS_OFFSET =
   '0x1111000000000000000000000000000000001111';
 
+export const L2_ASSET_ROUTER_ADDRESS: Address =
+  '0x0000000000000000000000000000000000010003';
+
 /**
  * The address of the L2 Message Verification.
  * @readonly
