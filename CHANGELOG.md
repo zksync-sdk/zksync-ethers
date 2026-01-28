@@ -1,3 +1,10 @@
+## [6.21.1](https://github.com/zksync-sdk/zksync-ethers/compare/v6.21.0...v6.21.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* use ntv assetId ([#272](https://github.com/zksync-sdk/zksync-ethers/issues/272)) ([43d4b35](https://github.com/zksync-sdk/zksync-ethers/commit/43d4b35db8ef2c09737cb03618522bccd273fae7))
+
 # [6.21.0](https://github.com/zksync-sdk/zksync-ethers/compare/v6.20.1...v6.21.0) (2025-09-18)
 
 
