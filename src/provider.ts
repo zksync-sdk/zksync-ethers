@@ -850,11 +850,6 @@ export function JsonRpcApiProvider<
       // For L1 native tokens we can use the legacy withdraw method.
       if (!isTokenL1Native) {
         const bridge = await this.connectL2AssetRouter();
-        const chainId = Number((await this.getNetwork()).chainId);
-        const assetId = encodeNativeTokenVaultAssetId(
-          BigInt(chainId),
-          tx.token
-        );
         const assetData = encodeNativeTokenVaultTransferData(
           BigInt(tx.amount),
           tx.to!,
