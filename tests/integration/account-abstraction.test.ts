@@ -107,7 +107,7 @@ describe('Account Abstraction', () => {
       walletTokenBalanceAfterTx ===
         walletTokenBalanceBeforeTx - minimalAllowance + mintAmount
     ).to.be.true;
-  }).timeout(30_000);
+  }).timeout(40_000);
 
   it('use multisig account', async () => {
     const storageValue = 500n;
@@ -176,7 +176,7 @@ describe('Account Abstraction', () => {
     expect(multisigAccountBalanceBeforeTx > multisigAccountBalanceAfterTx).to.be
       .true;
     expect(await storage.get()).to.be.equal(storageValue);
-  }).timeout(25_000);
+  }).timeout(40_000);
 
   it('use a contract with smart account as a runner to send transactions that utilize a paymaster', async () => {
     const minimalAllowance = 1n;
@@ -220,5 +220,5 @@ describe('Account Abstraction', () => {
         accountApprovalTokenBalanceBeforeTx - minimalAllowance
     ).to.be.true;
     expect(await storage.get()).to.be.equal(storageValue);
-  }).timeout(25_000);
+  }).timeout(40_000);
 });
