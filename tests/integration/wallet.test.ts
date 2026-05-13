@@ -1042,7 +1042,7 @@ describe('Wallet', () => {
             'Cannot claim successful deposit!'
           );
         }
-      }).timeout(90_000);
+      }).timeout(120_000);
     } else {
       it('should throw an error when trying to claim successful deposit', async () => {
         const response = await wallet.deposit({
@@ -1060,7 +1060,7 @@ describe('Wallet', () => {
             'Cannot claim successful deposit!'
           );
         }
-      }).timeout(90_000);
+      }).timeout(120_000);
     }
   });
 
@@ -1285,7 +1285,7 @@ describe('Wallet', () => {
         expect(result).not.to.be.null;
         expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
           .to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000n;
@@ -1350,7 +1350,7 @@ describe('Wallet', () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
     } else {
       it('should withdraw ETH to the L1 network', async () => {
         const amount = 7_000_000_000n;
@@ -1374,7 +1374,7 @@ describe('Wallet', () => {
         expect(result).not.to.be.null;
         expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
           .to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000n;
@@ -1442,7 +1442,7 @@ describe('Wallet', () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw base token to the L1 network', async () => {
         const amount = 7_000_000_000n;
@@ -1463,7 +1463,7 @@ describe('Wallet', () => {
         expect(result).not.to.be.null;
         expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
           .to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw base token to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000n;
@@ -1528,7 +1528,7 @@ describe('Wallet', () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
     }
 
     it('should withdraw DAI to the L1 network', async () => {
@@ -1559,7 +1559,7 @@ describe('Wallet', () => {
       expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
         amount
       );
-    }).timeout(90_000);
+    }).timeout(120_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
       const amount = 5n;
@@ -1628,7 +1628,7 @@ describe('Wallet', () => {
       expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
         amount
       );
-    }).timeout(90_000);
+    }).timeout(120_000);
 
     it('should withdraw Crown to the L1 network', async () => {
       const amount = 5n;
@@ -1653,7 +1653,7 @@ describe('Wallet', () => {
       expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
         amount
       );
-    }).timeout(90_000);
+    }).timeout(120_000);
 
     it('should deposit Crown to the L2 network', async () => {
       const amount = 5n;
@@ -1699,7 +1699,7 @@ describe('Wallet', () => {
       expect(l1BalanceBeforeWithdrawal - l1BalanceAfterWithdrawal).to.be.equal(
         amount
       );
-    }).timeout(90_000);
+    }).timeout(120_000);
 
     it('should withdraw Crown to the L1 network using paymaster to cover fee', async () => {
       const amount = 5n;
@@ -1763,7 +1763,483 @@ describe('Wallet', () => {
       expect(
         l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal - minimalAllowance
       ).to.be.equal(amount);
-    }).timeout(90_000);
+    }).timeout(120_000);
+  });
+
+  describe('#withdraw() with bridgeAddress', () => {
+    if (IS_ETH_BASED) {
+      it('should withdraw ETH to the L1 network', async () => {
+        const amount = 7_000_000_000n;
+        const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+        const l2BalanceBeforeWithdrawal = await wallet.getBalance();
+        const withdrawTx = await wallet.withdraw({
+          token: utils.LEGACY_ETH_ADDRESS,
+          to: await wallet.getAddress(),
+          amount: amount,
+          bridgeAddress: bridgeAddresses.sharedL2,
+        });
+        await withdrawTx.waitFinalize();
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+        const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+          withdrawTx.hash
+        );
+        const result = await finalizeWithdrawTx.wait();
+        const l2BalanceAfterWithdrawal = await wallet.getBalance();
+        expect(result).not.to.be.null;
+        expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
+          .to.be.true;
+      }).timeout(120_000);
+
+      it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
+        const amount = 7_000_000_000n;
+        const minimalAllowance = 1n;
+        const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+
+        const paymasterBalanceBeforeWithdrawal =
+          await provider.getBalance(PAYMASTER);
+        const paymasterTokenBalanceBeforeWithdrawal = await provider.getBalance(
+          PAYMASTER,
+          'latest',
+          APPROVAL_TOKEN
+        );
+        const l2BalanceBeforeWithdrawal = await wallet.getBalance();
+        const l2ApprovalTokenBalanceBeforeWithdrawal =
+          await wallet.getBalance(APPROVAL_TOKEN);
+
+        const withdrawTx = await wallet.withdraw({
+          token: utils.ETH_ADDRESS_IN_CONTRACTS,
+          to: await wallet.getAddress(),
+          amount: amount,
+          bridgeAddress: bridgeAddresses.sharedL2,
+          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
+            type: 'ApprovalBased',
+            token: APPROVAL_TOKEN,
+            minimalAllowance: minimalAllowance,
+            innerInput: new Uint8Array(),
+          }),
+        });
+        await withdrawTx.waitFinalize();
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+        const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+          withdrawTx.hash
+        );
+        const result = await finalizeWithdrawTx.wait();
+
+        const paymasterBalanceAfterWithdrawal =
+          await provider.getBalance(PAYMASTER);
+        const paymasterTokenBalanceAfterWithdrawal = await provider.getBalance(
+          PAYMASTER,
+          'latest',
+          APPROVAL_TOKEN
+        );
+        const l2BalanceAfterWithdrawal = await wallet.getBalance();
+        const l2ApprovalTokenBalanceAfterWithdrawal =
+          await wallet.getBalance(APPROVAL_TOKEN);
+
+        expect(
+          paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >=
+            0n
+        ).to.be.true;
+        expect(
+          paymasterTokenBalanceAfterWithdrawal -
+            paymasterTokenBalanceBeforeWithdrawal
+        ).to.be.equal(minimalAllowance);
+
+        expect(
+          l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal
+        ).to.be.equal(amount);
+        expect(
+          l2ApprovalTokenBalanceAfterWithdrawal ===
+            l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance
+        ).to.be.true;
+
+        expect(result).not.to.be.null;
+      }).timeout(120_000);
+    } else {
+      it('should withdraw ETH to the L1 network', async () => {
+        const amount = 7_000_000_000n;
+        const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+        const token = await wallet.l2TokenAddress(
+          utils.ETH_ADDRESS_IN_CONTRACTS
+        );
+        const l2BalanceBeforeWithdrawal = await wallet.getBalance(token);
+        const withdrawTx = await wallet.withdraw({
+          token: token,
+          to: await wallet.getAddress(),
+          amount: amount,
+          bridgeAddress: bridgeAddresses.sharedL2,
+        });
+        await withdrawTx.waitFinalize();
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+        const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+          withdrawTx.hash
+        );
+        const result = await finalizeWithdrawTx.wait();
+        const l2BalanceAfterWithdrawal = await wallet.getBalance(token);
+        expect(result).not.to.be.null;
+        expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
+          .to.be.true;
+      }).timeout(120_000);
+
+      it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
+        const amount = 7_000_000_000n;
+        const minimalAllowance = 1n;
+        const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+
+        const token = await wallet.l2TokenAddress(
+          utils.ETH_ADDRESS_IN_CONTRACTS
+        );
+        const paymasterBalanceBeforeWithdrawal =
+          await provider.getBalance(PAYMASTER);
+        const paymasterTokenBalanceBeforeWithdrawal = await provider.getBalance(
+          PAYMASTER,
+          'latest',
+          APPROVAL_TOKEN
+        );
+        const l2BalanceBeforeWithdrawal = await wallet.getBalance(token);
+        const l2ApprovalTokenBalanceBeforeWithdrawal =
+          await wallet.getBalance(APPROVAL_TOKEN);
+
+        const withdrawTx = await wallet.withdraw({
+          token: token,
+          to: await wallet.getAddress(),
+          amount: amount,
+          bridgeAddress: bridgeAddresses.sharedL2,
+          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
+            type: 'ApprovalBased',
+            token: APPROVAL_TOKEN,
+            minimalAllowance: minimalAllowance,
+            innerInput: new Uint8Array(),
+          }),
+        });
+        await withdrawTx.waitFinalize();
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+        const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+          withdrawTx.hash
+        );
+        const result = await finalizeWithdrawTx.wait();
+
+        const paymasterBalanceAfterWithdrawal =
+          await provider.getBalance(PAYMASTER);
+        const paymasterTokenBalanceAfterWithdrawal = await provider.getBalance(
+          PAYMASTER,
+          'latest',
+          APPROVAL_TOKEN
+        );
+        const l2BalanceAfterWithdrawal = await wallet.getBalance(token);
+        const l2ApprovalTokenBalanceAfterWithdrawal =
+          await wallet.getBalance(APPROVAL_TOKEN);
+
+        expect(
+          paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >=
+            0n
+        ).to.be.true;
+        expect(
+          paymasterTokenBalanceAfterWithdrawal -
+            paymasterTokenBalanceBeforeWithdrawal
+        ).to.be.equal(minimalAllowance);
+
+        expect(
+          l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal
+        ).to.be.equal(amount);
+        expect(
+          l2ApprovalTokenBalanceAfterWithdrawal ===
+            l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance
+        ).to.be.true;
+
+        expect(result).not.to.be.null;
+      }).timeout(120_000);
+
+      it('should withdraw base token to the L1 network', async () => {
+        const amount = 7_000_000_000n;
+        const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+        const l2BalanceBeforeWithdrawal = await wallet.getBalance();
+        const withdrawTx = await wallet.withdraw({
+          token: utils.L2_BASE_TOKEN_ADDRESS,
+          to: await wallet.getAddress(),
+          amount: amount,
+          bridgeAddress: bridgeAddresses.sharedL2,
+        });
+        await withdrawTx.waitFinalize();
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+        const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+          withdrawTx.hash
+        );
+        const result = await finalizeWithdrawTx.wait();
+        const l2BalanceAfterWithdrawal = await wallet.getBalance();
+        expect(result).not.to.be.null;
+        expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal >= amount)
+          .to.be.true;
+      }).timeout(120_000);
+
+      it('should withdraw base token to the L1 network using paymaster to cover fee', async () => {
+        const amount = 7_000_000_000n;
+        const minimalAllowance = 1n;
+        const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+
+        const paymasterBalanceBeforeWithdrawal =
+          await provider.getBalance(PAYMASTER);
+        const paymasterTokenBalanceBeforeWithdrawal = await provider.getBalance(
+          PAYMASTER,
+          'latest',
+          APPROVAL_TOKEN
+        );
+        const l2BalanceBeforeWithdrawal = await wallet.getBalance();
+        const l2ApprovalTokenBalanceBeforeWithdrawal =
+          await wallet.getBalance(APPROVAL_TOKEN);
+
+        const withdrawTx = await wallet.withdraw({
+          token: utils.L2_BASE_TOKEN_ADDRESS,
+          to: await wallet.getAddress(),
+          amount: amount,
+          bridgeAddress: bridgeAddresses.sharedL2,
+          paymasterParams: utils.getPaymasterParams(PAYMASTER, {
+            type: 'ApprovalBased',
+            token: APPROVAL_TOKEN,
+            minimalAllowance: minimalAllowance,
+            innerInput: new Uint8Array(),
+          }),
+        });
+        await withdrawTx.waitFinalize();
+        expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+        const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+          withdrawTx.hash
+        );
+        const result = await finalizeWithdrawTx.wait();
+
+        const paymasterBalanceAfterWithdrawal =
+          await provider.getBalance(PAYMASTER);
+        const paymasterTokenBalanceAfterWithdrawal = await provider.getBalance(
+          PAYMASTER,
+          'latest',
+          APPROVAL_TOKEN
+        );
+        const l2BalanceAfterWithdrawal = await wallet.getBalance();
+        const l2ApprovalTokenBalanceAfterWithdrawal =
+          await wallet.getBalance(APPROVAL_TOKEN);
+
+        expect(
+          paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >=
+            0n
+        ).to.be.true;
+        expect(
+          paymasterTokenBalanceAfterWithdrawal -
+            paymasterTokenBalanceBeforeWithdrawal
+        ).to.be.equal(minimalAllowance);
+
+        expect(
+          l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal
+        ).to.be.equal(amount);
+        expect(
+          l2ApprovalTokenBalanceAfterWithdrawal ===
+            l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance
+        ).to.be.true;
+
+        expect(result).not.to.be.null;
+      }).timeout(120_000);
+    }
+
+    it('should withdraw DAI to the L1 network', async () => {
+      const amount = 5n;
+      const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+      const l2DAI = await provider.l2TokenAddress(DAI_L1);
+      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2DAI);
+      const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(DAI_L1);
+
+      const withdrawTx = await wallet.withdraw({
+        token: l2DAI,
+        to: await wallet.getAddress(),
+        amount: amount,
+        bridgeAddress: bridgeAddresses.sharedL2,
+      });
+      await withdrawTx.waitFinalize();
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+      const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+        withdrawTx.hash
+      );
+      const result = await finalizeWithdrawTx.wait();
+      const l2BalanceAfterWithdrawal = await wallet.getBalance(l2DAI);
+      const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(DAI_L1);
+
+      expect(result).not.to.be.null;
+      expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
+        amount
+      );
+      expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
+        amount
+      );
+    }).timeout(120_000);
+
+    it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
+      const amount = 5n;
+      const minimalAllowance = 1n;
+      const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+      const l2DAI = await provider.l2TokenAddress(DAI_L1);
+
+      const paymasterBalanceBeforeWithdrawal =
+        await provider.getBalance(PAYMASTER);
+      const paymasterTokenBalanceBeforeWithdrawal = await provider.getBalance(
+        PAYMASTER,
+        'latest',
+        APPROVAL_TOKEN
+      );
+      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2DAI);
+      const l1BalanceBeforeWithdrawal = await wallet.getBalanceL1(DAI_L1);
+      const l2ApprovalTokenBalanceBeforeWithdrawal =
+        await wallet.getBalance(APPROVAL_TOKEN);
+
+      const withdrawTx = await wallet.withdraw({
+        token: l2DAI,
+        to: await wallet.getAddress(),
+        amount: amount,
+        bridgeAddress: bridgeAddresses.sharedL2,
+        paymasterParams: utils.getPaymasterParams(PAYMASTER, {
+          type: 'ApprovalBased',
+          token: APPROVAL_TOKEN,
+          minimalAllowance: minimalAllowance,
+          innerInput: new Uint8Array(),
+        }),
+      });
+      await withdrawTx.waitFinalize();
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+      const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+        withdrawTx.hash
+      );
+      const result = await finalizeWithdrawTx.wait();
+
+      const paymasterBalanceAfterWithdrawal =
+        await provider.getBalance(PAYMASTER);
+      const paymasterTokenBalanceAfterWithdrawal = await provider.getBalance(
+        PAYMASTER,
+        'latest',
+        APPROVAL_TOKEN
+      );
+      const l2BalanceAfterWithdrawal = await wallet.getBalance(l2DAI);
+      const l1BalanceAfterWithdrawal = await wallet.getBalanceL1(DAI_L1);
+      const l2ApprovalTokenBalanceAfterWithdrawal =
+        await wallet.getBalance(APPROVAL_TOKEN);
+
+      expect(
+        paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= 0n
+      ).to.be.true;
+      expect(
+        paymasterTokenBalanceAfterWithdrawal -
+          paymasterTokenBalanceBeforeWithdrawal
+      ).to.be.equal(minimalAllowance);
+      expect(
+        l2ApprovalTokenBalanceAfterWithdrawal ===
+          l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance
+      ).to.be.true;
+
+      expect(result).not.to.be.null;
+      expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
+        amount
+      );
+      expect(l1BalanceAfterWithdrawal - l1BalanceBeforeWithdrawal).to.be.equal(
+        amount
+      );
+    }).timeout(120_000);
+
+    it('should withdraw Crown to the L1 network', async () => {
+      const amount = 5n;
+      const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+      const l2Crown = APPROVAL_TOKEN;
+      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2Crown);
+
+      const withdrawTx = await wallet.withdraw({
+        token: l2Crown,
+        to: await wallet.getAddress(),
+        amount: amount,
+        bridgeAddress: bridgeAddresses.sharedL2,
+      });
+      await withdrawTx.waitFinalize();
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+      const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+        withdrawTx.hash
+      );
+      const result = await finalizeWithdrawTx.wait();
+      const l2BalanceAfterWithdrawal = await wallet.getBalance(l2Crown);
+
+      expect(result).not.to.be.null;
+      expect(l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal).to.be.equal(
+        amount
+      );
+    }).timeout(120_000);
+
+    it('should withdraw Crown to the L1 network using paymaster to cover fee', async () => {
+      const amount = 5n;
+      const minimalAllowance = 1n;
+      const bridgeAddresses = await provider.getDefaultBridgeAddresses();
+      const l2Crown = APPROVAL_TOKEN;
+
+      const paymasterBalanceBeforeWithdrawal =
+        await provider.getBalance(PAYMASTER);
+      const paymasterTokenBalanceBeforeWithdrawal = await provider.getBalance(
+        PAYMASTER,
+        'latest',
+        APPROVAL_TOKEN
+      );
+      const l2BalanceBeforeWithdrawal = await wallet.getBalance(l2Crown);
+      const l2ApprovalTokenBalanceBeforeWithdrawal =
+        await wallet.getBalance(APPROVAL_TOKEN);
+
+      const withdrawTx = await wallet.withdraw({
+        token: l2Crown,
+        to: await wallet.getAddress(),
+        amount: amount,
+        bridgeAddress: bridgeAddresses.sharedL2,
+        paymasterParams: utils.getPaymasterParams(PAYMASTER, {
+          type: 'ApprovalBased',
+          token: APPROVAL_TOKEN,
+          minimalAllowance: minimalAllowance,
+          innerInput: new Uint8Array(),
+        }),
+      });
+      await withdrawTx.waitFinalize();
+      expect(await wallet.isWithdrawalFinalized(withdrawTx.hash)).to.be.false;
+
+      const finalizeWithdrawTx = await wallet.finalizeWithdrawal(
+        withdrawTx.hash
+      );
+      const result = await finalizeWithdrawTx.wait();
+
+      const paymasterBalanceAfterWithdrawal =
+        await provider.getBalance(PAYMASTER);
+      const paymasterTokenBalanceAfterWithdrawal = await provider.getBalance(
+        PAYMASTER,
+        'latest',
+        APPROVAL_TOKEN
+      );
+      const l2BalanceAfterWithdrawal = await wallet.getBalance(l2Crown);
+      const l2ApprovalTokenBalanceAfterWithdrawal =
+        await wallet.getBalance(APPROVAL_TOKEN);
+
+      expect(
+        paymasterBalanceBeforeWithdrawal - paymasterBalanceAfterWithdrawal >= 0n
+      ).to.be.true;
+      expect(
+        paymasterTokenBalanceAfterWithdrawal -
+          paymasterTokenBalanceBeforeWithdrawal
+      ).to.be.equal(minimalAllowance);
+      expect(
+        l2ApprovalTokenBalanceAfterWithdrawal ===
+          l2ApprovalTokenBalanceBeforeWithdrawal - minimalAllowance - amount
+      ).to.be.true;
+
+      expect(result).not.to.be.null;
+      expect(
+        l2BalanceBeforeWithdrawal - l2BalanceAfterWithdrawal - minimalAllowance
+      ).to.be.equal(amount);
+    }).timeout(120_000);
   });
 
   describe('#getRequestExecuteTx()', () => {

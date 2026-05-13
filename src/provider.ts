@@ -763,7 +763,8 @@ export function JsonRpcApiProvider<
      * @param transaction.token The token address.
      * @param [transaction.from] The sender's address.
      * @param [transaction.to] The recipient's address.
-     * @param [transaction.bridgeAddress] The bridge address.
+     * @param [transaction.bridgeAddress] The address of a custom bridge. If provided, the withdrawal
+     * is routed through that bridge instead of the asset router. Use this for bridges not yet migrated to NTV.
      * @param [transaction.paymasterParams] Paymaster parameters.
      * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
      */
@@ -830,43 +831,34 @@ export function JsonRpcApiProvider<
       }
 
       let populatedTx;
-      // we get the tokens data, assetId and originChainId
       const ntv = await this.connectL2NativeTokenVault();
       const assetId = await ntv.assetId(tx.token);
       const originChainId = await ntv.originChainId(assetId);
       const l1ChainId = await this.getL1ChainId();
-
       const isTokenL1Native =
         originChainId === BigInt(l1ChainId) ||
         tx.token === ETH_ADDRESS_IN_CONTRACTS;
-      if (!tx.bridgeAddress) {
-        const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        // If the legacy L2SharedBridge is deployed we use it for l1 native tokens.
-        tx.bridgeAddress = isTokenL1Native
-          ? bridgeAddresses.sharedL2
-          : L2_ASSET_ROUTER_ADDRESS;
-      }
-      // For non L1 native tokens we need to use the AssetRouter.
-      // For L1 native tokens we can use the legacy withdraw method.
-      if (!isTokenL1Native) {
+
+      // to match previous behavior of `getWithdrawTx` for backward compatibility,
+      // custom bridge is used only when bridgeAddress is provided and the token is native on L1
+      if (tx.bridgeAddress && isTokenL1Native) {
+        const bridge = await this.connectL2Bridge(tx.bridgeAddress);
+        populatedTx = await bridge.withdraw.populateTransaction(
+          tx.to!,
+          tx.token,
+          tx.amount,
+          tx.overrides
+        );
+      } else {
         const bridge = await this.connectL2AssetRouter();
         const assetData = encodeNativeTokenVaultTransferData(
           BigInt(tx.amount),
           tx.to!,
           tx.token
         );
-
         populatedTx = await bridge.withdraw.populateTransaction(
           assetId,
           assetData,
-          tx.overrides
-        );
-      } else {
-        const bridge = await this.connectL2Bridge(tx.bridgeAddress!);
-        populatedTx = await bridge.withdraw.populateTransaction(
-          tx.to!,
-          tx.token,
-          tx.amount,
           tx.overrides
         );
       }
