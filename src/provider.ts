@@ -831,7 +831,17 @@ export function JsonRpcApiProvider<
       }
 
       let populatedTx;
-      if (tx.bridgeAddress) {
+      const ntv = await this.connectL2NativeTokenVault();
+      const assetId = await ntv.assetId(tx.token);
+      const originChainId = await ntv.originChainId(assetId);
+      const l1ChainId = await this.getL1ChainId();
+      const isTokenL1Native =
+        originChainId === BigInt(l1ChainId) ||
+        tx.token === ETH_ADDRESS_IN_CONTRACTS;
+
+      // to match previous behavior of `getWithdrawTx` for backward compatibility,
+      // custom bridge is used only when bridgeAddress is provided and the token is native on L1
+      if (tx.bridgeAddress && isTokenL1Native) {
         const bridge = await this.connectL2Bridge(tx.bridgeAddress);
         populatedTx = await bridge.withdraw.populateTransaction(
           tx.to!,
@@ -840,8 +850,6 @@ export function JsonRpcApiProvider<
           tx.overrides
         );
       } else {
-        const ntv = await this.connectL2NativeTokenVault();
-        const assetId = await ntv.assetId(tx.token);
         const bridge = await this.connectL2AssetRouter();
         const assetData = encodeNativeTokenVaultTransferData(
           BigInt(tx.amount),
