@@ -180,6 +180,32 @@ export const L1_TO_L2_ALIAS_OFFSET =
 export const L2_ASSET_ROUTER_ADDRESS: Address =
   '0x0000000000000000000000000000000000010003';
 
+export const L2_NATIVE_TOKEN_VAULT_ADDRESS: Address =
+  '0x0000000000000000000000000000000000010004';
+
+/**
+ * The ABI for the `IL2NativeTokenVault` interface.
+ * @readonly
+ */
+export const L2_NATIVE_TOKEN_VAULT_ABI = new utils.Interface([
+  'function assetId(address token) view returns (bytes32)',
+  'function originChainId(bytes32 assetId) view returns (uint256)',
+]);
+
+/**
+ * Encodes the transfer data for the NativeTokenVault withdraw call.
+ */
+export function encodeNativeTokenVaultTransferData(
+  amount: BigNumberish,
+  receiver: Address,
+  token: Address
+): string {
+  return utils.defaultAbiCoder.encode(
+    ['uint256', 'address', 'address'],
+    [amount, receiver, token]
+  );
+}
+
 /**
  * The address of the L2 Message Verification.
  * @readonly
