@@ -7,13 +7,13 @@ import {
   providers,
   utils,
 } from 'ethers';
-import {ExternalProvider} from '@ethersproject/providers';
-import {ConnectionInfo, poll} from '@ethersproject/web';
-import {Ierc20Factory as IERC20Factory} from './typechain/Ierc20Factory';
-import {IEthTokenFactory} from './typechain/IEthTokenFactory';
-import {Il2BridgeFactory as IL2BridgeFactory} from './typechain/Il2BridgeFactory';
-import {Il2AssetRouter} from './typechain/Il2AssetRouter';
-import {Il2AssetRouterFactory as IL2AssetRouterFactory} from './typechain/Il2AssetRouterFactory';
+import { ExternalProvider } from '@ethersproject/providers';
+import { ConnectionInfo, poll } from '@ethersproject/web';
+import { Ierc20Factory as IERC20Factory } from './typechain/Ierc20Factory';
+import { IEthTokenFactory } from './typechain/IEthTokenFactory';
+import { Il2BridgeFactory as IL2BridgeFactory } from './typechain/Il2BridgeFactory';
+import { Il2AssetRouter } from './typechain/Il2AssetRouter';
+import { Il2AssetRouterFactory as IL2AssetRouterFactory } from './typechain/Il2AssetRouterFactory';
 import {
   Address,
   BalancesMap,
@@ -60,12 +60,12 @@ import {
   isAddressEq,
   L2_ASSET_ROUTER_ADDRESS,
 } from './utils';
-import {Signer} from './signer';
+import { Signer } from './signer';
 import Formatter = providers.Formatter;
-import {Il2SharedBridgeFactory} from './typechain/Il2SharedBridgeFactory';
-import {Il2Bridge} from './typechain/Il2Bridge';
-import {Il2SharedBridge} from './typechain/Il2SharedBridge';
-import {deepCopy} from 'ethers/lib/utils';
+import { Il2SharedBridgeFactory } from './typechain/Il2SharedBridgeFactory';
+import { Il2Bridge } from './typechain/Il2Bridge';
+import { Il2SharedBridge } from './typechain/Il2SharedBridge';
+import { deepCopy } from 'ethers/lib/utils';
 
 let defaultFormatter: Formatter | null = null;
 
@@ -362,7 +362,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
           return receipt;
         }
       },
-      {oncePoll: this}
+      { oncePoll: this }
     );
   }
 
@@ -526,7 +526,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     } else {
       try {
         const token = IERC20Factory.connect(tokenAddress, this);
-        return await token.balanceOf(address, {blockTag: tag});
+        return await token.balanceOf(address, { blockTag: tag });
       } catch {
         return BigNumber.from(0);
       }
@@ -668,7 +668,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     await this.getNetwork();
     const params = (await utils.resolveProperties({
       transaction: this._getTransactionRequest(transaction),
-    })) as {transaction: TransactionRequest};
+    })) as { transaction: TransactionRequest };
     if (transaction.customData) {
       params.transaction.customData = transaction.customData;
     }
@@ -1147,7 +1147,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       start,
       limit,
     ]);
-    return tokens.map(token => ({address: token.l2Address, ...token}));
+    return tokens.map(token => ({ address: token.l2Address, ...token }));
   }
 
   /**
@@ -1429,7 +1429,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     paymasterParams?: PaymasterParams;
     overrides?: ethers.CallOverrides;
   }): Promise<ethers.providers.TransactionRequest> {
-    const {...tx} = transaction;
+    const { ...tx } = transaction;
 
     if (!tx.token) {
       tx.token = L2_BASE_TOKEN_ADDRESS;
@@ -1481,6 +1481,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       const bridgeAddresses = await this.getDefaultBridgeAddresses();
       tx.bridgeAddress = bridgeAddresses.sharedL2;
     }
+
+
 
     const bridge = await this.connectL2Bridge(tx.bridgeAddress);
     const populatedTx = await bridge.populateTransaction.withdraw(
@@ -1592,7 +1594,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     paymasterParams?: PaymasterParams;
     overrides?: ethers.CallOverrides;
   }): Promise<ethers.providers.TransactionRequest> {
-    const {...tx} = transaction;
+    const { ...tx } = transaction;
     if (!tx.token) {
       tx.token = L2_BASE_TOKEN_ADDRESS;
     } else if (
@@ -1975,7 +1977,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   async getPriorityOpResponse(
     l1TxResponse: ethers.providers.TransactionResponse
   ): Promise<PriorityOpResponse> {
-    const l2Response = {...l1TxResponse} as PriorityOpResponse;
+    const l2Response = { ...l1TxResponse } as PriorityOpResponse;
 
     l2Response.waitL1Commit = l1TxResponse.wait.bind(
       l1TxResponse
@@ -2026,7 +2028,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * console.log(`Confirmation data: ${utils.toJSON(await provider.getPriorityOpConfirmation(tx, 0))}`);
    */
   async getPriorityOpConfirmation(txHash: string, index = 0) {
-    const {l2ToL1LogIndex, l2ToL1Log, l1BatchTxId} =
+    const { l2ToL1LogIndex, l2ToL1Log, l1BatchTxId } =
       await this._getPriorityOpConfirmationL2ToL1Log(txHash, index);
     const proof = await this.getLogProof(txHash, l2ToL1LogIndex);
     if (!proof) {
@@ -2112,7 +2114,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       gasPerPubdataByte: transaction.gasPerPubdataByte,
     };
     if (transaction.factoryDeps) {
-      Object.assign(customData, {factoryDeps: transaction.factoryDeps});
+      Object.assign(customData, { factoryDeps: transaction.factoryDeps });
     }
 
     return await this.estimateGasL1({
@@ -2206,7 +2208,7 @@ function buildEip1193Fetcher(provider: ExternalProvider): JsonRpcFetchFunc {
       params = [];
     }
 
-    const request = {method, params};
+    const request = { method, params };
     // @ts-ignore
     this.emit('debug', {
       action: 'request',
