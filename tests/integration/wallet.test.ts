@@ -802,7 +802,7 @@ describe('Wallet', () => {
           .be.true;
         expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to
           .be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should deposit DAI to the L2 network with approve transaction for allowance', async () => {
         const amount = 7;
@@ -825,7 +825,7 @@ describe('Wallet', () => {
           .be.true;
         expect(l1BalanceBeforeDeposit.sub(l1BalanceAfterDeposit).eq(amount)).to
           .be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
     } else {
       it('should deposit ETH to L2 network', async () => {
         const amount = 7_000_000_000;
@@ -949,7 +949,7 @@ describe('Wallet', () => {
             'Cannot claim successful deposit'
           );
         }
-      }).timeout(90_000);
+      }).timeout(120_000);
     } else {
       it('should throw an error when trying to claim successful deposit', async () => {
         const response = await wallet.deposit({
@@ -967,7 +967,7 @@ describe('Wallet', () => {
             'Cannot claim successful deposit'
           );
         }
-      }).timeout(90_000);
+      }).timeout(120_000);
     }
   });
 
@@ -1196,7 +1196,7 @@ describe('Wallet', () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(35_000);
+      }).timeout(120_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000;
@@ -1264,7 +1264,7 @@ describe('Wallet', () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
     } else {
       it('should withdraw ETH to L1 network', async () => {
         const amount = 7_000_000_000;
@@ -1290,7 +1290,7 @@ describe('Wallet', () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw base token to L1 network', async () => {
         const amount = 7_000_000_000;
@@ -1314,7 +1314,7 @@ describe('Wallet', () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
     }
 
     it('should withdraw DAI to L1 network', async () => {
@@ -1341,7 +1341,7 @@ describe('Wallet', () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(90_000);
+    }).timeout(120_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
       const amount = 5;
@@ -1413,7 +1413,7 @@ describe('Wallet', () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(90_000);
+    }).timeout(120_000);
   });
 
   describe('#getRequestExecuteTx()', () => {

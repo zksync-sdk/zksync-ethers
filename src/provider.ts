@@ -59,6 +59,9 @@ import {
   sleep,
   isAddressEq,
   L2_ASSET_ROUTER_ADDRESS,
+  L2_NATIVE_TOKEN_VAULT_ADDRESS,
+  L2_NATIVE_TOKEN_VAULT_ABI,
+  encodeNativeTokenVaultTransferData,
 } from './utils';
 import {Signer} from './signer';
 import Formatter = providers.Formatter;
@@ -1380,7 +1383,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
    * @param transaction.amount The amount of token.
    * @param [transaction.from] The sender's address.
    * @param [transaction.to] The recipient's address.
-   * @param [transaction.bridgeAddress] The bridge address.
+   * @param [transaction.bridgeAddress] The address of a custom bridge. If provided, the withdrawal
+   * is routed through that bridge instead of the asset router. Use this for bridges not yet migrated to NTV.
    * @param [transaction.paymasterParams] Paymaster parameters.
    * @param [transaction.overrides] Transaction overrides including `gasLimit`, `gasPrice`, and `value`.
    *
@@ -1477,18 +1481,41 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       return populatedTx;
     }
 
-    if (!tx.bridgeAddress) {
-      const bridgeAddresses = await this.getDefaultBridgeAddresses();
-      tx.bridgeAddress = bridgeAddresses.sharedL2;
-    }
-
-    const bridge = await this.connectL2Bridge(tx.bridgeAddress);
-    const populatedTx = await bridge.populateTransaction.withdraw(
-      tx.to!,
-      tx.token,
-      tx.amount,
-      tx.overrides
+    const ntv = new Contract(
+      L2_NATIVE_TOKEN_VAULT_ADDRESS,
+      L2_NATIVE_TOKEN_VAULT_ABI,
+      this as unknown as providers.Provider
     );
+    const assetId: string = await ntv.assetId(tx.token);
+    const originChainId: BigNumber = await ntv.originChainId(assetId);
+    const l1ChainId = await this.l1ChainId();
+    const isTokenL1Native =
+      originChainId.eq(l1ChainId) || tx.token === ETH_ADDRESS_IN_CONTRACTS;
+
+    let populatedTx;
+    // to match previous behavior of `getWithdrawTx` for backward compatibility,
+    // custom bridge is used only when bridgeAddress is provided and the token is native on L1
+    if (tx.bridgeAddress && isTokenL1Native) {
+      const bridge = await this.connectL2Bridge(tx.bridgeAddress);
+      populatedTx = await bridge.populateTransaction.withdraw(
+        tx.to!,
+        tx.token,
+        tx.amount,
+        tx.overrides
+      );
+    } else {
+      const bridge = this.connectL2AssetRouter();
+      const assetData = encodeNativeTokenVaultTransferData(
+        tx.amount,
+        tx.to!,
+        tx.token
+      );
+      populatedTx = await bridge.populateTransaction.withdraw(
+        assetId,
+        assetData,
+        tx.overrides
+      );
+    }
     if (tx.paymasterParams) {
       return {
         ...populatedTx,
