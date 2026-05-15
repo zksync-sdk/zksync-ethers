@@ -1490,8 +1490,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     const originChainId: BigNumber = await ntv.originChainId(assetId);
     const l1ChainId = await this.l1ChainId();
     const isTokenL1Native =
-      originChainId.eq(l1ChainId) ||
-      tx.token === ETH_ADDRESS_IN_CONTRACTS;
+      originChainId.eq(l1ChainId) || tx.token === ETH_ADDRESS_IN_CONTRACTS;
 
     let populatedTx;
     // to match previous behavior of `getWithdrawTx` for backward compatibility,

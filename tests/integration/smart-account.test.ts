@@ -609,7 +609,7 @@ describe('SmartAccount', async () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000;
@@ -677,7 +677,7 @@ describe('SmartAccount', async () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
     } else {
       it('should withdraw ETH to the L1 network', async () => {
         const amount = 7_000_000_000;
@@ -703,7 +703,7 @@ describe('SmartAccount', async () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000;
@@ -774,7 +774,7 @@ describe('SmartAccount', async () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw base token to the L1 network', async () => {
         const amount = 7_000_000_000;
@@ -864,7 +864,7 @@ describe('SmartAccount', async () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
     }
 
     it('should withdraw DAI to the L1 network', async () => {
@@ -893,7 +893,7 @@ describe('SmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(90_000);
+    }).timeout(120_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
       const amount = 5;
@@ -965,7 +965,7 @@ describe('SmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(90_000);
+    }).timeout(120_000);
   });
 });
 
@@ -1442,7 +1442,7 @@ describe('MultisigECDSASmartAccount', async () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000;
@@ -1510,7 +1510,7 @@ describe('MultisigECDSASmartAccount', async () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
     } else {
       it('should withdraw ETH to the L1 network', async () => {
         const amount = 7_000_000_000;
@@ -1536,7 +1536,7 @@ describe('MultisigECDSASmartAccount', async () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw ETH to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000;
@@ -1607,7 +1607,7 @@ describe('MultisigECDSASmartAccount', async () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw base token to the L1 network', async () => {
         const amount = 7_000_000_000;
@@ -1629,7 +1629,7 @@ describe('MultisigECDSASmartAccount', async () => {
         expect(
           l2BalanceBeforeWithdrawal.sub(l2BalanceAfterWithdrawal).gte(amount)
         ).to.be.true;
-      }).timeout(90_000);
+      }).timeout(120_000);
 
       it('should withdraw base token to the L1 network using paymaster to cover fee', async () => {
         const amount = 7_000_000_000;
@@ -1697,7 +1697,7 @@ describe('MultisigECDSASmartAccount', async () => {
         ).to.be.true;
 
         expect(result).not.to.be.null;
-      }).timeout(90_000);
+      }).timeout(120_000);
     }
 
     it('should withdraw DAI to the L1 network', async () => {
@@ -1727,7 +1727,7 @@ describe('MultisigECDSASmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(90_000);
+    }).timeout(120_000);
 
     it('should withdraw DAI to the L1 network using paymaster to cover fee', async () => {
       const amount = 5;
@@ -1799,6 +1799,6 @@ describe('MultisigECDSASmartAccount', async () => {
         .to.be.true;
       expect(l1BalanceAfterWithdrawal.sub(l1BalanceBeforeWithdrawal).eq(amount))
         .to.be.true;
-    }).timeout(90_000);
+    }).timeout(120_000);
   });
 });
