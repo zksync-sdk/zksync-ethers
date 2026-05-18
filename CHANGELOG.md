@@ -1,3 +1,10 @@
+## [5.11.2](https://github.com/zksync-sdk/zksync-ethers/compare/v5.11.1...v5.11.2) (2026-05-18)
+
+
+### Bug Fixes
+
+* remove legacy bridge usage ([#274](https://github.com/zksync-sdk/zksync-ethers/issues/274)) ([07f6d62](https://github.com/zksync-sdk/zksync-ethers/commit/07f6d62a3419974a64b114229e6aaefd4067c1b2))
+
 ## [5.11.1](https://github.com/zksync-sdk/zksync-ethers/compare/v5.11.0...v5.11.1) (2025-12-16)
 
 
