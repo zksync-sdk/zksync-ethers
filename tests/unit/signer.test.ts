@@ -63,6 +63,33 @@ describe('EIP712Signer', () => {
       });
       expect(result).to.be.deep.equal(tx);
     });
+
+    it('should correcly handle zero values', async () => {
+      const tx = {
+        txType: utils.EIP712_TX_TYPE,
+        from: ADDRESS1,
+        to: ADDRESS2,
+        gasLimit: 0n,
+        gasPerPubdataByteLimit: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+        maxFeePerGas: 250_000_000n,
+        maxPriorityFeePerGas: 0n,
+        paymaster: ethers.ZeroAddress,
+        nonce: 0,
+        value: 0n,
+        data: '0x',
+        factoryDeps: [],
+        paymasterInput: '0x',
+      };
+
+      const result = EIP712Signer.getSignInput({
+        type: utils.EIP712_TX_TYPE,
+        to: ADDRESS2,
+        from: ADDRESS1,
+        maxFeePerGas: 250_000_000n,
+        maxPriorityFeePerGas: 0n,
+      });
+      expect(result).to.be.deep.equal(tx);
+    });
   });
 
   describe('#getSignedDigest()', () => {

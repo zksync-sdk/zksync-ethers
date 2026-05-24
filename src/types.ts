@@ -512,12 +512,15 @@ export class Transaction extends ethers.Transaction {
       }
       if (tx.type !== null && tx.type !== undefined) result.type = tx.type;
       if (tx.to) result.to = tx.to;
-      if (tx.nonce) result.nonce = tx.nonce;
-      if (tx.gasLimit) result.gasLimit = tx.gasLimit;
-      if (tx.gasPrice) result.gasPrice = tx.gasPrice;
-      if (tx.maxPriorityFeePerGas)
+
+      /* eslint-disable eqeqeq -- Loose (==) comparison is used to exclude both null and undefined */
+      if (tx.nonce != null) result.nonce = tx.nonce;
+      if (tx.gasLimit != null) result.gasLimit = tx.gasLimit;
+      if (tx.gasPrice != null) result.gasPrice = tx.gasPrice;
+      if (tx.maxPriorityFeePerGas != null)
         result.maxPriorityFeePerGas = tx.maxPriorityFeePerGas;
-      if (tx.maxFeePerGas) result.maxFeePerGas = tx.maxFeePerGas;
+      if (tx.maxFeePerGas != null) result.maxFeePerGas = tx.maxFeePerGas;
+      /* eslint-enable eqeqeq */
       if (tx.data) result.data = tx.data;
       if (tx.value) result.value = tx.value;
       if (tx.chainId) result.chainId = tx.chainId;
